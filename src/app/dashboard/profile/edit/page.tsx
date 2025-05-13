@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import * as z from "zod";
+import { ProfilePictureUpload } from "@/components/profile/profile-picture-upload";
 
 const profileSchema = z.object({
   bio: z.string().min(50, "Bio must be at least 50 characters"),
@@ -124,6 +125,16 @@ export default function EditProfilePage() {
             <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
               Edit Profile
             </h2>
+          </div>
+        </div>
+
+        {/* Profile Picture Upload */}
+        <div className="bg-white shadow sm:rounded-lg mb-8">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+              Profile Picture
+            </h3>
+            <ProfilePictureUpload />
           </div>
         </div>
 

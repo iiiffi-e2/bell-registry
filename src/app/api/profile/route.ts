@@ -3,17 +3,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { prisma } from "@/lib/prisma";
 
+// Use static rendering by default, only opt into dynamic when needed
 export const dynamic = 'force-dynamic';
+export const revalidate = 30; // Revalidate every 30 seconds
 
 export async function GET(request: NextRequest) {
-  console.log("[PROFILE_GET] Request received");
   try {
     const session = await getServerSession(authOptions);
-    console.log("[PROFILE_GET] Session:", session);
     
     if (!session?.user?.email) {
-      console.log("[PROFILE_GET] No session or email");
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse("Unauthorized", { 
+        status: 401,
+        headers: {
+          'Cache-Control': 'no-store'
+        }
+      });
     }
 
     const profile = await prisma.candidateProfile.findFirst({
@@ -29,22 +33,38 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             phoneNumber: true,
+            image: true,
           }
         }
       }
     });
 
-    console.log("[PROFILE_GET] Profile found:", profile);
-
     if (!profile) {
-      console.log("[PROFILE_GET] No profile found");
-      return new NextResponse("Profile not found", { status: 404 });
+      return new NextResponse("Profile not found", { 
+        status: 404,
+        headers: {
+          'Cache-Control': 'no-store'
+        }
+      });
     }
 
-    return NextResponse.json(profile);
+    // Add cache control headers for successful responses
+    return NextResponse.json(profile, {
+      headers: {
+        'Cache-Control': 'private, max-age=30, must-revalidate',
+        'Surrogate-Control': 'no-store',
+        'Pragma': 'no-cache',
+      }
+    });
+    
   } catch (error) {
     console.error("[PROFILE_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse("Internal error", { 
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-store'
+      }
+    });
   }
 }
 

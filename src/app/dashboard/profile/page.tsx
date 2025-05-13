@@ -12,6 +12,7 @@ import {
   BriefcaseIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
+import Image from "next/image";
 
 interface CandidateProfile {
   id: string;
@@ -22,7 +23,6 @@ interface CandidateProfile {
   certifications: string[];
   availability: Date | null;
   resumeUrl: string | null;
-  photoUrl: string | null;
   location: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -31,6 +31,7 @@ interface CandidateProfile {
     lastName: string | null;
     email: string;
     phoneNumber: string | null;
+    image: string | null;
   };
 }
 
@@ -111,14 +112,34 @@ export default function ProfilePage() {
           {/* Basic Info */}
           <div className="px-4 py-5 sm:px-6 flex items-center">
             <div className="flex-shrink-0">
-              {profile.photoUrl ? (
-                <img
-                  className="h-24 w-24 rounded-full"
-                  src={profile.photoUrl}
-                  alt={`${profile.user.firstName} ${profile.user.lastName}`}
-                />
+              {profile.user.image ? (
+                <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
+                  <Image
+                    src={profile.user.image}
+                    alt={`${profile.user.firstName} ${profile.user.lastName}`}
+                    width={96}
+                    height={96}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
               ) : (
-                <UserCircleIcon className="h-24 w-24 text-gray-300" />
+                <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                    className="h-24 w-24 text-gray-300"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                    />
+                  </svg>
+                </div>
               )}
             </div>
             <div className="ml-6">

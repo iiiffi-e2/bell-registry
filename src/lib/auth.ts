@@ -7,14 +7,19 @@ import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 declare module "next-auth" {
+  interface User {
+    id: string;
+    role: UserRole;
+    email: string;
+    name?: string | null;
+    image?: string | null;
+  }
+
   interface Session {
-    user: {
+    user: User & {
       id: string;
       role: UserRole;
-      email: string;
-      name?: string | null;
-      image?: string | null;
-    }
+    };
   }
 }
 
@@ -22,6 +27,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRole;
+    image?: string | null;
   }
 }
 
@@ -63,6 +69,7 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: user.role,
           name: `${user.firstName} ${user.lastName}`.trim(),
+          image: user.image,
         };
       }
     }),
@@ -79,7 +86,6 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!existingUser) {
-          // Create new user with default role
           const newUser = await prisma.user.create({
             data: {
               email: user.email!,
@@ -90,7 +96,6 @@ export const authOptions: NextAuthOptions = {
             }
           });
 
-          // Create candidate profile
           await prisma.candidateProfile.create({
             data: {
               userId: newUser.id,
@@ -103,26 +108,43 @@ export const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, trigger, session }) {
+      // Handle initial sign in
       if (user) {
         token.id = user.id;
-        // Fetch user from database to get role
-        const dbUser = await prisma.user.findUnique({
-          where: { email: user.email! }
-        });
-        token.role = dbUser?.role || UserRole.CANDIDATE;
+        token.role = user.role;
+        token.image = user.image;
+        return token;
       }
+
+      // Handle image updates
+      if (trigger === "update" && session?.user?.image) {
+        token.image = session.user.image;
+        return token;
+      }
+
+      // Return the previous token if no updates needed
       return token;
     },
     async session({ session, token }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          role: token.role,
-        }
-      };
+      if (token) {
+        session.user.id = token.id;
+        session.user.role = token.role;
+        session.user.image = token.image;
+      }
+      return session;
+    },
+  },
+  debug: false,
+  logger: {
+    error(code, ...message) {
+      console.error(code, ...message);
+    },
+    warn(code, ...message) {
+      console.warn(code, ...message);
+    },
+    debug(code, ...message) {
+      // Disable debug logging
     },
   },
   pages: {
@@ -130,5 +152,7 @@ export const authOptions: NextAuthOptions = {
   },
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
 }; 
