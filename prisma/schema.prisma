@@ -75,6 +75,7 @@ model User {
   role          UserRole  @default(CANDIDATE)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  profileSlug   String?   @unique  // Unique slug for public profile URL
 
   // NextAuth.js fields
   accounts      Account[]

@@ -13,6 +13,8 @@ import {
   AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { generateProfileUrl } from "@/lib/utils";
+import Link from "next/link";
 
 interface CandidateProfile {
   id: string;
@@ -32,6 +34,7 @@ interface CandidateProfile {
     email: string;
     phoneNumber: string | null;
     image: string | null;
+    profileSlug: string | null;
   };
 }
 
@@ -95,6 +98,17 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
               My Profile
             </h2>
+            {profile?.user.profileSlug && (
+              <Link
+                href={generateProfileUrl(profile.user.profileSlug)}
+                className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
+              >
+                View public profile
+                <svg className="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clipRule="evenodd" />
+                </svg>
+              </Link>
+            )}
           </div>
           <div className="mt-4 flex md:mt-0 md:ml-4">
             <button

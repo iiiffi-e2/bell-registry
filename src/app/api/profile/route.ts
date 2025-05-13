@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { prisma } from "@/lib/prisma";
+import { generateProfileSlug } from "@/lib/utils";
 
 // Use static rendering by default, only opt into dynamic when needed
 export const dynamic = 'force-dynamic';
@@ -34,6 +35,8 @@ export async function GET(request: NextRequest) {
             lastName: true,
             phoneNumber: true,
             image: true,
+            profileSlug: true,
+            id: true
           }
         }
       }
@@ -89,7 +92,9 @@ export async function PUT(request: NextRequest) {
       skills,
       certifications,
       availability,
-      experience
+      experience,
+      firstName,
+      lastName
     } = body;
 
     // First get the user
@@ -106,13 +111,27 @@ export async function PUT(request: NextRequest) {
       return new NextResponse("User not found", { status: 404 });
     }
 
-    // Update user's phone number
+    // Generate profile slug if it's null or if name changed
+    let profileSlug = user.profileSlug;
+    if ((!profileSlug && user.firstName && user.lastName) || 
+        (firstName && lastName && (firstName !== user.firstName || lastName !== user.lastName))) {
+      profileSlug = await generateProfileSlug(
+        firstName || user.firstName, 
+        lastName || user.lastName, 
+        user.id
+      );
+    }
+
+    // Update user's basic info
     await prisma.user.update({
       where: {
         id: user.id
       },
       data: {
-        phoneNumber
+        phoneNumber,
+        firstName: firstName || user.firstName,
+        lastName: lastName || user.lastName,
+        profileSlug
       }
     });
 
