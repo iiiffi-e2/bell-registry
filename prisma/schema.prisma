@@ -11,8 +11,9 @@ datasource db {
 }
 
 enum UserRole {
-  CANDIDATE
+  PROFESSIONAL
   EMPLOYER
+  AGENCY
   ADMIN
 }
 
@@ -72,7 +73,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   password      String?   // Optional to support both OAuth and email/password
-  role          UserRole  @default(CANDIDATE)
+  role          UserRole  @default(PROFESSIONAL)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   profileSlug   String?   @unique  // Unique slug for public profile URL

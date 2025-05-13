@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import * as z from "zod";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/types";
 import bcrypt from "bcryptjs";
 
 const registerSchema = z.object({
@@ -9,7 +9,7 @@ const registerSchema = z.object({
   lastName: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.nativeEnum(UserRole),
+  role: z.enum(["PROFESSIONAL", "EMPLOYER", "AGENCY", "ADMIN"]),
 });
 
 export async function POST(req: Request) {
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
     });
 
     // Create the appropriate profile based on user role
-    if (body.role === UserRole.CANDIDATE) {
+    if (body.role === "PROFESSIONAL") {
       await prisma.candidateProfile.create({
         data: {
           userId: user.id,
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
           experience: [],
         },
       });
-    } else if (body.role === UserRole.EMPLOYER) {
+    } else if (body.role === "EMPLOYER" || body.role === "AGENCY") {
       await prisma.employerProfile.create({
         data: {
           userId: user.id,
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: error.errors[0].message },
+        { message: "Invalid request data", errors: error.errors },
         { status: 400 }
       );
     }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useProfile } from "@/providers/profile-provider";
+import { UserRole } from "@/types";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -33,7 +34,7 @@ export function Navbar() {
               >
                 Jobs
               </Link>
-              {session?.user?.role === "EMPLOYER" && (
+              {session?.user?.role === UserRole.EMPLOYER && (
                 <Link
                   href="/post-job"
                   className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"

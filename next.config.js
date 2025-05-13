@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost'],
     remotePatterns: [
       {
         protocol: 'http',
@@ -13,6 +12,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_DOMAIN || 'localhost',
         pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+        pathname: '/a/**',
       }
     ],
   },

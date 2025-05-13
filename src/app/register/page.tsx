@@ -24,6 +24,11 @@ export default function RegisterPage() {
               Sign in
             </Link>
           </p>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-500">
+              Please select your account type below. This will determine your access and features.
+            </p>
+          </div>
         </div>
         <RegisterForm />
       </div>

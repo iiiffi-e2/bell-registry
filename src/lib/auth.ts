@@ -3,8 +3,16 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/types";
+import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
+
+const ROLES = {
+  PROFESSIONAL: UserRole.PROFESSIONAL,
+  EMPLOYER: UserRole.EMPLOYER,
+  AGENCY: UserRole.AGENCY,
+  ADMIN: UserRole.ADMIN,
+} as const;
 
 declare module "next-auth" {
   interface User {
@@ -29,6 +37,30 @@ declare module "next-auth/jwt" {
     role: UserRole;
     image?: string | null;
   }
+}
+
+function toPrismaRole(role: string): UserRole {
+  const upperRole = role.toUpperCase();
+  switch (upperRole) {
+    case UserRole.PROFESSIONAL:
+      return UserRole.PROFESSIONAL;
+    case UserRole.EMPLOYER:
+      return UserRole.EMPLOYER;
+    case UserRole.AGENCY:
+      return UserRole.AGENCY;
+    case UserRole.ADMIN:
+      return UserRole.ADMIN;
+    default:
+      return UserRole.PROFESSIONAL;
+  }
+}
+
+function isProfessionalRole(role: UserRole): boolean {
+  return role === UserRole.PROFESSIONAL;
+}
+
+function isEmployerOrAgencyRole(role: UserRole): boolean {
+  return role === UserRole.EMPLOYER || role === UserRole.AGENCY;
 }
 
 export const authOptions: NextAuthOptions = {
@@ -67,63 +99,103 @@ export const authOptions: NextAuthOptions = {
         return {
           id: user.id,
           email: user.email,
-          role: user.role,
+          role: fromPrismaUserRole(user.role),
           name: `${user.firstName} ${user.lastName}`.trim(),
           image: user.image,
-        };
+        } as any;
       }
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile }) {
       if (account?.provider === "google") {
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! }
+          where: { email: user.email! },
+          include: {
+            accounts: true
+          }
         });
 
+        if (existingUser && existingUser.accounts.length === 0) {
+          await prisma.account.create({
+            data: {
+              userId: existingUser.id,
+              type: account.type,
+              provider: account.provider,
+              providerAccountId: account.providerAccountId,
+              access_token: account.access_token,
+              token_type: account.token_type,
+              scope: account.scope,
+            },
+          });
+
+          user.id = existingUser.id;
+          user.role = fromPrismaUserRole(existingUser.role);
+          return true;
+        }
+
         if (!existingUser) {
+          const defaultRole = UserRole.PROFESSIONAL;
+          const role = account.role ? toPrismaRole(account.role.toString()) : defaultRole;
+
           const newUser = await prisma.user.create({
             data: {
               email: user.email!,
-              role: UserRole.CANDIDATE,
+              role: toPrismaUserRole(role),
               firstName: user.name?.split(" ")[0] || "",
               lastName: user.name?.split(" ").slice(1).join(" ") || "",
               image: user.image,
+              accounts: {
+                create: {
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  access_token: account.access_token,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                }
+              }
             }
           });
 
-          await prisma.candidateProfile.create({
-            data: {
-              userId: newUser.id,
-              skills: [],
-              certifications: [],
-              experience: [],
-            }
-          });
+          if (role === UserRole.PROFESSIONAL) {
+            await prisma.candidateProfile.create({
+              data: {
+                userId: newUser.id,
+                skills: [],
+                certifications: [],
+                experience: [],
+              }
+            });
+          } else if (role === UserRole.EMPLOYER || role === UserRole.AGENCY) {
+            await prisma.employerProfile.create({
+              data: {
+                userId: newUser.id,
+                companyName: "",
+              }
+            });
+          }
+
+          user.id = newUser.id;
+          user.role = role;
+        } else {
+          user.id = existingUser.id;
+          user.role = fromPrismaUserRole(existingUser.role);
         }
       }
       return true;
     },
-    async jwt({ token, user, trigger, session }) {
-      // Handle initial sign in
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
         token.image = user.image;
-        return token;
       }
-
-      // Handle image updates
-      if (trigger === "update" && session?.user?.image) {
-        token.image = session.user.image;
-        return token;
-      }
-
-      // Return the previous token if no updates needed
       return token;
     },
     async session({ session, token }) {
@@ -135,7 +207,7 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  debug: false,
+  debug: true,
   logger: {
     error(code, ...message) {
       console.error(code, ...message);
@@ -144,7 +216,7 @@ export const authOptions: NextAuthOptions = {
       console.warn(code, ...message);
     },
     debug(code, ...message) {
-      // Disable debug logging
+      console.log(code, ...message);
     },
   },
   pages: {

@@ -9,6 +9,13 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
+const ROLES = {
+  PROFESSIONAL: "PROFESSIONAL",
+  EMPLOYER: "EMPLOYER",
+  AGENCY: "AGENCY",
+  ADMIN: "ADMIN",
+} as const;
+
 const stats = [
   {
     name: "Profile Views",
@@ -72,9 +79,16 @@ const recentApplications = [
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const isCandidate = session?.user?.role === "CANDIDATE";
+  console.log("Session data:", {
+    user: session?.user,
+    role: session?.user?.role,
+    roleType: typeof session?.user?.role,
+  });
+  
+  const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
 
-  if (!isCandidate) {
+  if (!isProfessional) {
+    console.log("User is not a professional, showing employer dashboard");
     return <EmployerDashboard />;
   }
 
