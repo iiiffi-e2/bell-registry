@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import * as z from "zod";
 import { ProfilePictureUpload } from "@/components/profile/profile-picture-upload";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 
 const profileSchema = z.object({
   bio: z.string().min(50, "Bio must be at least 50 characters"),
@@ -37,15 +39,21 @@ export default function EditProfilePage() {
     endDate: "", 
     description: "" 
   }]);
+  const [showImprovedBioModal, setShowImprovedBioModal] = useState(false);
+  const [improvedBio, setImprovedBio] = useState("");
+  const [isImprovingBio, setIsImprovingBio] = useState(false);
 
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
+    watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
   });
+
+  const currentBio = watch("bio");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -117,6 +125,39 @@ export default function EditProfilePage() {
     setExperiences(updatedExperiences);
   };
 
+  const handleImproveWithAI = async () => {
+    try {
+      setIsImprovingBio(true);
+      setShowImprovedBioModal(true);
+      
+      const response = await fetch("/api/ai/improve-bio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ currentBio }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to improve bio");
+      }
+
+      const data = await response.json();
+      setImprovedBio(data.improvedBio);
+    } catch (error) {
+      console.error("Error improving bio:", error);
+      // You might want to show an error toast here
+      setShowImprovedBioModal(false);
+    } finally {
+      setIsImprovingBio(false);
+    }
+  };
+
+  const handleAcceptImprovedBio = (bio: string) => {
+    setValue("bio", bio);
+    setShowImprovedBioModal(false);
+  };
+
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -144,9 +185,20 @@ export default function EditProfilePage() {
               <div className="grid grid-cols-1 gap-6">
                 {/* Bio */}
                 <div>
-                  <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                    Professional Bio
-                  </label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                      Professional Bio
+                    </label>
+                    <button
+                      type="button"
+                      onClick={handleImproveWithAI}
+                      disabled={!currentBio || isLoading}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <SparklesIcon className="h-4 w-4 mr-1" />
+                      Improve with AI
+                    </button>
+                  </div>
                   <div className="mt-1">
                     <textarea
                       {...register("bio")}
@@ -346,6 +398,16 @@ export default function EditProfilePage() {
             </button>
           </div>
         </form>
+
+        {/* Improved Bio Modal */}
+        <ImprovedBioModal
+          isOpen={showImprovedBioModal}
+          onClose={() => setShowImprovedBioModal(false)}
+          originalBio={currentBio || ""}
+          improvedBio={improvedBio}
+          onAccept={handleAcceptImprovedBio}
+          isLoading={isImprovingBio}
+        />
       </div>
     </div>
   );
