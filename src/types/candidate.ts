@@ -16,7 +16,7 @@ export interface CandidateProfile {
 
 export interface CandidateFilters {
   location?: string
-  roleType?: string
+  roleType?: UserRole
   searchQuery?: string
 }
 

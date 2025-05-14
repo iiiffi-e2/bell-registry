@@ -12,6 +12,7 @@ import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 
 const profileSchema = z.object({
   bio: z.string().min(50, "Bio must be at least 50 characters"),
+  title: z.string().min(2, "Professional title is required"),
   location: z.string().min(1, "Location is required"),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 characters"),
   skills: z.string().transform((str) => str.split(",").map((s) => s.trim())),
@@ -63,6 +64,7 @@ export default function EditProfilePage() {
           const data = await response.json();
           // Pre-fill form with existing data
           setValue("bio", data.bio || "");
+          setValue("title", data.title || "");
           setValue("location", data.location || "");
           setValue("phoneNumber", data.user.phoneNumber || "");
           setValue("skills", data.skills?.join(", ") || "");
@@ -183,6 +185,25 @@ export default function EditProfilePage() {
           <div className="bg-white shadow sm:rounded-lg">
             <div className="px-4 py-5 sm:p-6">
               <div className="grid grid-cols-1 gap-6">
+                {/* Title */}
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    Professional Title
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      type="text"
+                      id="title"
+                      {...register("title")}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      placeholder="e.g. Private Chef, Estate Manager, Personal Assistant"
+                    />
+                  </div>
+                  {errors.title && (
+                    <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                  )}
+                </div>
+
                 {/* Bio */}
                 <div>
                   <div className="flex justify-between items-center mb-1">

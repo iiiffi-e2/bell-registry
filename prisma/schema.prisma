@@ -107,6 +107,7 @@ model CandidateProfile {
   userId          String    @unique
   user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bio             String?   @db.Text
+  title           String?   // Professional title/role (e.g. "Private Chef", "Estate Manager")
   skills          String[]
   experience      Json[]    // Array of work history objects
   certifications  String[]

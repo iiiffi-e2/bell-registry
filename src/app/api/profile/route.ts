@@ -87,6 +87,7 @@ export async function PUT(request: NextRequest) {
     
     const {
       bio,
+      title,
       location,
       phoneNumber,
       skills,

@@ -72,7 +72,7 @@ export default async function BrowseProfessionalsPage({
 }) {
   const filters: CandidateFilters = {
     location: searchParams.location,
-    roleType: searchParams.roleType,
+    roleType: searchParams.roleType as UserRole | undefined,
     searchQuery: searchParams.search,
   }
 

@@ -65,6 +65,8 @@ export async function GET(request: Request) {
         : {}),
     }
 
+    console.log('Fetching professionals with where clause:', where);
+
     const [professionals, total] = await Promise.all([
       prisma.candidateProfile.findMany({
         where,
@@ -87,6 +89,8 @@ export async function GET(request: Request) {
       }),
       prisma.candidateProfile.count({ where }),
     ])
+
+    console.log('Found professionals:', professionals);
 
     return NextResponse.json({
       professionals,

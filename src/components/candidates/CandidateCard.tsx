@@ -9,6 +9,7 @@ interface CandidateCardProps {
   candidate: {
     id: string
     bio: string | null
+    title: string | null
     location: string | null
     skills: string[]
     user: {
@@ -47,7 +48,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
           )}
           <div>
             <h3 className="text-lg font-medium text-gray-900">{fullName}</h3>
-            <p className="text-sm text-gray-500">{candidate.user.role}</p>
+            <p className="text-sm text-gray-500">{candidate.title || 'Professional'}</p>
           </div>
         </div>
 

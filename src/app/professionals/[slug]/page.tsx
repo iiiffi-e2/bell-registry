@@ -23,6 +23,7 @@ interface Experience {
 interface PublicProfile {
   id: string;
   bio: string | null;
+  title: string | null;
   skills: string[];
   experience: Experience[];
   certifications: string[];
@@ -111,6 +112,7 @@ export default async function PublicProfilePage({
                 <h1 className="text-2xl font-bold text-gray-900">
                   {profile.user.firstName} {profile.user.lastName}
                 </h1>
+                <p className="mt-1 text-lg text-gray-600">{profile.title || 'Professional'}</p>
                 <div className="mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:space-x-6">
                   {profile.location && (
                     <div className="mt-2 flex items-center text-sm text-gray-500">

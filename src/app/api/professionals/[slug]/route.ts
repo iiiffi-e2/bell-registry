@@ -27,6 +27,7 @@ export async function GET(
           select: {
             id: true,
             bio: true,
+            title: true,
             skills: true,
             experience: true,
             certifications: true,
@@ -56,6 +57,7 @@ export async function GET(
     const responseData = {
       id: profile.candidateProfile.id,
       bio: profile.candidateProfile.bio,
+      title: profile.candidateProfile.title,
       skills: profile.candidateProfile.skills || [],
       experience: profile.candidateProfile.experience || [],
       certifications: profile.candidateProfile.certifications || [],
