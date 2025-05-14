@@ -14,10 +14,13 @@ export interface CandidateProfile {
   updatedAt: Date
 }
 
+export type SortOption = 'recent' | 'experience' | 'certifications' | 'views' | 'relevance'
+
 export interface CandidateFilters {
   location?: string
   roleType?: UserRole
   searchQuery?: string
+  sortBy?: SortOption
 }
 
 export interface CandidateSearchParams extends CandidateFilters {
