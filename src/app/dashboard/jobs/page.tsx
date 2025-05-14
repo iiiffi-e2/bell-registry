@@ -9,6 +9,8 @@ import {
   BuildingOfficeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ListBulletIcon,
+  Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
 
@@ -58,7 +60,10 @@ const filters = {
   ],
 };
 
+type ViewMode = "list" | "grid";
+
 export default function JobSearchPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     location: [] as string[],
@@ -137,6 +142,55 @@ export default function JobSearchPage() {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
+  const JobCard = ({ job }: { job: Job }) => (
+    <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
+          <div className="mt-1 flex items-center text-sm text-gray-500">
+            <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
+            <span className="ml-1">{job.employer.employerProfile.companyName}</span>
+          </div>
+          <div className="mt-1 flex items-center text-sm text-gray-500">
+            <MapPinIcon className="h-4 w-4 text-gray-400" />
+            <span className="ml-1">{job.location}</span>
+          </div>
+          <div className="mt-1 flex items-center text-sm text-gray-500">
+            <CurrencyDollarIcon className="h-4 w-4 text-gray-400" />
+            <span className="ml-1">{formatSalary(job.salary)}</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+        >
+          <BookmarkIcon className="h-6 w-6" />
+        </button>
+      </div>
+      <p className="mt-4 text-sm text-gray-500 line-clamp-3">{job.description}</p>
+      <div className="mt-4">
+        <div className="flex flex-wrap gap-2">
+          {job.requirements.slice(0, 3).map((req, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+            >
+              {req}
+            </span>
+          ))}
+          {job.requirements.length > 3 && (
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+              +{job.requirements.length - 3} more
+            </span>
+          )}
+        </div>
+        <div className="mt-2 text-xs text-gray-500">
+          Posted {formatDate(job.createdAt)}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="py-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -168,16 +222,40 @@ export default function JobSearchPage() {
                 />
               </div>
             </div>
-            <button
-              type="button"
-              className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-            >
-              <FunnelIcon
-                className="h-5 w-5 text-gray-400 mr-2"
-                aria-hidden="true"
-              />
-              Filters
-            </button>
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center rounded-lg border border-gray-200 p-1">
+                <button
+                  onClick={() => setViewMode("list")}
+                  className={`p-1.5 rounded ${
+                    viewMode === "list"
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  <ListBulletIcon className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode("grid")}
+                  className={`p-1.5 rounded ${
+                    viewMode === "grid"
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-500 hover:text-gray-900"
+                  }`}
+                >
+                  <Squares2X2Icon className="h-5 w-5" />
+                </button>
+              </div>
+              <button
+                type="button"
+                className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+              >
+                <FunnelIcon
+                  className="h-5 w-5 text-gray-400 mr-2"
+                  aria-hidden="true"
+                />
+                Filters
+              </button>
+            </div>
           </div>
 
           {/* Filter Tags */}
@@ -224,70 +302,78 @@ export default function JobSearchPage() {
             </div>
           ) : (
             <>
-              <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                    <div className="divide-y divide-gray-200 bg-white">
-                      {jobs.map((job) => (
-                        <div
-                          key={job.id}
-                          className="p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <h3 className="text-lg font-medium leading-6 text-gray-900">
-                                    {job.title}
-                                  </h3>
-                                  <div className="mt-1 flex items-center">
-                                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                                    <p className="ml-1 text-sm text-gray-500">
-                                      {job.employer.employerProfile.companyName}
-                                    </p>
-                                    <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                    <p className="ml-1 text-sm text-gray-500">
-                                      {job.location}
-                                    </p>
-                                    <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                    <p className="ml-1 text-sm text-gray-500">
-                                      {formatSalary(job.salary)}
-                                    </p>
+              {viewMode === "list" ? (
+                <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                  <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                      <div className="divide-y divide-gray-200 bg-white">
+                        {jobs.map((job) => (
+                          <div
+                            key={job.id}
+                            className="p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <h3 className="text-lg font-medium leading-6 text-gray-900">
+                                      {job.title}
+                                    </h3>
+                                    <div className="mt-1 flex items-center">
+                                      <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
+                                      <p className="ml-1 text-sm text-gray-500">
+                                        {job.employer.employerProfile.companyName}
+                                      </p>
+                                      <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
+                                      <p className="ml-1 text-sm text-gray-500">
+                                        {job.location}
+                                      </p>
+                                      <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
+                                      <p className="ml-1 text-sm text-gray-500">
+                                        {formatSalary(job.salary)}
+                                      </p>
+                                    </div>
                                   </div>
+                                  <button
+                                    type="button"
+                                    className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+                                  >
+                                    <BookmarkIcon className="h-6 w-6" />
+                                  </button>
                                 </div>
-                                <button
-                                  type="button"
-                                  className="rounded-full p-1 text-gray-400 hover:text-gray-500"
-                                >
-                                  <BookmarkIcon className="h-6 w-6" />
-                                </button>
-                              </div>
-                              <div className="mt-2">
-                                <p className="text-sm text-gray-500">
-                                  {job.description}
-                                </p>
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                  {job.requirements.map((req, index) => (
-                                    <span
-                                      key={index}
-                                      className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
-                                    >
-                                      {req}
+                                <div className="mt-2">
+                                  <p className="text-sm text-gray-500">
+                                    {job.description}
+                                  </p>
+                                  <div className="mt-4 flex flex-wrap gap-2">
+                                    {job.requirements.map((req, index) => (
+                                      <span
+                                        key={index}
+                                        className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+                                      >
+                                        {req}
+                                      </span>
+                                    ))}
+                                    <span className="ml-2 text-xs text-gray-500">
+                                      Posted {formatDate(job.createdAt)}
                                     </span>
-                                  ))}
-                                  <span className="ml-2 text-xs text-gray-500">
-                                    Posted {formatDate(job.createdAt)}
-                                  </span>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {jobs.map((job) => (
+                    <JobCard key={job.id} job={job} />
+                  ))}
+                </div>
+              )}
 
               {/* Pagination Controls */}
               <div className="mt-4 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
