@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import * as z from "zod";
 import { UserRole } from "@/types";
 import bcrypt from "bcryptjs";
+import { generateProfileSlug } from "@/lib/utils";
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -33,6 +34,9 @@ export async function POST(req: Request) {
     // Hash the password
     const hashedPassword = await bcrypt.hash(body.password, 10);
 
+    // Generate profile slug
+    const profileSlug = await generateProfileSlug(body.firstName, body.lastName);
+
     const user = await prisma.user.create({
       data: {
         email: body.email,
@@ -40,6 +44,7 @@ export async function POST(req: Request) {
         firstName: body.firstName,
         lastName: body.lastName,
         role: body.role,
+        profileSlug,
       },
     });
 
@@ -67,7 +72,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("[REGISTER_ERROR]", error);
+    console.error("[REGISTER]", error);
     
     if (error instanceof z.ZodError) {
       return NextResponse.json(

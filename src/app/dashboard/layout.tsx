@@ -43,6 +43,12 @@ export default function DashboardLayout({
       icon: HomeIcon,
       current: pathname === "/dashboard",
     },
+    {
+      name: "Browse Professionals",
+      href: "/browse-professionals",
+      icon: UserCircleIcon,
+      current: pathname === "/browse-professionals",
+    },
     ...(isProfessional
       ? [
           {
@@ -64,12 +70,6 @@ export default function DashboardLayout({
             href: "/dashboard/post-job",
             icon: DocumentTextIcon,
             current: pathname === "/dashboard/post-job",
-          },
-          {
-            name: "Browse Candidates",
-            href: "/dashboard/candidates",
-            icon: UserCircleIcon,
-            current: pathname === "/dashboard/candidates",
           },
         ]),
     {
