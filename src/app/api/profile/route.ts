@@ -144,6 +144,7 @@ export async function PUT(request: NextRequest) {
       create: {
         userId: user.id,
         bio,
+        title,
         location,
         skills: Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim()),
         certifications: Array.isArray(certifications) ? certifications : certifications.split(",").map(s => s.trim()),
@@ -152,6 +153,7 @@ export async function PUT(request: NextRequest) {
       },
       update: {
         bio,
+        title,
         location,
         skills: Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim()),
         certifications: Array.isArray(certifications) ? certifications : certifications.split(",").map(s => s.trim()),
