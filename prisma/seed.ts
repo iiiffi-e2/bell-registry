@@ -92,6 +92,9 @@ async function main() {
       currency: 'USD'
     }
 
+    // Make the first 3 jobs featured
+    const featured = i < 3
+
     const job = await prisma.job.create({
       data: {
         employerId: employer.id,
@@ -100,6 +103,7 @@ async function main() {
         location,
         requirements: jobRequirements,
         salary,
+        featured,
         status: JobStatus.ACTIVE,
         expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
       }
@@ -107,7 +111,7 @@ async function main() {
     jobs.push(job)
   }
 
-  console.log(`Created ${jobs.length} jobs`)
+  console.log(`Created ${jobs.length} jobs (${jobs.filter(j => j.featured).length} featured)`)
 }
 
 main()

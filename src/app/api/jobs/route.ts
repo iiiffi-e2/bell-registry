@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
-    const where: Prisma.JobWhereInput = {
+    const baseWhere: Prisma.JobWhereInput = {
       status: JobStatus.ACTIVE,
       ...(location ? { location } : {}),
       ...(searchQuery
@@ -41,11 +41,38 @@ export async function GET(request: Request) {
         : {}),
     }
 
+    // Fetch featured jobs first (limited to 3)
+    const featuredJobs = await prisma.job.findMany({
+      where: {
+        ...baseWhere,
+        featured: true,
+      },
+      take: 3,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        employer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            employerProfile: {
+              select: {
+                companyName: true,
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // Fetch regular jobs, excluding featured ones if we're on the first page
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
-        where,
-        skip,
-        take: limit,
+        where: {
+          ...baseWhere,
+          ...(page === 1 ? { featured: false } : {}),
+        },
+        skip: page === 1 ? 0 : skip,
+        take: page === 1 ? limit - featuredJobs.length : limit,
         orderBy: { createdAt: 'desc' },
         include: {
           employer: {
@@ -61,11 +88,20 @@ export async function GET(request: Request) {
           }
         }
       }),
-      prisma.job.count({ where })
+      prisma.job.count({ 
+        where: {
+          ...baseWhere,
+          featured: false,
+        }
+      })
     ])
 
+    // Combine featured and regular jobs on the first page
+    const combinedJobs = page === 1 ? [...featuredJobs, ...jobs] : jobs
+
     return NextResponse.json({
-      jobs,
+      jobs: combinedJobs,
+      featured: featuredJobs.length > 0,
       pagination: {
         total,
         pages: Math.ceil(total / limit),

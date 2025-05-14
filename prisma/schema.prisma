@@ -145,6 +145,7 @@ model Job {
   salary          Json?     // { min: number, max: number, currency: string }
   requirements    String[]
   status          JobStatus @default(ACTIVE)
+  featured        Boolean   @default(false)
   applications    JobApplication[]
   savedBy         SavedJob[]
   createdAt       DateTime  @default(now())

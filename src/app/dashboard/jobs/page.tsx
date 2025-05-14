@@ -26,6 +26,7 @@ interface Job {
     currency: string;
   };
   status: string;
+  featured: boolean;
   createdAt: string;
   employer: {
     firstName: string;
@@ -143,7 +144,16 @@ export default function JobSearchPage() {
   };
 
   const JobCard = ({ job }: { job: Job }) => (
-    <div className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200">
+    <div className={`bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200 ${
+      job.featured ? 'border-2 border-blue-500 relative' : ''
+    }`}>
+      {job.featured && (
+        <div className="absolute -top-3 left-4">
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-0.5 text-sm font-medium text-blue-800">
+            Featured
+          </span>
+        </div>
+      )}
       <div className="flex justify-between items-start">
         <div>
           <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
@@ -186,6 +196,71 @@ export default function JobSearchPage() {
         </div>
         <div className="mt-2 text-xs text-gray-500">
           Posted {formatDate(job.createdAt)}
+        </div>
+      </div>
+    </div>
+  );
+
+  const JobListItem = ({ job }: { job: Job }) => (
+    <div
+      className={`p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out ${
+        job.featured ? 'bg-blue-50 relative pt-8' : ''
+      }`}
+    >
+      {job.featured && (
+        <div className="absolute top-2 left-4">
+          <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-0.5 text-sm font-medium text-blue-800">
+            Featured
+          </span>
+        </div>
+      )}
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                {job.title}
+              </h3>
+              <div className="mt-1 flex items-center">
+                <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
+                <p className="ml-1 text-sm text-gray-500">
+                  {job.employer.employerProfile.companyName}
+                </p>
+                <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
+                <p className="ml-1 text-sm text-gray-500">
+                  {job.location}
+                </p>
+                <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
+                <p className="ml-1 text-sm text-gray-500">
+                  {formatSalary(job.salary)}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+            >
+              <BookmarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+          <div className="mt-2">
+            <p className="text-sm text-gray-500">
+              {job.description}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {job.requirements.map((req, index) => (
+                <span
+                  key={index}
+                  className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+                >
+                  {req}
+                </span>
+              ))}
+              <span className="ml-2 text-xs text-gray-500">
+                Posted {formatDate(job.createdAt)}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -305,65 +380,17 @@ export default function JobSearchPage() {
               {viewMode === "list" ? (
                 <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                   <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-                    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                      <div className="divide-y divide-gray-200 bg-white">
-                        {jobs.map((job) => (
-                          <div
-                            key={job.id}
-                            className="p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between">
-                                  <div>
-                                    <h3 className="text-lg font-medium leading-6 text-gray-900">
-                                      {job.title}
-                                    </h3>
-                                    <div className="mt-1 flex items-center">
-                                      <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                                      <p className="ml-1 text-sm text-gray-500">
-                                        {job.employer.employerProfile.companyName}
-                                      </p>
-                                      <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                      <p className="ml-1 text-sm text-gray-500">
-                                        {job.location}
-                                      </p>
-                                      <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                      <p className="ml-1 text-sm text-gray-500">
-                                        {formatSalary(job.salary)}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    className="rounded-full p-1 text-gray-400 hover:text-gray-500"
-                                  >
-                                    <BookmarkIcon className="h-6 w-6" />
-                                  </button>
-                                </div>
-                                <div className="mt-2">
-                                  <p className="text-sm text-gray-500">
-                                    {job.description}
-                                  </p>
-                                  <div className="mt-4 flex flex-wrap gap-2">
-                                    {job.requirements.map((req, index) => (
-                                      <span
-                                        key={index}
-                                        className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
-                                      >
-                                        {req}
-                                      </span>
-                                    ))}
-                                    <span className="ml-2 text-xs text-gray-500">
-                                      Posted {formatDate(job.createdAt)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-4">
+                      {jobs.map((job) => (
+                        <div 
+                          key={job.id} 
+                          className={`overflow-hidden shadow sm:rounded-lg ${
+                            job.featured ? 'ring-2 ring-blue-500' : 'ring-1 ring-black ring-opacity-5'
+                          }`}
+                        >
+                          <JobListItem job={job} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
