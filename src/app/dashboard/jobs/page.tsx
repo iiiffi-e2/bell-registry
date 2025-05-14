@@ -1,54 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
   MapPinIcon,
   CurrencyDollarIcon,
   BuildingOfficeIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
 
-const jobs = [
-  {
-    id: 1,
-    title: "Estate Manager",
-    company: "Luxury Estate Services",
-    location: "Beverly Hills, CA",
-    type: "Full-time",
-    salary: "$120,000 - $180,000",
-    description:
-      "Seeking an experienced Estate Manager to oversee daily operations of a luxury property...",
-    requirements: [
-      "10+ years of estate management experience",
-      "Strong organizational and leadership skills",
-      "Experience with staff management",
-      "Valid driver's license",
-    ],
-    posted: "2 days ago",
-    isSaved: false,
-  },
-  {
-    id: 2,
-    title: "Private Chef",
-    company: "Elite Household Staff",
-    location: "New York, NY",
-    type: "Full-time",
-    salary: "$90,000 - $130,000",
-    description:
-      "Looking for a skilled Private Chef to prepare gourmet meals for a high-profile family...",
-    requirements: [
-      "Culinary degree required",
-      "5+ years experience in fine dining",
-      "Knowledge of dietary restrictions and allergies",
-      "Flexible schedule",
-    ],
-    posted: "1 week ago",
-    isSaved: true,
-  },
-  // Add more job listings as needed
-];
+interface Job {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  requirements: string[];
+  salary: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  status: string;
+  createdAt: string;
+  employer: {
+    firstName: string;
+    lastName: string;
+    employerProfile: {
+      companyName: string;
+    };
+  };
+}
+
+interface PaginationData {
+  total: number;
+  pages: number;
+  page: number;
+  limit: number;
+}
 
 const filters = {
   locations: [
@@ -70,10 +61,48 @@ const filters = {
 export default function JobSearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
-    location: [],
-    jobType: [],
-    salaryRange: [],
+    location: [] as string[],
+    jobType: [] as string[],
+    salaryRange: [] as string[],
   });
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationData>({
+    total: 0,
+    pages: 1,
+    page: 1,
+    limit: 10,
+  });
+
+  useEffect(() => {
+    fetchJobs(1);
+  }, [searchTerm, selectedFilters]);
+
+  const fetchJobs = async (page: number) => {
+    try {
+      setLoading(true);
+      const searchParams = new URLSearchParams();
+      if (searchTerm) searchParams.append("search", searchTerm);
+      if (selectedFilters.location.length > 0) {
+        searchParams.append("location", selectedFilters.location[0]);
+      }
+      searchParams.append("page", page.toString());
+
+      const response = await fetch(`/api/jobs?${searchParams.toString()}`);
+      if (!response.ok) throw new Error("Failed to fetch jobs");
+      
+      const data = await response.json();
+      setJobs(data.jobs);
+      setPagination(data.pagination);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch jobs");
+      setJobs([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
     setSelectedFilters((prev) => {
@@ -85,6 +114,27 @@ export default function JobSearchPage() {
           : [...current, value],
       };
     });
+  };
+
+  const formatSalary = (salary: Job["salary"]) => {
+    const formatter = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: salary.currency,
+      maximumFractionDigits: 0,
+    });
+    return `${formatter.format(salary.min)} - ${formatter.format(salary.max)}`;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) return "1 day ago";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
   };
 
   return (
@@ -99,7 +149,7 @@ export default function JobSearchPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="mt-6">
+        <div className="mt-4">
           <div className="flex space-x-4">
             <div className="flex-1">
               <div className="relative">
@@ -131,7 +181,7 @@ export default function JobSearchPage() {
           </div>
 
           {/* Filter Tags */}
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-2 flex flex-wrap gap-2">
             {Object.entries(selectedFilters).map(([category, values]) =>
               values.map((value) => (
                 <span
@@ -158,72 +208,139 @@ export default function JobSearchPage() {
         </div>
 
         {/* Job Listings */}
-        <div className="mt-8 flow-root">
-          <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-            <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-                <div className="divide-y divide-gray-200 bg-white">
-                  {jobs.map((job) => (
-                    <div
-                      key={job.id}
-                      className="p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
+        <div className="mt-8">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-500">Loading jobs...</p>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-500">{error}</p>
+            </div>
+          ) : jobs.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No jobs found matching your criteria.</p>
+            </div>
+          ) : (
+            <>
+              <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                    <div className="divide-y divide-gray-200 bg-white">
+                      {jobs.map((job) => (
+                        <div
+                          key={job.id}
+                          className="p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out"
+                        >
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-lg font-medium leading-6 text-gray-900">
-                                {job.title}
-                              </h3>
-                              <div className="mt-1 flex items-center">
-                                <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-                                <p className="ml-1 text-sm text-gray-500">
-                                  {job.company}
-                                </p>
-                                <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                <p className="ml-1 text-sm text-gray-500">
-                                  {job.location}
-                                </p>
-                                <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
-                                <p className="ml-1 text-sm text-gray-500">
-                                  {job.salary}
-                                </p>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                                    {job.title}
+                                  </h3>
+                                  <div className="mt-1 flex items-center">
+                                    <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
+                                    <p className="ml-1 text-sm text-gray-500">
+                                      {job.employer.employerProfile.companyName}
+                                    </p>
+                                    <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
+                                    <p className="ml-1 text-sm text-gray-500">
+                                      {job.location}
+                                    </p>
+                                    <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
+                                    <p className="ml-1 text-sm text-gray-500">
+                                      {formatSalary(job.salary)}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+                                >
+                                  <BookmarkIcon className="h-6 w-6" />
+                                </button>
                               </div>
-                            </div>
-                            <div className="ml-4 flex flex-shrink-0">
-                              <button
-                                type="button"
-                                className={`rounded-full p-1 ${
-                                  job.isSaved
-                                    ? "text-blue-600 hover:text-blue-700"
-                                    : "text-gray-400 hover:text-gray-500"
-                                }`}
-                              >
-                                <BookmarkIcon className="h-6 w-6" />
-                              </button>
-                            </div>
-                          </div>
-                          <div className="mt-2">
-                            <p className="text-sm text-gray-500">
-                              {job.description}
-                            </p>
-                            <div className="mt-4">
-                              <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
-                                {job.type}
-                              </span>
-                              <span className="ml-2 text-xs text-gray-500">
-                                Posted {job.posted}
-                              </span>
+                              <div className="mt-2">
+                                <p className="text-sm text-gray-500">
+                                  {job.description}
+                                </p>
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                  {job.requirements.map((req, index) => (
+                                    <span
+                                      key={index}
+                                      className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+                                    >
+                                      {req}
+                                    </span>
+                                  ))}
+                                  <span className="ml-2 text-xs text-gray-500">
+                                    Posted {formatDate(job.createdAt)}
+                                  </span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+
+              {/* Pagination Controls */}
+              <div className="mt-4 flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div className="flex flex-1 justify-between sm:hidden">
+                  <button
+                    onClick={() => fetchJobs(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                    className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => fetchJobs(pagination.page + 1)}
+                    disabled={pagination.page >= pagination.pages}
+                    className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                </div>
+                <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{((pagination.page - 1) * pagination.limit) + 1}</span> to{' '}
+                      <span className="font-medium">
+                        {Math.min(pagination.page * pagination.limit, pagination.total)}
+                      </span>{' '}
+                      of <span className="font-medium">{pagination.total}</span> results
+                    </p>
+                  </div>
+                  <div>
+                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                      <button
+                        onClick={() => fetchJobs(pagination.page - 1)}
+                        disabled={pagination.page === 1}
+                        className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Previous</span>
+                        <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                      <button
+                        onClick={() => fetchJobs(pagination.page + 1)}
+                        disabled={pagination.page >= pagination.pages}
+                        className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <span className="sr-only">Next</span>
+                        <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                      </button>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>
