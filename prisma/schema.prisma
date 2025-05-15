@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -68,6 +69,19 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model EmailChangeRequest {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  newEmail  String
+  token     String   @unique
+  expires   DateTime @db.Timestamptz
+  createdAt DateTime @default(now()) @db.Timestamptz
+
+  @@index([token])
+  @@index([userId])
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -100,6 +114,8 @@ model User {
   // Messaging
   sentMessages     Message[]    @relation("SentMessages")
   receivedMessages Message[]    @relation("ReceivedMessages")
+
+  emailChangeRequests EmailChangeRequest[]
 }
 
 model CandidateProfile {

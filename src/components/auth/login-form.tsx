@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -16,21 +16,32 @@ type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Check for email update success message
+  useEffect(() => {
+    if (searchParams.get('emailUpdated') === 'true') {
+      setSuccessMessage('Your email has been updated successfully. Please sign in with your new email address.');
+    }
+  }, [searchParams]);
 
   const onSubmit = async (data: LoginFormData) => {
     try {
       setIsLoading(true);
       setError(null);
+      setSuccessMessage(null);
 
       const result = await signIn("credentials", {
         redirect: false,
@@ -58,6 +69,16 @@ export function LoginForm() {
 
   return (
     <div className="mt-8 space-y-6">
+      {successMessage && (
+        <div className="rounded-md bg-green-50 p-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-green-800">{successMessage}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="rounded-md shadow-sm -space-y-px">
           <div>

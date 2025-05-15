@@ -1,0 +1,288 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useSearchParams, useRouter } from "next/navigation";
+
+interface ChangePasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
+interface ChangeEmailForm {
+  newEmail: string;
+}
+
+export default function SettingsPage() {
+  const { data: session, update: updateSession, status } = useSession();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [emailForm, setEmailForm] = useState<ChangeEmailForm>({ newEmail: "" });
+  const [passwordForm, setPasswordForm] = useState<ChangePasswordForm>({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [emailMessage, setEmailMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Force session refresh when component mounts if email was just verified
+  useEffect(() => {
+    const forceSessionRefresh = async () => {
+      const emailVerified = searchParams.get('emailVerified') === 'true';
+      
+      if (emailVerified && !isUpdating) {
+        setIsUpdating(true);
+        console.log('[SETTINGS] Email verification detected, forcing session refresh');
+        
+        try {
+          setEmailMessage({ 
+            type: "info", 
+            text: "Email updated successfully. Refreshing your session..." 
+          });
+
+          // Update the session
+          await updateSession();
+          
+          // Remove query parameters without causing a refresh
+          window.history.replaceState({}, '', window.location.pathname);
+          
+          setEmailMessage({ 
+            type: "success", 
+            text: "Your email has been successfully updated!" 
+          });
+
+        } catch (error) {
+          console.error('[SETTINGS] Error updating session:', error);
+          setEmailMessage({ 
+            type: "error", 
+            text: "Your email was updated but there was an issue refreshing the session. Please refresh the page manually." 
+          });
+        } finally {
+          setIsUpdating(false);
+        }
+      }
+    };
+
+    forceSessionRefresh();
+  }, [searchParams, updateSession, isUpdating]);
+
+  // Monitor session changes and update UI accordingly
+  useEffect(() => {
+    if (session?.user?.email) {
+      console.log('[SETTINGS] Session updated with email:', session.user.email);
+      setEmailForm({ newEmail: "" }); // Reset form when session changes
+    }
+  }, [session?.user?.email]);
+
+  // Monitor session changes
+  useEffect(() => {
+    console.log('[SETTINGS] Session updated:', {
+      email: session?.user?.email,
+      status
+    });
+  }, [session, status]);
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailMessage(null);
+
+    try {
+      const response = await fetch("/api/settings/email", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailForm.newEmail }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      setEmailMessage({ 
+        type: "info", 
+        text: "A verification email has been sent to your new email address. Please check your inbox and click the verification link to complete the change." 
+      });
+      setEmailForm({ newEmail: "" });
+    } catch (error) {
+      setEmailMessage({ 
+        type: "error", 
+        text: error instanceof Error ? error.message : "Failed to update email" 
+      });
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage({ type: "error", text: "New passwords do not match" });
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/settings/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      setPasswordMessage({ type: "success", text: "Password updated successfully" });
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      setPasswordMessage({ 
+        type: "error", 
+        text: error instanceof Error ? error.message : "Failed to update password" 
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen py-8">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-8">Account Settings</h1>
+
+        {/* Change Email Section */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Change Email Address</h2>
+            <form onSubmit={handleEmailChange} className="space-y-4">
+              <div>
+                <label htmlFor="current-email" className="block text-sm font-medium text-gray-700">
+                  Current Email
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="email"
+                    id="current-email"
+                    value={session?.user?.email || ""}
+                    disabled
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="new-email" className="block text-sm font-medium text-gray-700">
+                  New Email
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="email"
+                    id="new-email"
+                    value={emailForm.newEmail}
+                    onChange={(e) => setEmailForm({ newEmail: e.target.value })}
+                    required
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              {emailMessage && (
+                <div 
+                  className={`mt-2 text-sm ${
+                    emailMessage.type === "success" 
+                      ? "text-green-600" 
+                      : emailMessage.type === "error"
+                      ? "text-red-600"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {emailMessage.text}
+                </div>
+              )}
+              <div>
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Send Verification Email
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {/* Change Password Section */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Change Password</h2>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label htmlFor="current-password" className="block text-sm font-medium text-gray-700">
+                  Current Password
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="password"
+                    id="current-password"
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    required
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="new-password" className="block text-sm font-medium text-gray-700">
+                  New Password
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="password"
+                    id="new-password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    required
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
+                  Confirm New Password
+                </label>
+                <div className="mt-1">
+                  <input
+                    type="password"
+                    id="confirm-password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    required
+                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  />
+                </div>
+              </div>
+              {passwordMessage && (
+                <div className={`mt-2 text-sm ${passwordMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                  {passwordMessage.text}
+                </div>
+              )}
+              <div>
+                <button
+                  type="submit"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Update Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 

@@ -17,16 +17,24 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [lastFetchedEmail, setLastFetchedEmail] = useState<string | null>(null);
 
   const fetchProfile = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      const response = await fetch("/api/profile");
+      const response = await fetch("/api/profile", {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setProfile(data);
+        setLastFetchedEmail(session?.user?.email || null);
       } else {
         throw new Error("Failed to fetch profile");
       }
@@ -38,13 +46,18 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    if (session?.user) {
+    const shouldFetchProfile = 
+      session?.user && 
+      (!lastFetchedEmail || lastFetchedEmail !== session.user.email);
+
+    if (shouldFetchProfile) {
       fetchProfile();
-    } else {
+    } else if (!session?.user) {
       setProfile(null);
       setLoading(false);
+      setLastFetchedEmail(null);
     }
-  }, [session?.user?.email]);
+  }, [session?.user, lastFetchedEmail]);
 
   const value = {
     profile,
