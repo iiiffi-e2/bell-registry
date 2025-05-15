@@ -26,14 +26,6 @@ export async function verifyEmailChange(token: string, userId: string) {
     const expiresUtc = new Date(request.expires);
     const nowUtc = new Date();
 
-    // Add detailed logging for expiration check
-    console.log("[EMAIL_VERIFY] Token expiration check:", {
-      tokenExpiresAt: expiresUtc.toISOString(),
-      currentTime: nowUtc.toISOString(),
-      isExpired: expiresUtc < nowUtc,
-      rawExpires: request.expires
-    });
-
     // Check if token is expired
     if (expiresUtc < nowUtc) {
       // Delete expired token
@@ -88,7 +80,7 @@ export async function verifyEmailChange(token: string, userId: string) {
       newEmail: request.newEmail
     };
   } catch (error) {
-    console.error("[EMAIL_VERIFY] Error:", error);
+    console.error("Email verification error:", error);
     throw error;
   }
 } 

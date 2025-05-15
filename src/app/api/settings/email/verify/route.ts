@@ -5,11 +5,9 @@ import { verifyEmailChange } from "@/lib/email-verification";
 
 export async function GET(request: NextRequest) {
   try {
-    console.log("[EMAIL_VERIFY] Starting verification process");
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.email) {
-      console.log("[EMAIL_VERIFY] No session found");
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
@@ -17,13 +15,11 @@ export async function GET(request: NextRequest) {
     const token = searchParams.get('token');
 
     if (!token) {
-      console.log("[EMAIL_VERIFY] No token provided");
       return new NextResponse("Token is required", { status: 400 });
     }
 
     try {
       const result = await verifyEmailChange(token, session.user.id);
-      console.log("[EMAIL_VERIFY] Email update complete:", result);
 
       // Set cookie to expire the session
       const cookie = `next-auth.session-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax`;
@@ -37,14 +33,14 @@ export async function GET(request: NextRequest) {
         },
       });
     } catch (error) {
-      console.error("[EMAIL_VERIFY] Verification failed:", error);
+      console.error("Email verification failed:", error);
       return new NextResponse(
         error instanceof Error ? error.message : "Failed to verify email",
         { status: 400 }
       );
     }
   } catch (error) {
-    console.error("[EMAIL_VERIFY] Error:", error);
+    console.error("Internal server error:", error);
     return new NextResponse(
       error instanceof Error ? error.message : "Internal error",
       { status: 500 }
