@@ -72,68 +72,60 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  console.log("[PROFILE_PUT] Request received");
   try {
     const session = await getServerSession(authOptions);
-    console.log("[PROFILE_PUT] Session:", session);
-    
-    if (!session?.user?.email) {
-      console.log("[PROFILE_PUT] No session or email");
+    if (!session?.user?.id) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const body = await request.json();
-    console.log("[PROFILE_PUT] Request body:", body);
-    
-    const {
-      bio,
-      title,
-      location,
-      phoneNumber,
-      skills,
-      certifications,
-      availability,
-      experience,
-      firstName,
-      lastName
-    } = body;
-
-    // First get the user
     const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email
-      }
+      where: { id: session.user.id },
+      include: { candidateProfile: true }
     });
 
-    console.log("[PROFILE_PUT] User found:", user);
-
     if (!user) {
-      console.log("[PROFILE_PUT] No user found");
       return new NextResponse("User not found", { status: 404 });
     }
 
-    // Generate profile slug if it's null or if name changed
-    let profileSlug = user.profileSlug;
-    if ((!profileSlug && user.firstName && user.lastName) || 
-        (firstName && lastName && (firstName !== user.firstName || lastName !== user.lastName))) {
-      profileSlug = await generateProfileSlug(
-        firstName || user.firstName, 
-        lastName || user.lastName, 
-        user.id
-      );
-    }
+    const data = await request.json();
+    const {
+      // Basic Info
+      headshot,
+      title,
+      location,
+      workLocations,
+      openToRelocation,
+      yearsOfExperience,
+      
+      // About Me Sections
+      whatImSeeking,
+      whyIEnjoyThisWork,
+      whatSetsApartMe,
+      idealEnvironment,
+      
+      // Professional Details
+      seekingOpportunities,
+      skills,
+      payRangeMin,
+      payRangeMax,
+      payCurrency,
+      
+      // Media
+      additionalPhotos,
+      mediaUrls,
+      
+      // Existing fields
+      bio,
+      phoneNumber,
+      certifications,
+      availability,
+      experience
+    } = data;
 
-    // Update user's basic info
+    // Update user's phone number
     await prisma.user.update({
-      where: {
-        id: user.id
-      },
-      data: {
-        phoneNumber,
-        firstName: firstName || user.firstName,
-        lastName: lastName || user.lastName,
-        profileSlug
-      }
+      where: { id: user.id },
+      data: { phoneNumber }
     });
 
     // Update or create profile
@@ -143,29 +135,73 @@ export async function PUT(request: NextRequest) {
       },
       create: {
         userId: user.id,
-        bio,
-        title,
+        // Basic Info
+        photoUrl: headshot || null,
+        preferredRole: title || null,
         location,
-        skills: Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim()),
-        certifications: Array.isArray(certifications) ? certifications : certifications.split(",").map(s => s.trim()),
+        workLocations: workLocations ? (Array.isArray(workLocations) ? workLocations : workLocations.split(",").map(l => l.trim())) : [],
+        openToRelocation: openToRelocation || false,
+        yearsOfExperience: yearsOfExperience ? parseInt(yearsOfExperience.toString()) : null,
+        
+        // About Me Sections
+        whatImSeeking,
+        whyIEnjoyThisWork,
+        whatSetsApartMe,
+        idealEnvironment,
+        
+        // Professional Details
+        seekingOpportunities: seekingOpportunities ? (Array.isArray(seekingOpportunities) ? seekingOpportunities : seekingOpportunities.split(",").map(o => o.trim())) : [],
+        skills: skills ? (Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim())) : [],
+        payRangeMin: payRangeMin ? parseFloat(payRangeMin) : null,
+        payRangeMax: payRangeMax ? parseFloat(payRangeMax) : null,
+        payCurrency,
+        
+        // Media
+        additionalPhotos: additionalPhotos || [],
+        mediaUrls: mediaUrls || [],
+        
+        // Existing fields
+        bio,
+        certifications: certifications ? (Array.isArray(certifications) ? certifications : certifications.split(",").map(c => c.trim())) : [],
         availability: availability ? new Date(availability) : null,
         experience: Array.isArray(experience) ? experience : []
       },
       update: {
-        bio,
-        title,
+        photoUrl: headshot || null,
+        preferredRole: title || null,
         location,
-        skills: Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim()),
-        certifications: Array.isArray(certifications) ? certifications : certifications.split(",").map(s => s.trim()),
+        workLocations: workLocations ? (Array.isArray(workLocations) ? workLocations : workLocations.split(",").map(l => l.trim())) : [],
+        openToRelocation: openToRelocation || false,
+        yearsOfExperience: yearsOfExperience ? parseInt(yearsOfExperience.toString()) : null,
+        
+        // About Me Sections
+        whatImSeeking,
+        whyIEnjoyThisWork,
+        whatSetsApartMe,
+        idealEnvironment,
+        
+        // Professional Details
+        seekingOpportunities: seekingOpportunities ? (Array.isArray(seekingOpportunities) ? seekingOpportunities : seekingOpportunities.split(",").map(o => o.trim())) : [],
+        skills: skills ? (Array.isArray(skills) ? skills : skills.split(",").map(s => s.trim())) : [],
+        payRangeMin: payRangeMin ? parseFloat(payRangeMin) : null,
+        payRangeMax: payRangeMax ? parseFloat(payRangeMax) : null,
+        payCurrency,
+        
+        // Media
+        additionalPhotos: additionalPhotos || [],
+        mediaUrls: mediaUrls || [],
+        
+        // Existing fields
+        bio,
+        certifications: certifications ? (Array.isArray(certifications) ? certifications : certifications.split(",").map(c => c.trim())) : [],
         availability: availability ? new Date(availability) : null,
         experience: Array.isArray(experience) ? experience : []
       }
     });
 
-    console.log("[PROFILE_PUT] Profile updated:", profile);
     return NextResponse.json(profile);
   } catch (error) {
-    console.error("[PROFILE_PUT]", error);
+    console.error("Error updating profile:", error);
     return new NextResponse("Internal error", { status: 500 });
   }
 } 
