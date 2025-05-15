@@ -5,6 +5,11 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useProfile } from "@/providers/profile-provider";
 import { UserRole } from "@/types";
+import { Menu } from "@headlessui/react";
+import { Fragment } from "react";
+import { signOut } from "next-auth/react";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { Transition } from "@headlessui/react";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -80,11 +85,51 @@ export function Navbar() {
                     </div>
                   )}
                 </div>
-                <Link href="/dashboard/profile">
-                  <button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                    Profile
-                  </button>
-                </Link>
+                <Menu as="div" className="relative inline-block text-left">
+                  <div>
+                    <Menu.Button className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                      Profile
+                    </Menu.Button>
+                  </div>
+                  <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href={profile?.user?.profileSlug ? `/professionals/${profile.user.profileSlug}` : "/dashboard/profile"}
+                          className={`${
+                            active ? "bg-gray-100" : ""
+                          } block px-4 py-2 text-sm text-gray-700`}
+                        >
+                          Your Profile
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <Link
+                          href="/dashboard/settings"
+                          className={`${
+                            active ? "bg-gray-100" : ""
+                          } block px-4 py-2 text-sm text-gray-700`}
+                        >
+                          Settings
+                        </Link>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={() => signOut()}
+                          className={`${
+                            active ? "bg-gray-100" : ""
+                          } block w-full px-4 py-2 text-left text-sm text-gray-700`}
+                        >
+                          Sign out
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </Menu.Items>
+                </Menu>
               </div>
             </div>
           ) : (
