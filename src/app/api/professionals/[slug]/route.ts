@@ -1,5 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma, User } from "@prisma/client";
+
+type CandidateProfileWithAll = Prisma.CandidateProfileGetPayload<{
+  select: {
+    id: true;
+    bio: true;
+    preferredRole: true;
+    skills: true;
+    experience: true;
+    certifications: true;
+    location: true;
+    availability: true;
+    resumeUrl: true;
+    profileViews: true;
+    workLocations: true;
+    openToRelocation: true;
+    yearsOfExperience: true;
+    whatImSeeking: true;
+    whyIEnjoyThisWork: true;
+    whatSetsApartMe: true;
+    idealEnvironment: true;
+    seekingOpportunities: true;
+    payRangeMin: true;
+    payRangeMax: true;
+    payCurrency: true;
+    additionalPhotos: true;
+    mediaUrls: true;
+  }
+}>;
+
+type ProfileWithCandidate = User & {
+  candidateProfile: CandidateProfileWithAll | null;
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -15,28 +48,8 @@ export async function GET(
       where: {
         profileSlug: params.slug
       },
-      select: {
-        firstName: true,
-        lastName: true,
-        image: true,
-        role: true,
-        createdAt: true,
-        email: true,
-        phoneNumber: true,
-        candidateProfile: {
-          select: {
-            id: true,
-            bio: true,
-            title: true,
-            skills: true,
-            experience: true,
-            certifications: true,
-            location: true,
-            availability: true,
-            resumeUrl: true,
-            profileViews: true,
-          }
-        }
+      include: {
+        candidateProfile: true
       }
     });
 
@@ -57,7 +70,7 @@ export async function GET(
     const responseData = {
       id: profile.candidateProfile.id,
       bio: profile.candidateProfile.bio,
-      title: profile.candidateProfile.title,
+      title: profile.candidateProfile.preferredRole,
       skills: profile.candidateProfile.skills || [],
       experience: profile.candidateProfile.experience || [],
       certifications: profile.candidateProfile.certifications || [],
@@ -65,6 +78,19 @@ export async function GET(
       availability: profile.candidateProfile.availability ? profile.candidateProfile.availability.toISOString() : null,
       resumeUrl: profile.candidateProfile.resumeUrl,
       profileViews: profile.candidateProfile.profileViews,
+      workLocations: profile.candidateProfile.workLocations || [],
+      openToRelocation: profile.candidateProfile.openToRelocation || false,
+      yearsOfExperience: profile.candidateProfile.yearsOfExperience,
+      whatImSeeking: profile.candidateProfile.whatImSeeking,
+      whyIEnjoyThisWork: profile.candidateProfile.whyIEnjoyThisWork,
+      whatSetsApartMe: profile.candidateProfile.whatSetsApartMe,
+      idealEnvironment: profile.candidateProfile.idealEnvironment,
+      seekingOpportunities: profile.candidateProfile.seekingOpportunities || [],
+      payRangeMin: profile.candidateProfile.payRangeMin,
+      payRangeMax: profile.candidateProfile.payRangeMax,
+      payCurrency: profile.candidateProfile.payCurrency || 'USD',
+      additionalPhotos: profile.candidateProfile.additionalPhotos || [],
+      mediaUrls: profile.candidateProfile.mediaUrls || [],
       user: {
         firstName: profile.firstName,
         lastName: profile.lastName,

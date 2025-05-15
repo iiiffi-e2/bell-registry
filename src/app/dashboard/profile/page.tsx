@@ -11,6 +11,8 @@ import {
   PhoneIcon,
   BriefcaseIcon,
   AcademicCapIcon,
+  CheckCircleIcon,
+  LinkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import { generateProfileUrl } from "@/lib/utils";
@@ -29,6 +31,19 @@ interface CandidateProfile {
   location: string | null;
   createdAt: Date;
   updatedAt: Date;
+  workLocations: string[];
+  openToRelocation: boolean;
+  yearsOfExperience: number | null;
+  whatImSeeking: string | null;
+  whyIEnjoyThisWork: string | null;
+  whatSetsApartMe: string | null;
+  idealEnvironment: string | null;
+  seekingOpportunities: string[];
+  payRangeMin: number | null;
+  payRangeMax: number | null;
+  payCurrency: string;
+  additionalPhotos: string[];
+  mediaUrls: string[];
   user: {
     firstName: string | null;
     lastName: string | null;
@@ -36,6 +51,7 @@ interface CandidateProfile {
     phoneNumber: string | null;
     image: string | null;
     profileSlug: string | null;
+    id: string;
   };
 }
 
@@ -183,13 +199,112 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
+          <div className="px-4 py-5 sm:p-6">
             <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
               {/* Bio */}
               <div className="sm:col-span-2">
                 <dt className="text-sm font-medium text-gray-500">Bio</dt>
                 <dd className="mt-1 text-sm text-gray-900">{profile.bio}</dd>
               </div>
+
+              {/* Work Locations & Relocation */}
+              {(profile.workLocations?.length > 0 || profile.openToRelocation) && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Work Preferences</dt>
+                  <dd className="mt-1">
+                    {profile.workLocations?.length > 0 && (
+                      <div className="mb-2">
+                        <span className="text-sm text-gray-700 font-medium">Available to work in: </span>
+                        <span className="text-sm text-gray-900">{profile.workLocations.join(", ")}</span>
+                      </div>
+                    )}
+                    {profile.openToRelocation && (
+                      <div className="text-sm text-blue-600">
+                        <CheckCircleIcon className="h-5 w-5 inline mr-1" />
+                        Open to relocation
+                      </div>
+                    )}
+                  </dd>
+                </div>
+              )}
+
+              {/* Years of Experience */}
+              {profile.yearsOfExperience !== null && (
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-500">Years of Experience</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{profile.yearsOfExperience} years</dd>
+                </div>
+              )}
+
+              {/* About Me Sections */}
+              {profile.whatImSeeking && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">What I'm Seeking</dt>
+                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whatImSeeking}</dd>
+                </div>
+              )}
+
+              {profile.whyIEnjoyThisWork && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Why I Enjoy This Work</dt>
+                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whyIEnjoyThisWork}</dd>
+                </div>
+              )}
+
+              {profile.whatSetsApartMe && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">What Sets Me Apart</dt>
+                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whatSetsApartMe}</dd>
+                </div>
+              )}
+
+              {profile.idealEnvironment && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Ideal Environment</dt>
+                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.idealEnvironment}</dd>
+                </div>
+              )}
+
+              {/* Professional Details */}
+              {profile.seekingOpportunities?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Seeking Opportunities</dt>
+                  <dd className="mt-1">
+                    <ul className="flex flex-wrap gap-2">
+                      {profile.seekingOpportunities.map((opportunity, index) => (
+                        <li
+                          key={index}
+                          className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+                        >
+                          {opportunity}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              )}
+
+              {/* Pay Range */}
+              {(profile.payRangeMin || profile.payRangeMax) && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Pay Range</dt>
+                  <dd className="mt-1 text-sm text-gray-900">
+                    {profile.payRangeMin && profile.payRangeMax ? (
+                      <>
+                        {profile.payCurrency} {profile.payRangeMin.toLocaleString()} - {profile.payRangeMax.toLocaleString()}
+                      </>
+                    ) : profile.payRangeMin ? (
+                      <>
+                        From {profile.payCurrency} {profile.payRangeMin.toLocaleString()}
+                      </>
+                    ) : (
+                      <>
+                        Up to {profile.payCurrency} {profile.payRangeMax.toLocaleString()}
+                      </>
+                    )}
+                  </dd>
+                </div>
+              )}
 
               {/* Skills */}
               <div className="sm:col-span-2">
@@ -209,44 +324,48 @@ export default function ProfilePage() {
               </div>
 
               {/* Experience */}
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Experience</dt>
-                <dd className="mt-1 space-y-4">
-                  {profile.experience.map((exp: any, index: number) => (
-                    <div key={index} className="border-l-4 border-gray-200 pl-4">
-                      <p className="text-sm font-medium text-gray-900">
-                        {exp.title} at {exp.employer}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {exp.startDate} - {exp.endDate || "Present"}
-                      </p>
-                      <p className="mt-1 text-sm text-gray-500">
-                        {exp.description}
-                      </p>
-                    </div>
-                  ))}
-                </dd>
-              </div>
+              {profile.experience?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Experience</dt>
+                  <dd className="mt-1 space-y-4">
+                    {profile.experience.map((exp: any, index: number) => (
+                      <div key={index} className="border-l-4 border-gray-200 pl-4">
+                        <p className="text-sm font-medium text-gray-900">
+                          {exp.title} at {exp.employer}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {exp.startDate} - {exp.endDate || "Present"}
+                        </p>
+                        <p className="mt-1 text-sm text-gray-500">
+                          {exp.description}
+                        </p>
+                      </div>
+                    ))}
+                  </dd>
+                </div>
+              )}
 
               {/* Certifications */}
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">
-                  Certifications
-                </dt>
-                <dd className="mt-1">
-                  <ul className="flex flex-wrap gap-2">
-                    {profile.certifications.map((cert, index) => (
-                      <li
-                        key={index}
-                        className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800"
-                      >
-                        <AcademicCapIcon className="h-4 w-4 mr-1" />
-                        {cert}
-                      </li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
+              {profile.certifications?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">
+                    Certifications
+                  </dt>
+                  <dd className="mt-1">
+                    <ul className="flex flex-wrap gap-2">
+                      {profile.certifications.map((cert, index) => (
+                        <li
+                          key={index}
+                          className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                        >
+                          <AcademicCapIcon className="h-4 w-4 mr-1" />
+                          {cert}
+                        </li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+              )}
 
               {/* Availability */}
               {profile.availability && (
@@ -256,6 +375,48 @@ export default function ProfilePage() {
                   </dt>
                   <dd className="mt-1 text-sm text-gray-900">
                     {new Date(profile.availability).toLocaleDateString()}
+                  </dd>
+                </div>
+              )}
+
+              {/* Media */}
+              {profile.additionalPhotos?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Portfolio Photos</dt>
+                  <dd className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    {profile.additionalPhotos.map((photo, index) => (
+                      <div key={index} className="relative aspect-w-3 aspect-h-2">
+                        <Image
+                          src={photo}
+                          alt={`Portfolio photo ${index + 1}`}
+                          fill
+                          className="object-cover rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </dd>
+                </div>
+              )}
+
+              {profile.mediaUrls?.length > 0 && (
+                <div className="sm:col-span-2">
+                  <dt className="text-sm font-medium text-gray-500">Media Links</dt>
+                  <dd className="mt-1">
+                    <ul className="space-y-2">
+                      {profile.mediaUrls.map((url, index) => (
+                        <li key={index}>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
+                          >
+                            <LinkIcon className="h-4 w-4 mr-1" />
+                            {url}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
                   </dd>
                 </div>
               )}
