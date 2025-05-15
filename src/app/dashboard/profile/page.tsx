@@ -138,294 +138,213 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Profile Content */}
+        {/* Profile Content - Two Column Layout */}
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-          {/* Basic Info */}
-          <div className="px-4 py-5 sm:px-6 flex items-center">
-            <div className="flex-shrink-0">
-              {profile.user.image ? (
-                <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
-                  <Image
-                    src={profile.user.image}
-                    alt={`${profile.user.firstName} ${profile.user.lastName}`}
-                    width={96}
-                    height={96}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                    className="h-24 w-24 text-gray-300"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-                    />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <div className="ml-6">
-              <h3 className="text-2xl font-bold text-gray-900">
-                {profile.user.firstName} {profile.user.lastName}
-              </h3>
-              <p className="mt-1 text-lg text-gray-600">{profile.title || 'Professional'}</p>
-              <div className="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
-                {profile.location && (
-                  <div className="mt-2 flex items-center text-sm text-gray-500">
-                    <MapPinIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                    {profile.location}
-                  </div>
-                )}
-                <div className="mt-2 flex items-center text-sm text-gray-500">
-                  <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                  {profile.user.email}
-                </div>
-                {profile.user.phoneNumber && (
-                  <div className="mt-2 flex items-center text-sm text-gray-500">
-                    <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                    {profile.user.phoneNumber}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="px-4 py-5 sm:p-6">
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-              {/* Bio */}
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Bio</dt>
-                <dd className="mt-1 text-sm text-gray-900">{profile.bio}</dd>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main Content Column */}
+              <div className="lg:col-span-2">
+                {/* Profile Header */}
+                <div className="flex items-center mb-6">
+                  <div className="flex-shrink-0">
+                    {profile.user.image ? (
+                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
+                        <Image
+                          src={profile.user.image}
+                          alt={`${profile.user.firstName} ${profile.user.lastName}`}
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                        <UserCircleIcon className="h-24 w-24 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="ml-6">
+                    <h3 className="text-2xl font-bold text-gray-900">
+                      {profile.user.firstName} {profile.user.lastName}
+                    </h3>
+                    <p className="mt-1 text-lg text-gray-600">{profile.title || 'Professional'}</p>
+                    <div className="mt-2 flex items-center text-sm text-gray-500">
+                      <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                      {profile.user.email}
+                    </div>
+                    {profile.user.phoneNumber && (
+                      <div className="mt-1 flex items-center text-sm text-gray-500">
+                        <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        {profile.user.phoneNumber}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bio */}
+                {profile.bio && (
+                  <div className="mb-8">
+                    <h4 className="text-lg font-medium text-gray-900 mb-2">Professional Bio</h4>
+                    <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
+                  </div>
+                )}
+
+                {/* About Me Sections */}
+                {(profile.whatImSeeking || profile.whyIEnjoyThisWork || profile.whatSetsApartMe || profile.idealEnvironment) && (
+                  <div className="space-y-8">
+                    {profile.whatImSeeking && (
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">What I'm Seeking</h4>
+                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whatImSeeking}</p>
+                      </div>
+                    )}
+
+                    {profile.whyIEnjoyThisWork && (
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Why I Enjoy This Work</h4>
+                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whyIEnjoyThisWork}</p>
+                      </div>
+                    )}
+
+                    {profile.whatSetsApartMe && (
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">What Sets Me Apart</h4>
+                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whatSetsApartMe}</p>
+                      </div>
+                    )}
+
+                    {profile.idealEnvironment && (
+                      <div>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">Ideal Environment</h4>
+                        <p className="text-gray-700 whitespace-pre-wrap">{profile.idealEnvironment}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Experience */}
+                {profile.experience?.length > 0 && (
+                  <div className="mt-8">
+                    <h4 className="text-lg font-medium text-gray-900 mb-4">Experience</h4>
+                    <div className="space-y-4">
+                      {profile.experience.map((exp: any, index: number) => (
+                        <div key={index} className="border-l-4 border-gray-200 pl-4">
+                          <p className="text-sm font-medium text-gray-900">
+                            {exp.title} at {exp.employer}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {exp.startDate} - {exp.endDate || "Present"}
+                          </p>
+                          <p className="mt-1 text-sm text-gray-500">
+                            {exp.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Work Locations & Relocation */}
-              {(profile.workLocations?.length > 0 || profile.openToRelocation) && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Work Preferences</dt>
-                  <dd className="mt-1">
+              {/* Sidebar Column */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Location */}
+                {profile.location && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Current Location</h4>
+                    <p className="text-gray-900 flex items-center">
+                      <MapPinIcon className="h-5 w-5 mr-2 text-gray-400" />
+                      {profile.location}
+                    </p>
+                  </div>
+                )}
+
+                {/* Work Preferences */}
+                {(profile.workLocations?.length > 0 || profile.openToRelocation) && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Work Preferences</h4>
                     {profile.workLocations?.length > 0 && (
                       <div className="mb-2">
-                        <span className="text-sm text-gray-700 font-medium">Available to work in: </span>
-                        <span className="text-sm text-gray-900">{profile.workLocations.join(", ")}</span>
+                        <p className="text-sm font-medium text-gray-700">Available to work in:</p>
+                        <p className="text-sm text-gray-900">{profile.workLocations.join(", ")}</p>
                       </div>
                     )}
                     {profile.openToRelocation && (
-                      <div className="text-sm text-blue-600">
-                        <CheckCircleIcon className="h-5 w-5 inline mr-1" />
+                      <div className="text-sm text-blue-600 flex items-center">
+                        <CheckCircleIcon className="h-5 w-5 mr-1" />
                         Open to relocation
                       </div>
                     )}
-                  </dd>
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Years of Experience */}
-              {profile.yearsOfExperience !== null && (
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">Years of Experience</dt>
-                  <dd className="mt-1 text-sm text-gray-900">{profile.yearsOfExperience} years</dd>
-                </div>
-              )}
+                {/* Years of Experience */}
+                {profile.yearsOfExperience !== null && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Years of Experience</h4>
+                    <p className="text-gray-900">{profile.yearsOfExperience} years</p>
+                  </div>
+                )}
 
-              {/* About Me Sections */}
-              {profile.whatImSeeking && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">What I'm Seeking</dt>
-                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whatImSeeking}</dd>
-                </div>
-              )}
-
-              {profile.whyIEnjoyThisWork && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Why I Enjoy This Work</dt>
-                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whyIEnjoyThisWork}</dd>
-                </div>
-              )}
-
-              {profile.whatSetsApartMe && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">What Sets Me Apart</dt>
-                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.whatSetsApartMe}</dd>
-                </div>
-              )}
-
-              {profile.idealEnvironment && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Ideal Environment</dt>
-                  <dd className="mt-1 text-sm text-gray-900 whitespace-pre-wrap">{profile.idealEnvironment}</dd>
-                </div>
-              )}
-
-              {/* Professional Details */}
-              {profile.seekingOpportunities?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Seeking Opportunities</dt>
-                  <dd className="mt-1">
-                    <ul className="flex flex-wrap gap-2">
+                {/* Seeking Opportunities */}
+                {profile.seekingOpportunities?.length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Seeking Opportunities</h4>
+                    <div className="flex flex-wrap gap-2">
                       {profile.seekingOpportunities.map((opportunity, index) => (
-                        <li
+                        <span
                           key={index}
-                          className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-purple-100 text-purple-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                         >
                           {opportunity}
-                        </li>
+                        </span>
                       ))}
-                    </ul>
-                  </dd>
-                </div>
-              )}
+                    </div>
+                  </div>
+                )}
 
-              {/* Pay Range */}
-              {(profile.payRangeMin || profile.payRangeMax) && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Pay Range</dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {profile.payRangeMin && profile.payRangeMax ? (
-                      <>
-                        {profile.payCurrency} {profile.payRangeMin.toLocaleString()} - {profile.payRangeMax.toLocaleString()}
-                      </>
-                    ) : profile.payRangeMin ? (
-                      <>
-                        From {profile.payCurrency} {profile.payRangeMin.toLocaleString()}
-                      </>
-                    ) : (
-                      <>
-                        Up to {profile.payCurrency} {profile.payRangeMax.toLocaleString()}
-                      </>
-                    )}
-                  </dd>
-                </div>
-              )}
-
-              {/* Skills */}
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Skills</dt>
-                <dd className="mt-1">
-                  <ul className="flex flex-wrap gap-2">
-                    {profile.skills.map((skill, index) => (
-                      <li
-                        key={index}
-                        className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800"
-                      >
-                        {skill}
-                      </li>
-                    ))}
-                  </ul>
-                </dd>
-              </div>
-
-              {/* Experience */}
-              {profile.experience?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Experience</dt>
-                  <dd className="mt-1 space-y-4">
-                    {profile.experience.map((exp: any, index: number) => (
-                      <div key={index} className="border-l-4 border-gray-200 pl-4">
-                        <p className="text-sm font-medium text-gray-900">
-                          {exp.title} at {exp.employer}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {exp.startDate} - {exp.endDate || "Present"}
-                        </p>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {exp.description}
-                        </p>
-                      </div>
-                    ))}
-                  </dd>
-                </div>
-              )}
-
-              {/* Certifications */}
-              {profile.certifications?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Certifications
-                  </dt>
-                  <dd className="mt-1">
-                    <ul className="flex flex-wrap gap-2">
-                      {profile.certifications.map((cert, index) => (
-                        <li
+                {/* Skills */}
+                {profile.skills.length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Skills & Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {profile.skills.map((skill, index) => (
+                        <span
                           key={index}
-                          className="inline-flex items-center px-3 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
                         >
-                          <AcademicCapIcon className="h-4 w-4 mr-1" />
-                          {cert}
-                        </li>
+                          {skill}
+                        </span>
                       ))}
-                    </ul>
-                  </dd>
-                </div>
-              )}
+                    </div>
+                  </div>
+                )}
 
-              {/* Availability */}
-              {profile.availability && (
-                <div className="sm:col-span-1">
-                  <dt className="text-sm font-medium text-gray-500">
-                    Available From
-                  </dt>
-                  <dd className="mt-1 text-sm text-gray-900">
-                    {new Date(profile.availability).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
+                {/* Pay Range */}
+                {(profile.payRangeMin || profile.payRangeMax) && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
+                    <p className="text-gray-900">
+                      {profile.payRangeMin && profile.payRangeMax ? (
+                        <>
+                          {profile.payCurrency} {profile.payRangeMin.toLocaleString()} - {profile.payRangeMax.toLocaleString()}
+                        </>
+                      ) : profile.payRangeMin ? (
+                        <>
+                          From {profile.payCurrency} {profile.payRangeMin.toLocaleString()}
+                        </>
+                      ) : (
+                        <>
+                          Up to {profile.payCurrency} {profile.payRangeMax.toLocaleString()}
+                        </>
+                      )}
+                    </p>
+                  </div>
+                )}
 
-              {/* Media */}
-              {profile.additionalPhotos?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Portfolio Photos</dt>
-                  <dd className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    {profile.additionalPhotos.map((photo, index) => (
-                      <div key={index} className="relative aspect-w-3 aspect-h-2">
-                        <Image
-                          src={photo}
-                          alt={`Portfolio photo ${index + 1}`}
-                          fill
-                          className="object-cover rounded-lg"
-                        />
-                      </div>
-                    ))}
-                  </dd>
-                </div>
-              )}
-
-              {profile.mediaUrls?.length > 0 && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Media Links</dt>
-                  <dd className="mt-1">
-                    <ul className="space-y-2">
-                      {profile.mediaUrls.map((url, index) => (
-                        <li key={index}>
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:text-blue-800 text-sm flex items-center"
-                          >
-                            <LinkIcon className="h-4 w-4 mr-1" />
-                            {url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </dd>
-                </div>
-              )}
-
-              {/* Resume */}
-              {profile.resumeUrl && (
-                <div className="sm:col-span-2">
-                  <dt className="text-sm font-medium text-gray-500">Resume</dt>
-                  <dd className="mt-1">
+                {/* Resume */}
+                {profile.resumeUrl && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Resume</h4>
                     <a
                       href={profile.resumeUrl}
                       target="_blank"
@@ -435,10 +354,10 @@ export default function ProfilePage() {
                       <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
                       View Resume
                     </a>
-                  </dd>
-                </div>
-              )}
-            </dl>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
