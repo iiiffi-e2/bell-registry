@@ -3,13 +3,14 @@
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { type CandidateFilters } from '@/types/candidate'
+import { UserRole } from '@prisma/client'
 import { Search } from 'lucide-react'
 
 interface CandidateFiltersProps {
   filters: CandidateFilters
   onFiltersChange: (filters: CandidateFilters) => void
   locations: string[]
-  roleTypes: string[]
+  roleTypes: UserRole[]
 }
 
 export function CandidateFilters({
@@ -23,7 +24,7 @@ export function CandidateFilters({
   }
 
   const handleRoleTypeChange = (value: string) => {
-    onFiltersChange({ ...filters, roleType: value === 'all' ? undefined : value })
+    onFiltersChange({ ...filters, roleType: value === 'all' ? undefined : value as UserRole })
   }
 
   return (
@@ -41,7 +42,7 @@ export function CandidateFilters({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:w-[400px]">
+      <div className="flex flex-col gap-4 md:flex-row md:gap-6">
         <Select
           value={filters.location || 'all'}
           onValueChange={handleLocationChange}
@@ -69,7 +70,7 @@ export function CandidateFilters({
             <SelectItem value="all">All roles</SelectItem>
             {roleTypes.map((role) => (
               <SelectItem key={role} value={role}>
-                {role}
+                {role.replace(/_/g, ' ')}
               </SelectItem>
             ))}
           </SelectContent>
