@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       {/* Main container */}
       <div className="max-w-7xl mx-auto bg-white rounded-2xl border-[6px] border-[#d9d9d9] overflow-hidden">
-        <div className="flex min-h-[800px]">
+        <div className="flex min-h-[680px]">
           {/* Left side - Form */}
           <div className="flex-1 flex flex-col justify-between p-8 lg:p-12">
             <div className="max-w-md w-full mx-auto">
