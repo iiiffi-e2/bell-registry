@@ -265,7 +265,7 @@ export default function ProfessionalsLayout({
                     )}
                     <div className="ml-3">
                       <div className="text-base font-medium text-gray-800">
-                        {session.user?.name || `${session.user?.firstName} ${session.user?.lastName}`}
+                        {session.user?.name || session.user?.email?.split('@')[0]}
                       </div>
                       <div className="text-sm font-medium text-gray-500">
                         {session.user?.email}
