@@ -6,8 +6,11 @@ import {
   BriefcaseIcon,
   EyeIcon,
   DocumentCheckIcon,
+  UserCircleIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useProfile } from "@/providers/profile-provider";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -79,13 +82,10 @@ const recentApplications = [
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  console.log("Session data:", {
-    user: session?.user,
-    role: session?.user?.role,
-    roleType: typeof session?.user?.role,
-  });
+  const { profile } = useProfile();
   
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
+  const isProfileIncomplete = isProfessional && (!profile?.bio || !profile?.whatImSeeking);
 
   if (!isProfessional) {
     console.log("User is not a professional, showing employer dashboard");
@@ -95,6 +95,29 @@ export default function DashboardPage() {
   return (
     <div className="py-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+        {isProfileIncomplete && (
+          <div className="rounded-md bg-blue-50 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <UserCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3 flex-1 md:flex md:justify-between">
+                <p className="text-sm text-blue-700">
+                  Complete your profile to help employers find you and increase your chances of finding the perfect job.
+                </p>
+                <p className="mt-3 text-sm md:mt-0 md:ml-6">
+                  <Link
+                    href="/dashboard/profile/edit"
+                    className="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600 inline-flex items-center"
+                  >
+                    Complete Profile
+                    <ArrowRightIcon className="ml-1 h-4 w-4" />
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
       </div>
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
