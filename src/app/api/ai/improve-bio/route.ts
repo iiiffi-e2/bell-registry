@@ -1,23 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth"; 
+import { authOptions } from "@/lib/auth";
 import OpenAI from "openai";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+
+    if (!session) {
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
 
-    const { currentBio } = await request.json();
+    const { currentBio } = await req.json();
     
     if (!currentBio) {
-      return new NextResponse("Bio is required", { status: 400 });
+      return new NextResponse(JSON.stringify({ error: "Bio is required" }), {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
     }
 
     const prompt = `Please improve the following professional bio to make it more engaging, professional, and impactful. 
@@ -52,9 +63,21 @@ export async function POST(request: NextRequest) {
 
     const improvedBio = completion.choices[0]?.message?.content || "";
 
-    return NextResponse.json({ improvedBio });
+    return NextResponse.json(
+      { improvedBio },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
   } catch (error) {
     console.error("Error improving bio:", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
   }
 } 
