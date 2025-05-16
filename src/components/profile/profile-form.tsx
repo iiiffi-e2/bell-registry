@@ -3,10 +3,63 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ProfilePictureUpload } from "./profile-picture-upload";
 import { useState, useEffect } from "react";
-import { CurrencyDollarIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { CurrencyDollarIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MediaUpload } from "./media-upload";
 import { useSession } from "next-auth/react";
 import ImprovedBioModal from "@/components/ui/improved-bio-modal";
+import { Combobox } from "@headlessui/react";
+
+const PROFESSIONAL_ROLES = [
+  "Head Gardener",
+  "Executive Housekeeper",
+  "Driver",
+  "Executive Protection",
+  "Butler",
+  "Governess",
+  "Private Teacher",
+  "Nanny | Educator",
+  "Nanny",
+  "Family Assistant",
+  "Personal Assistant",
+  "Laundress",
+  "Housekeeper",
+  "Houseman",
+  "Estate Couple",
+  "Property Caretaker",
+  "House Manager",
+  "Estate Manager",
+  "Personal Chef",
+  "Private Chef",
+  "Event Chef",
+  "Drop-Off Chef",
+  "Seasonal Chef",
+  "Office Chef",
+  "Yacht Chef",
+  "Jet Chef",
+  "Family Office CEO",
+  "Family Office COO",
+  "Executive Assistant",
+  "Administrative Assistant",
+  "Office Manager",
+  "Human Resources Director",
+  "Director of Residences",
+  "Chief of Staff",
+  "Estate Hospitality Manager",
+  "Estate IT Director",
+  "Estate Security Director",
+  "Director of Operations",
+  "Director of Real Estate and Construction",
+  "Construction Manager",
+  "Facilities Manager",
+  "Property Manager",
+  "Landscape Director",
+  "Yacht Captain",
+  "Yacht Steward | Stewardess",
+  "Yacht Chef",
+  "Yacht Engineer",
+  "Flight Attendant",
+  "Other"
+];
 
 const profileSchema = z.object({
   // Basic Info
@@ -35,9 +88,7 @@ const profileSchema = z.object({
   idealEnvironment: z.string().optional(),
   
   // Professional Details
-  seekingOpportunities: z.string()
-    .optional()
-    .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
+  seekingOpportunities: z.array(z.string()).default([]),
   skills: z.string()
     .optional()
     .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
@@ -66,6 +117,99 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 interface ProfileFormProps {
   onSubmit: (data: ProfileFormData) => Promise<void>;
+}
+
+function MultiSelect({ options, value, onChange, placeholder }: { 
+  options: string[], 
+  value: string[], 
+  onChange: (value: string[]) => void,
+  placeholder: string 
+}) {
+  const [query, setQuery] = useState("");
+
+  const filteredOptions = query === ""
+    ? options
+    : options.filter((option) =>
+        option.toLowerCase().includes(query.toLowerCase())
+      );
+
+  const handleSelect = (selectedOption: string) => {
+    if (!value.includes(selectedOption)) {
+      onChange([...value, selectedOption]);
+    }
+    setQuery("");
+  };
+
+  const handleRemove = (optionToRemove: string) => {
+    onChange(value.filter(v => v !== optionToRemove));
+  };
+
+  return (
+    <div className="relative">
+      <Combobox as="div" value={query} onChange={handleSelect}>
+        <div className="relative">
+          <div 
+            className="flex flex-wrap gap-2 p-1 border rounded-md border-gray-300 bg-white min-h-[38px]"
+            onClick={() => {
+              const input = document.querySelector('[role="combobox"]') as HTMLElement;
+              input?.focus();
+            }}
+          >
+            {value.map((item) => (
+              <span
+                key={item}
+                className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-blue-100 text-blue-800"
+              >
+                {item}
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove(item);
+                  }}
+                  className="ml-1 text-blue-600 hover:text-blue-800"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </span>
+            ))}
+            <Combobox.Input
+              className="border-0 p-1 text-sm focus:ring-0 flex-1 min-w-[100px]"
+              placeholder={value.length === 0 ? placeholder : "Add more..."}
+              onChange={(event) => setQuery(event.target.value)}
+              displayValue={(val: string) => val}
+            />
+            <Combobox.Button className="hidden">
+              <span>Toggle</span>
+            </Combobox.Button>
+          </div>
+          <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+            {filteredOptions.length === 0 && query !== "" ? (
+              <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
+                Nothing found.
+              </div>
+            ) : (
+              filteredOptions
+                .filter(option => !value.includes(option))
+                .map((option) => (
+                  <Combobox.Option
+                    key={option}
+                    value={option}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-4 pr-4 ${
+                        active ? 'bg-blue-600 text-white' : 'text-gray-900'
+                      }`
+                    }
+                  >
+                    {option}
+                  </Combobox.Option>
+                ))
+            )}
+          </Combobox.Options>
+        </div>
+      </Combobox>
+    </div>
+  );
 }
 
 export function ProfileForm({ onSubmit }: ProfileFormProps) {
@@ -138,7 +282,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             whyIEnjoyThisWork: data.whyIEnjoyThisWork || "",
             whatSetsApartMe: data.whatSetsApartMe || "",
             idealEnvironment: data.idealEnvironment || "",
-            seekingOpportunities: data.seekingOpportunities?.join(", ") || "",
+            seekingOpportunities: data.seekingOpportunities || [],
             skills: data.skills?.join(", ") || "",
             payRangeMin: data.payRangeMin?.toString() || "",
             payRangeMax: data.payRangeMax?.toString() || "",
@@ -229,12 +373,17 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     Professional Title <span className="text-red-500">*</span>
                   </label>
                   <div className="mt-1">
-                    <input
-                      type="text"
+                    <select
                       {...form.register("preferredRole")}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="e.g. Private Chef, Estate Manager (Required)"
-                    />
+                    >
+                      <option value="">Select a Professional Title</option>
+                      {PROFESSIONAL_ROLES.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   {form.formState.errors.preferredRole && (
                     <p className="mt-1 text-sm text-red-600">{form.formState.errors.preferredRole.message}</p>
@@ -325,11 +474,11 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     Seeking Opportunities (Roles)
                   </label>
                   <div className="mt-1">
-                    <input
-                      type="text"
-                      {...form.register("seekingOpportunities")}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Enter roles separated by commas (Optional)"
+                    <MultiSelect
+                      options={PROFESSIONAL_ROLES}
+                      value={form.watch("seekingOpportunities") || []}
+                      onChange={(newValue) => form.setValue("seekingOpportunities", newValue)}
+                      placeholder="Select roles you're interested in..."
                     />
                   </div>
                   {form.formState.errors.seekingOpportunities && (
