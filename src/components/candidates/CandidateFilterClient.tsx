@@ -1,13 +1,15 @@
 "use client"
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { CandidateFilters, SortOption } from '@/types/candidate'
-import { UserRole } from '@prisma/client'
 import { useCallback } from 'react'
+import { UserRole } from '@prisma/client'
+import { type CandidateFilters } from '@/types/candidate'
+import { type SortOption } from '@/types/sort'
 
 interface CandidateFilterClientProps {
   locations: string[]
   roleTypes: UserRole[]
+  onFiltersChange: (filters: CandidateFilters) => void
 }
 
 const SORT_OPTIONS: { value: SortOption; label: string }[] = [
@@ -21,8 +23,8 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 export function CandidateFilterClient({
   locations,
   roleTypes,
+  onFiltersChange,
 }: CandidateFilterClientProps) {
-  const router = useRouter()
   const searchParams = useSearchParams()
 
   const currentFilters: CandidateFilters = {
@@ -34,106 +36,78 @@ export function CandidateFilterClient({
 
   const handleFiltersChange = useCallback(
     (newFilters: CandidateFilters) => {
-      const params = new URLSearchParams()
-      if (newFilters.location) params.set('location', newFilters.location)
-      if (newFilters.roleType) params.set('roleType', newFilters.roleType)
-      if (newFilters.searchQuery) params.set('search', newFilters.searchQuery)
-      if (newFilters.sortBy) params.set('sort', newFilters.sortBy)
-      router.push(`/browse-professionals?${params.toString()}`)
+      onFiltersChange(newFilters)
     },
-    [router]
+    [onFiltersChange]
   )
 
   return (
-    <div className="bg-white shadow rounded-lg p-6">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Search */}
-        <div>
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700">
-            Search
-          </label>
-          <input
-            type="text"
-            id="search"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            placeholder="Search professionals..."
-            value={currentFilters.searchQuery || ''}
-            onChange={(e) =>
-              handleFiltersChange({ ...currentFilters, searchQuery: e.target.value || undefined })
-            }
-          />
-        </div>
-
-        {/* Location */}
-        <div>
-          <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-            Location
-          </label>
-          <select
-            id="location"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            value={currentFilters.location || ''}
-            onChange={(e) =>
-              handleFiltersChange({ ...currentFilters, location: e.target.value || undefined })
-            }
-          >
-            <option value="">All Locations</option>
-            {locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Role Type */}
-        <div>
-          <label htmlFor="roleType" className="block text-sm font-medium text-gray-700">
-            Role Type
-          </label>
-          <select
-            id="roleType"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            value={currentFilters.roleType || ''}
-            onChange={(e) =>
-              handleFiltersChange({
-                ...currentFilters,
-                roleType: (e.target.value as UserRole) || undefined,
-              })
-            }
-          >
-            <option value="">All Roles</option>
-            {roleTypes.map((role) => (
-              <option key={role} value={role}>
-                {role.charAt(0) + role.slice(1).toLowerCase()}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Sort By */}
-        <div>
-          <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700">
-            Sort By
-          </label>
-          <select
-            id="sortBy"
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            value={currentFilters.sortBy || 'recent'}
-            onChange={(e) =>
-              handleFiltersChange({
-                ...currentFilters,
-                sortBy: (e.target.value as SortOption) || undefined,
-              })
-            }
-          >
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex-1">
+        <input
+          type="text"
+          placeholder="Search professionals..."
+          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
+          value={currentFilters.searchQuery || ''}
+          onChange={(e) =>
+            handleFiltersChange({
+              ...currentFilters,
+              searchQuery: e.target.value || undefined,
+            })
+          }
+        />
+      </div>
+      <div className="flex gap-4">
+        <select
+          value={currentFilters.location || ''}
+          onChange={(e) =>
+            handleFiltersChange({
+              ...currentFilters,
+              location: e.target.value || undefined,
+            })
+          }
+          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
+        >
+          <option value="">All Locations</option>
+          {locations.map((location) => (
+            <option key={location} value={location}>
+              {location}
+            </option>
+          ))}
+        </select>
+        <select
+          value={currentFilters.roleType || ''}
+          onChange={(e) =>
+            handleFiltersChange({
+              ...currentFilters,
+              roleType: (e.target.value as UserRole) || undefined,
+            })
+          }
+          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
+        >
+          <option value="">All Roles</option>
+          {roleTypes.map((role) => (
+            <option key={role} value={role}>
+              {role.replace(/_/g, ' ')}
+            </option>
+          ))}
+        </select>
+        <select
+          value={currentFilters.sortBy || 'recent'}
+          onChange={(e) =>
+            handleFiltersChange({
+              ...currentFilters,
+              sortBy: e.target.value as SortOption,
+            })
+          }
+          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
+        >
+          {SORT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
       </div>
     </div>
   )
