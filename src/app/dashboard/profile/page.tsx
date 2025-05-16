@@ -17,6 +17,7 @@ import {
 import Image from "next/image";
 import { generateProfileUrl } from "@/lib/utils";
 import Link from "next/link";
+import { PhotoGallery } from "@/components/profile/photo-gallery";
 
 interface CandidateProfile {
   id: string;
@@ -355,6 +356,13 @@ export default function ProfilePage() {
                       <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
                       View Resume
                     </a>
+                  </div>
+                )}
+
+                {/* Photo Gallery */}
+                {profile.additionalPhotos.length > 0 && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <PhotoGallery photos={profile.additionalPhotos} />
                   </div>
                 )}
               </div>

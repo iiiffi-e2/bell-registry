@@ -13,6 +13,7 @@ import {
   CheckCircleIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
+import { PhotoGallery } from "@/components/profile/photo-gallery";
 
 interface Experience {
   title: string;
@@ -329,6 +330,13 @@ export default async function PublicProfilePage({
                     <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
                     View Resume
                   </a>
+                </div>
+              )}
+
+              {/* Photo Gallery */}
+              {profile.additionalPhotos.length > 0 && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <PhotoGallery photos={profile.additionalPhotos} />
                 </div>
               )}
             </div>
