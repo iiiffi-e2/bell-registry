@@ -90,8 +90,8 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     const {
       // Basic Info
-      headshot,
-      title,
+      photoUrl,
+      preferredRole,
       location,
       workLocations,
       openToRelocation,
@@ -136,8 +136,8 @@ export async function PUT(request: NextRequest) {
       create: {
         userId: user.id,
         // Basic Info
-        photoUrl: headshot || null,
-        preferredRole: title || null,
+        photoUrl: photoUrl || null,
+        preferredRole: preferredRole || null,
         location,
         workLocations: workLocations ? (Array.isArray(workLocations) ? workLocations : workLocations.split(",").map(l => l.trim())) : [],
         openToRelocation: openToRelocation || false,
@@ -167,8 +167,8 @@ export async function PUT(request: NextRequest) {
         experience: Array.isArray(experience) ? experience : []
       },
       update: {
-        photoUrl: headshot || null,
-        preferredRole: title || null,
+        photoUrl: photoUrl || null,
+        preferredRole: preferredRole || null,
         location,
         workLocations: workLocations ? (Array.isArray(workLocations) ? workLocations : workLocations.split(",").map(l => l.trim())) : [],
         openToRelocation: openToRelocation || false,

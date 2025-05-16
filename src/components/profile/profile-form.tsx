@@ -10,8 +10,8 @@ import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 
 const profileSchema = z.object({
   // Basic Info
-  headshot: z.string().optional(),
-  title: z.string().min(2, "Professional title is required"),
+  photoUrl: z.string().optional(),
+  preferredRole: z.string().min(2, "Professional title is required"),
   location: z.string().min(2, "Current location is required"),
   workLocations: z.string()
     .optional()
@@ -127,8 +127,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         
         if (data) {
           form.reset({
-            headshot: data.headshot || "",
-            title: data.title || "",
+            photoUrl: data.photoUrl || "",
+            preferredRole: data.preferredRole || "",
             location: data.location || "",
             workLocations: data.workLocations?.join(", ") || "",
             openToRelocation: data.openToRelocation || false,
@@ -189,8 +189,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                 {/* Profile Picture Upload */}
                 <div>
                   <ProfilePictureUpload
-                    currentImage={form.watch("headshot")}
-                    onUpload={(url) => form.setValue("headshot", url)}
+                    currentImage={form.watch("photoUrl") as string}
+                    onUpload={(url) => form.setValue("photoUrl", url)}
                   />
                 </div>
 
@@ -225,19 +225,19 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
                 {/* Preferred Role */}
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="preferredRole" className="block text-sm font-medium text-gray-700">
                     Professional Title <span className="text-red-500">*</span>
                   </label>
                   <div className="mt-1">
                     <input
                       type="text"
-                      {...form.register("title")}
+                      {...form.register("preferredRole")}
                       className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                       placeholder="e.g. Private Chef, Estate Manager (Required)"
                     />
                   </div>
-                  {form.formState.errors.title && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.title.message}</p>
+                  {form.formState.errors.preferredRole && (
+                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.preferredRole.message}</p>
                   )}
                 </div>
 

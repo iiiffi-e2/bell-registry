@@ -53,6 +53,7 @@ interface CandidateProfile {
     profileSlug: string | null;
     id: string;
   };
+  preferredRole: string | null;
 }
 
 export default function ProfilePage() {
@@ -167,7 +168,7 @@ export default function ProfilePage() {
                     <h3 className="text-2xl font-bold text-gray-900">
                       {profile.user.firstName} {profile.user.lastName}
                     </h3>
-                    <p className="mt-1 text-lg text-gray-600">{profile.title || 'Professional'}</p>
+                    <p className="mt-1 text-lg text-gray-600">{profile.preferredRole || 'Professional'}</p>
                     <div className="mt-2 flex items-center text-sm text-gray-500">
                       <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
                       {profile.user.email}
