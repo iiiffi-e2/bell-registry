@@ -96,7 +96,13 @@ export async function GET(request: Request) {
         skip,
         take: limit,
         orderBy,
-        include: {
+        select: {
+          id: true,
+          bio: true,
+          title: true,
+          preferredRole: true,
+          location: true,
+          skills: true,
           user: {
             select: {
               id: true,

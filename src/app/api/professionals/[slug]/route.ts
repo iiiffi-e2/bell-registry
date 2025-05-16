@@ -71,6 +71,7 @@ export async function GET(
       id: profile.candidateProfile.id,
       bio: profile.candidateProfile.bio,
       title: profile.candidateProfile.preferredRole,
+      preferredRole: profile.candidateProfile.preferredRole,
       skills: profile.candidateProfile.skills || [],
       experience: profile.candidateProfile.experience || [],
       certifications: profile.candidateProfile.certifications || [],

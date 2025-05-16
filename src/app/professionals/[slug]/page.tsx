@@ -130,7 +130,7 @@ export default async function PublicProfilePage({
                   <h1 className="text-2xl font-bold text-gray-900">
                     {profile.user.firstName} {profile.user.lastName}
                   </h1>
-                  <p className="mt-1 text-lg text-gray-600">{profile.preferredRole || 'Professional'}</p>
+                  <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
                   <div className="mt-2 flex items-center text-sm text-gray-500">
                     <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
                     {profile.user.email}
