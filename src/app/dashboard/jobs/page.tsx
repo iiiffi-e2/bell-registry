@@ -35,6 +35,7 @@ interface Job {
       companyName: string;
     };
   };
+  isBookmarked?: boolean;
 }
 
 interface PaginationData {
@@ -99,7 +100,20 @@ export default function JobSearchPage() {
       if (!response.ok) throw new Error("Failed to fetch jobs");
       
       const data = await response.json();
-      setJobs(data.jobs);
+      
+      // Fetch bookmark status for each job
+      const jobsWithBookmarks = await Promise.all(
+        data.jobs.map(async (job: Job) => {
+          const bookmarkResponse = await fetch(`/api/jobs/${job.id}/bookmark`);
+          if (bookmarkResponse.ok) {
+            const { bookmarked } = await bookmarkResponse.json();
+            return { ...job, isBookmarked: bookmarked };
+          }
+          return { ...job, isBookmarked: false };
+        })
+      );
+
+      setJobs(jobsWithBookmarks);
       setPagination(data.pagination);
       setError(null);
     } catch (err) {
@@ -107,6 +121,25 @@ export default function JobSearchPage() {
       setJobs([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBookmark = async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/jobs/${jobId}/bookmark`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) throw new Error('Failed to bookmark job');
+
+      const { bookmarked } = await response.json();
+      
+      // Update the jobs state to reflect the new bookmark status
+      setJobs(jobs.map(job => 
+        job.id === jobId ? { ...job, isBookmarked: bookmarked } : job
+      ));
+    } catch (error) {
+      console.error('Error bookmarking job:', error);
     }
   };
 
@@ -172,31 +205,33 @@ export default function JobSearchPage() {
         </div>
         <button
           type="button"
-          className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+          onClick={() => handleBookmark(job.id)}
+          className={`rounded-full p-1 ${
+            job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
+          }`}
         >
           <BookmarkIcon className="h-6 w-6" />
         </button>
       </div>
       <p className="mt-4 text-sm text-gray-500 line-clamp-3">{job.description}</p>
-      <div className="mt-4">
-        <div className="flex flex-wrap gap-2">
-          {job.requirements.slice(0, 3).map((req, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
-            >
-              {req}
-            </span>
-          ))}
-          {job.requirements.length > 3 && (
-            <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-              +{job.requirements.length - 3} more
-            </span>
-          )}
-        </div>
-        <div className="mt-2 text-xs text-gray-500">
-          Posted {formatDate(job.createdAt)}
-        </div>
+      
+      <div className="flex flex-wrap gap-2">
+        {job.requirements.slice(0, 3).map((req, index) => (
+          <span
+            key={index}
+            className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+          >
+            {req}
+          </span>
+        ))}
+        {job.requirements.length > 3 && (
+          <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+            +{job.requirements.length - 3} more
+          </span>
+        )}
+      </div>
+      <div className="mt-2 text-xs text-gray-500">
+        Posted {formatDate(job.createdAt)}
       </div>
     </div>
   );
@@ -238,28 +273,30 @@ export default function JobSearchPage() {
             </div>
             <button
               type="button"
-              className="rounded-full p-1 text-gray-400 hover:text-gray-500"
+              onClick={() => handleBookmark(job.id)}
+              className={`rounded-full p-1 ${
+                job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
+              }`}
             >
               <BookmarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <div className="mt-2">
-            <p className="text-sm text-gray-500">
-              {job.description}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {job.requirements.map((req, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
-                >
-                  {req}
-                </span>
-              ))}
-              <span className="ml-2 text-xs text-gray-500">
-                Posted {formatDate(job.createdAt)}
+          
+          <p className="text-sm text-gray-500">
+            {job.description}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {job.requirements.map((req, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800"
+              >
+                {req}
               </span>
-            </div>
+            ))}
+            <span className="ml-2 text-xs text-gray-500">
+              Posted {formatDate(job.createdAt)}
+            </span>
           </div>
         </div>
       </div>
