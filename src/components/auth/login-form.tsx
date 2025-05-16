@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as z from "zod";
+import Link from "next/link";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -174,6 +175,15 @@ export function LoginForm() {
           </svg>
           Sign in with Google
         </button>
+      </div>
+
+      <div className="text-center">
+        <p className="text-sm text-gray-600">
+          Not a member yet?{" "}
+          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            Create your account
+          </Link>
+        </p>
       </div>
     </div>
   );
