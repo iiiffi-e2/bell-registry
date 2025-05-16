@@ -1,49 +1,37 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from 'next/server'
 
-export default withAuth(
-  function middleware(req) {
-    const token = req.nextauth.token;
-    const isAuth = !!token;
-    const isAuthPage =
-      req.nextUrl.pathname.startsWith("/login") ||
-      req.nextUrl.pathname.startsWith("/register");
-
-    if (isAuthPage) {
-      if (isAuth) {
-        return NextResponse.redirect(new URL("/dashboard", req.url));
-      }
-      return null;
-    }
-
-    if (!isAuth) {
-      let from = req.nextUrl.pathname;
-      if (req.nextUrl.search) {
-        from += req.nextUrl.search;
-      }
-
-      return NextResponse.redirect(
-        new URL(`/login?from=${encodeURIComponent(from)}`, req.url)
-      );
-    }
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        const isAuthPage =
-          req.nextUrl.pathname.startsWith("/login") ||
-          req.nextUrl.pathname.startsWith("/register");
-        
-        if (isAuthPage) {
-          return true; // Always allow access to auth pages
-        }
-        
-        return !!token; // Require auth for other protected routes
+function middleware(request: NextRequest) {
+  // Make all API routes dynamic
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-middleware-cache', 'no-cache');
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
       },
-    },
+    });
   }
-);
+
+  return NextResponse.next();
+}
+
+export default withAuth(middleware, {
+  callbacks: {
+    authorized: ({ token }) => !!token,
+  },
+  pages: {
+    signIn: "/login",
+  },
+});
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
-}; 
+  matcher: [
+    '/api/:path*',
+    '/dashboard/:path*',
+    '/login',
+    '/register',
+  ],
+} 

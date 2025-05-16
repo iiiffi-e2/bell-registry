@@ -20,6 +20,27 @@ const nextConfig = {
       }
     ],
   },
+  // Disable static optimization for all routes
+  staticPageGenerationTimeout: 300,
+  output: 'standalone',
+  // Configure dynamic routes
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, must-revalidate',
+          },
+        ],
+      },
+    ];
+  },
+  // Disable static page generation
+  experimental: {
+    missingSuspenseWithCSRBailout: false,
+  },
 }
 
 module.exports = nextConfig 
