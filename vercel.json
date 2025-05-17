@@ -4,6 +4,17 @@
       "main": true
     }
   },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "prisma": {
+          "generate": true
+        }
+      }
+    }
+  ],
   "crons": [{
     "path": "/api/cron/cleanup",
     "schedule": "0 0 * * *"
