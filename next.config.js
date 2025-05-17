@@ -3,12 +3,6 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/uploads/**',
-      },
-      {
         protocol: 'https',
         hostname: process.env.NEXT_PUBLIC_DOMAIN || 'localhost',
         pathname: '/uploads/**',
@@ -20,14 +14,27 @@ const nextConfig = {
       }
     ],
   },
-  // Disable static optimization for all routes
-  staticPageGenerationTimeout: 300,
+  swcMinify: true,
   output: 'standalone',
-  // Configure dynamic routes
+  poweredByHeader: false,
+  compress: true,
   async headers() {
     return [
       {
         source: '/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, must-revalidate',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains'
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
         headers: [
           {
             key: 'Cache-Control',
@@ -37,7 +44,6 @@ const nextConfig = {
       },
     ];
   },
-  // Disable static page generation
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },

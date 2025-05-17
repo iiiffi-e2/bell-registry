@@ -5,9 +5,11 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { Resend } from 'resend';
 
-// Initialize Resend with logging
+// Initialize Resend
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-console.log('[EMAIL_SETUP] Initializing Resend with API key:', RESEND_API_KEY ? 'Key exists' : 'No key found');
+if (!RESEND_API_KEY) {
+  throw new Error('RESEND_API_KEY is not configured');
+}
 const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
