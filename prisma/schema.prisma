@@ -138,6 +138,8 @@ model Job {
   salary       Json?
   requirements String[]
   status       JobStatus        @default(ACTIVE)
+  jobType      String?         // Full-time, Part-time, Contract, Temporary
+  employmentType String?       // On-site, Remote, Hybrid
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   expiresAt    DateTime?

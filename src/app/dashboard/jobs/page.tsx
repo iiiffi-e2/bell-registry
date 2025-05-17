@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import * as React from "react";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -13,6 +14,29 @@ import {
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Label,
+} from "@/components/ui/label";
+import {
+  Button,
+} from "@/components/ui/button";
+import { FilterProvider, useFilters } from "@/contexts/FilterContext";
+import { FilterModal } from "@/components/FilterModal";
 
 interface Job {
   id: string;
@@ -54,24 +78,57 @@ const filters = {
     "Chicago, IL",
   ],
   jobTypes: ["Full-time", "Part-time", "Contract", "Temporary"],
+  employmentTypes: ["On-site", "Remote", "Hybrid"],
   salaryRanges: [
-    "Under $50,000",
-    "$50,000 - $100,000",
-    "$100,000 - $150,000",
-    "$150,000+",
+    { label: "Under $50,000", min: 0, max: 50000 },
+    { label: "$50,000 - $100,000", min: 50000, max: 100000 },
+    { label: "$100,000 - $150,000", min: 100000, max: 150000 },
+    { label: "$150,000 - $200,000", min: 150000, max: 200000 },
+    { label: "$200,000+", min: 200000, max: null },
+  ],
+  statuses: ["ACTIVE", "FILLED", "EXPIRED"],
+  sortOptions: [
+    { value: "recent", label: "Most Recent" },
+    { value: "salary-high", label: "Highest Salary" },
+    { value: "salary-low", label: "Lowest Salary" },
+    { value: "oldest", label: "Oldest" },
   ],
 };
 
 type ViewMode = "list" | "grid";
 
-export default function JobSearchPage() {
+const FilterButton = React.memo(({ 
+  children, 
+  isSelected, 
+  onClick 
+}: { 
+  children: React.ReactNode;
+  isSelected: boolean; 
+  onClick: (e: React.MouseEvent) => void;
+}) => (
+  <button
+    type="button"
+    onClick={(e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onClick(e);
+    }}
+    className={`px-3 py-1 rounded-full text-sm transition-colors ${
+      isSelected
+        ? "bg-blue-100 text-blue-800"
+        : "bg-gray-100 text-gray-800"
+    }`}
+  >
+    {children}
+  </button>
+));
+
+FilterButton.displayName = 'FilterButton';
+
+function JobSearchPageContent() {
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState({
-    location: [] as string[],
-    jobType: [] as string[],
-    salaryRange: [] as string[],
-  });
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +138,8 @@ export default function JobSearchPage() {
     page: 1,
     limit: 10,
   });
+
+  const { filters: selectedFilters } = useFilters();
 
   useEffect(() => {
     fetchJobs(1);
@@ -94,6 +153,21 @@ export default function JobSearchPage() {
       if (selectedFilters.location.length > 0) {
         searchParams.append("location", selectedFilters.location[0]);
       }
+      if (selectedFilters.jobType.length > 0) {
+        searchParams.append("jobType", selectedFilters.jobType[0]);
+      }
+      if (selectedFilters.employmentType.length > 0) {
+        searchParams.append("employmentType", selectedFilters.employmentType[0]);
+      }
+      if (selectedFilters.status.length > 0) {
+        searchParams.append("status", selectedFilters.status[0]);
+      }
+      if (selectedFilters.salaryRange.length > 0) {
+        const [min, max] = selectedFilters.salaryRange[0].split("-").map(Number);
+        if (min) searchParams.append("salaryMin", min.toString());
+        if (max) searchParams.append("salaryMax", max.toString());
+      }
+      searchParams.append("sortBy", selectedFilters.sortBy);
       searchParams.append("page", page.toString());
 
       const response = await fetch(`/api/jobs?${searchParams.toString()}`);
@@ -101,7 +175,6 @@ export default function JobSearchPage() {
       
       const data = await response.json();
       
-      // Fetch bookmark status for each job
       const jobsWithBookmarks = await Promise.all(
         data.jobs.map(async (job: Job) => {
           const bookmarkResponse = await fetch(`/api/jobs/${job.id}/bookmark`);
@@ -143,18 +216,6 @@ export default function JobSearchPage() {
     }
   };
 
-  const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[category];
-      return {
-        ...prev,
-        [category]: current.includes(value)
-          ? current.filter((item) => item !== value)
-          : [...current, value],
-      };
-    });
-  };
-
   const formatSalary = (salary: Job["salary"]) => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -176,10 +237,12 @@ export default function JobSearchPage() {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  const JobCard = ({ job }: { job: Job }) => (
-    <div className={`bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200 ${
-      job.featured ? 'border-2 border-blue-500 relative' : ''
-    }`}>
+  const JobCard = ({ job, isLoading }: { job: Job; isLoading?: boolean }) => (
+    <div 
+      className={`bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200 ${
+        job.featured ? 'border-2 border-blue-500 relative' : ''
+      } ${isLoading ? 'opacity-50' : ''}`}
+    >
       {job.featured && (
         <div className="absolute -top-3 left-4">
           <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-0.5 text-sm font-medium text-blue-800">
@@ -236,11 +299,11 @@ export default function JobSearchPage() {
     </div>
   );
 
-  const JobListItem = ({ job }: { job: Job }) => (
+  const JobListItem = ({ job, isLoading }: { job: Job; isLoading?: boolean }) => (
     <div
       className={`p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out ${
         job.featured ? 'bg-blue-50 relative pt-8' : ''
-      }`}
+      } ${isLoading ? 'opacity-50' : ''}`}
     >
       {job.featured && (
         <div className="absolute top-2 left-4">
@@ -334,7 +397,7 @@ export default function JobSearchPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-4">
               <div className="flex items-center rounded-lg border border-gray-200 p-1">
                 <button
                   onClick={() => setViewMode("list")}
@@ -359,6 +422,7 @@ export default function JobSearchPage() {
               </div>
               <button
                 type="button"
+                onClick={() => setIsFilterModalOpen(true)}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 <FunnelIcon
@@ -366,14 +430,19 @@ export default function JobSearchPage() {
                   aria-hidden="true"
                 />
                 Filters
+                {Object.values(selectedFilters).flat().length > 1 && (
+                  <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                    {Object.values(selectedFilters).flat().length - 1}
+                  </span>
+                )}
               </button>
             </div>
           </div>
 
           {/* Filter Tags */}
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(selectedFilters).map(([category, values]) =>
-              values.map((value) => (
+              Array.isArray(values) ? values.map((value) => (
                 <span
                   key={`${category}-${value}`}
                   className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
@@ -381,18 +450,15 @@ export default function JobSearchPage() {
                   {value}
                   <button
                     type="button"
-                    onClick={() =>
-                      toggleFilter(
-                        category as keyof typeof selectedFilters,
-                        value
-                      )
-                    }
+                    onClick={() => {
+                      // Handle removing individual filters
+                    }}
                     className="ml-1 inline-flex h-4 w-4 flex-shrink-0 rounded-full p-1 text-blue-700 hover:bg-blue-200 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
                     <span className="sr-only">Remove filter for {value}</span>×
                   </button>
                 </span>
-              ))
+              )) : null
             )}
           </div>
         </div>
@@ -425,7 +491,7 @@ export default function JobSearchPage() {
                             job.featured ? 'ring-2 ring-blue-500' : 'ring-1 ring-black ring-opacity-5'
                           }`}
                         >
-                          <JobListItem job={job} />
+                          <JobListItem job={job} isLoading={loading} />
                         </div>
                       ))}
                     </div>
@@ -434,7 +500,7 @@ export default function JobSearchPage() {
               ) : (
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {jobs.map((job) => (
-                    <JobCard key={job.id} job={job} />
+                    <JobCard key={job.id} job={job} isLoading={loading} />
                   ))}
                 </div>
               )}
@@ -492,7 +558,21 @@ export default function JobSearchPage() {
             </>
           )}
         </div>
+
+        <FilterModal
+          isOpen={isFilterModalOpen}
+          onClose={() => setIsFilterModalOpen(false)}
+          filters={filters}
+        />
       </div>
     </div>
+  );
+}
+
+export default function JobSearchPage() {
+  return (
+    <FilterProvider>
+      <JobSearchPageContent />
+    </FilterProvider>
   );
 } 

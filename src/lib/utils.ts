@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 function generateRandomCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -55,4 +57,8 @@ export async function generateProfileSlug(firstName: string | null, lastName: st
 export function generateProfileUrl(slug: string | null): string {
   if (!slug) return '';
   return `/professionals/${slug}`;
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 } 

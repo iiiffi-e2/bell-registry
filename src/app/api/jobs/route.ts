@@ -9,13 +9,28 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const location = searchParams.get('location')
     const searchQuery = searchParams.get('search')
+    const jobType = searchParams.get('jobType')
+    const salaryMin = searchParams.get('salaryMin')
+    const salaryMax = searchParams.get('salaryMax')
+    const status = searchParams.get('status')
+    const employmentType = searchParams.get('employmentType')
+    const sortBy = searchParams.get('sortBy') || 'recent'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
     const baseWhere: Prisma.JobWhereInput = {
-      status: JobStatus.ACTIVE,
+      status: status ? (status as JobStatus) : JobStatus.ACTIVE,
       ...(location ? { location } : {}),
+      ...(jobType ? { jobType } : {}),
+      ...(employmentType ? { employmentType } : {}),
+      ...(salaryMin || salaryMax ? {
+        salary: {
+          path: ['min'],
+          gte: salaryMin ? parseInt(salaryMin) : undefined,
+          lte: salaryMax ? parseInt(salaryMax) : undefined,
+        }
+      } : {}),
       ...(searchQuery
         ? {
             OR: [
@@ -41,6 +56,31 @@ export async function GET(request: Request) {
         : {}),
     }
 
+    // Determine sort order
+    let orderBy: Prisma.JobOrderByWithRelationInput = { createdAt: 'desc' }
+    switch (sortBy) {
+      case 'salary-high':
+        orderBy = { 
+          salary: {
+            path: ['max'],
+            order: 'desc'
+          }
+        }
+        break
+      case 'salary-low':
+        orderBy = { 
+          salary: {
+            path: ['min'],
+            order: 'asc'
+          }
+        }
+        break
+      case 'oldest':
+        orderBy = { createdAt: 'asc' }
+        break
+      // Default is 'recent' which is already set
+    }
+
     // Fetch featured jobs first (limited to 3)
     const featuredJobs = await prisma.job.findMany({
       where: {
@@ -48,7 +88,7 @@ export async function GET(request: Request) {
         featured: true,
       },
       take: 3,
-      orderBy: { createdAt: 'desc' },
+      orderBy,
       include: {
         employer: {
           select: {
@@ -73,7 +113,7 @@ export async function GET(request: Request) {
         },
         skip: page === 1 ? 0 : skip,
         take: page === 1 ? limit - featuredJobs.length : limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           employer: {
             select: {

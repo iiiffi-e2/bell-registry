@@ -490,8 +490,49 @@ async function main() {
     const email = `${prof.firstName.toLowerCase()}.${prof.lastName.toLowerCase()}@gmail.com`
     const profileSlug = `${prof.firstName.toLowerCase()}-${prof.lastName.toLowerCase()}`
     
-    const user = await prisma.user.create({
-      data: {
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {
+        firstName: prof.firstName,
+        lastName: prof.lastName,
+        role: UserRole.PROFESSIONAL,
+        profileSlug,
+        candidateProfile: {
+          upsert: {
+            create: {
+              title: prof.title,
+              bio: prof.bio,
+              location: prof.location,
+              yearsOfExperience: prof.yearsOfExperience,
+              skills: prof.skills,
+              certifications: prof.certifications,
+              preferredRole: prof.preferredRole,
+              workLocations: prof.workLocations,
+              seekingOpportunities: prof.seekingOpportunities,
+              openToRelocation: true,
+              payRangeMin: 80000,
+              payRangeMax: 200000,
+              payCurrency: 'USD',
+              whatImSeeking: 'Seeking a position that allows me to utilize my expertise while maintaining the highest standards of service.',
+              whyIEnjoyThisWork: 'I am passionate about delivering exceptional service and creating memorable experiences.',
+              whatSetsApartMe: 'My attention to detail, discretion, and commitment to excellence sets me apart.',
+              idealEnvironment: 'A professional environment that values excellence, teamwork, and continuous growth.'
+            },
+            update: {
+              title: prof.title,
+              bio: prof.bio,
+              location: prof.location,
+              yearsOfExperience: prof.yearsOfExperience,
+              skills: prof.skills,
+              certifications: prof.certifications,
+              preferredRole: prof.preferredRole,
+              workLocations: prof.workLocations,
+              seekingOpportunities: prof.seekingOpportunities,
+            }
+          }
+        }
+      },
+      create: {
         email,
         firstName: prof.firstName,
         lastName: prof.lastName,
@@ -520,7 +561,7 @@ async function main() {
         }
       }
     })
-    console.log(`Created professional profile for ${prof.firstName} ${prof.lastName}`)
+    console.log(`Created/updated professional profile for ${prof.firstName} ${prof.lastName}`)
   }
 
   // Create 50 jobs
@@ -561,6 +602,12 @@ async function main() {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + Math.floor(Math.random() * 28) + 14)
 
+    // Randomly select job type and employment type
+    const jobTypes = ["Full-time", "Part-time", "Contract", "Temporary"]
+    const employmentTypes = ["On-site", "Remote", "Hybrid"]
+    const jobType = jobTypes[Math.floor(Math.random() * jobTypes.length)]
+    const employmentType = employmentTypes[Math.floor(Math.random() * employmentTypes.length)]
+
     const job = await prisma.job.create({
       data: {
         employerId: employer.id,
@@ -571,7 +618,9 @@ async function main() {
         salary,
         featured,
         status: JobStatus.ACTIVE,
-        expiresAt
+        expiresAt,
+        jobType,
+        employmentType,
       }
     })
     jobs.push(job)
