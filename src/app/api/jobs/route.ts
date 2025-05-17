@@ -61,18 +61,12 @@ export async function GET(request: Request) {
     switch (sortBy) {
       case 'salary-high':
         orderBy = { 
-          salary: {
-            path: ['max'],
-            order: 'desc'
-          }
+          salary: 'desc'
         }
         break
       case 'salary-low':
         orderBy = { 
-          salary: {
-            path: ['min'],
-            order: 'asc'
-          }
+          salary: 'asc'
         }
         break
       case 'oldest':
