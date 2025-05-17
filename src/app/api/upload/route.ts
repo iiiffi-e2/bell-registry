@@ -3,14 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 import { prisma } from "@/lib/prisma";
-import AWS from 'aws-sdk';
-
-// Configure AWS
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
+import { storageProvider } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,15 +35,8 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to S3 - removed ACL parameter since bucket has ACLs disabled
-    const uploadResult = await s3.upload({
-      Bucket: process.env.AWS_BUCKET_NAME!,
-      Key: `uploads/${fileName}`,
-      Body: buffer,
-      ContentType: file.type,
-    }).promise();
-
-    const url = uploadResult.Location;
+    // Upload file using storage provider
+    const url = await storageProvider.uploadFile(buffer, fileName, file.type);
 
     // Update both User.image and CandidateProfile.photoUrl
     await prisma.$transaction([

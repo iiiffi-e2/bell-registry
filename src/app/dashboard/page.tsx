@@ -85,7 +85,7 @@ export default function DashboardPage() {
   const { profile } = useProfile();
   
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
-  const isProfileIncomplete = isProfessional && (!profile?.bio || !profile?.whatImSeeking);
+  const isProfileIncomplete = isProfessional && !profile?.bio;
 
   if (!isProfessional) {
     console.log("User is not a professional, showing employer dashboard");
