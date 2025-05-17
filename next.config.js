@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    domains: ['bell-registry-bucket.s3.us-east-2.amazonaws.com'],
     remotePatterns: [
       {
         protocol: 'https',
