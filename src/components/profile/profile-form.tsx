@@ -244,15 +244,17 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         body: JSON.stringify({ currentBio }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to improve bio");
+        throw new Error(data.details || data.error || "Failed to improve bio");
       }
 
-      const data = await response.json();
       setImprovedBio(data.improvedBio);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error improving bio:", error);
-      setShowImprovedBioModal(false);
+      // Show error in modal instead of closing it
+      setImprovedBio(`Error: ${error.message || "Failed to improve bio. Please try again later."}`);
     } finally {
       setIsImprovingBio(false);
     }
