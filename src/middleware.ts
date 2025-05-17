@@ -1,13 +1,14 @@
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from 'next/server'
+import type { NextRequest } from 'next/server';
+import { getToken } from "next-auth/jwt";
 
-function middleware(request: NextRequest) {
-  // Make all API routes dynamic
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Add dynamic header for API routes
+  if (pathname.startsWith('/api/')) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-middleware-cache', 'no-cache');
-    
     return NextResponse.next({
       request: {
         headers: requestHeaders,
@@ -15,23 +16,28 @@ function middleware(request: NextRequest) {
     });
   }
 
+  // Check for authentication
+  const token = await getToken({ req: request });
+  if (!token) {
+    const url = new URL('/login', request.url);
+    url.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(url);
+  }
+
   return NextResponse.next();
 }
 
-export default withAuth(middleware, {
-  callbacks: {
-    authorized: ({ token }) => !!token,
-  },
-  pages: {
-    signIn: "/login",
-  },
-});
-
+// Only match specific protected routes
 export const config = {
   matcher: [
-    '/api/:path*',
+    /*
+     * Match all protected routes:
+     * - /dashboard/*
+     * - /profile/*
+     * - /api/* (except /api/auth/*)
+     */
     '/dashboard/:path*',
-    '/login',
-    '/register',
-  ],
+    '/profile/:path*',
+    '/api/((?!auth).*)',
+  ]
 } 
