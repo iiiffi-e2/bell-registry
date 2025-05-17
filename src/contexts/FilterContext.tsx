@@ -38,21 +38,23 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const toggleFilter = (category: keyof FilterState, value: string) => {
     setTempFilters(prev => {
       const current = prev[category];
-      if (Array.isArray(current)) {
-        return {
-          ...prev,
-          [category]: current.includes(value)
+      const newTempFilters = {
+        ...prev,
+        [category]: Array.isArray(current)
+          ? current.includes(value)
             ? current.filter((item) => item !== value)
-            : [...current, value],
-        };
+            : [...current, value]
+          : category === 'sortBy'
+            ? value
+            : current
+      };
+      
+      // When removing a filter, update both temp and actual filters
+      if (Array.isArray(current) && current.includes(value)) {
+        setFilters(newTempFilters);
       }
-      if (category === 'sortBy') {
-        return {
-          ...prev,
-          sortBy: value,
-        };
-      }
-      return prev;
+      
+      return newTempFilters;
     });
   };
 

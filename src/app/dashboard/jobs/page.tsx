@@ -139,7 +139,7 @@ function JobSearchPageContent() {
     limit: 10,
   });
 
-  const { filters: selectedFilters } = useFilters();
+  const { filters: selectedFilters, toggleFilter } = useFilters();
 
   useEffect(() => {
     fetchJobs(1);
@@ -442,7 +442,7 @@ function JobSearchPageContent() {
           {/* Filter Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
             {Object.entries(selectedFilters).map(([category, values]) =>
-              Array.isArray(values) ? values.map((value) => (
+              Array.isArray(values) && values.length > 0 ? values.map((value) => (
                 <span
                   key={`${category}-${value}`}
                   className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
@@ -450,12 +450,16 @@ function JobSearchPageContent() {
                   {value}
                   <button
                     type="button"
-                    onClick={() => {
-                      // Handle removing individual filters
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const filterCategory = category as keyof typeof selectedFilters;
+                      toggleFilter(filterCategory, value);
                     }}
-                    className="ml-1 inline-flex h-4 w-4 flex-shrink-0 rounded-full p-1 text-blue-700 hover:bg-blue-200 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-700 hover:bg-blue-200 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
-                    <span className="sr-only">Remove filter for {value}</span>×
+                    <span className="sr-only">Remove filter for {value}</span>
+                    <span className="leading-none relative -top-[1px]">×</span>
                   </button>
                 </span>
               )) : null
