@@ -42,13 +42,12 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to S3
+    // Upload to S3 - removed ACL parameter since bucket has ACLs disabled
     const uploadResult = await s3.upload({
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: `uploads/${fileName}`,
       Body: buffer,
       ContentType: file.type,
-      ACL: 'public-read',
     }).promise();
 
     const url = uploadResult.Location;
