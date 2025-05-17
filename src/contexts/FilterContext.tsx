@@ -38,23 +38,22 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   const toggleFilter = (category: keyof FilterState, value: string) => {
     setTempFilters(prev => {
       const current = prev[category];
-      const newTempFilters = {
-        ...prev,
-        [category]: Array.isArray(current)
-          ? current.includes(value)
+      if (Array.isArray(current)) {
+        const newFilters = {
+          ...prev,
+          [category]: current.includes(value)
             ? current.filter((item) => item !== value)
             : [...current, value]
-          : category === 'sortBy'
-            ? value
-            : current
-      };
-      
-      // When removing a filter, update both temp and actual filters
-      if (Array.isArray(current) && current.includes(value)) {
-        setFilters(newTempFilters);
+        };
+        return newFilters;
       }
-      
-      return newTempFilters;
+      if (category === 'sortBy') {
+        return {
+          ...prev,
+          sortBy: value
+        };
+      }
+      return prev;
     });
   };
 
@@ -63,7 +62,9 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetFilters = () => {
-    setTempFilters(defaultFilters);
+    const newFilters = { ...defaultFilters };
+    setTempFilters(newFilters);
+    setFilters(newFilters);
   };
 
   const setInitialFilters = (newFilters: FilterState) => {

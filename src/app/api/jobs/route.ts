@@ -19,11 +19,28 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
+    console.log('API received location:', location)
+
     const baseWhere: Prisma.JobWhereInput = {
       status: status ? (status as JobStatus) : JobStatus.ACTIVE,
-      ...(location ? { location } : {}),
-      ...(jobType ? { jobType } : {}),
-      ...(employmentType ? { employmentType } : {}),
+      ...(location ? {
+        OR: location.split(',').map(loc => ({
+          location: {
+            contains: loc.trim(),
+            mode: Prisma.QueryMode.insensitive
+          }
+        }))
+      } : {}),
+      ...(jobType ? { 
+        jobType: {
+          in: jobType.split(',')
+        }
+      } : {}),
+      ...(employmentType ? { 
+        employmentType: {
+          in: employmentType.split(',')
+        }
+      } : {}),
       ...(salaryMin || salaryMax ? {
         salary: {
           path: ['min'],
@@ -55,6 +72,9 @@ export async function GET(request: Request) {
           }
         : {}),
     }
+
+    // Log the query conditions
+    console.log('Query conditions:', baseWhere)
 
     // Determine sort order
     let orderBy: Prisma.JobOrderByWithRelationInput = { createdAt: 'desc' }
@@ -98,6 +118,9 @@ export async function GET(request: Request) {
       }
     })
 
+    // Log the number of featured jobs found
+    console.log('Featured jobs found:', featuredJobs.length)
+
     // Fetch regular jobs, excluding featured ones if we're on the first page
     const [jobs, total] = await Promise.all([
       prisma.job.findMany({
@@ -129,6 +152,9 @@ export async function GET(request: Request) {
         }
       })
     ])
+
+    // Log the number of regular jobs found
+    console.log('Regular jobs found:', jobs.length)
 
     // Combine featured and regular jobs on the first page
     const combinedJobs = page === 1 ? [...featuredJobs, ...jobs] : jobs

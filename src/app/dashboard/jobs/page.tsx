@@ -149,18 +149,27 @@ function JobSearchPageContent() {
     try {
       setLoading(true);
       const searchParams = new URLSearchParams();
+      
+      console.log('Current filters:', selectedFilters);
+      
       if (searchTerm) searchParams.append("search", searchTerm);
+      
+      // Handle location filters
       if (selectedFilters.location.length > 0) {
-        searchParams.append("location", selectedFilters.location[0]);
+        const locationParam = selectedFilters.location.join(',');
+        console.log('Sending locations:', locationParam);
+        searchParams.append("location", locationParam);
       }
+      
+      // Handle other filters
       if (selectedFilters.jobType.length > 0) {
-        searchParams.append("jobType", selectedFilters.jobType[0]);
+        searchParams.append("jobType", selectedFilters.jobType.join(','));
       }
       if (selectedFilters.employmentType.length > 0) {
-        searchParams.append("employmentType", selectedFilters.employmentType[0]);
+        searchParams.append("employmentType", selectedFilters.employmentType.join(','));
       }
       if (selectedFilters.status.length > 0) {
-        searchParams.append("status", selectedFilters.status[0]);
+        searchParams.append("status", selectedFilters.status.join(','));
       }
       if (selectedFilters.salaryRange.length > 0) {
         const [min, max] = selectedFilters.salaryRange[0].split("-").map(Number);
@@ -170,10 +179,14 @@ function JobSearchPageContent() {
       searchParams.append("sortBy", selectedFilters.sortBy);
       searchParams.append("page", page.toString());
 
-      const response = await fetch(`/api/jobs?${searchParams.toString()}`);
+      const queryString = searchParams.toString();
+      console.log('Fetching jobs with params:', queryString);
+
+      const response = await fetch(`/api/jobs?${queryString}`);
       if (!response.ok) throw new Error("Failed to fetch jobs");
       
       const data = await response.json();
+      console.log('Jobs response:', data);
       
       const jobsWithBookmarks = await Promise.all(
         data.jobs.map(async (job: Job) => {
