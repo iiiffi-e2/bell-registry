@@ -8,6 +8,9 @@ import {
   DocumentCheckIcon,
   UserCircleIcon,
   ArrowRightIcon,
+  MapPinIcon,
+  CalendarIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useProfile } from "@/providers/profile-provider";
@@ -59,6 +62,7 @@ const recentApplications = [
     status: "Under Review",
     statusColor: "bg-yellow-100 text-yellow-800",
     date: "2024-03-10",
+    salary: "$120,000 - $180,000",
   },
   {
     id: 2,
@@ -68,6 +72,7 @@ const recentApplications = [
     status: "Interview",
     statusColor: "bg-blue-100 text-blue-800",
     date: "2024-03-08",
+    salary: "$90,000 - $140,000",
   },
   {
     id: 3,
@@ -77,6 +82,37 @@ const recentApplications = [
     status: "Applied",
     statusColor: "bg-gray-100 text-gray-800",
     date: "2024-03-05",
+    salary: "$85,000 - $130,000",
+  },
+];
+
+const recommendedJobs = [
+  {
+    id: 1,
+    title: "Executive Housekeeper",
+    company: "Luxury Estates International",
+    location: "Los Angeles, CA",
+    salary: "$80,000 - $120,000",
+    type: "Full-time",
+    posted: "2 days ago",
+  },
+  {
+    id: 2,
+    title: "Personal Chef",
+    company: "Private Staff Group",
+    location: "San Francisco, CA",
+    salary: "$100,000 - $150,000",
+    type: "Full-time",
+    posted: "3 days ago",
+  },
+  {
+    id: 3,
+    title: "Estate Manager",
+    company: "Elite Domestic Agency",
+    location: "Greenwich, CT",
+    salary: "$150,000 - $200,000",
+    type: "Full-time",
+    posted: "1 week ago",
   },
 ];
 
@@ -88,163 +124,169 @@ export default function DashboardPage() {
   const isProfileIncomplete = isProfessional && !profile?.bio;
 
   if (!isProfessional) {
-    console.log("User is not a professional, showing employer dashboard");
     return <EmployerDashboard />;
   }
 
   return (
-    <div className="py-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, {session?.user?.name?.split(' ')[0] || 'Professional'}
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Here's what's happening with your job search
+          </p>
+        </div>
+
+        {/* Profile Completion Alert */}
         {isProfileIncomplete && (
-          <div className="rounded-md bg-blue-50 p-4 mb-6">
-            <div className="flex">
+          <div className="mb-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+            <div className="flex items-start">
               <div className="flex-shrink-0">
-                <UserCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                <UserCircleIcon className="h-6 w-6" />
               </div>
-              <div className="ml-3 flex-1 md:flex md:justify-between">
-                <p className="text-sm text-blue-700">
-                  Complete your profile to help employers find you and increase your chances of finding the perfect job.
+              <div className="ml-3 flex-1">
+                <h3 className="text-lg font-semibold">Complete Your Profile</h3>
+                <p className="mt-1">
+                  A complete profile helps employers find you and increases your chances of finding the perfect job.
                 </p>
-                <p className="mt-3 text-sm md:mt-0 md:ml-6">
-                  <Link
-                    href="/dashboard/profile/edit"
-                    className="whitespace-nowrap font-medium text-blue-700 hover:text-blue-600 inline-flex items-center"
-                  >
-                    Complete Profile
-                    <ArrowRightIcon className="ml-1 h-4 w-4" />
-                  </Link>
-                </p>
+                <Link
+                  href="/dashboard/profile/edit"
+                  className="mt-4 inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium text-sm hover:bg-blue-50 transition-colors"
+                >
+                  Complete Profile
+                  <ArrowRightIcon className="ml-2 h-4 w-4" />
+                </Link>
               </div>
             </div>
           </div>
         )}
-        <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-      </div>
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-        {/* Stats */}
-        <div className="mt-8">
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((item) => (
-              <div
-                key={item.name}
-                className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-12 shadow sm:px-6 sm:pt-6"
-              >
-                <dt>
-                  <div className="absolute rounded-md bg-blue-500 p-3">
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          {stats.map((item) => (
+            <div
+              key={item.name}
+              className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
                     <item.icon
-                      className="h-6 w-6 text-white"
+                      className="h-6 w-6 text-gray-400"
                       aria-hidden="true"
                     />
                   </div>
-                  <p className="ml-16 truncate text-sm font-medium text-gray-500">
-                    {item.name}
-                  </p>
-                </dt>
-                <dd className="ml-16 flex items-baseline pb-6 sm:pb-7">
-                  <p className="text-2xl font-semibold text-gray-900">
-                    {item.stat}
-                  </p>
-                  <p
-                    className={`ml-2 flex items-baseline text-sm font-semibold ${
-                      item.changeType === "positive"
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {item.change}
-                  </p>
-                </dd>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-500 truncate">
+                      {item.name}
+                    </p>
+                    <div className="flex items-baseline">
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {item.stat}
+                      </p>
+                      <p
+                        className={`ml-2 flex items-baseline text-sm font-semibold ${
+                          item.changeType === "positive"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {item.change}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        {/* Recent Applications */}
-        <div className="mt-8">
-          <div className="sm:flex sm:items-center">
-            <div className="sm:flex-auto">
-              <h2 className="text-xl font-semibold text-gray-900">
-                Recent Applications
-              </h2>
-              <p className="mt-2 text-sm text-gray-700">
-                A list of your most recent job applications and their current
-                status.
-              </p>
-            </div>
-            <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-              <Link
-                href="/dashboard/jobs"
-                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:w-auto"
-              >
-                Browse Jobs
-              </Link>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Applications */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
+                  <Link
+                    href="/dashboard/applications"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    View all
+                  </Link>
+                </div>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {recentApplications.map((application) => (
+                  <div key={application.id} className="p-6 hover:bg-gray-50 transition-colors">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-900">
+                          {application.position}
+                        </h3>
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <BuildingOfficeIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                          {application.company}
+                        </div>
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                          {application.location}
+                        </div>
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <CalendarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                          Applied on {new Date(application.date).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <span
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}
+                      >
+                        {application.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="mt-8 flex flex-col">
-            <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-              <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                  <table className="min-w-full divide-y divide-gray-300">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th
-                          scope="col"
-                          className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                        >
-                          Position
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          Company
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          Location
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          Status
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200 bg-white">
-                      {recentApplications.map((application) => (
-                        <tr key={application.id}>
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {application.position}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {application.company}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {application.location}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm">
-                            <span
-                              className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${application.statusColor}`}
-                            >
-                              {application.status}
-                            </span>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {application.date}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+
+          {/* Recommended Jobs */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+              <div className="border-b border-gray-200 px-6 py-4">
+                <h2 className="text-lg font-semibold text-gray-900">Recommended Jobs</h2>
+              </div>
+              <div className="divide-y divide-gray-100">
+                {recommendedJobs.map((job) => (
+                  <div key={job.id} className="p-6 hover:bg-gray-50 transition-colors">
+                    <h3 className="text-base font-medium text-gray-900">
+                      {job.title}
+                    </h3>
+                    <div className="mt-1 flex items-center text-sm text-gray-500">
+                      <BuildingOfficeIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                      {job.company}
+                    </div>
+                    <div className="mt-1 flex items-center text-sm text-gray-500">
+                      <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                      {job.location}
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {job.type}
+                      </span>
+                      <span className="text-sm text-gray-500">{job.posted}</span>
+                    </div>
+                  </div>
+                ))}
+                <div className="p-6">
+                  <Link
+                    href="/dashboard/jobs"
+                    className="block w-full text-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                  >
+                    View More Jobs
+                  </Link>
                 </div>
               </div>
             </div>
@@ -262,8 +304,7 @@ function EmployerDashboard() {
         <h1 className="text-2xl font-semibold text-gray-900">
           Employer Dashboard
         </h1>
-        {/* Add employer-specific dashboard content here */}
       </div>
     </div>
   );
-} 
+}
