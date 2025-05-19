@@ -11,6 +11,8 @@ import {
   MapPinIcon,
   CalendarIcon,
   BuildingOfficeIcon,
+  BookmarkIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useProfile } from "@/providers/profile-provider";
@@ -24,31 +26,31 @@ const ROLES = {
 
 const stats = [
   {
-    name: "Profile Views",
-    stat: "245",
-    icon: EyeIcon,
-    change: "+4.75%",
+    name: "Active Applications",
+    stat: "12",
+    icon: DocumentCheckIcon,
+    change: "2 new this week",
     changeType: "positive",
   },
   {
-    name: "Applications",
-    stat: "12",
-    icon: DocumentCheckIcon,
-    change: "+54.02%",
+    name: "Interviews Scheduled",
+    stat: "3",
+    icon: CalendarIcon,
+    change: "1 new this week",
     changeType: "positive",
   },
   {
     name: "Saved Jobs",
-    stat: "23",
-    icon: BriefcaseIcon,
-    change: "+12.05%",
-    changeType: "positive",
+    stat: "8",
+    icon: BookmarkIcon,
+    change: "No change",
+    changeType: "neutral",
   },
   {
-    name: "Interview Invites",
-    stat: "3",
-    icon: ChartBarIcon,
-    change: "+54.02%",
+    name: "Profile Views",
+    stat: "24",
+    icon: EyeIcon,
+    change: "40% increase",
     changeType: "positive",
   },
 ];
@@ -86,34 +88,41 @@ const recentApplications = [
   },
 ];
 
-const recommendedJobs = [
+const upcomingInterviews = [
   {
     id: 1,
-    title: "Executive Housekeeper",
-    company: "Luxury Estates International",
-    location: "Los Angeles, CA",
-    salary: "$80,000 - $120,000",
-    type: "Full-time",
-    posted: "2 days ago",
+    employer: "Rothschild Estate",
+    date: "May 20, 2023",
+    time: "10:00 AM",
   },
   {
     id: 2,
-    title: "Personal Chef",
-    company: "Private Staff Group",
-    location: "San Francisco, CA",
-    salary: "$100,000 - $150,000",
-    type: "Full-time",
-    posted: "3 days ago",
+    employer: "Wellington Family",
+    date: "May 25, 2023",
+    time: "2:30 PM",
+  },
+];
+
+const recommendedJobs = [
+  {
+    id: 1,
+    title: "Executive Chef",
+    company: "Morgan Estate",
+    location: "Aspen, CO",
   },
   {
-    id: 3,
-    title: "Estate Manager",
-    company: "Elite Domestic Agency",
-    location: "Greenwich, CT",
-    salary: "$150,000 - $200,000",
-    type: "Full-time",
-    posted: "1 week ago",
+    id: 2,
+    title: "Private Chef",
+    company: "Johnson Family",
+    location: "Malibu, CA",
   },
+];
+
+const quickActions = [
+  { name: "New Application", icon: DocumentCheckIcon },
+  { name: "Update Profile", icon: UserCircleIcon },
+  { name: "Resume", icon: DocumentTextIcon },
+  { name: "Saved Jobs", icon: BookmarkIcon },
 ];
 
 export default function DashboardPage() {
@@ -130,164 +139,211 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {session?.user?.name?.split(' ')[0] || 'Professional'}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Here's what's happening with your job search
-          </p>
-        </div>
+        <div className="flex flex-col gap-8">
+          {/* Welcome Section */}
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Welcome back, {session?.user?.name?.split(' ')[0] || 'Professional'}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Here's what's happening with your job search
+            </p>
+          </div>
 
-        {/* Profile Completion Alert */}
-        {isProfileIncomplete && (
-          <div className="mb-8 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <UserCircleIcon className="h-6 w-6" />
-              </div>
-              <div className="ml-3 flex-1">
-                <h3 className="text-lg font-semibold">Complete Your Profile</h3>
-                <p className="mt-1">
-                  A complete profile helps employers find you and increases your chances of finding the perfect job.
-                </p>
-                <Link
-                  href="/dashboard/profile/edit"
-                  className="mt-4 inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium text-sm hover:bg-blue-50 transition-colors"
-                >
-                  Complete Profile
-                  <ArrowRightIcon className="ml-2 h-4 w-4" />
-                </Link>
+          {/* Profile Completion Alert */}
+          {isProfileIncomplete && (
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <UserCircleIcon className="h-6 w-6" />
+                </div>
+                <div className="ml-3 flex-1">
+                  <h3 className="text-lg font-semibold">Complete Your Profile</h3>
+                  <p className="mt-1">
+                    A complete profile helps employers find you and increases your chances of finding the perfect job.
+                  </p>
+                  <Link
+                    href="/dashboard/profile/edit"
+                    className="mt-4 inline-flex items-center px-4 py-2 bg-white text-blue-600 rounded-lg font-medium text-sm hover:bg-blue-50 transition-colors"
+                  >
+                    Complete Profile
+                    <ArrowRightIcon className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-          {stats.map((item) => (
-            <div
-              key={item.name}
-              className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <item.icon
-                      className="h-6 w-6 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-500 truncate">
-                      {item.name}
-                    </p>
-                    <div className="flex items-baseline">
-                      <p className="text-2xl font-semibold text-gray-900">
-                        {item.stat}
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            {stats.map((item) => (
+              <div
+                key={item.name}
+                className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="p-5">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <item.icon
+                        className="h-6 w-6 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm font-medium text-gray-500 truncate">
+                        {item.name}
                       </p>
-                      <p
-                        className={`ml-2 flex items-baseline text-sm font-semibold ${
-                          item.changeType === "positive"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
-                      >
-                        {item.change}
-                      </p>
+                      <div className="flex items-baseline">
+                        <p className="text-2xl font-semibold text-gray-900">
+                          {item.stat}
+                        </p>
+                        <p
+                          className={`ml-2 flex items-baseline text-sm font-semibold ${
+                            item.changeType === "positive"
+                              ? "text-green-600"
+                              : item.changeType === "negative"
+                              ? "text-red-600"
+                              : "text-gray-400"
+                          }`}
+                        >
+                          {item.change}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Recent Applications */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-              <div className="border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
-                  <Link
-                    href="/dashboard/applications"
-                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
-                  >
-                    View all
-                  </Link>
-                </div>
-              </div>
-              <div className="divide-y divide-gray-100">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
+              <Link
+                href="/dashboard/applications"
+                className="text-sm font-medium text-blue-600 hover:text-blue-500"
+              >
+                View all
+              </Link>
+            </div>
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Position</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employer</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied Date</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-100">
                 {recentApplications.map((application) => (
-                  <div key={application.id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-lg font-medium text-gray-900">
-                          {application.position}
-                        </h3>
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                          <BuildingOfficeIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                          {application.company}
-                        </div>
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                          <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                          {application.location}
-                        </div>
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                          <CalendarIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                          Applied on {new Date(application.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}
-                      >
+                  <tr key={application.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900">{application.position}</div>
+                      <div className="text-sm text-gray-500">Full-time</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{application.company}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{application.location}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{new Date(application.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}>
                         {application.status}
                       </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <Link href="#" className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Widgets Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Upcoming Interviews */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Upcoming Interviews</h3>
+                <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
+              </div>
+              <div className="space-y-4">
+                {upcomingInterviews.map((interview) => (
+                  <div key={interview.id} className="flex items-center">
+                    <CalendarIcon className="h-6 w-6 text-blue-400 mr-3" />
+                    <div>
+                      <div className="font-medium text-gray-900">{interview.employer}</div>
+                      <div className="text-sm text-gray-500">{interview.date} • {interview.time}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
-          {/* Recommended Jobs */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
-              <div className="border-b border-gray-200 px-6 py-4">
-                <h2 className="text-lg font-semibold text-gray-900">Recommended Jobs</h2>
+            {/* Recommended Jobs */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Recommended Jobs</h3>
+                <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="space-y-4">
                 {recommendedJobs.map((job) => (
-                  <div key={job.id} className="p-6 hover:bg-gray-50 transition-colors">
-                    <h3 className="text-base font-medium text-gray-900">
-                      {job.title}
-                    </h3>
-                    <div className="mt-1 flex items-center text-sm text-gray-500">
-                      <BuildingOfficeIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                      {job.company}
-                    </div>
-                    <div className="mt-1 flex items-center text-sm text-gray-500">
-                      <MapPinIcon className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                      {job.location}
-                    </div>
-                    <div className="mt-2 flex items-center justify-between">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {job.type}
-                      </span>
-                      <span className="text-sm text-gray-500">{job.posted}</span>
+                  <div key={job.id} className="flex items-center">
+                    <BriefcaseIcon className="h-6 w-6 text-blue-400 mr-3" />
+                    <div>
+                      <div className="font-medium text-gray-900">{job.title}</div>
+                      <div className="text-sm text-gray-500">{job.company} • {job.location}</div>
                     </div>
                   </div>
                 ))}
-                <div className="p-6">
-                  <Link
-                    href="/dashboard/jobs"
-                    className="block w-full text-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    View More Jobs
-                  </Link>
-                </div>
+              </div>
+            </div>
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 gap-4 flex-1">
+                {quickActions.map((action) => {
+                  if (action.name === "Update Profile") {
+                    return (
+                      <Link
+                        key={action.name}
+                        href="/dashboard/profile/edit"
+                        className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        <action.icon className="h-6 w-6 mb-2 text-blue-400" />
+                        <span className="font-medium">{action.name}</span>
+                      </Link>
+                    );
+                  }
+                  if (action.name === "Saved Jobs") {
+                    return (
+                      <Link
+                        key={action.name}
+                        href="/dashboard/saved-jobs"
+                        className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        <action.icon className="h-6 w-6 mb-2 text-blue-400" />
+                        <span className="font-medium">{action.name}</span>
+                      </Link>
+                    );
+                  }
+                  return (
+                    <button
+                      key={action.name}
+                      className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                    >
+                      <action.icon className="h-6 w-6 mb-2 text-blue-400" />
+                      <span className="font-medium">{action.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>

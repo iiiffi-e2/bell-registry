@@ -18,6 +18,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 import { useProfile } from "@/providers/profile-provider";
+import React from "react";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -45,253 +46,203 @@ export default function DashboardLayout({
       current: pathname === "/dashboard",
     },
     {
-      name: "Browse Professionals",
+      name: "Professionals",
       href: "/browse-professionals",
       icon: UserCircleIcon,
       current: pathname === "/browse-professionals",
     },
-    ...(isProfessional
-      ? [
-          {
-            name: "My Profile",
-            href: "/dashboard/profile",
-            icon: UserCircleIcon,
-            current: pathname === "/dashboard/profile",
-          },
-          {
-            name: "Job Search",
-            href: "/dashboard/jobs",
-            icon: BriefcaseIcon,
-            current: pathname === "/dashboard/jobs",
-          },
-          {
-            name: "Saved Jobs",
-            href: "/dashboard/saved-jobs",
-            icon: BookmarkIcon,
-            current: pathname === "/dashboard/saved-jobs",
-          },
-        ]
-      : [
-          {
-            name: "Post Job",
-            href: "/dashboard/post-job",
-            icon: DocumentTextIcon,
-            current: pathname === "/dashboard/post-job",
-          },
-        ]),
     {
-      name: "Messages",
-      href: "/dashboard/messages",
-      icon: ChatBubbleLeftRightIcon,
-      current: pathname === "/dashboard/messages",
+      name: "Job Listings",
+      href: "/dashboard/jobs",
+      icon: BriefcaseIcon,
+      current: pathname === "/dashboard/jobs",
+    },
+    {
+      name: "Applications",
+      href: "/dashboard/applications",
+      icon: DocumentTextIcon,
+      current: pathname === "/dashboard/applications",
+    },
+    {
+      name: "Profile",
+      href: "/dashboard/profile",
+      icon: UserCircleIcon,
+      current: pathname === "/dashboard/profile",
+    },
+    {
+      name: "Notifications",
+      href: "/dashboard/notifications",
+      icon: BellIcon,
+      current: pathname === "/dashboard/notifications",
     },
   ];
 
+  const secondaryNav = [
+    {
+      name: "Help & Support",
+      href: "/dashboard/help",
+      icon: ChatBubbleLeftRightIcon,
+    },
+    {
+      name: "Sign Out",
+      href: "#",
+      icon: XMarkIcon,
+      action: () => signOut(),
+    },
+  ];
+
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
+
   return (
-    <div>
-      <Disclosure as="nav" className="bg-white shadow">
-        {({ open }) => (
-          <>
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-              <div className="flex h-16 justify-between">
-                <div className="flex">
-                  <div className="flex flex-shrink-0 items-center">
-                    <Link href="/dashboard">
-                      <span className="text-xl font-bold text-blue-600">
-                        BellRegistry
-                      </span>
-                    </Link>
-                  </div>
-                  <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    {navigation.map((item) => (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className={
+        `fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:static lg:inset-0`
+      }>
+        <div className="flex h-16 items-center px-6 border-b border-gray-100">
+          <Link href="/dashboard" className="block max-w-[175px]">
+            <Image
+              src="/images/brand/logo-full.png"
+              alt="The Bell Registry"
+              width={175}
+              height={47}
+              priority
+              className="h-auto w-full"
+            />
+          </Link>
+        </div>
+        <nav className="flex-1 px-4 py-6 space-y-2">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
+                ${item.current ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+              `}
+              onClick={() => setSidebarOpen(false)}
+            >
+              <item.icon className={`h-5 w-5 mr-3 ${item.current ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-auto px-4 py-6 space-y-2">
+          {secondaryNav.map((item) => (
+            item.name === 'Sign Out' ? (
+              <button
+                key={item.name}
+                onClick={item.action}
+                className="flex w-full items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors"
+              >
+                <item.icon className="h-5 w-5 mr-3 text-gray-400 group-hover:text-red-600" />
+                {item.name}
+              </button>
+            ) : (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600" />
+                {item.name}
+              </Link>
+            )
+          ))}
+        </div>
+      </div>
+      {/* Overlay for mobile */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-30 bg-black bg-opacity-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+      {/* Hamburger button */}
+      <button
+        className="fixed top-4 left-4 z-50 p-2 rounded-md text-gray-500 bg-white shadow lg:hidden"
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        aria-label="Open sidebar"
+      >
+        {sidebarOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
+      </button>
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Top bar */}
+        <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-100">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center space-x-4">
+            <button
+              type="button"
+              className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <span className="sr-only">View notifications</span>
+              <BellIcon className="h-6 w-6" aria-hidden="true" />
+            </button>
+            {/* Profile dropdown */}
+            <Menu as="div" className="relative ml-3">
+              <div>
+                <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  <span className="sr-only">Open user menu</span>
+                  {imageUrl ? (
+                    <Image
+                      className="h-8 w-8 rounded-full"
+                      src={imageUrl}
+                      alt=""
+                      width={32}
+                      height={32}
+                    />
+                  ) : (
+                    <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                  )}
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Item>
+                    {({ active }) => (
                       <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                          item.current
-                            ? "border-b-2 border-blue-500 text-gray-900"
-                            : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                        }`}
+                        href="/dashboard/profile"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
                       >
-                        <item.icon className="h-5 w-5 mr-1" />
-                        {item.name}
+                        Your Profile
                       </Link>
-                    ))}
-                  </div>
-                </div>
-                <div className="hidden sm:ml-6 sm:flex sm:items-center">
-                  <button
-                    type="button"
-                    className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
-
-                  {/* Profile dropdown */}
-                  <Menu as="div" className="relative ml-3">
-                    <div>
-                      <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        <span className="sr-only">Open user menu</span>
-                        {imageUrl ? (
-                          <Image
-                            className="h-8 w-8 rounded-full"
-                            src={imageUrl}
-                            alt=""
-                            width={32}
-                            height={32}
-                          />
-                        ) : (
-                          <UserCircleIcon className="h-8 w-8 text-gray-400" />
-                        )}
-                      </Menu.Button>
-                    </div>
-                    <Transition
-                      as={Fragment}
-                      enter="transition ease-out duration-200"
-                      enterFrom="transform opacity-0 scale-95"
-                      enterTo="transform opacity-100 scale-100"
-                      leave="transition ease-in duration-75"
-                      leaveFrom="transform opacity-100 scale-100"
-                      leaveTo="transform opacity-0 scale-95"
-                    >
-                      <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <Menu.Item>
-                          {({ active }) => (
-                            <Link
-                              href="/dashboard/profile"
-                              className={`${
-                                active ? "bg-gray-100" : ""
-                              } block px-4 py-2 text-sm text-gray-700`}
-                            >
-                              Your Profile
-                            </Link>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <Link
-                              href="/dashboard/settings"
-                              className={`${
-                                active ? "bg-gray-100" : ""
-                              } block px-4 py-2 text-sm text-gray-700`}
-                            >
-                              Settings
-                            </Link>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <button
-                              onClick={() => signOut()}
-                              className={`${
-                                active ? "bg-gray-100" : ""
-                              } block w-full px-4 py-2 text-left text-sm text-gray-700`}
-                            >
-                              Sign out
-                            </button>
-                          )}
-                        </Menu.Item>
-                      </Menu.Items>
-                    </Transition>
-                  </Menu>
-                </div>
-                <div className="-mr-2 flex items-center sm:hidden">
-                  {/* Mobile menu button */}
-                  <Disclosure.Button className="inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
-                    <span className="sr-only">Open main menu</span>
-                    {open ? (
-                      <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
-                    ) : (
-                      <Bars3Icon className="block h-6 w-6" aria-hidden="true" />
                     )}
-                  </Disclosure.Button>
-                </div>
-              </div>
-            </div>
-
-            <Disclosure.Panel className="sm:hidden">
-              <div className="space-y-1 pb-3 pt-2">
-                {navigation.map((item) => (
-                  <Disclosure.Button
-                    key={item.name}
-                    as={Link}
-                    href={item.href}
-                    className={`block py-2 pl-3 pr-4 text-base font-medium ${
-                      item.current
-                        ? "border-l-4 border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-l-4 border-transparent text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-800"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <item.icon className="h-5 w-5 mr-2" />
-                      {item.name}
-                    </div>
-                  </Disclosure.Button>
-                ))}
-              </div>
-              <div className="border-t border-gray-200 pb-3 pt-4">
-                <div className="flex items-center px-4">
-                  <div className="flex-shrink-0">
-                    {imageUrl ? (
-                      <Image
-                        className="h-10 w-10 rounded-full"
-                        src={imageUrl}
-                        alt=""
-                        width={40}
-                        height={40}
-                      />
-                    ) : (
-                      <UserCircleIcon className="h-10 w-10 text-gray-400" />
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <Link
+                        href="/dashboard/settings"
+                        className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                      >
+                        Settings
+                      </Link>
                     )}
-                  </div>
-                  <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">
-                      {session?.user?.name}
-                    </div>
-                    <div className="text-sm font-medium text-gray-500">
-                      {session?.user?.email}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    className="ml-auto flex-shrink-0 rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  >
-                    <span className="sr-only">View notifications</span>
-                    <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  </button>
-                </div>
-                <div className="mt-3 space-y-1">
-                  <Disclosure.Button
-                    as={Link}
-                    href="/dashboard/profile"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    Your Profile
-                  </Disclosure.Button>
-                  <Disclosure.Button
-                    as={Link}
-                    href="/dashboard/settings"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    Settings
-                  </Disclosure.Button>
-                  <Disclosure.Button
-                    as="button"
-                    onClick={() => signOut()}
-                    className="block w-full px-4 py-2 text-left text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    Sign out
-                  </Disclosure.Button>
-                </div>
-              </div>
-            </Disclosure.Panel>
-          </>
-        )}
-      </Disclosure>
-
-      <div className="py-10">
-        <main>{children}</main>
+                  </Menu.Item>
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={() => signOut()}
+                        className={`${active ? "bg-gray-100" : ""} block w-full px-4 py-2 text-left text-sm text-gray-700`}
+                      >
+                        Sign out
+                      </button>
+                    )}
+                  </Menu.Item>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          </div>
+        </div>
+        {/* Main content area */}
+        <main className="flex-1 p-6 bg-gray-50 min-h-screen">{children}</main>
       </div>
     </div>
   );
