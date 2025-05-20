@@ -79,6 +79,7 @@ model User {
   savedJobs           SavedJob[]
   sessions            Session[]
   profileViewEvents   ProfileViewEvent[]
+  isDemo              Boolean              @default(false)
 }
 
 model CandidateProfile {
@@ -148,6 +149,7 @@ model Job {
   employer     User             @relation(fields: [employerId], references: [id])
   applications JobApplication[]
   savedBy      SavedJob[]
+  isDemo       Boolean          @default(false)
 }
 
 model JobApplication {

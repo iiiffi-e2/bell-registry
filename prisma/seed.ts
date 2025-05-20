@@ -473,6 +473,7 @@ async function main() {
       firstName: 'Victoria',
       lastName: 'Bell',
       role: UserRole.EMPLOYER,
+      isDemo: true,
       employerProfile: {
         create: {
           companyName: 'Bell Registry',
@@ -497,6 +498,7 @@ async function main() {
         lastName: prof.lastName,
         role: UserRole.PROFESSIONAL,
         profileSlug,
+        isDemo: true,
         candidateProfile: {
           upsert: {
             create: {
@@ -538,6 +540,7 @@ async function main() {
         lastName: prof.lastName,
         role: UserRole.PROFESSIONAL,
         profileSlug,
+        isDemo: true,
         candidateProfile: {
           create: {
             title: prof.title,
@@ -621,6 +624,7 @@ async function main() {
         expiresAt,
         jobType,
         employmentType,
+        isDemo: true,
       }
     })
     jobs.push(job)
