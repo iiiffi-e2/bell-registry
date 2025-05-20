@@ -120,6 +120,8 @@ export default function DashboardPage() {
   const [loadingProfileViews, setLoadingProfileViews] = useState(true);
   const [savedJobsCount, setSavedJobsCount] = useState<number | null>(null);
   const [loadingSavedJobs, setLoadingSavedJobs] = useState(true);
+  // Mobile accordion open state
+  const [accordionOpen, setAccordionOpen] = useState(Array(recentApplications.length).fill(false));
 
   useEffect(() => {
     async function fetchProfileViews() {
@@ -166,9 +168,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col gap-8">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col gap-8 w-full">
           {/* Welcome Section */}
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
@@ -309,7 +311,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Applications */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto w-full max-w-full hidden md:block">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
               <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
               <Link
@@ -319,33 +321,33 @@ export default function DashboardPage() {
                 View all
               </Link>
             </div>
-            <table className="min-w-full divide-y divide-gray-100 text-sm">
+            <table className="w-full min-w-[700px] divide-y divide-gray-100 text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Position</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employer</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied Date</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Position</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employer</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied Date</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-100">
                 {recentApplications.map((application) => (
                   <tr key={application.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">
                       <div className="font-medium text-gray-900">{application.position}</div>
                       <div className="text-sm text-gray-500">Full-time</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{application.company}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{application.location}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{new Date(application.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-4 whitespace-nowrap">{application.company}</td>
+                    <td className="px-3 py-4 whitespace-nowrap">{application.location}</td>
+                    <td className="px-3 py-4">{new Date(application.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                    <td className="px-3 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}>
                         {application.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="px-3 py-4 whitespace-nowrap text-center">
                       <Link href="#" className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
@@ -357,6 +359,40 @@ export default function DashboardPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Accordion in Card Widget */}
+          <div className="block md:hidden">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Applications</h3>
+              <div className="space-y-3">
+                {recentApplications.map((application, idx) => (
+                  <div key={application.id} className="border border-gray-100 rounded-lg">
+                    <button
+                      className="w-full flex justify-between items-center px-4 py-3 text-left text-gray-900 font-medium focus:outline-none"
+                      onClick={() => setAccordionOpen(open => open.map((v, i) => i === idx ? !v : v))}
+                    >
+                      <span>{application.position} - {application.location}</span>
+                      <span className={`transform transition-transform ${accordionOpen[idx] ? "rotate-90" : "rotate-0"}`}>&#9654;</span>
+                    </button>
+                    {accordionOpen[idx] && (
+                      <div className="px-4 pb-4">
+                        <div className="mb-2"><span className="font-semibold">Employer:</span> {application.company}</div>
+                        <div className="mb-2"><span className="font-semibold">Applied:</span> {new Date(application.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                        <div className="mb-2"><span className="font-semibold">Status:</span> <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}>{application.status}</span></div>
+                        <Link href="#" className="inline-flex items-center p-2 text-blue-600 hover:text-blue-800" title="View Listing">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="ml-2">View Listing</span>
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Widgets Row */}
@@ -400,17 +436,17 @@ export default function DashboardPage() {
             {/* Quick Actions */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-4 flex-1">
+              <div className="grid grid-cols-2 gap-4 flex-1 justify-center">
                 {quickActions.map((action) => {
                   if (action.name === "Update Profile") {
                     return (
                       <Link
                         key={action.name}
                         href="/dashboard/profile/edit"
-                        className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="w-full flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         <action.icon className="h-6 w-6 mb-2 text-blue-400" />
-                        <span className="font-medium">{action.name}</span>
+                        <span className="font-medium text-center w-full">{action.name}</span>
                       </Link>
                     );
                   }
@@ -419,20 +455,20 @@ export default function DashboardPage() {
                       <Link
                         key={action.name}
                         href="/dashboard/saved-jobs"
-                        className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="w-full flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                       >
                         <action.icon className="h-6 w-6 mb-2 text-blue-400" />
-                        <span className="font-medium">{action.name}</span>
+                        <span className="font-medium text-center w-full">{action.name}</span>
                       </Link>
                     );
                   }
                   return (
                     <button
                       key={action.name}
-                      className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="w-full flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                     >
                       <action.icon className="h-6 w-6 mb-2 text-blue-400" />
-                      <span className="font-medium">{action.name}</span>
+                      <span className="font-medium text-center w-full">{action.name}</span>
                     </button>
                   );
                 })}
