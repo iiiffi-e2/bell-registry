@@ -40,13 +40,6 @@ const stats = [
     change: "1 new this week",
     changeType: "positive",
   },
-  {
-    name: "Saved Jobs",
-    stat: "8",
-    icon: BookmarkIcon,
-    change: "No change",
-    changeType: "neutral",
-  },
 ];
 
 const recentApplications = [
@@ -125,6 +118,8 @@ export default function DashboardPage() {
   const [profileViews, setProfileViews] = useState<number | null>(null);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [loadingProfileViews, setLoadingProfileViews] = useState(true);
+  const [savedJobsCount, setSavedJobsCount] = useState<number | null>(null);
+  const [loadingSavedJobs, setLoadingSavedJobs] = useState(true);
 
   useEffect(() => {
     async function fetchProfileViews() {
@@ -143,6 +138,24 @@ export default function DashboardPage() {
       }
     }
     fetchProfileViews();
+  }, []);
+
+  useEffect(() => {
+    async function fetchSavedJobsCount() {
+      setLoadingSavedJobs(true);
+      try {
+        const res = await fetch("/api/jobs/saved");
+        if (res.ok) {
+          const data = await res.json();
+          setSavedJobsCount(Array.isArray(data.jobs) ? data.jobs.length : 0);
+        }
+      } catch (e) {
+        // handle error
+      } finally {
+        setLoadingSavedJobs(false);
+      }
+    }
+    fetchSavedJobsCount();
   }, []);
 
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
@@ -230,6 +243,28 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+            {/* Saved Jobs Stat Card (live data) */}
+            <div className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <BookmarkIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-500 truncate">Saved Jobs</p>
+                    <div className="flex items-baseline">
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {loadingSavedJobs
+                          ? "--"
+                          : savedJobsCount !== null
+                          ? savedJobsCount
+                          : "--"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Profile Views Stat Card (live data) */}
             <div className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
               <div className="p-5">
