@@ -8,6 +8,8 @@ import { MediaUpload } from "./media-upload";
 import { useSession } from "next-auth/react";
 import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 import { Combobox } from "@headlessui/react";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -55,7 +57,6 @@ const PROFESSIONAL_ROLES = [
   "Landscape Director",
   "Yacht Captain",
   "Yacht Steward | Stewardess",
-  "Yacht Chef",
   "Yacht Engineer",
   "Flight Attendant",
   "Other"
@@ -458,16 +459,15 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       Current Location <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1">
-                      <input
-                        type="text"
-                        {...form.register("location")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="City, State/Province, Country (Required)"
-                      />
+                      <GoogleMapsLoader>
+                        <LocationAutocomplete
+                          value={form.watch("location")}
+                          onChange={(value) => form.setValue("location", value)}
+                          error={form.formState.errors.location?.message}
+                          placeholder="Enter city and state..."
+                        />
+                      </GoogleMapsLoader>
                     </div>
-                    {form.formState.errors.location && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.location.message}</p>
-                    )}
                   </div>
 
                   <div>
