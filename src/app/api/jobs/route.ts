@@ -73,6 +73,12 @@ export async function GET(request: Request) {
                   has: searchQuery,
                 },
               },
+              {
+                location: {
+                  contains: searchQuery,
+                  mode: Prisma.QueryMode.insensitive,
+                },
+              },
             ],
           }
         : {}),
