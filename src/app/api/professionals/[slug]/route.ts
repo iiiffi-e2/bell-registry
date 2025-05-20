@@ -66,6 +66,13 @@ export async function GET(
       data: { profileViews: { increment: 1 } }
     });
 
+    // Log profile view event
+    await prisma.profileViewEvent.create({
+      data: {
+        userId: profile.id,
+      }
+    });
+
     // Format the response data
     const responseData = {
       id: profile.candidateProfile.id,

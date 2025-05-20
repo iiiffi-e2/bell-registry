@@ -78,6 +78,7 @@ model User {
   sentMessages        Message[]            @relation("SentMessages")
   savedJobs           SavedJob[]
   sessions            Session[]
+  profileViewEvents   ProfileViewEvent[]
 }
 
 model CandidateProfile {
@@ -181,6 +182,13 @@ model Message {
   createdAt  DateTime @default(now())
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+}
+
+model ProfileViewEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  viewedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 enum UserRole {

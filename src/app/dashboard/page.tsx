@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useProfile } from "@/providers/profile-provider";
+import { useEffect, useState } from "react";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -45,13 +46,6 @@ const stats = [
     icon: BookmarkIcon,
     change: "No change",
     changeType: "neutral",
-  },
-  {
-    name: "Profile Views",
-    stat: "24",
-    icon: EyeIcon,
-    change: "40% increase",
-    changeType: "positive",
   },
 ];
 
@@ -128,7 +122,29 @@ const quickActions = [
 export default function DashboardPage() {
   const { data: session } = useSession();
   const { profile } = useProfile();
-  
+  const [profileViews, setProfileViews] = useState<number | null>(null);
+  const [percentChange, setPercentChange] = useState<number | null>(null);
+  const [loadingProfileViews, setLoadingProfileViews] = useState(true);
+
+  useEffect(() => {
+    async function fetchProfileViews() {
+      setLoadingProfileViews(true);
+      try {
+        const res = await fetch("/api/dashboard/profile-views");
+        if (res.ok) {
+          const data = await res.json();
+          setProfileViews(data.totalViews);
+          setPercentChange(data.percentChange);
+        }
+      } catch (e) {
+        // handle error
+      } finally {
+        setLoadingProfileViews(false);
+      }
+    }
+    fetchProfileViews();
+  }, []);
+
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
   const isProfileIncomplete = isProfessional && !profile?.bio;
 
@@ -175,7 +191,7 @@ export default function DashboardPage() {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((item) => (
               <div
                 key={item.name}
@@ -214,6 +230,47 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
+            {/* Profile Views Stat Card (live data) */}
+            <div className="bg-white overflow-hidden rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <EyeIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium text-gray-500 truncate">Profile Views</p>
+                    <div className="flex items-baseline">
+                      <p className="text-2xl font-semibold text-gray-900">
+                        {loadingProfileViews
+                          ? "--"
+                          : profileViews !== null
+                          ? profileViews
+                          : "--"}
+                      </p>
+                      <p
+                        className={`ml-2 flex items-baseline text-sm font-semibold ${
+                          percentChange === null || loadingProfileViews
+                            ? "text-gray-400"
+                            : percentChange > 0
+                            ? "text-green-600"
+                            : percentChange < 0
+                            ? "text-red-600"
+                            : "text-gray-400"
+                        }`}
+                      >
+                        {loadingProfileViews || percentChange === null
+                          ? ""
+                          : percentChange > 0
+                          ? `+${percentChange.toFixed(0)}%`
+                          : percentChange < 0
+                          ? `${percentChange.toFixed(0)}%`
+                          : "0%"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Recent Applications */}
