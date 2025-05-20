@@ -90,6 +90,8 @@ export async function PUT(request: NextRequest) {
     const data = await request.json();
     const {
       // Basic Info
+      firstName,
+      lastName,
       photoUrl,
       preferredRole,
       location,
@@ -122,10 +124,14 @@ export async function PUT(request: NextRequest) {
       experience
     } = data;
 
-    // Update user's phone number
+    // Update user's phone number, first name, and last name
     await prisma.user.update({
       where: { id: user.id },
-      data: { phoneNumber }
+      data: {
+        phoneNumber,
+        firstName,
+        lastName,
+      }
     });
 
     // Update or create profile

@@ -63,6 +63,8 @@ const PROFESSIONAL_ROLES = [
 
 const profileSchema = z.object({
   // Basic Info
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
   photoUrl: z.string().optional(),
   preferredRole: z.string().min(2, "Professional title is required"),
   location: z.string().min(2, "Current location is required"),
@@ -273,6 +275,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         
         if (data) {
           form.reset({
+            firstName: data.user?.firstName || "",
+            lastName: data.user?.lastName || "",
             photoUrl: data.photoUrl || "",
             preferredRole: data.preferredRole || "",
             location: data.location || "",
@@ -338,6 +342,42 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     currentImage={form.watch("photoUrl") as string}
                     onUpload={(url) => form.setValue("photoUrl", url)}
                   />
+                </div>
+
+                {/* First Name and Last Name */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                      First Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        {...form.register("firstName")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Enter your first name"
+                      />
+                    </div>
+                    {form.formState.errors.firstName && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.firstName.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                      Last Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        {...form.register("lastName")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Enter your last name"
+                      />
+                    </div>
+                    {form.formState.errors.lastName && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.lastName.message}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Professional Bio */}
