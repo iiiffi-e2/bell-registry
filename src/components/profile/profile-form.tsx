@@ -10,6 +10,7 @@ import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 import { Combobox } from "@headlessui/react";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
+import { MultiLocationAutocomplete } from '../ui/multi-location-autocomplete';
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -453,8 +454,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                 </div>
 
                 {/* Location Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                  <div className="flex flex-col">
                     <label htmlFor="location" className="block text-sm font-medium text-gray-700">
                       Current Location <span className="text-red-500">*</span>
                     </label>
@@ -469,37 +470,37 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       </GoogleMapsLoader>
                     </div>
                   </div>
-
-                  <div>
-                    <label htmlFor="workLocations" className="block text-sm font-medium text-gray-700">
-                      Available to Work In
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        {...form.register("workLocations")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Enter locations separated by commas (Optional)"
-                      />
-                    </div>
-                    {form.formState.errors.workLocations && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.workLocations.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Open to Relocation */}
-                <div>
-                  <div className="flex items-center">
+                  <div className="flex items-center h-full pt-6 sm:pt-0">
                     <input
                       type="checkbox"
                       {...form.register("openToRelocation")}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      id="openToRelocation"
                     />
                     <label htmlFor="openToRelocation" className="ml-2 block text-sm text-gray-700">
                       Open to Relocation
                     </label>
                   </div>
+                </div>
+
+                {/* Available to Work In - its own row */}
+                <div className="mt-4">
+                  <label htmlFor="workLocations" className="block text-sm font-medium text-gray-700">
+                    Available to Work In
+                  </label>
+                  <div className="mt-1">
+                    <GoogleMapsLoader>
+                      <MultiLocationAutocomplete
+                        value={form.watch("workLocations") || []}
+                        onChange={(value) => form.setValue("workLocations", value)}
+                        error={form.formState.errors.workLocations?.message}
+                        placeholder="Enter city and state..."
+                      />
+                    </GoogleMapsLoader>
+                  </div>
+                  {form.formState.errors.workLocations && (
+                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.workLocations.message}</p>
+                  )}
                 </div>
               </div>
             </div>
