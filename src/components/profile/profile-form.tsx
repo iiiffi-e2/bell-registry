@@ -70,9 +70,7 @@ const profileSchema = z.object({
   photoUrl: z.string().optional(),
   preferredRole: z.string().min(2, "Professional title is required"),
   location: z.string().min(2, "Current location is required"),
-  workLocations: z.string()
-    .optional()
-    .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
+  workLocations: z.array(z.string()).optional().default([]),
   openToRelocation: z.boolean().default(false),
   yearsOfExperience: z.string()
     .optional()
@@ -282,7 +280,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             photoUrl: data.photoUrl || "",
             preferredRole: data.preferredRole || "",
             location: data.location || "",
-            workLocations: data.workLocations?.join(", ") || "",
+            workLocations: data.workLocations || [],
             openToRelocation: data.openToRelocation || false,
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
             bio: data.bio || "",
