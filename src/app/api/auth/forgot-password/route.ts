@@ -1,0 +1,91 @@
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { randomBytes } from "crypto";
+import { Resend } from 'resend';
+
+// Initialize Resend
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+if (!RESEND_API_KEY) {
+  throw new Error('RESEND_API_KEY is not configured');
+}
+const resend = new Resend(RESEND_API_KEY);
+
+const isDevelopment = process.env.NODE_ENV === 'development';
+
+// Use Resend's development domain in dev mode
+const FROM_EMAIL = isDevelopment 
+  ? 'onboarding@resend.dev'
+  : 'Bell Registry <noreply@bellregistry.com>';
+
+export async function POST(request: Request) {
+  try {
+    const { email } = await request.json();
+
+    // Find user by email
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    // If user doesn't exist, still return success to prevent email enumeration
+    if (!user) {
+      return NextResponse.json({ success: true });
+    }
+
+    // Generate reset token
+    const resetToken = randomBytes(32).toString("hex");
+    const resetTokenExpiry = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // Store reset token in database
+    await prisma.user.update({
+      where: { email },
+      data: {
+        resetToken,
+        resetTokenExpiry,
+      },
+    });
+
+    // Send reset email
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    
+    // In development, use Resend's test email address
+    const toEmail = isDevelopment ? 'delivered@resend.dev' : email;
+    
+    const emailResponse = await resend.emails.send({
+      from: FROM_EMAIL,
+      to: toEmail,
+      subject: 'Reset Your Password - Bell Registry',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #333;">Password Reset Request</h1>
+          <p>You requested a password reset for your Bell Registry account.</p>
+          <p>Click the link below to reset your password. This link will expire in 30 minutes.</p>
+          <a href="${resetUrl}" style="display: inline-block; background-color: #0066cc; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">Reset Password</a>
+          <p style="color: #666;">If you didn't request this change, you can safely ignore this email.</p>
+          ${isDevelopment ? '<p style="color: #ff6b6b;">Development Mode: Email would be sent to ' + email + '</p>' : ''}
+        </div>
+      `,
+    });
+
+    if (isDevelopment) {
+      return NextResponse.json({
+        message: "Development mode: Reset email simulated. Check the console for details.",
+        debug: {
+          resetUrl,
+          originalEmail: email,
+          testEmail: toEmail,
+          isDevelopment,
+          hasResendKey: !!RESEND_API_KEY,
+          emailResponse
+        }
+      });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error in forgot-password:", error);
+    return NextResponse.json(
+      { error: "Failed to process request" },
+      { status: 500 }
+    );
+  }
+} 

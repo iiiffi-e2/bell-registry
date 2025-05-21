@@ -36,6 +36,9 @@ export function LoginForm() {
     if (searchParams.get('emailUpdated') === 'true') {
       setSuccessMessage('Your email has been updated successfully. Please sign in with your new email address.');
     }
+    if (searchParams.get('passwordReset') === 'true') {
+      setSuccessMessage('Your password has been reset successfully. Please sign in with your new password.');
+    }
   }, [searchParams]);
 
   const onSubmit = async (data: LoginFormData) => {
@@ -118,16 +121,6 @@ export function LoginForm() {
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">{error}</h3>
-              </div>
-            </div>
-          </div>
-        )}
-
         <div>
           <button
             type="submit"
@@ -175,6 +168,12 @@ export function LoginForm() {
           </svg>
           Sign in with Google
         </button>
+      </div>
+
+      <div className="text-center">
+        <Link href="/forgot-password" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+          Forgot your password?
+        </Link>
       </div>
 
       <div className="text-center">
