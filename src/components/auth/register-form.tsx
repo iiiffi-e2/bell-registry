@@ -43,7 +43,7 @@ type StepTwoData = z.infer<typeof stepTwoSchema>;
 export function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | JSX.Element | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [stepOneData, setStepOneData] = useState<StepOneData | null>(null);
@@ -61,8 +61,43 @@ export function RegisterForm() {
   });
 
   const onStepOneSubmit = async (data: StepOneData) => {
-    setStepOneData(data);
-    setCurrentStep(2);
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Check if email exists
+      const response = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        if (result.message === "User with this email already exists") {
+          setError(
+            <div>
+              An account with this email already exists.{" "}
+              <Link href="/login" className="text-blue-600 hover:text-blue-500 underline">
+                Click here to log in
+              </Link>
+            </div>
+          );
+          return;
+        }
+        throw new Error(result.message || "Something went wrong");
+      }
+
+      setStepOneData(data);
+      setCurrentStep(2);
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes("email already exists"))) {
+        setError(error instanceof Error ? error.message : "An error occurred");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const onStepTwoSubmit = async (data: StepTwoData) => {
@@ -93,9 +128,6 @@ export function RegisterForm() {
       router.push("/login?registered=true");
     } catch (error) {
       setError(error instanceof Error ? error.message : "An error occurred");
-      if (error instanceof Error && error.message.includes("email already exists")) {
-        setCurrentStep(1); // Go back to email step if email exists
-      }
     } finally {
       setIsLoading(false);
     }
@@ -153,12 +185,22 @@ export function RegisterForm() {
           </div>
         </div>
 
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">{error}</h3>
+              </div>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={stepOneForm.handleSubmit(onStepOneSubmit)}
           disabled={isLoading}
           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
         >
-          Continue
+          {isLoading ? "Checking..." : "Continue"}
         </button>
 
         <div className="relative">
