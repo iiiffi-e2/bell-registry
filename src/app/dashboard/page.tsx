@@ -114,7 +114,7 @@ const quickActions = [
 
 export default function DashboardPage() {
   const { data: session } = useSession();
-  const { profile } = useProfile();
+  const { profile, loading: profileLoading } = useProfile();
   const [profileViews, setProfileViews] = useState<number | null>(null);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [loadingProfileViews, setLoadingProfileViews] = useState(true);
@@ -161,7 +161,16 @@ export default function DashboardPage() {
   }, []);
 
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
-  const isProfileIncomplete = isProfessional && !profile?.bio;
+  const isProfileIncomplete = isProfessional && !profileLoading && !profile?.bio;
+
+  // Show loading state while session or profile is loading
+  if (!session || profileLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   if (!isProfessional) {
     return <EmployerDashboard />;
