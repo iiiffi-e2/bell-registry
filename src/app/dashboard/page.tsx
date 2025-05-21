@@ -90,21 +90,6 @@ const upcomingInterviews = [
   },
 ];
 
-const recommendedJobs = [
-  {
-    id: 1,
-    title: "Executive Chef",
-    company: "Morgan Estate",
-    location: "Aspen, CO",
-  },
-  {
-    id: 2,
-    title: "Private Chef",
-    company: "Johnson Family",
-    location: "Malibu, CA",
-  },
-];
-
 const quickActions = [
   { name: "New Application", icon: DocumentCheckIcon },
   { name: "Update Profile", icon: UserCircleIcon },
@@ -120,8 +105,31 @@ export default function DashboardPage() {
   const [loadingProfileViews, setLoadingProfileViews] = useState(true);
   const [savedJobsCount, setSavedJobsCount] = useState<number | null>(null);
   const [loadingSavedJobs, setLoadingSavedJobs] = useState(true);
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loadingRecommendedJobs, setLoadingRecommendedJobs] = useState(true);
   // Mobile accordion open state
   const [accordionOpen, setAccordionOpen] = useState(Array(recentApplications.length).fill(false));
+
+  useEffect(() => {
+    async function fetchRecommendedJobs() {
+      setLoadingRecommendedJobs(true);
+      try {
+        const res = await fetch("/api/jobs/recommended");
+        if (res.ok) {
+          const data = await res.json();
+          console.log('Recommended jobs response:', data);
+          setRecommendedJobs(data.jobs || []);
+        } else {
+          console.error('Failed to fetch recommended jobs:', await res.text());
+        }
+      } catch (e) {
+        console.error('Error fetching recommended jobs:', e);
+      } finally {
+        setLoadingRecommendedJobs(false);
+      }
+    }
+    fetchRecommendedJobs();
+  }, []);
 
   useEffect(() => {
     async function fetchProfileViews() {
@@ -425,21 +433,65 @@ export default function DashboardPage() {
               </div>
             </div>
             {/* Recommended Jobs */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recommended Jobs</h3>
-                <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
-              </div>
-              <div className="space-y-4">
-                {recommendedJobs.map((job) => (
-                  <div key={job.id} className="flex items-center">
-                    <BriefcaseIcon className="h-6 w-6 text-blue-400 mr-3" />
-                    <div>
-                      <div className="font-medium text-gray-900">{job.title}</div>
-                      <div className="text-sm text-gray-500">{job.company} • {job.location}</div>
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">Recommended Jobs</h2>
+                  <Link
+                    href="/jobs"
+                    className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                  >
+                    View all
+                    <ArrowRightIcon className="ml-1 h-4 w-4 inline" />
+                  </Link>
+                </div>
+                
+                {loadingRecommendedJobs ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : recommendedJobs.length > 0 ? (
+                  <div className="space-y-4">
+                    {recommendedJobs.map((job) => (
+                      <Link
+                        key={job.id}
+                        href={`/jobs/${job.id}`}
+                        className="block p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-medium text-gray-900">{job.title}</h3>
+                            <p className="text-sm text-gray-600">
+                              {job.employer.employerProfile?.companyName || `${job.employer.firstName} ${job.employer.lastName}`}
+                            </p>
+                            <div className="mt-1 flex items-center text-sm text-gray-500">
+                              <MapPinIcon className="h-4 w-4 mr-1" />
+                              {job.location}
+                            </div>
+                          </div>
+                          <BriefcaseIcon className="h-5 w-5 text-gray-400" />
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <BriefcaseIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No recommended jobs found</h3>
+                    <p className="mt-1 text-sm text-gray-500">
+                      We couldn't find any jobs matching your profile. Try browsing all jobs.
+                    </p>
+                    <div className="mt-6">
+                      <Link
+                        href="/jobs"
+                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Browse Jobs
+                        <ArrowRightIcon className="ml-2 h-4 w-4" />
+                      </Link>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             </div>
             {/* Quick Actions */}
