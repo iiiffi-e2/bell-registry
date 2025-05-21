@@ -1,3 +1,5 @@
+// To use fuzzy search, ensure the pg_trgm extension is enabled in your PostgreSQL database:
+// CREATE EXTENSION IF NOT EXISTS pg_trgm;
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { JobStatus, Prisma } from '@prisma/client'
@@ -18,6 +20,73 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
+
+    // Fuzzy search with trigram similarity if searchQuery is present
+    if (searchQuery) {
+      // Parse for 'in' to boost role/location matches
+      let roleQuery = searchQuery
+      let locationQuery = null
+      if (searchQuery.toLowerCase().includes(' in ')) {
+        const [role, loc] = searchQuery.split(/ in /i)
+        roleQuery = role.trim()
+        locationQuery = loc.trim()
+      }
+      // Build SQL for fuzzy search
+      let whereClauses = [
+        'title % $1',
+        'description % $1',
+        'location % $1'
+      ]
+      let rankExpr = 'GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1))'
+      let params = [roleQuery, limit, skip]
+      let boostClause = ''
+      if (locationQuery) {
+        // Boost jobs that also match the location
+        whereClauses.push('location % $4')
+        rankExpr = `GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1)) + 0.5 * similarity(location, $4)`
+        params = [roleQuery, limit, skip, locationQuery]
+      }
+      const query = `
+        SELECT *,
+          ${rankExpr} AS rank
+        FROM "Job"
+        WHERE (${whereClauses.join(' OR ')})
+        ORDER BY rank DESC
+        LIMIT $2 OFFSET $3
+      `
+      let jobs = await prisma.$queryRawUnsafe(query, ...params) as any[];
+      // Fetch employer and employerProfile for each job
+      jobs = await Promise.all(jobs.map(async (job: any) => {
+        const employer = await prisma.user.findUnique({
+          where: { id: job.employerId },
+          select: {
+            firstName: true,
+            lastName: true,
+            employerProfile: {
+              select: { companyName: true }
+            }
+          }
+        });
+        return { ...job, employer };
+      }));
+      // Count
+      const countQuery = `
+        SELECT COUNT(*) FROM "Job"
+        WHERE (${whereClauses.join(' OR ')})
+      `
+      const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1))
+      const total = parseInt(countResult[0].count, 10)
+      return NextResponse.json({
+        jobs,
+        featured: false,
+        pagination: {
+          total,
+          pages: Math.ceil(total / limit),
+          page,
+          limit
+        }
+      })
+    }
 
     const baseWhere: Prisma.JobWhereInput = {
       status: status ? (status as JobStatus) : JobStatus.ACTIVE,
@@ -53,35 +122,6 @@ export async function GET(request: Request) {
           lte: salaryMax ? parseInt(salaryMax) : undefined,
         }
       } : {}),
-      ...(searchQuery
-        ? {
-            OR: [
-              {
-                title: {
-                  contains: searchQuery,
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-              {
-                description: {
-                  contains: searchQuery,
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-              {
-                requirements: {
-                  has: searchQuery,
-                },
-              },
-              {
-                location: {
-                  contains: searchQuery,
-                  mode: Prisma.QueryMode.insensitive,
-                },
-              },
-            ],
-          }
-        : {}),
     }
 
     let orderBy: Prisma.JobOrderByWithRelationInput = { createdAt: 'desc' }
