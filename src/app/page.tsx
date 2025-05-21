@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 export default function Home() {
@@ -7,7 +8,14 @@ export default function Home() {
       <header className="fixed w-full bg-white/80 backdrop-blur-md z-50">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="text-2xl font-bold text-gray-900">
-            Bell Registry
+            <Image
+              src="/images/brand/logo-full.png"
+              alt="The Bell Registry"
+              width={175}
+              height={47}
+              priority
+              className="h-auto w-full"
+            />
           </Link>
           <div className="space-x-4">
             <Link
