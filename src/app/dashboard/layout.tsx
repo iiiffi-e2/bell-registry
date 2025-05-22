@@ -101,7 +101,7 @@ export default function DashboardLayout({
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:inset-0`
       }>
-        <div className="flex h-16 items-center px-6 border-b border-gray-100">
+        <div className="flex h-16 items-center px-6 pt-4 border-b border-gray-100">
           <Link href="/dashboard" className="block max-w-[175px]">
             <Image
               src="/images/brand/logo-full.png"
