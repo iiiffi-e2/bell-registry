@@ -102,7 +102,7 @@ export default function DashboardLayout({
         lg:translate-x-0 lg:static lg:inset-0`
       }>
         <div className="flex h-16 items-center px-6 pt-4 border-b border-gray-100">
-          <Link href="/dashboard" className="block max-w-[175px]">
+          <Link href="/dashboard" className="hidden lg:block max-w-[175px]">
             <Image
               src="/images/brand/logo-full.png"
               alt="The Bell Registry"
@@ -169,7 +169,19 @@ export default function DashboardLayout({
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-100">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center">
+            <h1 className="hidden md:block text-2xl font-bold text-gray-900">Dashboard</h1>
+            <Link href="/dashboard" className="block lg:hidden max-w-[140px] ml-8">
+              <Image
+                src="/images/brand/logo-full.png"
+                alt="The Bell Registry"
+                width={140}
+                height={37}
+                priority
+                className="h-auto w-full"
+              />
+            </Link>
+          </div>
           <div className="flex items-center space-x-4">
             <button
               type="button"
