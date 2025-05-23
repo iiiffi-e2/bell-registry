@@ -107,6 +107,7 @@ export async function GET(
         createdAt: profile.createdAt.toISOString(),
         email: profile.email,
         phoneNumber: profile.phoneNumber,
+        isAnonymous: profile.isAnonymous || false,
       }
     };
 

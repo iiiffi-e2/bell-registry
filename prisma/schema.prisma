@@ -82,6 +82,7 @@ model User {
   isDemo              Boolean              @default(false)
   resetToken          String?              @unique
   resetTokenExpiry    DateTime?            @db.Timestamptz(6)
+  isAnonymous         Boolean              @default(false)
 }
 
 model CandidateProfile {

@@ -53,8 +53,19 @@ interface CandidateProfile {
     image: string | null;
     profileSlug: string | null;
     id: string;
+    isAnonymous: boolean;
   };
   preferredRole: string | null;
+}
+
+// Helper function to get display name based on anonymous setting
+function getDisplayName(profile: CandidateProfile) {
+  if (profile.user.isAnonymous) {
+    const firstInitial = profile.user.firstName?.[0] || '';
+    const lastInitial = profile.user.lastName?.[0] || '';
+    return `${firstInitial}. ${lastInitial}.`;
+  }
+  return `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim();
 }
 
 export default function ProfilePage() {
@@ -140,7 +151,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Profile Content - Two Column Layout */}
+        {/* Profile Content */}
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -149,11 +160,11 @@ export default function ProfilePage() {
                 {/* Profile Header */}
                 <div className="flex items-center mb-6">
                   <div className="flex-shrink-0">
-                    {profile.user.image ? (
+                    {!profile.user.isAnonymous && profile.user.image ? (
                       <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
                         <Image
                           src={profile.user.image}
-                          alt={`${profile.user.firstName} ${profile.user.lastName}`}
+                          alt={getDisplayName(profile)}
                           width={96}
                           height={96}
                           className="h-full w-full object-cover"
@@ -167,18 +178,22 @@ export default function ProfilePage() {
                   </div>
                   <div className="ml-6">
                     <h3 className="text-2xl font-bold text-gray-900">
-                      {profile.user.firstName} {profile.user.lastName}
+                      {getDisplayName(profile)}
                     </h3>
                     <p className="mt-1 text-lg text-gray-600">{profile.preferredRole || 'Professional'}</p>
-                    <div className="mt-2 flex items-center text-sm text-gray-500">
-                      <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {profile.user.email}
-                    </div>
-                    {profile.user.phoneNumber && (
-                      <div className="mt-1 flex items-center text-sm text-gray-500">
-                        <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                        {profile.user.phoneNumber}
-                      </div>
+                    {!profile.user.isAnonymous && (
+                      <>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                          {profile.user.email}
+                        </div>
+                        {profile.user.phoneNumber && (
+                          <div className="mt-1 flex items-center text-sm text-gray-500">
+                            <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                            {profile.user.phoneNumber}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

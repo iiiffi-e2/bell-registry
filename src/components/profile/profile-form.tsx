@@ -11,6 +11,9 @@ import { Combobox } from "@headlessui/react";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
 import { MultiLocationAutocomplete } from '../ui/multi-location-autocomplete';
+import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form } from "@/components/ui/form";
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -72,6 +75,7 @@ const profileSchema = z.object({
   location: z.string().min(2, "Current location is required"),
   workLocations: z.array(z.string()).optional().default([]),
   openToRelocation: z.boolean().default(false),
+  isAnonymous: z.boolean().default(false),
   yearsOfExperience: z.string()
     .optional()
     .transform((val) => {
@@ -234,6 +238,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       openToRelocation: false,
+      isAnonymous: false,
       payCurrency: "USD",
     },
   });
@@ -281,7 +286,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         const data = await response.json();
         
         if (data) {
-          form.reset({
+          // Set the form values
+          const formValues = {
             firstName: data.user?.firstName || "",
             lastName: data.user?.lastName || "",
             photoUrl: data.photoUrl || "",
@@ -289,8 +295,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             location: data.location || "",
             workLocations: data.workLocations || [],
             openToRelocation: data.openToRelocation || false,
+            isAnonymous: Boolean(data.user?.isAnonymous), // Ensure boolean value
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
-            // Just take the date part when loading back into the form
             availability: data.availability ? data.availability.split('T')[0] : "",
             bio: data.bio || "",
             whatImSeeking: data.whatImSeeking || "",
@@ -307,7 +313,9 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             certifications: data.certifications?.join(", ") || "",
             experience: data.experience || [],
             phoneNumber: data.phoneNumber || "",
-          });
+          };
+
+          form.reset(formValues);
           setUploadedPhotos(data.additionalPhotos || []);
           setUploadedMedia(data.mediaUrls || []);
         }
@@ -335,441 +343,466 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   };
 
   return (
-    <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column */}
-        <div className="space-y-8">
-          {/* Basic Info Section */}
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Basic Information</h3>
-              <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
-                {/* Profile Picture Upload */}
-                <div>
-                  <ProfilePictureUpload
-                    currentImage={form.watch("photoUrl") as string}
-                    onUpload={(url) => form.setValue("photoUrl", url)}
-                  />
-                </div>
-
-                {/* First Name and Last Name */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {/* Basic Info Section */}
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">Basic Information</h3>
+                <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
+                  {/* Profile Picture Upload */}
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                      First Name <span className="text-red-500">*</span>
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        {...form.register("firstName")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Enter your first name"
-                      />
-                    </div>
-                    {form.formState.errors.firstName && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.firstName.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                      Last Name <span className="text-red-500">*</span>
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="text"
-                        {...form.register("lastName")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Enter your last name"
-                      />
-                    </div>
-                    {form.formState.errors.lastName && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.lastName.message}</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Professional Bio */}
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
-                      Professional Bio <span className="text-red-500">*</span>
-                    </label>
-                    <button
-                      type="button"
-                      onClick={handleImproveWithAI}
-                      disabled={!currentBio || isLoading}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <SparklesIcon className="h-4 w-4 mr-1" />
-                      Improve with AI
-                    </button>
-                  </div>
-                  <div className="mt-1">
-                    <textarea
-                      {...form.register("bio")}
-                      rows={4}
-                      className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Tell us about your professional background and expertise... (Required, minimum 50 characters)"
+                    <ProfilePictureUpload
+                      currentImage={form.watch("photoUrl") as string}
+                      onUpload={(url) => form.setValue("photoUrl", url)}
                     />
                   </div>
-                  {form.formState.errors.bio && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.bio.message}</p>
-                  )}
-                </div>
 
-                {/* Preferred Role */}
-                <div>
-                  <label htmlFor="preferredRole" className="block text-sm font-medium text-gray-700">
-                    Professional Title <span className="text-red-500">*</span>
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      {...form.register("preferredRole")}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                    >
-                      <option value="">Select a Professional Title</option>
-                      {PROFESSIONAL_ROLES.map((role) => (
-                        <option key={role} value={role}>
-                          {role}
-                        </option>
-                      ))}
-                    </select>
+                  {/* First Name and Last Name */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                        First Name <span className="text-red-500">*</span>
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="text"
+                          {...form.register("firstName")}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          placeholder="Enter your first name"
+                        />
+                      </div>
+                      {form.formState.errors.firstName && (
+                        <p className="mt-1 text-sm text-red-600">{form.formState.errors.firstName.message}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="text"
+                          {...form.register("lastName")}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          placeholder="Enter your last name"
+                        />
+                      </div>
+                      {form.formState.errors.lastName && (
+                        <p className="mt-1 text-sm text-red-600">{form.formState.errors.lastName.message}</p>
+                      )}
+                    </div>
                   </div>
-                  {form.formState.errors.preferredRole && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.preferredRole.message}</p>
-                  )}
-                </div>
 
-                {/* Years of Experience and Availability */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Professional Bio */}
                   <div>
-                    <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
-                      Years of Experience
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                      <label htmlFor="bio" className="block text-sm font-medium text-gray-700">
+                        Professional Bio <span className="text-red-500">*</span>
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleImproveWithAI}
+                        disabled={!currentBio || isLoading}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <SparklesIcon className="h-4 w-4 mr-1" />
+                        Improve with AI
+                      </button>
+                    </div>
                     <div className="mt-1">
-                      <input
-                        type="number"
-                        {...form.register("yearsOfExperience")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        min="0"
-                        placeholder="Optional"
+                      <textarea
+                        {...form.register("bio")}
+                        rows={4}
+                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        placeholder="Tell us about your professional background and expertise... (Required, minimum 50 characters)"
                       />
                     </div>
-                    {form.formState.errors.yearsOfExperience && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.yearsOfExperience.message}</p>
+                    {form.formState.errors.bio && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.bio.message}</p>
                     )}
                   </div>
 
+                  {/* Preferred Role */}
                   <div>
-                    <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
-                      Availability Date
+                    <label htmlFor="preferredRole" className="block text-sm font-medium text-gray-700">
+                      Professional Title <span className="text-red-500">*</span>
                     </label>
                     <div className="mt-1">
-                      <input
-                        type="date"
-                        {...form.register("availability")}
+                      <select
+                        {...form.register("preferredRole")}
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Optional"
-                      />
+                      >
+                        <option value="">Select a Professional Title</option>
+                        {PROFESSIONAL_ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                    {form.formState.errors.availability && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.availability.message}</p>
+                    {form.formState.errors.preferredRole && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.preferredRole.message}</p>
                     )}
                   </div>
-                </div>
 
-                {/* Location Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
-                  <div className="flex flex-col">
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700">
-                      Current Location <span className="text-red-500">*</span>
+                  {/* Years of Experience and Availability */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
+                        Years of Experience
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="number"
+                          {...form.register("yearsOfExperience")}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          min="0"
+                          placeholder="Optional"
+                        />
+                      </div>
+                      {form.formState.errors.yearsOfExperience && (
+                        <p className="mt-1 text-sm text-red-600">{form.formState.errors.yearsOfExperience.message}</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
+                        Availability Date
+                      </label>
+                      <div className="mt-1">
+                        <input
+                          type="date"
+                          {...form.register("availability")}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          placeholder="Optional"
+                        />
+                      </div>
+                      {form.formState.errors.availability && (
+                        <p className="mt-1 text-sm text-red-600">{form.formState.errors.availability.message}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Location Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+                    <div className="flex flex-col">
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                        Current Location <span className="text-red-500">*</span>
+                      </label>
+                      <div className="mt-1">
+                        <GoogleMapsLoader>
+                          <LocationAutocomplete
+                            value={form.watch("location")}
+                            onChange={(value) => form.setValue("location", value)}
+                            error={form.formState.errors.location?.message}
+                            placeholder="Enter city and state..."
+                          />
+                        </GoogleMapsLoader>
+                      </div>
+                    </div>
+                    <div className="flex items-center h-full pt-6 sm:pt-0">
+                      <input
+                        type="checkbox"
+                        {...form.register("openToRelocation")}
+                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        id="openToRelocation"
+                      />
+                      <label htmlFor="openToRelocation" className="ml-2 block text-sm text-gray-700">
+                        Open to Relocation
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Available to Work In - its own row */}
+                  <div className="mt-4">
+                    <label htmlFor="workLocations" className="block text-sm font-medium text-gray-700">
+                      Available to Work In
                     </label>
                     <div className="mt-1">
                       <GoogleMapsLoader>
-                        <LocationAutocomplete
-                          value={form.watch("location")}
-                          onChange={(value) => form.setValue("location", value)}
-                          error={form.formState.errors.location?.message}
+                        <MultiLocationAutocomplete
+                          value={form.watch("workLocations") || []}
+                          onChange={(value) => form.setValue("workLocations", value)}
+                          error={form.formState.errors.workLocations?.message}
                           placeholder="Enter city and state..."
                         />
                       </GoogleMapsLoader>
                     </div>
+                    {form.formState.errors.workLocations && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.workLocations.message}</p>
+                    )}
                   </div>
-                  <div className="flex items-center h-full pt-6 sm:pt-0">
-                    <input
-                      type="checkbox"
-                      {...form.register("openToRelocation")}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      id="openToRelocation"
+
+                  <div className="col-span-full">
+                    <FormField
+                      control={form.control}
+                      name="isAnonymous"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Anonymous Profile</FormLabel>
+                            <FormDescription>
+                              When enabled, your profile will display only your initials and hide your headshot and email address
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
                     />
-                    <label htmlFor="openToRelocation" className="ml-2 block text-sm text-gray-700">
-                      Open to Relocation
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Professional Details Section */}
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">Professional Details</h3>
+                <div className="mt-6 space-y-6">
+                  {/* Seeking Opportunities */}
+                  <div>
+                    <label htmlFor="seekingOpportunities" className="block text-sm font-medium text-gray-700">
+                      Seeking Opportunities (Roles)
                     </label>
-                  </div>
-                </div>
-
-                {/* Available to Work In - its own row */}
-                <div className="mt-4">
-                  <label htmlFor="workLocations" className="block text-sm font-medium text-gray-700">
-                    Available to Work In
-                  </label>
-                  <div className="mt-1">
-                    <GoogleMapsLoader>
-                      <MultiLocationAutocomplete
-                        value={form.watch("workLocations") || []}
-                        onChange={(value) => form.setValue("workLocations", value)}
-                        error={form.formState.errors.workLocations?.message}
-                        placeholder="Enter city and state..."
+                    <div className="mt-1">
+                      <MultiSelect
+                        options={PROFESSIONAL_ROLES}
+                        value={form.watch("seekingOpportunities") || []}
+                        onChange={(newValue) => form.setValue("seekingOpportunities", newValue)}
+                        placeholder="Select roles you're interested in..."
                       />
-                    </GoogleMapsLoader>
+                    </div>
+                    {form.formState.errors.seekingOpportunities && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.seekingOpportunities.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.workLocations && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.workLocations.message}</p>
-                  )}
+
+                  {/* Skills */}
+                  <div>
+                    <label htmlFor="skills" className="block text-sm font-medium text-gray-700">
+                      Skills & Tags
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="text"
+                        {...form.register("skills")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Enter skills separated by commas (Optional)"
+                      />
+                    </div>
+                    {form.formState.errors.skills && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.skills.message}</p>
+                    )}
+                  </div>
+
+                  {/* Pay Range */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Pay Range (Optional)
+                    </label>
+                    <div className="mt-1 grid grid-cols-3 gap-4">
+                      <div>
+                        <label htmlFor="payRangeMin" className="sr-only">
+                          Minimum
+                        </label>
+                        <div className="relative rounded-md shadow-sm">
+                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <CurrencyDollarIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          </div>
+                          <input
+                            type="number"
+                            {...form.register("payRangeMin")}
+                            className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="Min"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="payRangeMax" className="sr-only">
+                          Maximum
+                        </label>
+                        <div className="relative rounded-md shadow-sm">
+                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                            <CurrencyDollarIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          </div>
+                          <input
+                            type="number"
+                            {...form.register("payRangeMax")}
+                            className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                            placeholder="Max"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label htmlFor="payCurrency" className="sr-only">
+                          Currency
+                        </label>
+                        <select
+                          {...form.register("payCurrency")}
+                          className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        >
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                          <option value="GBP">GBP</option>
+                          <option value="CAD">CAD</option>
+                          <option value="AUD">AUD</option>
+                        </select>
+                      </div>
+                    </div>
+                    {(form.formState.errors.payRangeMin || form.formState.errors.payRangeMax) && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {form.formState.errors.payRangeMin?.message || form.formState.errors.payRangeMax?.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Professional Details Section */}
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Professional Details</h3>
-              <div className="mt-6 space-y-6">
-                {/* Seeking Opportunities */}
-                <div>
-                  <label htmlFor="seekingOpportunities" className="block text-sm font-medium text-gray-700">
-                    Seeking Opportunities (Roles)
-                  </label>
-                  <div className="mt-1">
-                    <MultiSelect
-                      options={PROFESSIONAL_ROLES}
-                      value={form.watch("seekingOpportunities") || []}
-                      onChange={(newValue) => form.setValue("seekingOpportunities", newValue)}
-                      placeholder="Select roles you're interested in..."
-                    />
+          {/* Right Column */}
+          <div className="space-y-8">
+            {/* About Me Sections */}
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">About Me</h3>
+                <div className="mt-6 space-y-6">
+                  {/* What I'm Seeking */}
+                  <div>
+                    <label htmlFor="whatImSeeking" className="block text-sm font-medium text-gray-700">
+                      What I'm Seeking
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        {...form.register("whatImSeeking")}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Describe the type of position and environment you're looking for... (Optional)"
+                      />
+                    </div>
+                    {form.formState.errors.whatImSeeking && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.whatImSeeking.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.seekingOpportunities && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.seekingOpportunities.message}</p>
-                  )}
-                </div>
 
-                {/* Skills */}
-                <div>
-                  <label htmlFor="skills" className="block text-sm font-medium text-gray-700">
-                    Skills & Tags
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      {...form.register("skills")}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Enter skills separated by commas (Optional)"
-                    />
+                  {/* Why I Enjoy This Work */}
+                  <div>
+                    <label htmlFor="whyIEnjoyThisWork" className="block text-sm font-medium text-gray-700">
+                      Why I Enjoy This Work
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        {...form.register("whyIEnjoyThisWork")}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Share what motivates you and why you're passionate about this field... (Optional)"
+                      />
+                    </div>
+                    {form.formState.errors.whyIEnjoyThisWork && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.whyIEnjoyThisWork.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.skills && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.skills.message}</p>
-                  )}
-                </div>
 
-                {/* Pay Range */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Pay Range (Optional)
-                  </label>
-                  <div className="mt-1 grid grid-cols-3 gap-4">
-                    <div>
-                      <label htmlFor="payRangeMin" className="sr-only">
-                        Minimum
-                      </label>
-                      <div className="relative rounded-md shadow-sm">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <CurrencyDollarIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </div>
-                        <input
-                          type="number"
-                          {...form.register("payRangeMin")}
-                          className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          placeholder="Min"
-                        />
-                      </div>
+                  {/* What Sets Me Apart */}
+                  <div>
+                    <label htmlFor="whatSetsApartMe" className="block text-sm font-medium text-gray-700">
+                      What Sets Me Apart
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        {...form.register("whatSetsApartMe")}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Highlight your unique qualities and experiences... (Optional)"
+                      />
                     </div>
-                    <div>
-                      <label htmlFor="payRangeMax" className="sr-only">
-                        Maximum
-                      </label>
-                      <div className="relative rounded-md shadow-sm">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                          <CurrencyDollarIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        </div>
-                        <input
-                          type="number"
-                          {...form.register("payRangeMax")}
-                          className="block w-full rounded-md border-gray-300 pl-10 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          placeholder="Max"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="payCurrency" className="sr-only">
-                        Currency
-                      </label>
-                      <select
-                        {...form.register("payCurrency")}
-                        className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      >
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                        <option value="CAD">CAD</option>
-                        <option value="AUD">AUD</option>
-                      </select>
-                    </div>
+                    {form.formState.errors.whatSetsApartMe && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.whatSetsApartMe.message}</p>
+                    )}
                   </div>
-                  {(form.formState.errors.payRangeMin || form.formState.errors.payRangeMax) && (
-                    <p className="mt-1 text-sm text-red-600">
-                      {form.formState.errors.payRangeMin?.message || form.formState.errors.payRangeMax?.message}
-                    </p>
-                  )}
+
+                  {/* Ideal Environment */}
+                  <div>
+                    <label htmlFor="idealEnvironment" className="block text-sm font-medium text-gray-700">
+                      Ideal Environment
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        {...form.register("idealEnvironment")}
+                        rows={4}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Describe your ideal work environment and culture... (Optional)"
+                      />
+                    </div>
+                    {form.formState.errors.idealEnvironment && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.idealEnvironment.message}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Media Uploads */}
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">Portfolio & Media</h3>
+                <div className="mt-6 space-y-6">
+                  <p className="text-sm text-gray-500 italic">
+                    By uploading photos and media, you confirm that you have the necessary rights, licenses, and permissions to use and share this content. You must own the content or have explicit permission to use it professionally.
+                  </p>
+                  {/* Additional Photos */}
+                  <MediaUpload
+                    type="photo"
+                    currentFiles={uploadedPhotos}
+                    onUpload={(urls) => setUploadedPhotos([...uploadedPhotos, ...urls])}
+                    onRemove={(url) => setUploadedPhotos(uploadedPhotos.filter((p) => p !== url))}
+                    maxFiles={5}
+                  />
+
+                  {/* Additional Media */}
+                  <MediaUpload
+                    type="media"
+                    currentFiles={uploadedMedia}
+                    onUpload={(urls) => setUploadedMedia([...uploadedMedia, ...urls])}
+                    onRemove={(url) => setUploadedMedia(uploadedMedia.filter((m) => m !== url))}
+                    maxFiles={3}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column */}
-        <div className="space-y-8">
-          {/* About Me Sections */}
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">About Me</h3>
-              <div className="mt-6 space-y-6">
-                {/* What I'm Seeking */}
-                <div>
-                  <label htmlFor="whatImSeeking" className="block text-sm font-medium text-gray-700">
-                    What I'm Seeking
-                  </label>
-                  <div className="mt-1">
-                    <textarea
-                      {...form.register("whatImSeeking")}
-                      rows={4}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Describe the type of position and environment you're looking for... (Optional)"
-                    />
-                  </div>
-                  {form.formState.errors.whatImSeeking && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.whatImSeeking.message}</p>
-                  )}
-                </div>
-
-                {/* Why I Enjoy This Work */}
-                <div>
-                  <label htmlFor="whyIEnjoyThisWork" className="block text-sm font-medium text-gray-700">
-                    Why I Enjoy This Work
-                  </label>
-                  <div className="mt-1">
-                    <textarea
-                      {...form.register("whyIEnjoyThisWork")}
-                      rows={4}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Share what motivates you and why you're passionate about this field... (Optional)"
-                    />
-                  </div>
-                  {form.formState.errors.whyIEnjoyThisWork && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.whyIEnjoyThisWork.message}</p>
-                  )}
-                </div>
-
-                {/* What Sets Me Apart */}
-                <div>
-                  <label htmlFor="whatSetsApartMe" className="block text-sm font-medium text-gray-700">
-                    What Sets Me Apart
-                  </label>
-                  <div className="mt-1">
-                    <textarea
-                      {...form.register("whatSetsApartMe")}
-                      rows={4}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Highlight your unique qualities and experiences... (Optional)"
-                    />
-                  </div>
-                  {form.formState.errors.whatSetsApartMe && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.whatSetsApartMe.message}</p>
-                  )}
-                </div>
-
-                {/* Ideal Environment */}
-                <div>
-                  <label htmlFor="idealEnvironment" className="block text-sm font-medium text-gray-700">
-                    Ideal Environment
-                  </label>
-                  <div className="mt-1">
-                    <textarea
-                      {...form.register("idealEnvironment")}
-                      rows={4}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      placeholder="Describe your ideal work environment and culture... (Optional)"
-                    />
-                  </div>
-                  {form.formState.errors.idealEnvironment && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.idealEnvironment.message}</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Media Uploads */}
-          <div className="bg-white shadow sm:rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">Portfolio & Media</h3>
-              <div className="mt-6 space-y-6">
-                <p className="text-sm text-gray-500 italic">
-                  By uploading photos and media, you confirm that you have the necessary rights, licenses, and permissions to use and share this content. You must own the content or have explicit permission to use it professionally.
-                </p>
-                {/* Additional Photos */}
-                <MediaUpload
-                  type="photo"
-                  currentFiles={uploadedPhotos}
-                  onUpload={(urls) => setUploadedPhotos([...uploadedPhotos, ...urls])}
-                  onRemove={(url) => setUploadedPhotos(uploadedPhotos.filter((p) => p !== url))}
-                  maxFiles={5}
-                />
-
-                {/* Additional Media */}
-                <MediaUpload
-                  type="media"
-                  currentFiles={uploadedMedia}
-                  onUpload={(urls) => setUploadedMedia([...uploadedMedia, ...urls])}
-                  onRemove={(url) => setUploadedMedia(uploadedMedia.filter((m) => m !== url))}
-                  maxFiles={3}
-                />
-              </div>
-            </div>
-          </div>
+        {/* Submit Button */}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+          >
+            {isLoading ? "Saving..." : "Save Changes"}
+          </button>
         </div>
-      </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-        >
-          {isLoading ? "Saving..." : "Save Changes"}
-        </button>
-      </div>
-
-      {/* Improved Bio Modal */}
-      <ImprovedBioModal
-        isOpen={showImprovedBioModal}
-        onClose={() => setShowImprovedBioModal(false)}
-        originalBio={currentBio || ""}
-        improvedBio={improvedBio}
-        onAccept={handleAcceptImprovedBio}
-        isLoading={isImprovingBio}
-      />
-    </form>
+        {/* Improved Bio Modal */}
+        <ImprovedBioModal
+          isOpen={showImprovedBioModal}
+          onClose={() => setShowImprovedBioModal(false)}
+          originalBio={currentBio || ""}
+          improvedBio={improvedBio}
+          onAccept={handleAcceptImprovedBio}
+          isLoading={isImprovingBio}
+        />
+      </form>
+    </Form>
   );
 } 

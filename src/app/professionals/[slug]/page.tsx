@@ -14,6 +14,7 @@ import {
   LinkIcon,
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
+import { notFound } from "next/navigation";
 
 interface Experience {
   title: string;
@@ -55,6 +56,7 @@ interface PublicProfile {
     createdAt: string;
     email: string;
     phoneNumber: string | null;
+    isAnonymous: boolean;
   };
   preferredRole: string | null;
 }
@@ -84,21 +86,26 @@ async function getProfile(slug: string): Promise<PublicProfile> {
   return data;
 }
 
+// Helper function to get display name based on anonymous setting
+function getDisplayName(profile: PublicProfile) {
+  if (profile.user.isAnonymous) {
+    const firstInitial = profile.user.firstName?.[0] || '';
+    const lastInitial = profile.user.lastName?.[0] || '';
+    return `${firstInitial}. ${lastInitial}.`;
+  }
+  return `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim();
+}
+
 export default async function PublicProfilePage({
   params,
 }: {
   params: { slug: string };
 }) {
-  console.log("[PROFILE_PAGE] Rendering page for slug:", params.slug);
-  
   const profile = await getProfile(params.slug);
-  
-  console.log("[PROFILE_PAGE] Profile loaded:", {
-    hasProfile: !!profile,
-    hasBio: !!profile?.bio,
-    hasSkills: profile?.skills?.length > 0,
-    hasExperience: profile?.experience?.length > 0,
-  });
+
+  if (!profile) {
+    notFound();
+  }
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -111,11 +118,11 @@ export default async function PublicProfilePage({
               {/* Profile Header */}
               <div className="flex items-center mb-6">
                 <div className="flex-shrink-0">
-                  {profile.user.image ? (
+                  {!profile.user.isAnonymous && profile.user.image ? (
                     <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
                       <Image
                         src={profile.user.image}
-                        alt={`${profile.user.firstName} ${profile.user.lastName}`}
+                        alt={getDisplayName(profile)}
                         width={96}
                         height={96}
                         className="h-full w-full object-cover"
@@ -129,18 +136,22 @@ export default async function PublicProfilePage({
                 </div>
                 <div className="ml-6">
                   <h1 className="text-2xl font-bold text-gray-900">
-                    {profile.user.firstName} {profile.user.lastName}
+                    {getDisplayName(profile)}
                   </h1>
                   <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-                  <div className="mt-2 flex items-center text-sm text-gray-500">
-                    <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                    {profile.user.email}
-                  </div>
-                  {profile.user.phoneNumber && (
-                    <div className="mt-1 flex items-center text-sm text-gray-500">
-                      <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {profile.user.phoneNumber}
-                    </div>
+                  {!profile.user.isAnonymous && (
+                    <>
+                      <div className="mt-2 flex items-center text-sm text-gray-500">
+                        <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        {profile.user.email}
+                      </div>
+                      {profile.user.phoneNumber && (
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                          {profile.user.phoneNumber}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

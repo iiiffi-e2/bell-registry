@@ -13,7 +13,6 @@ if (!RESEND_API_KEY) {
 const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
-console.log('[EMAIL_SETUP] Environment:', isDevelopment ? 'Development' : 'Production');
 
 // Use Resend's development domain in dev mode
 const FROM_EMAIL = isDevelopment 
