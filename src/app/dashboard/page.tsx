@@ -456,7 +456,7 @@ export default function DashboardPage() {
                     {recommendedJobs.map((job) => (
                       <Link
                         key={job.id}
-                        href={`/jobs/${job.id}`}
+                        href={`/jobs/${job.urlSlug}`}
                         className="block p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors"
                       >
                         <div className="flex justify-between items-start">
