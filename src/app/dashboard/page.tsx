@@ -13,6 +13,7 @@ import {
   BuildingOfficeIcon,
   BookmarkIcon,
   DocumentTextIcon,
+  BellIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useProfile } from "@/providers/profile-provider";
@@ -91,7 +92,7 @@ const upcomingInterviews = [
 ];
 
 const quickActions = [
-  { name: "New Application", icon: DocumentCheckIcon },
+  { name: "Job Alerts", icon: BellIcon },
   { name: "Update Profile", icon: UserCircleIcon },
   { name: "Resume", icon: DocumentTextIcon },
   { name: "Saved Jobs", icon: BookmarkIcon },
@@ -511,6 +512,18 @@ export default function DashboardPage() {
                       </Link>
                     );
                   }
+                  if (action.name === "Job Alerts") {
+                    return (
+                      <Link
+                        key={action.name}
+                        href="/dashboard/job-alerts"
+                        className="w-full flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white px-4 py-6 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      >
+                        <action.icon className="h-6 w-6 mb-2 text-blue-400" />
+                        <span className="font-medium text-center w-full">{action.name}</span>
+                      </Link>
+                    );
+                  }
                   if (action.name === "Saved Jobs") {
                     return (
                       <Link
@@ -553,3 +566,5 @@ function EmployerDashboard() {
     </div>
   );
 }
+
+
