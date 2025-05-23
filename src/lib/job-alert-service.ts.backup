@@ -41,7 +41,7 @@ export async function findMatchingJobs(
       createdAt: {
         gte: since,
       },
-      AND: [
+      OR: [
         // Match by role/title
         {
           OR: roles.map(role => ({
@@ -228,4 +228,3 @@ export async function processJobAlerts(frequency: 'DAILY' | 'WEEKLY') {
     }
   }
 } 
-
