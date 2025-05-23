@@ -697,6 +697,9 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium leading-6 text-gray-900">Portfolio & Media</h3>
               <div className="mt-6 space-y-6">
+                <p className="text-sm text-gray-500 italic">
+                  By uploading photos and media, you confirm that you have the necessary rights, licenses, and permissions to use and share this content. You must own the content or have explicit permission to use it professionally.
+                </p>
                 {/* Additional Photos */}
                 <MediaUpload
                   type="photo"
