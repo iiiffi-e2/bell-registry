@@ -13,6 +13,7 @@ import {
   DocumentTextIcon,
   HomeIcon,
   BookmarkIcon,
+  InboxIcon,
 } from "@heroicons/react/24/outline";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -58,6 +59,12 @@ export default function DashboardLayout({
       current: pathname === "/dashboard/jobs",
     },
     {
+      name: "Job Alerts",
+      href: "/dashboard/job-alerts",
+      icon: BellIcon,
+      current: pathname === "/dashboard/job-alerts",
+    },
+    {
       name: "Applications",
       href: "/dashboard/applications",
       icon: DocumentTextIcon,
@@ -72,7 +79,7 @@ export default function DashboardLayout({
     {
       name: "Notifications",
       href: "/dashboard/notifications",
-      icon: BellIcon,
+      icon: InboxIcon,
       current: pathname === "/dashboard/notifications",
     },
   ];

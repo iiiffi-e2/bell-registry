@@ -83,6 +83,7 @@ model User {
   resetToken          String?              @unique
   resetTokenExpiry    DateTime?            @db.Timestamptz(6)
   isAnonymous         Boolean              @default(false)
+  jobAlerts           JobAlert[]
 }
 
 model CandidateProfile {
@@ -196,6 +197,24 @@ model ProfileViewEvent {
   user      User     @relation(fields: [userId], references: [id])
 }
 
+model JobAlert {
+  id          String         @id @default(cuid())
+  userId      String
+  name        String
+  roles       String[]
+  locations   String[]
+  frequency   AlertFrequency @default(WEEKLY)
+  isActive    Boolean        @default(true)
+  lastSent    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isActive])
+  @@index([frequency])
+}
+
 enum UserRole {
   PROFESSIONAL
   EMPLOYER
@@ -217,4 +236,9 @@ enum ApplicationStatus {
   OFFER
   REJECTED
   ACCEPTED
+}
+
+enum AlertFrequency {
+  DAILY
+  WEEKLY
 }
