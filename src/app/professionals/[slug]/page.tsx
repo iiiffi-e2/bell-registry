@@ -342,7 +342,7 @@ export default async function PublicProfilePage({
               )}
 
               {/* Resume */}
-              {profile.resumeUrl && (
+              {!profile.user.isAnonymous && profile.resumeUrl && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-500 mb-2">Resume</h4>
                   <a
@@ -358,7 +358,7 @@ export default async function PublicProfilePage({
               )}
 
               {/* Photo Gallery */}
-              {profile.additionalPhotos.length > 0 && (
+              {!profile.user.isAnonymous && profile.additionalPhotos.length > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <PhotoGallery photos={profile.additionalPhotos} />
                 </div>
