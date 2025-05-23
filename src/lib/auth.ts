@@ -84,7 +84,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error("Invalid credentials");
+          throw new Error("No account found with this email address");
         }
 
         const isCorrectPassword = await bcrypt.compare(
@@ -93,7 +93,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
+          throw new Error("Incorrect password");
         }
 
         return {

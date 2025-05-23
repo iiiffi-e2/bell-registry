@@ -54,7 +54,7 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        setError("Invalid email or password");
+        setError(result.error);
         return;
       }
 
@@ -78,6 +78,16 @@ export function LoginForm() {
           <div className="flex">
             <div className="ml-3">
               <h3 className="text-sm font-medium text-green-800">{successMessage}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="rounded-md bg-red-50 p-4 mb-4">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800">{error}</h3>
             </div>
           </div>
         </div>
