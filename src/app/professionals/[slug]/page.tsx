@@ -261,6 +261,19 @@ export default async function PublicProfilePage({
                 </div>
               )}
 
+              {/* Availability */}
+              {profile.availability && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Available From</h4>
+                  <p className="text-gray-900">
+                    {(() => {
+                      const [year, month, day] = profile.availability.split('T')[0].split('-');
+                      return `${month}/${day}/${year.slice(2)}`;
+                    })()}
+                  </p>
+                </div>
+              )}
+
               {/* Seeking Opportunities */}
               {profile.seekingOpportunities?.length > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg">

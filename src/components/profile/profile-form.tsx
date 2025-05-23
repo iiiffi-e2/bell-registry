@@ -79,6 +79,14 @@ const profileSchema = z.object({
       const num = parseInt(val);
       return isNaN(num) ? null : num;
     }),
+  availability: z.string()
+    .optional()
+    .transform((val) => {
+      if (!val || val === "") return null;
+      // Ensure we store the date at the end of the day in UTC
+      // This way when converted to any timezone it will still be the same date
+      return `${val}T23:59:59.999Z`;
+    }),
   
   // Professional Bio
   bio: z.string().min(50, "Bio must be at least 50 characters"),
@@ -110,7 +118,6 @@ const profileSchema = z.object({
   certifications: z.string()
     .optional()
     .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
-  availability: z.string().optional(),
   experience: z.array(z.any()).optional(),
   phoneNumber: z.string().optional(),
 });
@@ -283,6 +290,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             workLocations: data.workLocations || [],
             openToRelocation: data.openToRelocation || false,
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
+            // Just take the date part when loading back into the form
+            availability: data.availability ? data.availability.split('T')[0] : "",
             bio: data.bio || "",
             whatImSeeking: data.whatImSeeking || "",
             whyIEnjoyThisWork: data.whyIEnjoyThisWork || "",
@@ -296,7 +305,6 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             additionalPhotos: data.additionalPhotos || [],
             mediaUrls: data.mediaUrls || [],
             certifications: data.certifications?.join(", ") || "",
-            availability: data.availability || "",
             experience: data.experience || [],
             phoneNumber: data.phoneNumber || "",
           });
@@ -432,23 +440,42 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                   )}
                 </div>
 
-                {/* Years of Experience */}
-                <div>
-                  <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
-                    Years of Experience
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="number"
-                      {...form.register("yearsOfExperience")}
-                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                      min="0"
-                      placeholder="Optional"
-                    />
+                {/* Years of Experience and Availability */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="yearsOfExperience" className="block text-sm font-medium text-gray-700">
+                      Years of Experience
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="number"
+                        {...form.register("yearsOfExperience")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        min="0"
+                        placeholder="Optional"
+                      />
+                    </div>
+                    {form.formState.errors.yearsOfExperience && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.yearsOfExperience.message}</p>
+                    )}
                   </div>
-                  {form.formState.errors.yearsOfExperience && (
-                    <p className="mt-1 text-sm text-red-600">{form.formState.errors.yearsOfExperience.message}</p>
-                  )}
+
+                  <div>
+                    <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
+                      Availability Date
+                    </label>
+                    <div className="mt-1">
+                      <input
+                        type="date"
+                        {...form.register("availability")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        placeholder="Optional"
+                      />
+                    </div>
+                    {form.formState.errors.availability && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.availability.message}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* Location Fields */}
