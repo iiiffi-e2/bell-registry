@@ -21,6 +21,14 @@ interface JobWithEmployer {
   salary: any;
   requirements: string[];
   createdAt: Date;
+  urlSlug: string;
+  employerId: string;
+  status: string;
+  jobType: string | null;
+  employmentType: string | null;
+  expiresAt: Date | null;
+  featured: boolean;
+  isDemo: boolean;
   employer: {
     firstName: string | null;
     lastName: string | null;
@@ -79,7 +87,7 @@ export async function findMatchingJobs(
       createdAt: 'desc',
     },
     take: 10, // Limit to 10 jobs per alert
-  });
+  }) as unknown as JobWithEmployer[];
 
   return jobs;
 }
@@ -106,7 +114,7 @@ export async function sendJobAlertEmail(
   const jobsHtml = jobs.map(job => `
     <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; background-color: #ffffff;">
       <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px; font-weight: 600;">
-        <a href="${baseUrl}/jobs/${job.id}" style="color: #2563eb; text-decoration: none;">${job.title}</a>
+        <a href="${baseUrl}/jobs/${job.urlSlug}" style="color: #2563eb; text-decoration: none;">${job.title}</a>
       </h3>
       <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">
         ${job.employer.employerProfile?.companyName || `${job.employer.firstName} ${job.employer.lastName}`} • ${job.location}
@@ -116,7 +124,7 @@ export async function sendJobAlertEmail(
       </p>
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <span style="color: #059669; font-weight: 500; font-size: 14px;">${formatSalary(job.salary)}</span>
-        <a href="${baseUrl}/jobs/${job.id}" style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+        <a href="${baseUrl}/jobs/${job.urlSlug}" style="background-color: #2563eb; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
           View Job
         </a>
       </div>
