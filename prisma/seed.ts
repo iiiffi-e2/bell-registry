@@ -1,4 +1,6 @@
 import { PrismaClient, UserRole, JobStatus } from '@prisma/client'
+import { generateJobUrlSlug } from '../src/lib/job-utils'
+
 const prisma = new PrismaClient()
 
 const jobTitles = [
@@ -625,6 +627,7 @@ async function main() {
         jobType,
         employmentType,
         isDemo: true,
+        urlSlug: generateJobUrlSlug(title),
       }
     })
     jobs.push(job)

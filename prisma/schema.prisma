@@ -146,6 +146,7 @@ model Job {
   status       JobStatus        @default(ACTIVE)
   jobType      String?         // Full-time, Part-time, Contract, Temporary
   employmentType String?       // On-site, Remote, Hybrid
+  urlSlug      String           @unique // Unique URL slug combining title and alphanumeric code
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
   expiresAt    DateTime?

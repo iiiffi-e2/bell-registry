@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -52,6 +53,7 @@ interface Job {
   status: string;
   featured: boolean;
   createdAt: string;
+  urlSlug: string;
   employer: {
     firstName: string;
     lastName: string;
@@ -126,6 +128,7 @@ const FilterButton = React.memo(({
 FilterButton.displayName = 'FilterButton';
 
 function JobSearchPageContent() {
+  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -250,11 +253,16 @@ function JobSearchPageContent() {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
+  const handleJobClick = (job: Job) => {
+    router.push(`/jobs/${job.urlSlug}`);
+  };
+
   const JobCard = ({ job, isLoading }: { job: Job; isLoading?: boolean }) => (
     <div 
-      className={`bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200 ${
+      className={`bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow duration-200 cursor-pointer ${
         job.featured ? 'border-2 border-blue-500 relative' : ''
       } ${isLoading ? 'opacity-50' : ''}`}
+      onClick={() => handleJobClick(job)}
     >
       {job.featured && (
         <div className="absolute -top-3 left-4">
@@ -265,7 +273,7 @@ function JobSearchPageContent() {
       )}
       <div className="flex justify-between items-start">
         <div>
-          <h3 className="text-lg font-medium text-gray-900">{job.title}</h3>
+          <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">{job.title}</h3>
           <div className="mt-1 flex items-center text-sm text-gray-500">
             <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
             <span className="ml-1">{job.employer.employerProfile.companyName}</span>
@@ -281,7 +289,10 @@ function JobSearchPageContent() {
         </div>
         <button
           type="button"
-          onClick={() => handleBookmark(job.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleBookmark(job.id);
+          }}
           className={`rounded-full p-1 ${
             job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
           }`}
@@ -314,9 +325,10 @@ function JobSearchPageContent() {
 
   const JobListItem = ({ job, isLoading }: { job: Job; isLoading?: boolean }) => (
     <div
-      className={`p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out ${
+      className={`p-4 sm:px-6 hover:bg-gray-50 transition duration-150 ease-in-out cursor-pointer ${
         job.featured ? 'bg-blue-50 relative pt-8' : ''
       } ${isLoading ? 'opacity-50' : ''}`}
+      onClick={() => handleJobClick(job)}
     >
       {job.featured && (
         <div className="absolute top-2 left-4">
@@ -329,7 +341,7 @@ function JobSearchPageContent() {
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-medium leading-6 text-gray-900">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 hover:text-blue-600 transition-colors">
                 {job.title}
               </h3>
               <div className="mt-1 flex items-center">
@@ -349,7 +361,10 @@ function JobSearchPageContent() {
             </div>
             <button
               type="button"
-              onClick={() => handleBookmark(job.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBookmark(job.id);
+              }}
               className={`rounded-full p-1 ${
                 job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
               }`}

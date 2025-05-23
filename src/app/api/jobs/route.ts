@@ -1,8 +1,10 @@
 // To use fuzzy search, ensure the pg_trgm extension is enabled in your PostgreSQL database:
 // CREATE EXTENSION IF NOT EXISTS pg_trgm;
-import { NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { JobStatus, Prisma } from '@prisma/client'
+import { getServerSession } from 'next-auth'
+import { generateJobUrlSlug } from '@/lib/job-utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -212,5 +214,100 @@ export async function GET(request: Request) {
       { error: 'Failed to fetch jobs' },
       { status: 500 }
     )
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getServerSession();
+    
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const {
+      title,
+      description,
+      location,
+      type,
+      salaryMin,
+      salaryMax,
+      requirements,
+      benefits,
+      applicationDeadline
+    } = body;
+
+    // Validate required fields
+    if (!title || !description || !location || !type || !salaryMin || !salaryMax || !requirements) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    // Generate URL slug
+    const urlSlug = generateJobUrlSlug(title);
+
+    // Parse requirements (assuming it's a string that needs to be split into array)
+    const requirementsArray = requirements.split('\n').filter((req: string) => req.trim());
+
+    // Create salary object
+    const salary = {
+      min: parseInt(salaryMin),
+      max: parseInt(salaryMax),
+      currency: 'USD'
+    };
+
+    // Set expiry date (30 days from now by default)
+    const expiresAt = applicationDeadline 
+      ? new Date(applicationDeadline)
+      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+
+    const job = await prisma.job.create({
+      data: {
+        employerId: session.user.id,
+        title,
+        description,
+        location,
+        requirements: requirementsArray,
+        salary,
+        status: JobStatus.ACTIVE,
+        jobType: type,
+        employmentType: 'On-site', // Default value, you might want to add this to the form
+        urlSlug,
+        expiresAt,
+        featured: false,
+        isDemo: false,
+      } as any,
+      include: {
+        employer: {
+          select: {
+            firstName: true,
+            lastName: true,
+            employerProfile: {
+              select: {
+                companyName: true,
+              }
+            }
+          }
+        }
+      }
+    });
+
+    return NextResponse.json({
+      success: true,
+      job,
+    });
+
+  } catch (error) {
+    console.error('Error creating job:', error);
+    return NextResponse.json(
+      { error: 'Failed to create job' },
+      { status: 500 }
+    );
   }
 } 
