@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth';
 
 export async function POST(
   request: Request,
-  { params }: { params: { jobId: string } }
+  { params }: { params: { slug: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -16,12 +16,9 @@ export async function POST(
       );
     }
 
-    const jobId = params.jobId;
-    const userId = session.user.id;
-
-    // Check if job exists
+    // Find job by slug
     const job = await prisma.job.findUnique({
-      where: { id: jobId },
+      where: { urlSlug: params.slug } as any,
     });
 
     if (!job) {
@@ -30,6 +27,9 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    const jobId = job.id;
+    const userId = session.user.id;
 
     // Check if job is already bookmarked
     const existingBookmark = await prisma.savedJob.findUnique({
@@ -74,7 +74,7 @@ export async function POST(
 // Get bookmark status for a job
 export async function GET(
   request: Request,
-  { params }: { params: { jobId: string } }
+  { params }: { params: { slug: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -85,7 +85,19 @@ export async function GET(
       );
     }
 
-    const jobId = params.jobId;
+    // Find job by slug
+    const job = await prisma.job.findUnique({
+      where: { urlSlug: params.slug } as any,
+    });
+
+    if (!job) {
+      return NextResponse.json(
+        { error: 'Job not found' },
+        { status: 404 }
+      );
+    }
+
+    const jobId = job.id;
     const userId = session.user.id;
 
     const bookmark = await prisma.savedJob.findUnique({

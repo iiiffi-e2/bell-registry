@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, Users, Bookmark, Briefcase, Plus, ArrowRight } from "lucide-react";
+import { Eye, Users, Bookmark, Briefcase, Plus, ArrowRight, Pencil } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -186,11 +186,18 @@ export function EmployerDashboard() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/dashboard/employer/jobs/${job.urlSlug}`} className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
-                          </Link>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/dashboard/employer/jobs/${job.urlSlug}`} className="flex items-center gap-1">
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/dashboard/employer/jobs/${job.urlSlug}/edit`} className="flex items-center gap-1">
+                              <Pencil className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -30,6 +30,7 @@ interface Job {
       companyName: string;
     };
   };
+  urlSlug: string;
 }
 
 export default function SavedJobsPage() {
@@ -63,6 +64,9 @@ export default function SavedJobsPage() {
     try {
       const response = await fetch(`/api/jobs/${jobId}/bookmark`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) throw new Error('Failed to unsave job');

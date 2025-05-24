@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,12 +13,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useFieldArray } from "react-hook-form";
-import * as z from "zod";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -26,6 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import * as z from "zod";
+import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
 
 const EMPLOYMENT_TYPES = [
@@ -45,29 +44,6 @@ const JOB_TYPES = [
   "Freelance",
   "Per Diem"
 ] as const;
-
-type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
-type JobType = (typeof JOB_TYPES)[number];
-
-const jobFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  professionalRole: z.string().min(1, "Professional role is required"),
-  description: z.string().min(1, "Description is required"),
-  location: z.string().min(1, "Location is required"),
-  requirements: z.array(z.string()).min(1, "At least one requirement is required"),
-  salaryMin: z.string().min(1, "Minimum salary is required"),
-  salaryMax: z.string().min(1, "Maximum salary is required"),
-  jobType: z.enum(JOB_TYPES, {
-    required_error: "Job type is required",
-  }),
-  employmentType: z.enum(EMPLOYMENT_TYPES, {
-    required_error: "Employment type is required",
-  }),
-  featured: z.boolean().default(false),
-  expiresAt: z.string().min(1, "Expiry date is required"),
-});
-
-type JobFormValues = z.infer<typeof jobFormSchema>;
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -120,40 +96,101 @@ const PROFESSIONAL_ROLES = [
   "Other"
 ];
 
-const defaultValues: Partial<JobFormValues> = {
-  featured: false,
-  jobType: "Permanent" as JobType,
-  employmentType: "Full-time" as EmploymentType,
-  requirements: [""],
-};
+type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
+type JobType = (typeof JOB_TYPES)[number];
 
-export default function PostJobPage() {
+const jobFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  professionalRole: z.string().min(1, "Professional role is required"),
+  description: z.string().min(1, "Description is required"),
+  location: z.string().min(1, "Location is required"),
+  requirements: z.array(z.string()).min(1, "At least one requirement is required"),
+  salaryMin: z.string().min(1, "Minimum salary is required"),
+  salaryMax: z.string().min(1, "Maximum salary is required"),
+  jobType: z.enum(JOB_TYPES, {
+    required_error: "Job type is required",
+  }),
+  employmentType: z.enum(EMPLOYMENT_TYPES, {
+    required_error: "Employment type is required",
+  }),
+  featured: z.boolean().default(false),
+  expiresAt: z.string().min(1, "Expiry date is required"),
+});
+
+type JobFormValues = z.infer<typeof jobFormSchema>;
+
+export default function EditJobPage() {
+  const params = useParams();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>("");
-  const [customTitle, setCustomTitle] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
-    defaultValues,
+    defaultValues: {
+      title: "",
+      professionalRole: "",
+      description: "",
+      location: "",
+      requirements: [""],
+      salaryMin: "",
+      salaryMax: "",
+      jobType: "Permanent",
+      employmentType: "Full-time",
+      featured: false,
+      expiresAt: "",
+    }
   });
 
   const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
-    name: "requirements",
     control: form.control,
+    name: "requirements",
   });
 
-  // Update form title when role is selected
   useEffect(() => {
-    if (selectedRole) {
-      if (selectedRole === "Other") {
-        form.setValue("title", customTitle);
-      } else {
-        form.setValue("title", selectedRole);
-        setCustomTitle("");
+    async function fetchJobDetails() {
+      try {
+        const response = await fetch(`/api/jobs/details/${params.slug}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch job details");
+        }
+
+        const data = await response.json();
+        const job = data.job;
+
+        // Extract professional role from title if it exists
+        const titleParts = job.title.split(" - ");
+        const professionalRole = PROFESSIONAL_ROLES.find(
+          role => titleParts[0] === role
+        ) || "Other";
+        const displayTitle = titleParts.length > 1 ? titleParts[1] : titleParts[0];
+
+        // Format the date to YYYY-MM-DD for the input
+        const expiryDate = new Date(job.expiresAt).toISOString().split('T')[0];
+
+        form.reset({
+          title: displayTitle,
+          professionalRole,
+          description: job.description,
+          location: job.location,
+          requirements: job.requirements,
+          salaryMin: job.salary.min.toString(),
+          salaryMax: job.salary.max.toString(),
+          jobType: job.jobType as JobType,
+          employmentType: job.employmentType as EmploymentType,
+          featured: job.featured,
+          expiresAt: expiryDate,
+        });
+      } catch (error) {
+        console.error("Error fetching job details:", error);
+        toast.error("Failed to load job details");
+      } finally {
+        setIsLoading(false);
       }
     }
-  }, [selectedRole, customTitle, form]);
+
+    fetchJobDetails();
+  }, [params.slug, form]);
 
   async function onSubmit(data: JobFormValues) {
     try {
@@ -162,8 +199,14 @@ export default function PostJobPage() {
       // Filter out empty requirements
       const requirements = data.requirements.filter(req => req.trim() !== "");
 
+      // Combine professional role and title
+      const fullTitle = data.professionalRole === "Other" 
+        ? data.title 
+        : `${data.professionalRole} - ${data.title}`;
+
       const jobData = {
         ...data,
+        title: fullTitle,
         requirements,
         salary: {
           min: parseInt(data.salaryMin),
@@ -172,8 +215,8 @@ export default function PostJobPage() {
         },
       };
 
-      const response = await fetch("/api/jobs", {
-        method: "POST",
+      const response = await fetch(`/api/jobs/${params.slug}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -181,25 +224,33 @@ export default function PostJobPage() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create job");
+        throw new Error("Failed to update job");
       }
 
-      toast.success("Job posted successfully!");
-      router.push("/dashboard/employer/jobs");
+      toast.success("Job updated successfully!");
+      router.push("/dashboard");
     } catch (error) {
-      toast.error("Failed to post job. Please try again.");
-      console.error("Error posting job:", error);
+      toast.error("Failed to update job. Please try again.");
+      console.error("Error updating job:", error);
     } finally {
       setIsSubmitting(false);
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Post a New Job</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Edit Job Posting</h1>
         <p className="mt-2 text-gray-600">
-          Fill in the details below to create a new job listing
+          Update the details of your job listing
         </p>
       </div>
 
@@ -261,9 +312,8 @@ export default function PostJobPage() {
                 <FormItem>
                   <FormLabel>Job Description</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <Input
                       placeholder="Describe the role and responsibilities..."
-                      className="min-h-[200px]"
                       {...field}
                     />
                   </FormControl>
@@ -271,47 +321,6 @@ export default function PostJobPage() {
                 </FormItem>
               )}
             />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. New York, NY" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="jobType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Job Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select job type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {JOB_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
@@ -341,13 +350,24 @@ export default function PostJobPage() {
 
               <FormField
                 control={form.control}
-                name="expiresAt"
+                name="jobType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expiry Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
+                    <FormLabel>Job Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select job type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JOB_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -433,6 +453,34 @@ export default function PostJobPage() {
 
             <FormField
               control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. New York, NY" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="expiresAt"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Expiry Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="featured"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
@@ -461,7 +509,7 @@ export default function PostJobPage() {
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Posting..." : "Post Job"}
+                {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>

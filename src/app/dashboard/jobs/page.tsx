@@ -206,7 +206,7 @@ function JobSearchPageContent() {
       
       const jobsWithBookmarks = await Promise.all(
         data.jobs.map(async (job: Job) => {
-          const bookmarkResponse = await fetch(`/api/jobs/${job.id}/bookmark`);
+          const bookmarkResponse = await fetch(`/api/jobs/${job.urlSlug}/bookmark`);
           if (bookmarkResponse.ok) {
             const { bookmarked } = await bookmarkResponse.json();
             return { ...job, isBookmarked: bookmarked };
@@ -230,6 +230,9 @@ function JobSearchPageContent() {
     try {
       const response = await fetch(`/api/jobs/${jobId}/bookmark`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (!response.ok) throw new Error('Failed to bookmark job');
