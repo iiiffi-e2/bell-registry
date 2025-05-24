@@ -144,6 +144,19 @@ function JobSearchPageContent() {
 
   const { filters: selectedFilters, toggleFilter } = useFilters();
 
+  // Set default view mode based on screen size
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 640px)');
+    setViewMode(mediaQuery.matches ? 'grid' : 'list');
+
+    const handleResize = (e: MediaQueryListEvent) => {
+      setViewMode(e.matches ? 'grid' : 'list');
+    };
+
+    mediaQuery.addEventListener('change', handleResize);
+    return () => mediaQuery.removeEventListener('change', handleResize);
+  }, []);
+
   useEffect(() => {
     fetchJobs(1);
   }, [searchTerm, selectedFilters]);
