@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { JobStatus, Prisma } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { generateJobUrlSlug } from '@/lib/job-utils'
+import { authOptions } from "@/lib/auth"
 
 export const dynamic = 'force-dynamic'
 
@@ -217,96 +218,47 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
-    
-    if (!session?.user?.id) {
+    const session = await getServerSession(authOptions);
+
+    if (!session || session.user.role !== "EMPLOYER") {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: "Unauthorized - Employers only" },
         { status: 401 }
       );
     }
 
-    const body = await request.json();
-    const {
-      title,
-      description,
-      location,
-      type,
-      salaryMin,
-      salaryMax,
-      requirements,
-      benefits,
-      applicationDeadline
-    } = body;
+    const data = await request.json();
 
-    // Validate required fields
-    if (!title || !description || !location || !type || !salaryMin || !salaryMax || !requirements) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Generate URL slug
-    const urlSlug = generateJobUrlSlug(title);
-
-    // Parse requirements (assuming it's a string that needs to be split into array)
-    const requirementsArray = requirements.split('\n').filter((req: string) => req.trim());
-
-    // Create salary object
-    const salary = {
-      min: parseInt(salaryMin),
-      max: parseInt(salaryMax),
-      currency: 'USD'
-    };
-
-    // Set expiry date (30 days from now by default)
-    const expiresAt = applicationDeadline 
-      ? new Date(applicationDeadline)
-      : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+    // Generate URL slug from title
+    const urlSlug = `${data.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")}-${Math.random().toString(36).substr(2, 6)}`;
 
     const job = await prisma.job.create({
       data: {
-        employerId: session.user.id,
-        title,
-        description,
-        location,
-        requirements: requirementsArray,
-        salary,
-        status: JobStatus.ACTIVE,
-        jobType: type,
-        employmentType: 'On-site', // Default value, you might want to add this to the form
+        title: data.title,
+        description: data.description,
+        location: data.location,
+        requirements: data.requirements,
+        salary: data.salary,
+        jobType: data.jobType,
+        employmentType: data.employmentType,
+        featured: data.featured,
+        expiresAt: new Date(data.expiresAt),
         urlSlug,
-        expiresAt,
-        featured: false,
-        isDemo: false,
-      } as any,
-      include: {
-        employer: {
-          select: {
-            firstName: true,
-            lastName: true,
-            employerProfile: {
-              select: {
-                companyName: true,
-              }
-            }
-          }
-        }
-      }
+        employerId: session.user.id,
+        status: JobStatus.ACTIVE,
+      },
     });
 
-    return NextResponse.json({
-      success: true,
-      job,
-    });
-
+    return NextResponse.json({ job }, { status: 201 });
   } catch (error) {
-    console.error('Error creating job:', error);
+    console.error("Error creating job:", error);
     return NextResponse.json(
-      { error: 'Failed to create job' },
+      { error: "Failed to create job" },
       { status: 500 }
     );
   }

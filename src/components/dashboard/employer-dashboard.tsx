@@ -23,6 +23,7 @@ interface Job {
   applicants: number;
   status: string;
   createdAt: string;
+  urlSlug: string;
 }
 
 interface Stats {
@@ -146,7 +147,7 @@ export function EmployerDashboard() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Active Job Listings</h2>
             <Button asChild>
-              <Link href="/dashboard/employer/jobs/new" className="flex items-center">
+              <Link href="/jobs/post" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
                 Post New Job
               </Link>
@@ -180,9 +181,8 @@ export function EmployerDashboard() {
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/dashboard/employer/jobs/${job.id}`} className="flex items-center">
-                            View Details
-                            <ArrowRight className="h-4 w-4 ml-1" />
+                          <Link href={`/jobs/${job.urlSlug}`} className="flex items-center gap-1">
+                            <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
                       </TableCell>
@@ -200,7 +200,7 @@ export function EmployerDashboard() {
               </p>
               <div className="mt-6">
                 <Button asChild>
-                  <Link href="/dashboard/employer/jobs/new" className="flex items-center">
+                  <Link href="/jobs/post" className="flex items-center">
                     <Plus className="h-4 w-4 mr-2" />
                     Post New Job
                   </Link>
