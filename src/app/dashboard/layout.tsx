@@ -68,7 +68,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { profile } = useProfile();
   const imageUrl = profile?.user?.image || null;
 
@@ -115,19 +115,25 @@ export default function DashboardLayout({
           </Link>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
-                ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
-              `}
-              onClick={() => setSidebarOpen(false)}
-            >
-              <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
-              {item.name}
-            </Link>
-          ))}
+          {status === "loading" ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
+                  ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                `}
+                onClick={() => setSidebarOpen(false)}
+              >
+                <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                {item.name}
+              </Link>
+            ))
+          )}
         </nav>
         <div className="mt-auto px-4 py-6 space-y-2">
           {secondaryNav.map((item) => (
