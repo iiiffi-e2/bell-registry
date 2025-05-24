@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import * as z from "zod";
 import Link from "next/link";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 const ROLES = ["PROFESSIONAL", "EMPLOYER", "AGENCY"] as const;
 type Role = typeof ROLES[number];
@@ -17,10 +19,9 @@ const stepOneSchema = z.object({
   terms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
-  role: z.enum(ROLES),
 });
 
-// Step 2: Personal Details and Password
+// Step 2: Personal Details, Password, and Role (if employer route)
 const stepTwoSchema = z.object({
   firstName: z.string().min(2, "First name must be at least 2 characters"),
   lastName: z.string().min(2, "Last name must be at least 2 characters"),
@@ -32,6 +33,7 @@ const stepTwoSchema = z.object({
       "Password must contain at least one uppercase letter, one lowercase letter, and one number"
     ),
   confirmPassword: z.string(),
+  role: z.enum(ROLES).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -47,17 +49,20 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [stepOneData, setStepOneData] = useState<StepOneData | null>(null);
+  const isEmployerRoute = searchParams.get("role")?.toUpperCase() === "EMPLOYER";
 
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
     defaultValues: {
-      role: (searchParams.get("role")?.toUpperCase() || "PROFESSIONAL") as Role,
       terms: false,
     },
   });
 
   const stepTwoForm = useForm<StepTwoData>({
     resolver: zodResolver(stepTwoSchema),
+    defaultValues: {
+      role: isEmployerRoute ? "EMPLOYER" : "PROFESSIONAL",
+    },
   });
 
   const onStepOneSubmit = async (data: StepOneData) => {
@@ -112,7 +117,7 @@ export function RegisterForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: stepOneData.email,
-          role: stepOneData.role,
+          role: data.role || "PROFESSIONAL",
           firstName: data.firstName,
           lastName: data.lastName,
           password: data.password,
@@ -137,13 +142,29 @@ export function RegisterForm() {
     setIsLoading(true);
     signIn("google", { 
       callbackUrl: "/dashboard",
-      role: stepOneForm.watch("role")
+      role: stepTwoForm.watch("role")
     });
   };
 
   if (currentStep === 1) {
     return (
       <div className="space-y-6">
+        <div>
+          <div className="relative">
+            <input
+              {...stepOneForm.register("email")}
+              type="email"
+              className="block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+              placeholder="Enter email"
+            />
+            {stepOneForm.formState.errors.email && (
+              <p className="mt-1 text-sm text-red-600">
+                {stepOneForm.formState.errors.email.message}
+              </p>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-center">
           <input
             type="checkbox"
@@ -168,22 +189,6 @@ export function RegisterForm() {
             {stepOneForm.formState.errors.terms.message}
           </p>
         )}
-
-        <div>
-          <div className="relative">
-            <input
-              {...stepOneForm.register("email")}
-              type="email"
-              className="block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-              placeholder="Enter email"
-            />
-            {stepOneForm.formState.errors.email && (
-              <p className="mt-1 text-sm text-red-600">
-                {stepOneForm.formState.errors.email.message}
-              </p>
-            )}
-          </div>
-        </div>
 
         {error && (
           <div className="rounded-md bg-red-50 p-4">
@@ -255,16 +260,50 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
+      {isEmployerRoute && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">I am registering as a:</h3>
+          <RadioGroup
+            defaultValue={stepTwoForm.getValues("role")}
+            onValueChange={(value) => stepTwoForm.setValue("role", value as Role)}
+            className="grid grid-cols-1 gap-4"
+          >
+            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-gray-50">
+              <RadioGroupItem value="EMPLOYER" id="employer" />
+              <Label htmlFor="employer" className="flex-1 cursor-pointer">
+                <div className="font-medium">Employer</div>
+                <div className="text-sm text-gray-500">I am hiring for a private service position</div>
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-gray-50">
+              <RadioGroupItem value="AGENCY" id="agency" />
+              <Label htmlFor="agency" className="flex-1 cursor-pointer">
+                <div className="font-medium">Agency</div>
+                <div className="text-sm text-gray-500">I am a staffing agency representing employers</div>
+              </Label>
+            </div>
+          </RadioGroup>
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Are you looking for a position?{" "}
+              <Link href="/register?role=professional" className="font-medium text-blue-600 hover:text-blue-500">
+                Register as a Professional
+              </Link>
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-            First Name
+            First name
           </label>
           <input
             {...stepTwoForm.register("firstName")}
             type="text"
+            id="firstName"
             className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-            placeholder="Enter your first name"
           />
           {stepTwoForm.formState.errors.firstName && (
             <p className="mt-1 text-sm text-red-600">
@@ -275,13 +314,13 @@ export function RegisterForm() {
 
         <div>
           <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-            Last Name
+            Last name
           </label>
           <input
             {...stepTwoForm.register("lastName")}
             type="text"
+            id="lastName"
             className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-            placeholder="Enter your last name"
           />
           {stepTwoForm.formState.errors.lastName && (
             <p className="mt-1 text-sm text-red-600">
@@ -289,40 +328,40 @@ export function RegisterForm() {
             </p>
           )}
         </div>
+      </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            {...stepTwoForm.register("password")}
-            type="password"
-            className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-            placeholder="Create a password"
-          />
-          {stepTwoForm.formState.errors.password && (
-            <p className="mt-1 text-sm text-red-600">
-              {stepTwoForm.formState.errors.password.message}
-            </p>
-          )}
-        </div>
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          {...stepTwoForm.register("password")}
+          type="password"
+          id="password"
+          className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+        />
+        {stepTwoForm.formState.errors.password && (
+          <p className="mt-1 text-sm text-red-600">
+            {stepTwoForm.formState.errors.password.message}
+          </p>
+        )}
+      </div>
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-            Confirm Password
-          </label>
-          <input
-            {...stepTwoForm.register("confirmPassword")}
-            type="password"
-            className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-            placeholder="Confirm your password"
-          />
-          {stepTwoForm.formState.errors.confirmPassword && (
-            <p className="mt-1 text-sm text-red-600">
-              {stepTwoForm.formState.errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
+      <div>
+        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+          Confirm password
+        </label>
+        <input
+          {...stepTwoForm.register("confirmPassword")}
+          type="password"
+          id="confirmPassword"
+          className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+        />
+        {stepTwoForm.formState.errors.confirmPassword && (
+          <p className="mt-1 text-sm text-red-600">
+            {stepTwoForm.formState.errors.confirmPassword.message}
+          </p>
+        )}
       </div>
 
       {error && (
@@ -335,22 +374,13 @@ export function RegisterForm() {
         </div>
       )}
 
-      <div className="flex space-x-4">
-        <button
-          type="button"
-          onClick={() => setCurrentStep(1)}
-          className="flex-1 py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          Back
-        </button>
-        <button
-          onClick={stepTwoForm.handleSubmit(onStepTwoSubmit)}
-          disabled={isLoading}
-          className="flex-1 py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-        >
-          {isLoading ? "Creating account..." : "Create account"}
-        </button>
-      </div>
+      <button
+        onClick={stepTwoForm.handleSubmit(onStepTwoSubmit)}
+        disabled={isLoading}
+        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+      >
+        {isLoading ? "Creating account..." : "Create account"}
+      </button>
     </div>
   );
 } 

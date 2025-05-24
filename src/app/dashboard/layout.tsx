@@ -14,6 +14,8 @@ import {
   HomeIcon,
   BookmarkIcon,
   InboxIcon,
+  UsersIcon,
+  BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
@@ -28,6 +30,36 @@ const ROLES = {
   ADMIN: "ADMIN",
 } as const;
 
+const professionalNavigation = [
+  { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+  { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
+  { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
+  { name: "Applications", href: "/dashboard/applications", icon: DocumentTextIcon },
+  { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
+];
+
+const employerNavigation = [
+  { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
+  { name: "Job Listings", href: "/dashboard/employer/jobs", icon: BriefcaseIcon },
+  { name: "Candidates", href: "/dashboard/employer/candidates", icon: UsersIcon },
+  { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
+  { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
+];
+
+const agencyNavigation = [
+  { name: "Dashboard", href: "/dashboard/agency", icon: HomeIcon },
+  { name: "Job Listings", href: "/dashboard/agency/jobs", icon: BriefcaseIcon },
+  { name: "Candidates", href: "/dashboard/agency/candidates", icon: UsersIcon },
+  { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
+  { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
+];
+
+const adminNavigation = [
+  { name: "Dashboard", href: "/dashboard/admin", icon: HomeIcon },
+  { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
+  { name: "Jobs", href: "/dashboard/admin/jobs", icon: BriefcaseIcon },
+];
+
 export default function DashboardLayout({
   children,
 }: {
@@ -37,52 +69,12 @@ export default function DashboardLayout({
   const { data: session } = useSession();
   const { profile } = useProfile();
   const imageUrl = profile?.user?.image || null;
-  const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
 
-  const navigation = [
-    {
-      name: "Dashboard",
-      href: "/dashboard",
-      icon: HomeIcon,
-      current: pathname === "/dashboard",
-    },
-    {
-      name: "Professionals",
-      href: "/browse-professionals",
-      icon: UserCircleIcon,
-      current: pathname === "/browse-professionals",
-    },
-    {
-      name: "Job Listings",
-      href: "/dashboard/jobs",
-      icon: BriefcaseIcon,
-      current: pathname === "/dashboard/jobs",
-    },
-    {
-      name: "Job Alerts",
-      href: "/dashboard/job-alerts",
-      icon: BellIcon,
-      current: pathname === "/dashboard/job-alerts",
-    },
-    {
-      name: "Applications",
-      href: "/dashboard/applications",
-      icon: DocumentTextIcon,
-      current: pathname === "/dashboard/applications",
-    },
-    {
-      name: "Profile",
-      href: "/dashboard/profile",
-      icon: UserCircleIcon,
-      current: pathname === "/dashboard/profile",
-    },
-    {
-      name: "Notifications",
-      href: "/dashboard/notifications",
-      icon: InboxIcon,
-      current: pathname === "/dashboard/notifications",
-    },
-  ];
+  // Role-based navigation
+  let navigation = professionalNavigation;
+  if (session?.user?.role === ROLES.EMPLOYER) navigation = employerNavigation;
+  else if (session?.user?.role === ROLES.AGENCY) navigation = agencyNavigation;
+  else if (session?.user?.role === ROLES.ADMIN) navigation = adminNavigation;
 
   const secondaryNav = [
     {
@@ -126,11 +118,11 @@ export default function DashboardLayout({
               key={item.name}
               href={item.href}
               className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
-                ${item.current ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
               `}
               onClick={() => setSidebarOpen(false)}
             >
-              <item.icon className={`h-5 w-5 mr-3 ${item.current ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+              <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
               {item.name}
             </Link>
           ))}
