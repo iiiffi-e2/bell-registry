@@ -18,6 +18,7 @@ import { useEffect, useState } from "react";
 interface Job {
   id: number;
   title: string;
+  professionalRole: string;
   location: string;
   views: number;
   applicants: number;
@@ -147,7 +148,7 @@ export function EmployerDashboard() {
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Active Job Listings</h2>
             <Button asChild>
-              <Link href="/jobs/post" className="flex items-center">
+              <Link href="/dashboard/employer/jobs/post" className="flex items-center">
                 <Plus className="h-4 w-4 mr-2" />
                 Post New Job
               </Link>
@@ -170,7 +171,12 @@ export function EmployerDashboard() {
                 <TableBody>
                   {jobs.map((job) => (
                     <TableRow key={job.id}>
-                      <TableCell className="font-medium">{job.title}</TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="font-medium">{job.title}</div>
+                          <div className="text-sm text-gray-500">{job.professionalRole}</div>
+                        </div>
+                      </TableCell>
                       <TableCell>{job.location}</TableCell>
                       <TableCell>{job.views}</TableCell>
                       <TableCell>{job.applicants}</TableCell>
@@ -181,7 +187,7 @@ export function EmployerDashboard() {
                       </TableCell>
                       <TableCell>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/jobs/${job.urlSlug}`} className="flex items-center gap-1">
+                          <Link href={`/dashboard/employer/jobs/${job.urlSlug}`} className="flex items-center gap-1">
                             <Eye className="h-4 w-4" />
                           </Link>
                         </Button>
@@ -200,7 +206,7 @@ export function EmployerDashboard() {
               </p>
               <div className="mt-6">
                 <Button asChild>
-                  <Link href="/jobs/post" className="flex items-center">
+                  <Link href="/dashboard/employer/jobs/post" className="flex items-center">
                     <Plus className="h-4 w-4 mr-2" />
                     Post New Job
                   </Link>

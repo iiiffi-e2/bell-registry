@@ -1,0 +1,471 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useFieldArray } from "react-hook-form";
+import * as z from "zod";
+import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Plus, X } from "lucide-react";
+
+const EMPLOYMENT_TYPES = [
+  "Full-time",
+  "Part-time",
+  "Contract",
+  "Temporary",
+  "Seasonal",
+  "Live-in",
+  "Live-out"
+] as const;
+
+const JOB_TYPES = [
+  "Permanent",
+  "Fixed-term",
+  "Temporary",
+  "Freelance",
+  "Per Diem"
+] as const;
+
+type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
+type JobType = (typeof JOB_TYPES)[number];
+
+const jobFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  professionalRole: z.string().min(1, "Professional role is required"),
+  description: z.string().min(1, "Description is required"),
+  location: z.string().min(1, "Location is required"),
+  requirements: z.array(z.string()).min(1, "At least one requirement is required"),
+  salaryMin: z.string().min(1, "Minimum salary is required"),
+  salaryMax: z.string().min(1, "Maximum salary is required"),
+  jobType: z.enum(JOB_TYPES, {
+    required_error: "Job type is required",
+  }),
+  employmentType: z.enum(EMPLOYMENT_TYPES, {
+    required_error: "Employment type is required",
+  }),
+  featured: z.boolean().default(false),
+  expiresAt: z.string().min(1, "Expiry date is required"),
+});
+
+type JobFormValues = z.infer<typeof jobFormSchema>;
+
+const PROFESSIONAL_ROLES = [
+  "Head Gardener",
+  "Executive Housekeeper",
+  "Driver",
+  "Executive Protection",
+  "Butler",
+  "Governess",
+  "Private Teacher",
+  "Nanny | Educator",
+  "Nanny",
+  "Family Assistant",
+  "Personal Assistant",
+  "Laundress",
+  "Housekeeper",
+  "Houseman",
+  "Estate Couple",
+  "Property Caretaker",
+  "House Manager",
+  "Estate Manager",
+  "Personal Chef",
+  "Private Chef",
+  "Event Chef",
+  "Drop-Off Chef",
+  "Seasonal Chef",
+  "Office Chef",
+  "Yacht Chef",
+  "Jet Chef",
+  "Family Office CEO",
+  "Family Office COO",
+  "Executive Assistant",
+  "Administrative Assistant",
+  "Office Manager",
+  "Human Resources Director",
+  "Director of Residences",
+  "Chief of Staff",
+  "Estate Hospitality Manager",
+  "Estate IT Director",
+  "Estate Security Director",
+  "Director of Operations",
+  "Director of Real Estate and Construction",
+  "Construction Manager",
+  "Facilities Manager",
+  "Property Manager",
+  "Landscape Director",
+  "Yacht Captain",
+  "Yacht Steward | Stewardess",
+  "Yacht Engineer",
+  "Flight Attendant",
+  "Other"
+];
+
+const defaultValues: Partial<JobFormValues> = {
+  featured: false,
+  jobType: "Permanent" as JobType,
+  employmentType: "Full-time" as EmploymentType,
+  requirements: [""],
+};
+
+export default function PostJobPage() {
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [customTitle, setCustomTitle] = useState<string>("");
+
+  const form = useForm<JobFormValues>({
+    resolver: zodResolver(jobFormSchema),
+    defaultValues,
+  });
+
+  const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
+    name: "requirements",
+    control: form.control,
+  });
+
+  // Update form title when role is selected
+  useEffect(() => {
+    if (selectedRole) {
+      if (selectedRole === "Other") {
+        form.setValue("title", customTitle);
+      } else {
+        form.setValue("title", selectedRole);
+        setCustomTitle("");
+      }
+    }
+  }, [selectedRole, customTitle, form]);
+
+  async function onSubmit(data: JobFormValues) {
+    try {
+      setIsSubmitting(true);
+      
+      // Filter out empty requirements
+      const requirements = data.requirements.filter(req => req.trim() !== "");
+
+      const jobData = {
+        ...data,
+        requirements,
+        salary: {
+          min: parseInt(data.salaryMin),
+          max: parseInt(data.salaryMax)
+        },
+      };
+
+      const response = await fetch("/api/jobs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jobData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create job");
+      }
+
+      toast.success("Job posted successfully!");
+      router.push("/dashboard/employer/jobs");
+    } catch (error) {
+      toast.error("Failed to post job. Please try again.");
+      console.error("Error posting job:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Post a New Job</h1>
+        <p className="mt-2 text-gray-600">
+          Fill in the details below to create a new job listing
+        </p>
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-6">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Title</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="e.g. Experienced Estate Manager for Luxury Manhattan Property" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Enter a descriptive title for the position
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="professionalRole"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Professional Role</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a professional role" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PROFESSIONAL_ROLES.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {role}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Choose the primary role category for this position
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the role and responsibilities..."
+                      className="min-h-[200px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. New York, NY" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="jobType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Job Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select job type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {JOB_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="employmentType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Employment Type</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select employment type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {EMPLOYMENT_TYPES.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="expiresAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Expiry Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <FormLabel>Requirements</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendRequirement("")}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Requirement
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {requirementFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`requirements.${index}`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              placeholder="Enter a job requirement"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeRequirement(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="salaryMin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Minimum Salary (USD)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g. 50000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="salaryMax"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Maximum Salary (USD)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g. 100000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="featured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">Featured Job</FormLabel>
+                    <div className="text-sm text-gray-500">
+                      Featured jobs appear at the top of search results
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Posting..." : "Post Job"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </div>
+  );
+} 
