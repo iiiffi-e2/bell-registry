@@ -32,10 +32,12 @@ const ROLES = {
 
 const professionalNavigation = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
+  { name: "Professionals", href: "/browse-professionals", icon: UserCircleIcon },
+  { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
-  { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
   { name: "Applications", href: "/dashboard/applications", icon: DocumentTextIcon },
   { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
+  { name: "Notifications", href: "/dashboard/notifications", icon: InboxIcon },
 ];
 
 const employerNavigation = [
