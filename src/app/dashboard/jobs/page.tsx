@@ -251,7 +251,7 @@ function JobSearchPageContent() {
   const formatSalary = (salary: Job["salary"]) => {
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: salary.currency,
+      currency: salary.currency || "USD",
       maximumFractionDigits: 0,
     });
     return `${formatter.format(salary.min)} - ${formatter.format(salary.max)}`;
