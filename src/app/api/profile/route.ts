@@ -24,6 +24,9 @@ export async function GET() {
     } else {
       const profile = await prisma.candidateProfile.findUnique({
         where: { userId: session.user.id },
+        include: {
+          user: true
+        }
       });
       return NextResponse.json(profile);
     }
