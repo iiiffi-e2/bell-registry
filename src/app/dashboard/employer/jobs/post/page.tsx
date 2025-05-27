@@ -54,7 +54,9 @@ const jobFormSchema = z.object({
   professionalRole: z.string().min(1, "Professional role is required"),
   description: z.string().min(1, "Description is required"),
   location: z.string().min(1, "Location is required"),
-  requirements: z.array(z.string()).min(1, "At least one requirement is required"),
+  requirements: z.array(z.object({
+    value: z.string()
+  })).min(1, "At least one requirement is required"),
   salaryMin: z.string().min(1, "Minimum salary is required"),
   salaryMax: z.string().min(1, "Maximum salary is required"),
   jobType: z.enum(JOB_TYPES, {
@@ -124,7 +126,7 @@ const defaultValues: Partial<JobFormValues> = {
   featured: false,
   jobType: "Permanent" as JobType,
   employmentType: "Full-time" as EmploymentType,
-  requirements: [""],
+  requirements: [{ value: "" }],
 };
 
 export default function PostJobPage() {
@@ -160,7 +162,9 @@ export default function PostJobPage() {
       setIsSubmitting(true);
       
       // Filter out empty requirements
-      const requirements = data.requirements.filter(req => req.trim() !== "");
+      const requirements = data.requirements
+        .filter(req => req.value.trim() !== "")
+        .map(req => req.value);
 
       const jobData = {
         ...data,
@@ -361,7 +365,7 @@ export default function PostJobPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  onClick={() => appendRequirement("")}
+                  onClick={() => appendRequirement({ value: "" })}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Requirement
@@ -373,7 +377,7 @@ export default function PostJobPage() {
                   <div key={field.id} className="flex gap-2">
                     <FormField
                       control={form.control}
-                      name={`requirements.${index}`}
+                      name={`requirements.${index}.value`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>

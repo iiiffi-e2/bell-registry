@@ -76,21 +76,8 @@ const profileSchema = z.object({
   workLocations: z.array(z.string()).optional().default([]),
   openToRelocation: z.boolean().default(false),
   isAnonymous: z.boolean().default(false),
-  yearsOfExperience: z.string()
-    .optional()
-    .transform((val) => {
-      if (!val || val === "") return null;
-      const num = parseInt(val);
-      return isNaN(num) ? null : num;
-    }),
-  availability: z.string()
-    .optional()
-    .transform((val) => {
-      if (!val || val === "") return null;
-      // Ensure we store the date at the end of the day in UTC
-      // This way when converted to any timezone it will still be the same date
-      return `${val}T23:59:59.999Z`;
-    }),
+  yearsOfExperience: z.string().optional(),
+  availability: z.string().optional(),
   
   // Professional Bio
   bio: z.string().min(50, "Bio must be at least 50 characters"),
@@ -103,15 +90,9 @@ const profileSchema = z.object({
   
   // Professional Details
   seekingOpportunities: z.array(z.string()).default([]),
-  skills: z.string()
-    .optional()
-    .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
-  payRangeMin: z.string()
-    .optional()
-    .transform((val) => (val === "" ? undefined : Number(val))),
-  payRangeMax: z.string()
-    .optional()
-    .transform((val) => (val === "" ? undefined : Number(val))),
+  skills: z.string().optional(),
+  payRangeMin: z.string().optional(),
+  payRangeMax: z.string().optional(),
   payCurrency: z.string().default("USD"),
   
   // Media
@@ -119,9 +100,7 @@ const profileSchema = z.object({
   mediaUrls: z.array(z.string()).optional(),
   
   // Existing fields
-  certifications: z.string()
-    .optional()
-    .transform((str) => (!str ? [] : str.split(",").map((s) => s.trim()))),
+  certifications: z.string().optional(),
   experience: z.array(z.any()).optional(),
   phoneNumber: z.string().optional(),
 });
@@ -304,13 +283,13 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             whatSetsApartMe: data.whatSetsApartMe || "",
             idealEnvironment: data.idealEnvironment || "",
             seekingOpportunities: data.seekingOpportunities || [],
-            skills: data.skills?.join(", ") || "",
+            skills: Array.isArray(data.skills) ? data.skills.join(", ") : data.skills || "",
             payRangeMin: data.payRangeMin?.toString() || "",
             payRangeMax: data.payRangeMax?.toString() || "",
             payCurrency: data.payCurrency || "USD",
             additionalPhotos: data.additionalPhotos || [],
             mediaUrls: data.mediaUrls || [],
-            certifications: data.certifications?.join(", ") || "",
+            certifications: Array.isArray(data.certifications) ? data.certifications.join(", ") : data.certifications || "",
             experience: data.experience || [],
             phoneNumber: data.phoneNumber || "",
           };
