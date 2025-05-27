@@ -5,8 +5,8 @@ import {
   MapPinIcon,
   CurrencyDollarIcon,
   BuildingOfficeIcon,
-  BookmarkIcon,
 } from "@heroicons/react/24/outline";
+import { BookmarkIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
 interface Job {
@@ -60,9 +60,9 @@ export default function SavedJobsPage() {
     }
   };
 
-  const handleUnsave = async (jobId: string) => {
+  const handleUnsave = async (jobSlug: string) => {
     try {
-      const response = await fetch(`/api/jobs/${jobId}/bookmark`, {
+      const response = await fetch(`/api/jobs/${jobSlug}/bookmark`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export default function SavedJobsPage() {
       if (!response.ok) throw new Error('Failed to unsave job');
       
       // Remove the job from the list
-      setJobs(jobs.filter(job => job.id !== jobId));
+      setJobs(jobs.filter(job => job.urlSlug !== jobSlug));
     } catch (error) {
       console.error('Error unsaving job:', error);
     }
@@ -162,7 +162,7 @@ export default function SavedJobsPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleUnsave(job.id)}
+                      onClick={() => handleUnsave(job.urlSlug)}
                       className="rounded-full p-1 text-blue-600 hover:text-blue-500"
                     >
                       <BookmarkIcon className="h-6 w-6" />

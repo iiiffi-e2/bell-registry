@@ -46,7 +46,7 @@ const professionalNavigation: NavigationItem[] = [
   { name: "Professionals", href: "/browse-professionals", icon: UserCircleIcon },
   { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
-  { name: "Applications", href: "/dashboard/applications", icon: DocumentTextIcon },
+  { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
   { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
   { name: "Notifications", href: "/dashboard/notifications", icon: InboxIcon },
 ];

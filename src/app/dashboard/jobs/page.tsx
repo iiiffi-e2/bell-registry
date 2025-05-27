@@ -226,9 +226,9 @@ function JobSearchPageContent() {
     }
   };
 
-  const handleBookmark = async (jobId: string) => {
+  const handleBookmark = async (jobSlug: string) => {
     try {
-      const response = await fetch(`/api/jobs/${jobId}/bookmark`, {
+      const response = await fetch(`/api/jobs/${jobSlug}/bookmark`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ function JobSearchPageContent() {
       
       // Update the jobs state to reflect the new bookmark status
       setJobs(jobs.map(job => 
-        job.id === jobId ? { ...job, isBookmarked: bookmarked } : job
+        job.urlSlug === jobSlug ? { ...job, isBookmarked: bookmarked } : job
       ));
     } catch (error) {
       console.error('Error bookmarking job:', error);
@@ -307,7 +307,7 @@ function JobSearchPageContent() {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            handleBookmark(job.id);
+            handleBookmark(job.urlSlug);
           }}
           className={`rounded-full p-1 ${
             job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
@@ -379,7 +379,7 @@ function JobSearchPageContent() {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                handleBookmark(job.id);
+                handleBookmark(job.urlSlug);
               }}
               className={`rounded-full p-1 ${
                 job.isBookmarked ? 'text-blue-600' : 'text-gray-400 hover:text-gray-500'
