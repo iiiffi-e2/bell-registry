@@ -206,14 +206,8 @@ export default function EditJobPage() {
         .filter(req => req.value.trim() !== "")
         .map(req => req.value);
 
-      // Combine professional role and title
-      const fullTitle = data.professionalRole === "Other" 
-        ? data.title 
-        : `${data.professionalRole} - ${data.title}`;
-
       const jobData = {
         ...data,
-        title: fullTitle,
         requirements,
         salary: {
           min: parseInt(data.salaryMin),
