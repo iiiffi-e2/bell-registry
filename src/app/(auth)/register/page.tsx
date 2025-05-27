@@ -1,14 +1,18 @@
-import { Metadata } from "next";
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
 
-export const metadata: Metadata = {
-  title: "Register - Bell Registry",
-  description: "Create your Bell Registry account",
-};
-
 export default function RegisterPage() {
+  const searchParams = useSearchParams();
+  const isEmployerRoute = searchParams.get("role")?.toUpperCase() === "EMPLOYER";
+  
+  // Determine which hero image to use
+  const heroImage = isEmployerRoute ? "/images/register-hero-employer.png" : "/images/register-hero.png";
+  const heroAlt = isEmployerRoute ? "Luxury estate employer" : "Luxury estate professional";
+
   return (
     <div className="min-h-screen bg-[#FFFFF0] p-4 md:p-8">
       {/* Logo above container */}
@@ -58,8 +62,8 @@ export default function RegisterPage() {
           <div className="hidden lg:block relative w-0 flex-1">
             <div className="absolute inset-0">
               <Image
-                src="/images/register-hero.png"
-                alt="Luxury estate professional"
+                src={heroImage}
+                alt={heroAlt}
                 fill
                 className="object-cover"
                 priority
