@@ -140,6 +140,12 @@ export default function PostJobPage() {
   const [improvedDescription, setImprovedDescription] = useState("");
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
 
+  // Add this alert to verify we're on the correct page
+  useEffect(() => {
+    // Remove this alert after testing
+    // alert("Employer job posting page loaded - this is the correct page!");
+  }, []);
+
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues,
@@ -234,8 +240,18 @@ export default function PostJobPage() {
         throw new Error("Failed to create job");
       }
 
+      const result = await response.json();
+      const jobSlug = result.job?.urlSlug;
+
+      if (!jobSlug) {
+        throw new Error("Job created but no slug returned");
+      }
+
+      const redirectUrl = `/dashboard/employer/jobs/${jobSlug}`;
+
       toast.success("Job posted successfully!");
-      router.push("/dashboard/employer/jobs");
+      router.push(redirectUrl);
+      
     } catch (error) {
       toast.error("Failed to post job. Please try again.");
       console.error("Error posting job:", error);
@@ -521,7 +537,10 @@ export default function PostJobPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Posting..." : "Post Job"}
               </Button>
             </div>
