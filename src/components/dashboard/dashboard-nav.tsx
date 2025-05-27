@@ -14,6 +14,7 @@ import {
   Users,
   FileText,
   Building,
+  ChevronDown,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -67,14 +68,24 @@ const employerRoutes = [
   {
     label: "Job Listings",
     icon: Briefcase,
-    href: "/dashboard/employer/jobs",
+    href: "/dashboard/jobs",
     color: "text-violet-500",
   },
   {
     label: "Candidates",
     icon: Users,
-    href: "/dashboard/employer/candidates",
+    href: "#",
     color: "text-blue-500",
+    submenu: [
+      {
+        label: "Browse All",
+        href: "/browse-professionals",
+      },
+      {
+        label: "View Saved",
+        href: "/dashboard/employer/saved-candidates",
+      },
+    ],
   },
   {
     label: "Applications",
@@ -165,6 +176,7 @@ const adminRoutes = [
 export function DashboardNav() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
 
   // Determine which routes to show based on user role
   const routes = (() => {
@@ -186,53 +198,105 @@ export function DashboardNav() {
       }];
     }
 
-    // Debug role information
-    const userRole = session.user.role;
-    
-    // Add a debug route at the top
-    const debugRoute = {
-      label: `Debug - Current Role: ${userRole || 'none'}`,
-      icon: LayoutDashboard,
-      href: "#",
-      color: "text-red-500",
-    };
-
     let roleRoutes;
-    if (userRole === ROLES.EMPLOYER) {
+    if (session.user.role === ROLES.EMPLOYER) {
       roleRoutes = employerRoutes;
-    } else if (userRole === ROLES.AGENCY) {
+    } else if (session.user.role === ROLES.AGENCY) {
       roleRoutes = agencyRoutes;
-    } else if (userRole === ROLES.ADMIN) {
+    } else if (session.user.role === ROLES.ADMIN) {
       roleRoutes = adminRoutes;
     } else {
       roleRoutes = professionalRoutes;
     }
 
-    return [debugRoute, ...roleRoutes];
+    return roleRoutes;
   })();
 
+  // Set initial submenu state based on current path
+  useEffect(() => {
+    const currentRoute = routes.find(route => 
+      route.submenu?.some(subItem => pathname === subItem.href)
+    );
+    if (currentRoute) {
+      setOpenSubmenu(currentRoute.href);
+    }
+  }, [pathname, routes]);
+
+  const toggleSubmenu = (href: string) => {
+    setOpenSubmenu(openSubmenu === href ? null : href);
+  };
+
   return (
-    <div className="space-y-4 py-4 flex flex-col h-full bg-white text-black">
-      <div className="px-3 py-2 flex-1">
-        <div className="space-y-1">
-          {routes.map((route) => (
-            <Link
-              key={route.href}
-              href={route.href}
-              className={cn(
-                "text-sm group flex p-3 w-full justify-start font-medium cursor-pointer hover:text-black hover:bg-white/10 rounded-lg transition",
-                pathname === route.href
-                  ? "text-black bg-white/10"
-                  : "text-zinc-400"
-              )}
-            >
-              <div className="flex items-center flex-1">
-                <route.icon className={cn("h-5 w-5 mr-3", route.color)} />
-                {route.label}
-              </div>
-            </Link>
-          ))}
+    <div className="flex h-full w-64 flex-col border-r bg-white">
+      <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
+        <div className="flex items-center flex-shrink-0 px-4">
+          <Link href="/" className="text-xl font-bold text-blue-600">
+            Bell Registry
+          </Link>
         </div>
+        <nav className="mt-5 flex-1 px-2 space-y-1">
+          {routes.map((route) => (
+            <div key={route.href} className="relative">
+              {route.submenu ? (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => toggleSubmenu(route.href)}
+                    className="w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <div className="flex items-center">
+                      <route.icon
+                        className={cn("mr-3 h-6 w-6", route.color)}
+                        aria-hidden="true"
+                      />
+                      <span>{route.label}</span>
+                    </div>
+                    <ChevronDown
+                      className={cn(
+                        "h-5 w-5 transition-transform duration-200",
+                        openSubmenu === route.href ? "rotate-180" : ""
+                      )}
+                    />
+                  </button>
+                  {openSubmenu === route.href && (
+                    <div className="mt-1 ml-8 space-y-1">
+                      {route.submenu.map((subItem) => (
+                        <Link
+                          key={subItem.href}
+                          href={subItem.href}
+                          className={cn(
+                            "block px-2 py-2 text-sm font-medium rounded-md",
+                            pathname === subItem.href
+                              ? "bg-gray-100 text-gray-900"
+                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                          )}
+                        >
+                          {subItem.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <Link
+                  href={route.href}
+                  className={cn(
+                    "flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                    pathname === route.href
+                      ? "bg-gray-100 text-gray-900"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  )}
+                >
+                  <route.icon
+                    className={cn("mr-3 h-6 w-6", route.color)}
+                    aria-hidden="true"
+                  />
+                  {route.label}
+                </Link>
+              )}
+            </div>
+          ))}
+        </nav>
       </div>
     </div>
   );

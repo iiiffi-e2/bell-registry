@@ -17,6 +17,7 @@ import {
   UsersIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
+import { ChevronDown } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
@@ -30,7 +31,17 @@ const ROLES = {
   ADMIN: "ADMIN",
 } as const;
 
-const professionalNavigation = [
+type NavigationItem = {
+  name: string;
+  href: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  submenu?: {
+    name: string;
+    href: string;
+  }[];
+};
+
+const professionalNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
   { name: "Professionals", href: "/browse-professionals", icon: UserCircleIcon },
   { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
@@ -40,15 +51,23 @@ const professionalNavigation = [
   { name: "Notifications", href: "/dashboard/notifications", icon: InboxIcon },
 ];
 
-const employerNavigation = [
+const employerNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
   { name: "Job Listings", href: "/dashboard/employer/jobs", icon: BriefcaseIcon },
-  { name: "Candidates", href: "/dashboard/employer/candidates", icon: UsersIcon },
+  { 
+    name: "Candidates", 
+    href: "#", 
+    icon: UsersIcon,
+    submenu: [
+      { name: "Browse All", href: "/browse-professionals" },
+      { name: "View Saved", href: "/dashboard/employer/saved-candidates" }
+    ]
+  },
   { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
   { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
 ];
 
-const agencyNavigation = [
+const agencyNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/agency", icon: HomeIcon },
   { name: "Job Listings", href: "/dashboard/agency/jobs", icon: BriefcaseIcon },
   { name: "Candidates", href: "/dashboard/agency/candidates", icon: UsersIcon },
@@ -56,7 +75,7 @@ const agencyNavigation = [
   { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
 ];
 
-const adminNavigation = [
+const adminNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/admin", icon: HomeIcon },
   { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
   { name: "Jobs", href: "/dashboard/admin/jobs", icon: BriefcaseIcon },
@@ -93,6 +112,7 @@ export default function DashboardLayout({
   ];
 
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
+  const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -121,17 +141,56 @@ export default function DashboardLayout({
             </div>
           ) : (
             navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
-                  ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
-                `}
-                onClick={() => setSidebarOpen(false)}
-              >
-                <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
-                {item.name}
-              </Link>
+              <div key={item.name}>
+                {item.submenu ? (
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
+                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
+                        ${pathname.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                      `}
+                    >
+                      <div className="flex items-center">
+                        <item.icon className={`h-5 w-5 mr-3 ${pathname.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                        {item.name}
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 transition-transform duration-200 ${
+                          openSubmenu === item.name ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    {openSubmenu === item.name && (
+                      <div className="mt-1 ml-8 space-y-1">
+                        {item.submenu.map((subItem) => (
+                          <Link
+                            key={subItem.name}
+                            href={subItem.href}
+                            className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                              ${pathname === subItem.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                            `}
+                            onClick={() => setSidebarOpen(false)}
+                          >
+                            {subItem.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link
+                    href={item.href}
+                    className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
+                      ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                    `}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                    {item.name}
+                  </Link>
+                )}
+              </div>
             ))
           )}
         </nav>
