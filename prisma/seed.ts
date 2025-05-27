@@ -617,6 +617,7 @@ async function main() {
       data: {
         employerId: employer.id,
         title,
+        professionalRole: title.split(' - ')[0],
         description,
         location,
         requirements: jobRequirements,
