@@ -54,6 +54,8 @@ export async function GET(request: Request) {
           ${rankExpr} AS rank
         FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
+        AND status = 'ACTIVE'
+        AND (expires_at > NOW() OR expires_at IS NULL)
         ORDER BY rank DESC
         LIMIT $2 OFFSET $3
       `
@@ -80,6 +82,8 @@ export async function GET(request: Request) {
       const countQuery = `
         SELECT COUNT(*) FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
+        AND status = 'ACTIVE'
+        AND (expires_at > NOW() OR expires_at IS NULL)
       `
       const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1))
       const total = parseInt(countResult[0].count, 10)
@@ -97,6 +101,16 @@ export async function GET(request: Request) {
 
     const baseWhere: Prisma.JobWhereInput = {
       status: status ? (status as JobStatus) : JobStatus.ACTIVE,
+      OR: [
+        {
+          expiresAt: {
+            gt: new Date()
+          }
+        },
+        {
+          expiresAt: null
+        }
+      ],
       ...(location ? {
         OR: location.split(',').reduce((acc: any[], loc, i, arr) => {
           if (i % 2 === 1) {
