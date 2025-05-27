@@ -61,39 +61,58 @@ export async function PUT(req: Request) {
 
       return NextResponse.json(updatedProfile);
     } else {
-      // Update candidate profile
-      const updatedProfile = await prisma.candidateProfile.update({
-        where: { userId: session.user.id },
-        data: {
-          bio: body.bio,
-          skills: body.skills ? body.skills.split(",").map((s: string) => s.trim()) : undefined,
-          experience: body.experience,
-          certifications: body.certifications ? body.certifications.split(",").map((c: string) => c.trim()) : undefined,
-          availability: body.availability ? new Date(body.availability) : undefined,
-          resumeUrl: body.resumeUrl,
-          photoUrl: body.photoUrl,
-          location: body.location,
-          title: body.preferredRole,
-          additionalPhotos: body.additionalPhotos,
-          currentLocation: body.location,
-          headshot: body.photoUrl,
-          idealEnvironment: body.idealEnvironment,
-          mediaUrls: body.mediaUrls,
-          openToRelocation: body.openToRelocation,
-          payCurrency: body.payCurrency,
-          payRangeMax: body.payRangeMax ? parseFloat(body.payRangeMax) : undefined,
-          payRangeMin: body.payRangeMin ? parseFloat(body.payRangeMin) : undefined,
-          preferredRole: body.preferredRole,
-          seekingOpportunities: body.seekingOpportunities,
-          whatImSeeking: body.whatImSeeking,
-          whatSetsApartMe: body.whatSetsApartMe,
-          whyIEnjoyThisWork: body.whyIEnjoyThisWork,
-          workLocations: body.workLocations,
-          yearsOfExperience: body.yearsOfExperience ? parseInt(body.yearsOfExperience) : undefined,
-        },
+      // Update both user and candidate profile in a transaction
+      const result = await prisma.$transaction(async (tx) => {
+        // Update user fields
+        const updatedUser = await tx.user.update({
+          where: { id: session.user.id },
+          data: {
+            firstName: body.firstName,
+            lastName: body.lastName,
+            phoneNumber: body.phoneNumber,
+            isAnonymous: body.isAnonymous,
+          },
+        });
+
+        // Update candidate profile
+        const updatedProfile = await tx.candidateProfile.update({
+          where: { userId: session.user.id },
+          data: {
+            bio: body.bio,
+            skills: body.skills ? body.skills.split(",").map((s: string) => s.trim()) : undefined,
+            experience: body.experience,
+            certifications: body.certifications ? body.certifications.split(",").map((c: string) => c.trim()) : undefined,
+            availability: body.availability ? new Date(body.availability) : undefined,
+            resumeUrl: body.resumeUrl,
+            photoUrl: body.photoUrl,
+            location: body.location,
+            title: body.preferredRole,
+            additionalPhotos: body.additionalPhotos,
+            currentLocation: body.location,
+            headshot: body.photoUrl,
+            idealEnvironment: body.idealEnvironment,
+            mediaUrls: body.mediaUrls,
+            openToRelocation: body.openToRelocation,
+            payCurrency: body.payCurrency,
+            payRangeMax: body.payRangeMax ? parseFloat(body.payRangeMax) : undefined,
+            payRangeMin: body.payRangeMin ? parseFloat(body.payRangeMin) : undefined,
+            preferredRole: body.preferredRole,
+            seekingOpportunities: body.seekingOpportunities,
+            whatImSeeking: body.whatImSeeking,
+            whatSetsApartMe: body.whatSetsApartMe,
+            whyIEnjoyThisWork: body.whyIEnjoyThisWork,
+            workLocations: body.workLocations,
+            yearsOfExperience: body.yearsOfExperience ? parseInt(body.yearsOfExperience) : undefined,
+          },
+          include: {
+            user: true
+          }
+        });
+
+        return updatedProfile;
       });
 
-      return NextResponse.json(updatedProfile);
+      return NextResponse.json(result);
     }
   } catch (error) {
     console.error("[PROFILE_PUT]", error);

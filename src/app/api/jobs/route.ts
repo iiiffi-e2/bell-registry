@@ -55,7 +55,7 @@ export async function GET(request: Request) {
         FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
         AND status = 'ACTIVE'
-        AND (expires_at > NOW() OR expires_at IS NULL)
+        AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
         ORDER BY rank DESC
         LIMIT $2 OFFSET $3
       `
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
         SELECT COUNT(*) FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
         AND status = 'ACTIVE'
-        AND (expires_at > NOW() OR expires_at IS NULL)
+        AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
       `
       const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1))
       const total = parseInt(countResult[0].count, 10)
