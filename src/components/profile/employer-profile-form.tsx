@@ -5,15 +5,16 @@ import { ProfilePictureUpload } from "./profile-picture-upload";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Form } from "@/components/ui/form";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
+import { toast } from "sonner";
 
 const employerProfileSchema = z.object({
-  companyName: z.string().optional(),
+  companyName: z.string().min(1, "Company name is required"),
   description: z.string().optional(),
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   logoUrl: z.string().optional(),
@@ -45,6 +46,9 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     const loadProfile = async () => {
       try {
         const response = await fetch("/api/profile");
+        if (!response.ok) {
+          throw new Error("Failed to load profile");
+        }
         const data = await response.json();
         
         if (data?.employerProfile) {
@@ -58,6 +62,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
         }
       } catch (error) {
         console.error("Error loading profile:", error);
+        toast.error("Failed to load profile");
       }
     };
 
@@ -70,6 +75,10 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     setIsLoading(true);
     try {
       await onSubmit(data);
+      toast.success("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
     }
@@ -97,10 +106,11 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                   name="companyName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Employer Name</FormLabel>
+                      <FormLabel>Company Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter employer name" />
+                        <Input {...field} placeholder="Enter company name" />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -121,6 +131,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                           placeholder="Tell us about your company..."
                         />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -137,6 +148,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                       <FormControl>
                         <Input {...field} placeholder="https://www.example.com" />
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -159,6 +171,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                           />
                         </GoogleMapsLoader>
                       </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

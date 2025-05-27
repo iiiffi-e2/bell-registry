@@ -8,27 +8,25 @@ import { generateProfileSlug } from "@/lib/utils";
 export const dynamic = 'force-dynamic';
 export const revalidate = 30; // Revalidate every 30 seconds
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        candidateProfile: true,
-        employerProfile: true,
-      },
-    });
-
-    if (!user) {
-      return new NextResponse("User not found", { status: 404 });
+    if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
+      const profile = await prisma.employerProfile.findUnique({
+        where: { userId: session.user.id },
+      });
+      return NextResponse.json({ employerProfile: profile });
+    } else {
+      const profile = await prisma.candidateProfile.findUnique({
+        where: { userId: session.user.id },
+      });
+      return NextResponse.json(profile);
     }
-
-    return NextResponse.json(user);
   } catch (error) {
     console.error("[PROFILE_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
