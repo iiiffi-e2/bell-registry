@@ -27,6 +27,8 @@ import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import ImprovedJobDescriptionModal from "@/components/ui/improved-job-description-modal";
 
 const EMPLOYMENT_TYPES = [
   "Full-time",
@@ -127,6 +129,9 @@ export default function EditJobPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showImprovedDescriptionModal, setShowImprovedDescriptionModal] = useState(false);
+  const [improvedDescription, setImprovedDescription] = useState("");
+  const [isImprovingDescription, setIsImprovingDescription] = useState(false);
 
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
@@ -149,6 +154,10 @@ export default function EditJobPage() {
     name: "requirements",
     control: form.control,
   });
+
+  const currentDescription = form.watch("description");
+  const currentTitle = form.watch("title");
+  const currentProfessionalRole = form.watch("professionalRole");
 
   useEffect(() => {
     async function fetchJobDetails() {
@@ -235,6 +244,44 @@ export default function EditJobPage() {
     }
   }
 
+  const handleImproveWithAI = async () => {
+    try {
+      setIsImprovingDescription(true);
+      setShowImprovedDescriptionModal(true);
+      
+      const response = await fetch("/api/ai/improve-job-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          currentDescription,
+          jobTitle: currentTitle,
+          professionalRole: currentProfessionalRole
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Failed to improve job description");
+      }
+
+      setImprovedDescription(data.improvedDescription);
+    } catch (error: any) {
+      console.error("Error improving job description:", error);
+      // Show error in modal instead of closing it
+      setImprovedDescription(`Error: ${error.message || "Failed to improve job description. Please try again later."}`);
+    } finally {
+      setIsImprovingDescription(false);
+    }
+  };
+
+  const handleAcceptImprovedDescription = (description: string) => {
+    form.setValue("description", description);
+    setShowImprovedDescriptionModal(false);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -308,7 +355,18 @@ export default function EditJobPage() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job Description</FormLabel>
+                  <div className="flex justify-between items-center mb-1">
+                    <FormLabel>Job Description</FormLabel>
+                    <button
+                      type="button"
+                      onClick={handleImproveWithAI}
+                      disabled={!currentDescription || isSubmitting}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <SparklesIcon className="h-4 w-4 mr-1" />
+                      Improve with AI
+                    </button>
+                  </div>
                   <FormControl>
                     <Textarea
                       placeholder="Describe the role and responsibilities..."
@@ -514,6 +572,16 @@ export default function EditJobPage() {
           </form>
         </Form>
       </div>
+
+      {/* Improved Job Description Modal */}
+      <ImprovedJobDescriptionModal
+        isOpen={showImprovedDescriptionModal}
+        onClose={() => setShowImprovedDescriptionModal(false)}
+        originalDescription={currentDescription || ""}
+        improvedDescription={improvedDescription}
+        onAccept={handleAcceptImprovedDescription}
+        isLoading={isImprovingDescription}
+      />
     </div>
   );
 } 
