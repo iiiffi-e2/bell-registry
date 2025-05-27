@@ -465,6 +465,29 @@ const professionals = [
   }
 ]
 
+const professionalRoles = {
+  'Private Chef': 'Private Chef',
+  'Estate Manager': 'Estate Manager',
+  'House Manager': 'House Manager',
+  'Personal Assistant': 'Personal Assistant',
+  'Butler': 'Butler',
+  'Executive Chauffeur': 'Driver',
+  'Head Housekeeper': 'Housekeeper',
+  'Governess/Nanny': 'Governess',
+  'Security Director': 'Security Director',
+  'Personal Trainer': 'Personal Trainer',
+  'Household Manager': 'House Manager',
+  'Executive Personal Assistant': 'Personal Assistant',
+  'Private Yacht Chef': 'Private Chef',
+  'Villa Manager': 'Estate Manager',
+  'Family Office Manager': 'Family Office Manager',
+  'Domestic Couple': 'Estate Couple',
+  'Private Flight Attendant': 'Flight Attendant',
+  'Personal Valet': 'Butler',
+  'Wine Cellar Manager': 'Wine Cellar Manager',
+  'Household Staff Supervisor': 'House Manager'
+}
+
 async function main() {
   // Create a demo employer
   const employer = await prisma.user.upsert({
@@ -617,7 +640,7 @@ async function main() {
       data: {
         employerId: employer.id,
         title,
-        professionalRole: title.split(' - ')[0],
+        professionalRole: professionalRoles[title.split(' - ')[0]] || title.split(' - ')[0],
         description,
         location,
         requirements: jobRequirements,

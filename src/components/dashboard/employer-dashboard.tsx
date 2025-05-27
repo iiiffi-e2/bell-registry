@@ -181,7 +181,13 @@ export function EmployerDashboard() {
                       <TableCell>{job.views}</TableCell>
                       <TableCell>{job.applicants}</TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span
+                          className={
+                            job.status === "EXPIRED"
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700"
+                              : "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                          }
+                        >
                           {job.status}
                         </span>
                       </TableCell>

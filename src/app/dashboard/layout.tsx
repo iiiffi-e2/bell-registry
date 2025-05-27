@@ -53,7 +53,7 @@ const professionalNavigation: NavigationItem[] = [
 
 const employerNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
-  { name: "Job Listings", href: "/dashboard/employer/jobs", icon: BriefcaseIcon },
+  { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { 
     name: "Candidates", 
     href: "#", 

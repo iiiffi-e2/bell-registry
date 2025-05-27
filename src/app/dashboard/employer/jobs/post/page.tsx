@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, X } from "lucide-react";
+import { SparklesIcon } from "@heroicons/react/24/outline";
+import ImprovedJobDescriptionModal from "@/components/ui/improved-job-description-modal";
 
 const EMPLOYMENT_TYPES = [
   "Full-time",
@@ -134,6 +136,9 @@ export default function PostJobPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [customTitle, setCustomTitle] = useState<string>("");
+  const [showImprovedDescriptionModal, setShowImprovedDescriptionModal] = useState(false);
+  const [improvedDescription, setImprovedDescription] = useState("");
+  const [isImprovingDescription, setIsImprovingDescription] = useState(false);
 
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
@@ -144,6 +149,10 @@ export default function PostJobPage() {
     name: "requirements",
     control: form.control,
   });
+
+  const currentDescription = form.watch("description");
+  const currentTitle = form.watch("title");
+  const currentProfessionalRole = form.watch("professionalRole");
 
   // Update form title when role is selected
   useEffect(() => {
@@ -156,6 +165,43 @@ export default function PostJobPage() {
       }
     }
   }, [selectedRole, customTitle, form]);
+
+  const handleImproveWithAI = async () => {
+    try {
+      setIsImprovingDescription(true);
+      setShowImprovedDescriptionModal(true);
+      
+      const response = await fetch("/api/ai/improve-job-description", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          currentDescription,
+          jobTitle: currentTitle,
+          professionalRole: currentProfessionalRole
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.details || data.error || "Failed to improve job description");
+      }
+
+      setImprovedDescription(data.improvedDescription);
+    } catch (error: any) {
+      console.error("Error improving job description:", error);
+      setImprovedDescription(`Error: ${error.message || "Failed to improve job description. Please try again later."}`);
+    } finally {
+      setIsImprovingDescription(false);
+    }
+  };
+
+  const handleAcceptImprovedDescription = (description: string) => {
+    form.setValue("description", description);
+    setShowImprovedDescriptionModal(false);
+  };
 
   async function onSubmit(data: JobFormValues) {
     try {
@@ -263,11 +309,22 @@ export default function PostJobPage() {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job Description</FormLabel>
+                  <div className="flex justify-between items-center mb-1">
+                    <FormLabel>Job Description</FormLabel>
+                    <button
+                      type="button"
+                      onClick={handleImproveWithAI}
+                      disabled={!currentDescription || isSubmitting}
+                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <SparklesIcon className="h-4 w-4 mr-1" />
+                      Improve with AI
+                    </button>
+                  </div>
                   <FormControl>
                     <Textarea
                       placeholder="Describe the role and responsibilities..."
-                      className="min-h-[200px]"
+                      className="min-h-[200px] resize-y"
                       {...field}
                     />
                   </FormControl>
@@ -350,7 +407,7 @@ export default function PostJobPage() {
                   <FormItem>
                     <FormLabel>Expiry Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -471,6 +528,16 @@ export default function PostJobPage() {
           </form>
         </Form>
       </div>
+
+      {/* Improved Job Description Modal */}
+      <ImprovedJobDescriptionModal
+        isOpen={showImprovedDescriptionModal}
+        onClose={() => setShowImprovedDescriptionModal(false)}
+        originalDescription={currentDescription || ""}
+        improvedDescription={improvedDescription}
+        onAccept={handleAcceptImprovedDescription}
+        isLoading={isImprovingDescription}
+      />
     </div>
   );
 } 

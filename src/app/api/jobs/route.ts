@@ -70,6 +70,10 @@ export async function GET(request: Request) {
             }
           }
         });
+        // Handle null professionalRole by using title as fallback
+        if (!job.professionalRole) {
+          job.professionalRole = job.title.split(' - ')[0];
+        }
         return { ...job, employer };
       }));
       // Count
@@ -197,24 +201,35 @@ export async function GET(request: Request) {
       })
     ])
 
-    const combinedJobs = page === 1 ? [...featuredJobs, ...jobs] : jobs
+    // Handle null professionalRole values
+    const processedJobs = jobs.map(job => ({
+      ...job,
+      professionalRole: job.professionalRole || job.title.split(' - ')[0]
+    }));
+
+    const processedFeaturedJobs = featuredJobs.map(job => ({
+      ...job,
+      professionalRole: job.professionalRole || job.title.split(' - ')[0]
+    }));
+
+    const combinedJobs = page === 1 ? [...processedFeaturedJobs, ...processedJobs] : processedJobs;
 
     return NextResponse.json({
       jobs: combinedJobs,
-      featured: featuredJobs.length > 0,
+      featured: page === 1,
       pagination: {
         total,
         pages: Math.ceil(total / limit),
         page,
         limit
       }
-    })
+    });
   } catch (error) {
-    console.error('Error fetching jobs:', error)
+    console.error("Error fetching jobs:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch jobs' },
+      { error: "Failed to fetch jobs" },
       { status: 500 }
-    )
+    );
   }
 }
 

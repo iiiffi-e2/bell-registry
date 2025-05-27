@@ -16,11 +16,10 @@ export async function GET() {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
-    // Get active jobs with application counts
+    // Get all jobs for the employer, regardless of status
     const jobs = await prisma.job.findMany({
       where: {
         employerId: session.user.id,
-        status: JobStatus.ACTIVE,
       },
       include: {
         _count: {
@@ -34,17 +33,28 @@ export async function GET() {
       },
     });
 
-    // Transform the data to include views and applicants
-    const transformedJobs = jobs.map((job) => ({
-      id: job.id,
-      title: job.title,
-      location: job.location,
-      status: job.status,
-      views: 0, // TODO: Implement job views tracking
-      applicants: job._count.applications,
-      createdAt: job.createdAt,
-      urlSlug: job.urlSlug,
-    }));
+    // Transform the data to include views, applicants, and handle expiry
+    const now = new Date();
+    const transformedJobs = jobs.map((job) => {
+      let status = job.status;
+      if (
+        job.expiresAt &&
+        new Date(job.expiresAt) < now &&
+        job.status !== "FILLED"
+      ) {
+        status = "EXPIRED";
+      }
+      return {
+        id: job.id,
+        title: job.title,
+        location: job.location,
+        status,
+        views: 0, // TODO: Implement job views tracking
+        applicants: job._count.applications,
+        createdAt: job.createdAt,
+        urlSlug: job.urlSlug,
+      };
+    });
 
     return NextResponse.json({
       jobs: transformedJobs,
