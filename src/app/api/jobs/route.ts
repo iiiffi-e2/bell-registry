@@ -240,6 +240,7 @@ export async function POST(request: Request) {
     const job = await prisma.job.create({
       data: {
         title: data.title,
+        professionalRole: data.professionalRole,
         description: data.description,
         location: data.location,
         requirements: data.requirements,

@@ -13,6 +13,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -160,19 +161,12 @@ export default function EditJobPage() {
         const data = await response.json();
         const job = data.job;
 
-        // Extract professional role from title if it exists
-        const titleParts = job.title.split(" - ");
-        const professionalRole = PROFESSIONAL_ROLES.find(
-          role => titleParts[0] === role
-        ) || "Other";
-        const displayTitle = titleParts.length > 1 ? titleParts[1] : titleParts[0];
-
         // Format the date to YYYY-MM-DD for the input
         const expiryDate = new Date(job.expiresAt).toISOString().split('T')[0];
 
         form.reset({
-          title: displayTitle,
-          professionalRole,
+          title: job.title,
+          professionalRole: job.professionalRole,
           description: job.description,
           location: job.location,
           requirements: job.requirements.map((req: string) => ({ value: req })),
@@ -316,8 +310,9 @@ export default function EditJobPage() {
                 <FormItem>
                   <FormLabel>Job Description</FormLabel>
                   <FormControl>
-                    <Input
+                    <Textarea
                       placeholder="Describe the role and responsibilities..."
+                      className="min-h-[200px] resize-y"
                       {...field}
                     />
                   </FormControl>

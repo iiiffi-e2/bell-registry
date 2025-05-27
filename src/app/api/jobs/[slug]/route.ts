@@ -53,6 +53,7 @@ export async function PUT(
     // Update the job
     const updateData: Prisma.JobUpdateInput = {
       title: data.title,
+      professionalRole: data.professionalRole,
       description: data.description,
       location: data.location,
       requirements: data.requirements,

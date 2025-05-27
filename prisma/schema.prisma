@@ -139,6 +139,7 @@ model Job {
   id           String           @id @default(cuid())
   employerId   String
   title        String
+  professionalRole String       // The primary role category for this position
   description  String
   location     String
   salary       Json?
