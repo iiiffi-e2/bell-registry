@@ -1,12 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Candidates | Bell Registry",
-  description: "Manage your candidate interactions",
-};
-
 export default function CandidatesPage() {
   return (
     <div className="container mx-auto py-6">
