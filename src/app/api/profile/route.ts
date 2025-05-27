@@ -12,161 +12,90 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session?.user?.email) {
-      return new NextResponse("Unauthorized", { 
-        status: 401,
-        headers: {
-          'Cache-Control': 'no-store'
-        }
-      });
-    }
-
-    const profile = await prisma.candidateProfile.findFirst({
-      where: {
-        user: {
-          email: session.user.email
-        }
-      },
-      include: {
-        user: true
-      }
-    });
-
-    if (!profile) {
-      return new NextResponse("Profile not found", { 
-        status: 404,
-        headers: {
-          'Cache-Control': 'no-store'
-        }
-      });
-    }
-
-    // Add cache control headers for successful responses
-    return NextResponse.json(profile, {
-      headers: {
-        'Cache-Control': 'private, max-age=30, must-revalidate',
-        'Surrogate-Control': 'no-store',
-        'Pragma': 'no-cache',
-      }
-    });
-    
-  } catch (error) {
-    console.error("[PROFILE_GET]", error);
-    return new NextResponse("Internal error", { 
-      status: 500,
-      headers: {
-        'Cache-Control': 'no-store'
-      }
-    });
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: { candidateProfile: true }
+      include: {
+        candidateProfile: true,
+        employerProfile: true,
+      },
     });
 
     if (!user) {
       return new NextResponse("User not found", { status: 404 });
     }
 
-    const data = await request.json();
-    const {
-      // Basic Info
-      firstName,
-      lastName,
-      photoUrl,
-      preferredRole,
-      location,
-      workLocations,
-      openToRelocation,
-      yearsOfExperience,
-      isAnonymous,
-      
-      // About Me Sections
-      whatImSeeking,
-      whyIEnjoyThisWork,
-      whatSetsApartMe,
-      idealEnvironment,
-      
-      // Professional Details
-      seekingOpportunities,
-      skills,
-      payRangeMin,
-      payRangeMax,
-      payCurrency,
-      
-      // Media
-      additionalPhotos,
-      mediaUrls,
-      
-      // Existing fields
-      bio,
-      phoneNumber,
-      certifications,
-      availability,
-      experience
-    } = data;
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error("[PROFILE_GET]", error);
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
 
-    // Update user's basic information
-    const userUpdateData = {
-      phoneNumber,
-      firstName,
-      lastName
-    };
+export async function PUT(req: Request) {
+  try {
+    const session = await getServerSession(authOptions);
 
-    // Only update isAnonymous if it's explicitly provided
-    if (typeof isAnonymous === 'boolean') {
-      Object.assign(userUpdateData, { isAnonymous });
+    if (!session?.user) {
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    // Update user
-    await prisma.user.update({
-      where: { id: user.id },
-      data: userUpdateData
-    });
+    const body = await req.json();
 
-    // Update or create candidate profile
-    const profileData = {
-      userId: user.id,
-      bio,
-      preferredRole,
-      location,
-      workLocations,
-      openToRelocation,
-      yearsOfExperience,
-      whatImSeeking,
-      whyIEnjoyThisWork,
-      whatSetsApartMe,
-      idealEnvironment,
-      seekingOpportunities,
-      skills,
-      payRangeMin: payRangeMin ? parseFloat(payRangeMin) : null,
-      payRangeMax: payRangeMax ? parseFloat(payRangeMax) : null,
-      payCurrency,
-      additionalPhotos,
-      mediaUrls,
-      certifications,
-      availability,
-      experience
-    };
+    if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
+      // Update employer profile
+      const updatedProfile = await prisma.employerProfile.update({
+        where: { userId: session.user.id },
+        data: {
+          companyName: body.companyName,
+          description: body.description,
+          website: body.website,
+          logoUrl: body.logoUrl,
+          location: body.location,
+        },
+      });
 
-    const updatedProfile = await prisma.candidateProfile.upsert({
-      where: { userId: user.id },
-      create: profileData,
-      update: profileData,
-    });
+      return NextResponse.json(updatedProfile);
+    } else {
+      // Update candidate profile
+      const updatedProfile = await prisma.candidateProfile.update({
+        where: { userId: session.user.id },
+        data: {
+          bio: body.bio,
+          skills: body.skills ? body.skills.split(",").map((s: string) => s.trim()) : undefined,
+          experience: body.experience,
+          certifications: body.certifications ? body.certifications.split(",").map((c: string) => c.trim()) : undefined,
+          availability: body.availability ? new Date(body.availability) : undefined,
+          resumeUrl: body.resumeUrl,
+          photoUrl: body.photoUrl,
+          location: body.location,
+          title: body.preferredRole,
+          additionalPhotos: body.additionalPhotos,
+          currentLocation: body.location,
+          headshot: body.photoUrl,
+          idealEnvironment: body.idealEnvironment,
+          mediaUrls: body.mediaUrls,
+          openToRelocation: body.openToRelocation,
+          payCurrency: body.payCurrency,
+          payRangeMax: body.payRangeMax ? parseFloat(body.payRangeMax) : undefined,
+          payRangeMin: body.payRangeMin ? parseFloat(body.payRangeMin) : undefined,
+          preferredRole: body.preferredRole,
+          seekingOpportunities: body.seekingOpportunities,
+          whatImSeeking: body.whatImSeeking,
+          whatSetsApartMe: body.whatSetsApartMe,
+          whyIEnjoyThisWork: body.whyIEnjoyThisWork,
+          workLocations: body.workLocations,
+          yearsOfExperience: body.yearsOfExperience ? parseInt(body.yearsOfExperience) : undefined,
+        },
+      });
 
-    return NextResponse.json(updatedProfile);
+      return NextResponse.json(updatedProfile);
+    }
   } catch (error) {
     console.error("[PROFILE_PUT]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    return new NextResponse("Internal Error", { status: 500 });
   }
 } 
