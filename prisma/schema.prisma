@@ -77,6 +77,8 @@ model User {
   receivedMessages    Message[]            @relation("ReceivedMessages")
   sentMessages        Message[]            @relation("SentMessages")
   savedJobs           SavedJob[]
+  savedCandidates     SavedCandidate[]     @relation("SavedCandidates")
+  savedByEmployers    SavedCandidate[]     @relation("SavedByEmployers")
   sessions            Session[]
   profileViewEvents   ProfileViewEvent[]
   jobViewEvents       JobViewEvent[]
@@ -181,6 +183,17 @@ model SavedJob {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([jobId, userId])
+}
+
+model SavedCandidate {
+  id          String   @id @default(cuid())
+  candidateId String
+  employerId  String
+  createdAt   DateTime @default(now())
+  candidate   User     @relation("SavedCandidates", fields: [candidateId], references: [id], onDelete: Cascade)
+  employer    User     @relation("SavedByEmployers", fields: [employerId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, employerId])
 }
 
 model Message {

@@ -8,72 +8,75 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
     }
 
-    if (session.user.role !== "EMPLOYER") {
-      return new NextResponse("Forbidden", { status: 403 });
+    // Check if user is an employer or agency
+    if (session.user.role !== 'EMPLOYER' && session.user.role !== 'AGENCY') {
+      return NextResponse.json(
+        { error: 'Only employers and agencies can access these stats' },
+        { status: 403 }
+      );
     }
 
-    // Get active job listings count (jobs available for applications)
-    const now = new Date();
-    const activeListings = await prisma.job.count({
-      where: {
-        employerId: session.user.id,
-        status: {
-          in: ["ACTIVE" as JobStatus, "INTERVIEWING" as JobStatus],
-        },
-        OR: [
-          {
-            expiresAt: {
-              gt: now,
-            },
-          },
-          {
-            expiresAt: null,
-          },
-        ],
-      },
-    });
+    const employerId = session.user.id;
 
-    // Get recent applications count (last 30 days)
-    const recentApplications = await prisma.jobApplication.count({
-      where: {
-        job: {
-          employerId: session.user.id,
-        },
-        createdAt: {
-          gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-        },
-      },
-    });
-
-    // Get saved candidates count (using ProfileViewEvent)
-    const savedCandidates = await prisma.profileViewEvent.count({
-      where: {
-        userId: session.user.id,
-      },
-    });
-
-    // Get total views for all jobs posted by this employer (using JobViewEvent)
-    const totalViewsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
-      SELECT COUNT(*) as count
-      FROM "JobViewEvent" jve
-      JOIN "Job" j ON jve."jobId" = j.id
-      WHERE j."employerId" = ${session.user.id}
-    `;
-    
-    const totalViews = totalViewsResult.length > 0 ? Number(totalViewsResult[0].count) : 0;
+    // Get various statistics
+    const [
+      activeJobsCount,
+      totalApplicationsCount,
+      savedCandidatesCount,
+      totalViewsCount
+    ] = await Promise.all([
+      // Active jobs count
+      prisma.job.count({
+        where: {
+          employerId,
+          status: 'ACTIVE'
+        }
+      }),
+      
+      // Total applications count
+      prisma.jobApplication.count({
+        where: {
+          job: {
+            employerId
+          }
+        }
+      }),
+      
+      // Saved candidates count
+      prisma.savedCandidate.count({
+        where: {
+          employerId
+        }
+      }),
+      
+      // Total job views count
+      prisma.jobViewEvent.count({
+        where: {
+          job: {
+            employerId
+          }
+        }
+      })
+    ]);
 
     return NextResponse.json({
-      activeListings,
-      recentApplications,
-      savedCandidates,
-      totalViews,
+      activeJobs: activeJobsCount,
+      totalApplications: totalApplicationsCount,
+      savedCandidates: savedCandidatesCount,
+      totalViews: totalViewsCount
     });
   } catch (error) {
-    console.error("[EMPLOYER_STATS]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    console.error('Error fetching employer stats:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch employer stats' },
+      { status: 500 }
+    );
   }
 } 

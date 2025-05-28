@@ -2,7 +2,10 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { UserCircleIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { UserCircleIcon, MapPinIcon, BookmarkIcon } from '@heroicons/react/24/outline'
+import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid'
 import { generateProfileUrl } from '@/lib/utils'
 
 interface CandidateCardProps {
@@ -25,6 +28,13 @@ interface CandidateCardProps {
 }
 
 export function CandidateCard({ candidate }: CandidateCardProps) {
+  const { data: session } = useSession()
+  const [isSaved, setIsSaved] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Check if current user is an employer/agency
+  const canSaveCandidate = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY'
+
   // Handle anonymized names (single characters) vs full names
   const getDisplayName = () => {
     const firstName = candidate.user.firstName || '';
@@ -41,12 +51,79 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
 
   const displayName = getDisplayName();
 
+  // Fetch save status when component mounts
+  useEffect(() => {
+    if (canSaveCandidate) {
+      fetchSaveStatus()
+    }
+  }, [canSaveCandidate, candidate.user.id])
+
+  const fetchSaveStatus = async () => {
+    try {
+      const response = await fetch(`/api/candidates/${candidate.user.id}/bookmark`)
+      if (response.ok) {
+        const { saved } = await response.json()
+        setIsSaved(saved)
+      }
+    } catch (error) {
+      console.error('Error fetching save status:', error)
+    }
+  }
+
+  const handleSaveToggle = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    if (isLoading) return
+
+    setIsLoading(true)
+    try {
+      const response = await fetch(`/api/candidates/${candidate.user.id}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        const { saved } = await response.json()
+        setIsSaved(saved)
+      } else {
+        console.error('Failed to toggle save status')
+      }
+    } catch (error) {
+      console.error('Error toggling save status:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
-    <Link
-      href={generateProfileUrl(candidate.user.profileSlug)}
-      className="block bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200"
-    >
-      <div className="p-6">
+    <div className="relative block bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200">
+      {/* Bookmark button for employers */}
+      {canSaveCandidate && (
+        <button
+          onClick={handleSaveToggle}
+          disabled={isLoading}
+          className={`absolute top-4 right-4 z-10 p-2 rounded-full transition-colors ${
+            isSaved 
+              ? 'text-blue-600 hover:text-blue-700' 
+              : 'text-gray-400 hover:text-gray-600'
+          } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          title={isSaved ? 'Remove from saved candidates' : 'Save candidate'}
+        >
+          {isSaved ? (
+            <BookmarkSolidIcon className="h-5 w-5" />
+          ) : (
+            <BookmarkIcon className="h-5 w-5" />
+          )}
+        </button>
+      )}
+
+      <Link
+        href={generateProfileUrl(candidate.user.profileSlug)}
+        className="block p-6"
+      >
         <div className="flex items-center space-x-4">
           {candidate.user.image ? (
             <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
@@ -97,7 +174,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
             </div>
           </div>
         )}
-      </div>
-    </Link>
+      </Link>
+    </div>
   )
 } 
