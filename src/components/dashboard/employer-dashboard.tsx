@@ -59,7 +59,11 @@ export function EmployerDashboard() {
         const jobsRes = await fetch("/api/dashboard/employer/jobs");
         if (jobsRes.ok) {
           const jobsData = await jobsRes.json();
-          setJobs(jobsData.jobs || []);
+          // Filter to only show active listings (ACTIVE and INTERVIEWING)
+          const activeJobs = (jobsData.jobs || []).filter((job: Job) => 
+            job.status === "ACTIVE" || job.status === "INTERVIEWING"
+          );
+          setJobs(activeJobs);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -147,12 +151,20 @@ export function EmployerDashboard() {
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold">Active Job Listings</h2>
-            <Button asChild>
-              <Link href="/dashboard/employer/jobs/post" className="flex items-center">
-                <Plus className="h-4 w-4 mr-2" />
-                Post New Job
-              </Link>
-            </Button>
+            <div className="flex gap-3">
+              <Button variant="outline" asChild>
+                <Link href="/dashboard/employer/jobs" className="flex items-center">
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  View All Jobs
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link href="/dashboard/employer/jobs/post" className="flex items-center">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Post New Job
+                </Link>
+              </Button>
+            </div>
           </div>
 
           {jobs.length > 0 ? (
