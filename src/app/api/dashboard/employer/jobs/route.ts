@@ -33,6 +33,20 @@ export async function GET() {
       },
     });
 
+    // Get view counts for all jobs using raw SQL
+    const viewCounts = jobs.length > 0 ? await prisma.$queryRaw<Array<{ jobId: string; count: bigint }>>`
+      SELECT "jobId", COUNT(*) as count
+      FROM "JobViewEvent"
+      WHERE "jobId" = ANY(${jobs.map(j => j.id)})
+      GROUP BY "jobId"
+    ` : [];
+
+    // Create a map of job IDs to view counts
+    const viewCountMap = new Map<string, number>();
+    viewCounts.forEach(vc => {
+      viewCountMap.set(vc.jobId, Number(vc.count));
+    });
+
     // Transform the data to include views, applicants, and handle expiry
     const now = new Date();
     const transformedJobs = jobs.map((job) => {
@@ -49,7 +63,7 @@ export async function GET() {
         title: job.title,
         location: job.location,
         status,
-        views: 0, // TODO: Implement job views tracking
+        views: viewCountMap.get(job.id) || 0,
         applicants: job._count.applications,
         createdAt: job.createdAt,
         urlSlug: job.urlSlug,

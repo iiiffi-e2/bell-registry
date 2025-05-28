@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getTimeAgo } from "@/lib/utils";
@@ -40,11 +40,17 @@ export default function PublicJobDetailsPage() {
   const [job, setJob] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const viewTrackedRef = useRef(false); // Track if we've already recorded a view for this page load
 
   useEffect(() => {
     if (params.slug) {
       fetchJobDetails(params.slug as string);
     }
+  }, [params.slug]);
+
+  useEffect(() => {
+    // Reset view tracking when slug changes
+    viewTrackedRef.current = false;
   }, [params.slug]);
 
   const fetchJobDetails = async (slug: string) => {
@@ -62,6 +68,29 @@ export default function PublicJobDetailsPage() {
       const data = await response.json();
       setJob(data.job);
       setError(null);
+
+      // Track job view after successfully fetching the job details
+      // Only track once per page load
+      if (data.job?.id && !viewTrackedRef.current) {
+        viewTrackedRef.current = true; // Mark as tracked to prevent duplicates
+        try {
+          const viewResponse = await fetch(`/api/jobs/${slug}/view`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          
+          if (viewResponse.ok) {
+            const viewData = await viewResponse.json();
+            console.log('View tracking result:', viewData); // Debug logging
+          }
+        } catch (viewError) {
+          // Silently fail if view tracking doesn't work
+          console.error("Failed to track job view:", viewError);
+          viewTrackedRef.current = false; // Reset on error so we can try again
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch job details");
       setJob(null);

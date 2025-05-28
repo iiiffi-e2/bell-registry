@@ -79,6 +79,7 @@ model User {
   savedJobs           SavedJob[]
   sessions            Session[]
   profileViewEvents   ProfileViewEvent[]
+  jobViewEvents       JobViewEvent[]
   isDemo              Boolean              @default(false)
   resetToken          String?              @unique
   resetTokenExpiry    DateTime?            @db.Timestamptz(6)
@@ -155,6 +156,7 @@ model Job {
   employer     User             @relation(fields: [employerId], references: [id])
   applications JobApplication[]
   savedBy      SavedJob[]
+  viewEvents   JobViewEvent[]
   isDemo       Boolean          @default(false)
 }
 
@@ -197,6 +199,18 @@ model ProfileViewEvent {
   userId    String
   viewedAt  DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model JobViewEvent {
+  id        String   @id @default(cuid())
+  jobId     String
+  userId    String?  // Optional since we want to track views from non-logged in users
+  viewedAt  DateTime @default(now())
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([jobId])
+  @@index([userId])
 }
 
 model JobAlert {

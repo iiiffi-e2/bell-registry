@@ -56,18 +56,15 @@ export async function GET() {
       },
     });
 
-    // Get total views for all jobs (using ProfileViewEvent)
-    const totalViews = await prisma.profileViewEvent.count({
-      where: {
-        user: {
-          postedJobs: {
-            some: {
-              employerId: session.user.id,
-            },
-          },
-        },
-      },
-    });
+    // Get total views for all jobs posted by this employer (using JobViewEvent)
+    const totalViewsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      SELECT COUNT(*) as count
+      FROM "JobViewEvent" jve
+      JOIN "Job" j ON jve."jobId" = j.id
+      WHERE j."employerId" = ${session.user.id}
+    `;
+    
+    const totalViews = totalViewsResult.length > 0 ? Number(totalViewsResult[0].count) : 0;
 
     return NextResponse.json({
       activeListings,
