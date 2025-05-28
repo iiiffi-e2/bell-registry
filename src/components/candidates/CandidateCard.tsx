@@ -25,7 +25,21 @@ interface CandidateCardProps {
 }
 
 export function CandidateCard({ candidate }: CandidateCardProps) {
-  const fullName = `${candidate.user.firstName || ''} ${candidate.user.lastName || ''}`.trim()
+  // Handle anonymized names (single characters) vs full names
+  const getDisplayName = () => {
+    const firstName = candidate.user.firstName || '';
+    const lastName = candidate.user.lastName || '';
+    
+    // If names are single characters (anonymized), show as initials
+    if (firstName.length === 1 && lastName.length === 1) {
+      return `${firstName}. ${lastName}.`;
+    }
+    
+    // Otherwise show full name
+    return `${firstName} ${lastName}`.trim();
+  };
+
+  const displayName = getDisplayName();
 
   return (
     <Link
@@ -38,7 +52,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
             <div className="h-12 w-12 rounded-full overflow-hidden bg-gray-100">
               <Image
                 src={candidate.user.image}
-                alt={fullName}
+                alt={displayName}
                 width={48}
                 height={48}
                 className="h-full w-full object-cover"
@@ -48,7 +62,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
             <UserCircleIcon className="h-12 w-12 text-gray-400" />
           )}
           <div>
-            <h3 className="text-lg font-medium text-gray-900">{fullName}</h3>
+            <h3 className="text-lg font-medium text-gray-900">{displayName}</h3>
             <p className="text-sm text-gray-500">{candidate.title || candidate.preferredRole || 'Professional'}</p>
           </div>
         </div>

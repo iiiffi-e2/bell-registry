@@ -1,5 +1,7 @@
 import Image from "next/image";
-import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import {
   UserCircleIcon,
   MapPinIcon,
@@ -62,38 +64,107 @@ interface PublicProfile {
 }
 
 async function getProfile(slug: string): Promise<PublicProfile> {
-  const headersList = headers();
-  const host = headersList.get("host");
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const url = `${protocol}://${host}/api/professionals/${slug}`;
+  const session = await getServerSession(authOptions);
+  const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY";
   
-  console.log("[PROFILE_PAGE] Fetching profile from:", url);
-  
-  const response = await fetch(url, {
-    next: { revalidate: 60 }, // Revalidate every minute
+  console.log("[PROFILE_PAGE] Looking for profile with slug:", slug);
+  console.log("[PROFILE_PAGE] User session role:", session?.user?.role);
+  console.log("[PROFILE_PAGE] Is employer or agency:", isEmployerOrAgency);
+
+  // Find the profile using the profileSlug field
+  const profile = await prisma.user.findFirst({
+    where: {
+      profileSlug: slug
+    },
+    include: {
+      candidateProfile: true
+    }
   });
 
-  console.log("[PROFILE_PAGE] Response status:", response.status);
+  console.log("[PROFILE_PAGE] Raw profile data found:", !!profile);
 
-  if (!response.ok) {
-    const text = await response.text();
-    console.error("[PROFILE_PAGE] Error response:", text);
+  if (!profile || !profile.candidateProfile) {
+    console.log("[PROFILE_PAGE] Profile not found");
     throw new Error('Profile not found');
   }
 
-  const data = await response.json();
-  console.log("[PROFILE_PAGE] Received profile data:", data);
-  return data;
+  // Increment profile views
+  await prisma.candidateProfile.update({
+    where: { id: profile.candidateProfile.id },
+    data: { profileViews: { increment: 1 } }
+  });
+
+  // Log profile view event
+  await prisma.profileViewEvent.create({
+    data: {
+      userId: profile.id,
+    }
+  });
+
+  // Format the response data with anonymization logic
+  const responseData: PublicProfile = {
+    id: profile.candidateProfile.id,
+    bio: profile.candidateProfile.bio,
+    title: profile.candidateProfile.preferredRole,
+    preferredRole: profile.candidateProfile.preferredRole,
+    skills: profile.candidateProfile.skills || [],
+    experience: (profile.candidateProfile.experience as unknown as Experience[]) || [],
+    certifications: profile.candidateProfile.certifications || [],
+    location: profile.candidateProfile.location,
+    availability: profile.candidateProfile.availability ? profile.candidateProfile.availability.toISOString() : null,
+    resumeUrl: isEmployerOrAgency ? null : profile.candidateProfile.resumeUrl,
+    profileViews: profile.candidateProfile.profileViews,
+    workLocations: profile.candidateProfile.workLocations || [],
+    openToRelocation: profile.candidateProfile.openToRelocation || false,
+    yearsOfExperience: profile.candidateProfile.yearsOfExperience,
+    whatImSeeking: profile.candidateProfile.whatImSeeking,
+    whyIEnjoyThisWork: profile.candidateProfile.whyIEnjoyThisWork,
+    whatSetsApartMe: profile.candidateProfile.whatSetsApartMe,
+    idealEnvironment: profile.candidateProfile.idealEnvironment,
+    seekingOpportunities: profile.candidateProfile.seekingOpportunities || [],
+    payRangeMin: profile.candidateProfile.payRangeMin,
+    payRangeMax: profile.candidateProfile.payRangeMax,
+    payCurrency: profile.candidateProfile.payCurrency || 'USD',
+    additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
+    mediaUrls: profile.candidateProfile.mediaUrls || [],
+    user: {
+      firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,
+      lastName: isEmployerOrAgency ? (profile.lastName?.[0] || '') : profile.lastName,
+      image: isEmployerOrAgency ? null : profile.image,
+      role: profile.role,
+      createdAt: profile.createdAt.toISOString(),
+      email: isEmployerOrAgency ? '' : profile.email,
+      phoneNumber: isEmployerOrAgency ? null : profile.phoneNumber,
+      isAnonymous: isEmployerOrAgency ? true : (profile.isAnonymous || false),
+    }
+  };
+
+  console.log("[PROFILE_PAGE] Formatted response data:", {
+    ...responseData,
+    user: {
+      ...responseData.user,
+      firstName: responseData.user.firstName,
+      lastName: responseData.user.lastName,
+      isAnonymous: responseData.user.isAnonymous
+    }
+  });
+
+  return responseData;
 }
 
 // Helper function to get display name based on anonymous setting
 function getDisplayName(profile: PublicProfile) {
-  if (profile.user.isAnonymous) {
-    const firstInitial = profile.user.firstName?.[0] || '';
-    const lastInitial = profile.user.lastName?.[0] || '';
+  const firstName = profile.user.firstName || '';
+  const lastName = profile.user.lastName || '';
+  
+  // Check if anonymized (either by isAnonymous flag or single character names)
+  if (profile.user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
+    const firstInitial = firstName[0] || '';
+    const lastInitial = lastName[0] || '';
     return `${firstInitial}. ${lastInitial}.`;
   }
-  return `${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim();
+  
+  return `${firstName} ${lastName}`.trim();
 }
 
 export default async function PublicProfilePage({
@@ -118,7 +189,7 @@ export default async function PublicProfilePage({
               {/* Profile Header */}
               <div className="flex items-center mb-6">
                 <div className="flex-shrink-0">
-                  {!profile.user.isAnonymous && profile.user.image ? (
+                  {profile.user.image && !profile.user.isAnonymous ? (
                     <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
                       <Image
                         src={profile.user.image}
@@ -139,7 +210,7 @@ export default async function PublicProfilePage({
                     {getDisplayName(profile)}
                   </h1>
                   <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-                  {!profile.user.isAnonymous && (
+                  {!profile.user.isAnonymous && profile.user.email && (
                     <>
                       <div className="mt-2 flex items-center text-sm text-gray-500">
                         <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />

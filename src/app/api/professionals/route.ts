@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma, UserRole } from '@prisma/client'
 import { SortOption } from '@/types/candidate'
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function GET(request: Request) {
   try {
+    const session = await getServerSession(authOptions)
+    const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY"
+
     const { searchParams } = new URL(request.url)
     const location = searchParams.get('location')
     const roleType = searchParams.get('roleType') as UserRole | null
@@ -121,8 +126,25 @@ export async function GET(request: Request) {
 
     console.log('Found professionals:', professionals)
 
+    // Anonymize data for employers and agencies
+    const anonymizedProfessionals = professionals.map(professional => {
+      if (isEmployerOrAgency) {
+        return {
+          ...professional,
+          user: {
+            ...professional.user,
+            firstName: professional.user.firstName?.[0] || '',
+            lastName: professional.user.lastName?.[0] || '',
+            image: null, // Hide profile image
+            email: '', // Hide email
+          }
+        };
+      }
+      return professional;
+    });
+
     return NextResponse.json({
-      professionals,
+      professionals: anonymizedProfessionals,
       pagination: {
         total,
         pages: Math.ceil(total / limit),

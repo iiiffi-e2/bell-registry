@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { Prisma, User } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 type CandidateProfileWithAll = Prisma.CandidateProfileGetPayload<{
   select: {
@@ -41,6 +43,9 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
+    const session = await getServerSession(authOptions);
+    const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY";
+
     console.log("[PROFILE_GET] Looking for profile with slug:", params.slug);
 
     // Find the profile using the profileSlug field
@@ -84,7 +89,7 @@ export async function GET(
       certifications: profile.candidateProfile.certifications || [],
       location: profile.candidateProfile.location,
       availability: profile.candidateProfile.availability ? profile.candidateProfile.availability.toISOString() : null,
-      resumeUrl: profile.candidateProfile.resumeUrl,
+      resumeUrl: isEmployerOrAgency ? null : profile.candidateProfile.resumeUrl,
       profileViews: profile.candidateProfile.profileViews,
       workLocations: profile.candidateProfile.workLocations || [],
       openToRelocation: profile.candidateProfile.openToRelocation || false,
@@ -97,17 +102,17 @@ export async function GET(
       payRangeMin: profile.candidateProfile.payRangeMin,
       payRangeMax: profile.candidateProfile.payRangeMax,
       payCurrency: profile.candidateProfile.payCurrency || 'USD',
-      additionalPhotos: profile.candidateProfile.additionalPhotos || [],
+      additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
       mediaUrls: profile.candidateProfile.mediaUrls || [],
       user: {
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        image: profile.image,
+        firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,
+        lastName: isEmployerOrAgency ? (profile.lastName?.[0] || '') : profile.lastName,
+        image: isEmployerOrAgency ? null : profile.image,
         role: profile.role,
         createdAt: profile.createdAt.toISOString(),
-        email: profile.email,
-        phoneNumber: profile.phoneNumber,
-        isAnonymous: profile.isAnonymous || false,
+        email: isEmployerOrAgency ? '' : profile.email,
+        phoneNumber: isEmployerOrAgency ? null : profile.phoneNumber,
+        isAnonymous: isEmployerOrAgency ? true : (profile.isAnonymous || false),
       }
     };
 
