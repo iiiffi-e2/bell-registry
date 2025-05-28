@@ -60,6 +60,7 @@ export async function PUT(
       salary: data.salary,
       jobType: data.jobType,
       employmentType: data.employmentType,
+      status: data.status as JobStatus,
       featured: data.featured,
       expiresAt: new Date(data.expiresAt),
     };

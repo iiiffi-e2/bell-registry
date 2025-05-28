@@ -54,7 +54,7 @@ export async function GET(request: Request) {
           ${rankExpr} AS rank
         FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
-        AND status = 'ACTIVE'
+        AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
         AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
         ORDER BY rank DESC
         LIMIT $2 OFFSET $3
@@ -82,7 +82,7 @@ export async function GET(request: Request) {
       const countQuery = `
         SELECT COUNT(*) FROM "Job"
         WHERE (${whereClauses.join(' OR ')})
-        AND status = 'ACTIVE'
+        AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
         AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
       `
       const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1))
@@ -100,7 +100,9 @@ export async function GET(request: Request) {
     }
 
     const baseWhere: Prisma.JobWhereInput = {
-      status: status ? (status as JobStatus) : JobStatus.ACTIVE,
+      status: status ? (status as JobStatus) : {
+        notIn: ['CLOSED' as JobStatus, 'EXPIRED' as JobStatus, 'FILLED' as JobStatus]
+      },
       OR: [
         {
           expiresAt: {

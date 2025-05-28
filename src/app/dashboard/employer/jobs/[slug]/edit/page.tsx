@@ -48,6 +48,13 @@ const JOB_TYPES = [
   "Per Diem"
 ] as const;
 
+const JOB_STATUSES = [
+  "ACTIVE",
+  "INTERVIEWING", 
+  "FILLED",
+  "CLOSED"
+] as const;
+
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
   "Executive Housekeeper",
@@ -101,6 +108,7 @@ const PROFESSIONAL_ROLES = [
 
 type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
 type JobType = (typeof JOB_TYPES)[number];
+type JobStatus = (typeof JOB_STATUSES)[number];
 
 const jobFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -109,7 +117,7 @@ const jobFormSchema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.array(z.object({
     value: z.string()
-  })).min(1, "At least one requirement is required"),
+  })).optional().default([]),
   salaryMin: z.string().min(1, "Minimum salary is required"),
   salaryMax: z.string().min(1, "Maximum salary is required"),
   jobType: z.enum(JOB_TYPES, {
@@ -117,6 +125,9 @@ const jobFormSchema = z.object({
   }),
   employmentType: z.enum(EMPLOYMENT_TYPES, {
     required_error: "Employment type is required",
+  }),
+  status: z.enum(JOB_STATUSES, {
+    required_error: "Job status is required",
   }),
   featured: z.boolean().default(false),
   expiresAt: z.string().min(1, "Expiry date is required"),
@@ -145,6 +156,7 @@ export default function EditJobPage() {
       salaryMax: "",
       jobType: "Permanent",
       employmentType: "Full-time",
+      status: "ACTIVE",
       featured: false,
       expiresAt: "",
     }
@@ -178,11 +190,12 @@ export default function EditJobPage() {
           professionalRole: job.professionalRole,
           description: job.description,
           location: job.location,
-          requirements: job.requirements.map((req: string) => ({ value: req })),
+          requirements: (job.requirements || []).map((req: string) => ({ value: req })),
           salaryMin: job.salary.min.toString(),
           salaryMax: job.salary.max.toString(),
           jobType: job.jobType as JobType,
           employmentType: job.employmentType as EmploymentType,
+          status: job.status as JobStatus,
           featured: job.featured,
           expiresAt: expiryDate,
         });
@@ -202,7 +215,7 @@ export default function EditJobPage() {
       setIsSubmitting(true);
       
       // Filter out empty requirements
-      const requirements = data.requirements
+      const requirements = (data.requirements || [])
         .filter(req => req.value.trim() !== "")
         .map(req => req.value);
 
@@ -425,6 +438,34 @@ export default function EditJobPage() {
               />
             </div>
 
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Job Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select job status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {JOB_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Set the current status of this job posting
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <FormLabel>Requirements</FormLabel>
@@ -559,7 +600,10 @@ export default function EditJobPage() {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? "Saving..." : "Save Changes"}
               </Button>
             </div>

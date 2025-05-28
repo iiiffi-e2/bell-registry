@@ -227,8 +227,10 @@ enum UserRole {
 enum JobStatus {
   DRAFT
   ACTIVE
-  EXPIRED
+  INTERVIEWING
   FILLED
+  CLOSED
+  EXPIRED
 }
 
 enum ApplicationStatus {

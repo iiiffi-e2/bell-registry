@@ -183,9 +183,15 @@ export function EmployerDashboard() {
                       <TableCell>
                         <span
                           className={
-                            job.status === "EXPIRED"
+                            job.status === "EXPIRED" || job.status === "CLOSED"
                               ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-200 text-gray-700"
-                              : "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                              : job.status === "ACTIVE"
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                              : job.status === "INTERVIEWING"
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                              : job.status === "FILLED"
+                              ? "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                              : "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
                           }
                         >
                           {job.status}
