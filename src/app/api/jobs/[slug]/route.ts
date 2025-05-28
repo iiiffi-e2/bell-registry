@@ -35,13 +35,6 @@ export async function PUT(
       );
     }
 
-    if (existingJob.status === JobStatus.FILLED) {
-      return NextResponse.json(
-        { error: "Cannot edit a filled job" },
-        { status: 400 }
-      );
-    }
-
     // Verify ownership
     if (existingJob.employerId !== session.user.id) {
       return NextResponse.json(
