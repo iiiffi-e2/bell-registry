@@ -129,19 +129,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Emit socket event for real-time updates
-    const io = global.io
-    if (io) {
-      // Emit to conversation room
-      io.to(`conversation:${conversationId}`).emit('new-message', {
-        conversationId,
-        message
-      })
+    try {
+      // Get the Socket.IO instance from the global server
+      const io = (global as any).io
+      if (io) {
+        // Emit to conversation room
+        io.to(`conversation:${conversationId}`).emit('new-message', {
+          conversationId,
+          message
+        })
 
-      // Emit notification to receiver
-      io.to(`user:${receiverId}`).emit('message-notification', {
-        conversationId,
-        message
-      })
+        // Emit notification to receiver
+        io.to(`user:${receiverId}`).emit('message-notification', {
+          conversationId,
+          message
+        })
+      }
+    } catch (error) {
+      console.error('Error emitting Socket.IO events:', error)
+      // Don't fail the request for Socket.IO errors
     }
 
     return NextResponse.json(message)

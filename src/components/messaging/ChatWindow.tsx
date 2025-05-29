@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
+import { useSocket } from '@/hooks/useSocket'
 
 interface Message {
   id: string
@@ -29,27 +30,28 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversationId }: ChatWindowProps) {
   const { data: session } = useSession()
+  const socket = useSocket()
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationData, setConversationData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (conversationId) {
-      console.log('Setting up polling for conversation:', conversationId)
+    if (conversationId && socket) {
       fetchConversation()
       
-      // Set up polling for new messages instead of Socket.IO
-      const interval = setInterval(() => {
-        fetchConversation()
-      }, 2000) // Poll every 2 seconds
+      // Join conversation room
+      socket.emit('join-conversation', conversationId)
+      
+      // Listen for new messages
+      socket.on('new-message', handleNewMessage)
       
       return () => {
-        console.log('Cleaning up polling')
-        clearInterval(interval)
+        socket.emit('leave-conversation', conversationId)
+        socket.off('new-message', handleNewMessage)
       }
     }
-  }, [conversationId])
+  }, [conversationId, socket])
 
   useEffect(() => {
     scrollToBottom()
@@ -62,7 +64,6 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
         const data = await response.json()
         setConversationData(data)
         setMessages(data.messages)
-        console.log('Fetched conversation messages:', data.messages.length)
       }
     } catch (error) {
       console.error('Error fetching conversation:', error)
@@ -71,31 +72,17 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
     }
   }
 
+  const handleNewMessage = (data: any) => {
+    if (data.conversationId === conversationId) {
+      setMessages(prev => [...prev, data.message])
+    }
+  }
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   const handleSendMessage = async (content: string) => {
-    console.log('Sending message:', content)
-    
-    // Optimistic update - add message to UI immediately
-    const optimisticMessage = {
-      id: 'temp-' + Date.now(),
-      content,
-      senderId: session?.user.id || '',
-      createdAt: new Date().toISOString(),
-      read: false,
-      sender: {
-        id: session?.user.id || '',
-        firstName: session?.user.name?.split(' ')[0] || '',
-        lastName: session?.user.name?.split(' ')[1] || '',
-        image: session?.user.image || '',
-        role: session?.user.role || ''
-      }
-    }
-    
-    setMessages(prev => [...prev, optimisticMessage])
-    
     try {
       const response = await fetch('/api/messages/send', {
         method: 'POST',
@@ -105,22 +92,10 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        // Remove optimistic message on error
-        setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id))
         throw new Error(error.error || 'Failed to send message')
       }
-      
-      const sentMessage = await response.json()
-      console.log('Message sent successfully:', sentMessage)
-      
-      // Replace optimistic message with real message
-      setMessages(prev => prev.map(msg => 
-        msg.id === optimisticMessage.id ? sentMessage : msg
-      ))
     } catch (error) {
       console.error('Error sending message:', error)
-      // Remove optimistic message on error if not already removed
-      setMessages(prev => prev.filter(msg => msg.id !== optimisticMessage.id))
       // Show error toast
     }
   }
