@@ -14,6 +14,7 @@ import { Eye, Users, Bookmark, Briefcase, Plus, ArrowRight, Pencil } from "lucid
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { truncateWords } from "@/lib/utils";
 
 interface Job {
   id: number;
@@ -25,6 +26,7 @@ interface Job {
   status: string;
   createdAt: string;
   urlSlug: string;
+  description: string;
 }
 
 interface Stats {
@@ -187,6 +189,9 @@ export function EmployerDashboard() {
                         <div className="space-y-1">
                           <div className="font-medium">{job.title}</div>
                           <div className="text-sm text-gray-500">{job.professionalRole}</div>
+                          <div className="text-sm text-gray-600 mt-1">
+                            {truncateWords(job.description, 60)}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>{job.location}</TableCell>

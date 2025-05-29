@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/button";
 import { FilterProvider, useFilters } from "@/contexts/FilterContext";
 import { FilterModal } from "@/components/FilterModal";
+import { truncateWords } from "@/lib/utils";
 
 interface Job {
   id: string;
@@ -316,7 +317,7 @@ function JobSearchPageContent() {
           <BookmarkIcon className="h-6 w-6" />
         </button>
       </div>
-      <p className="mt-4 text-sm text-gray-500 line-clamp-3">{job.description}</p>
+      <p className="mt-4 text-sm text-gray-500 line-clamp-3">{truncateWords(job.description, 60)}</p>
       
       <div className="flex flex-wrap gap-2">
         {job.requirements.slice(0, 3).map((req, index) => (
@@ -390,7 +391,7 @@ function JobSearchPageContent() {
           </div>
           
           <p className="text-sm text-gray-500">
-            {job.description}
+            {truncateWords(job.description, 60)}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {job.requirements.map((req, index) => (
