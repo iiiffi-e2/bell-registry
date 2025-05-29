@@ -33,6 +33,9 @@ interface SavedCandidate {
     image: string | null;
     role: string;
     profileSlug: string | null;
+    email: string;
+    phoneNumber: string | null;
+    isAnonymous: boolean;
   };
 }
 
@@ -90,16 +93,18 @@ export default function SavedCandidatesPage() {
     }
   };
 
+  // Helper function to get display name based on anonymous setting
   const getDisplayName = (candidate: SavedCandidate) => {
     const firstName = candidate.user.firstName || '';
     const lastName = candidate.user.lastName || '';
     
-    // If names are single characters (anonymized), show as initials
-    if (firstName.length === 1 && lastName.length === 1) {
-      return `${firstName}. ${lastName}.`;
+    // Check if anonymized (either by isAnonymous flag or single character names indicating anonymization)
+    if (candidate.user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
+      const firstInitial = firstName[0] || '';
+      const lastInitial = lastName[0] || '';
+      return `${firstInitial}. ${lastInitial}.`;
     }
     
-    // Otherwise show full name
     return `${firstName} ${lastName}`.trim();
   };
 
@@ -186,7 +191,7 @@ export default function SavedCandidatesPage() {
                       className="flex-1"
                     >
                       <div className="flex items-center space-x-4">
-                        {candidate.user.image ? (
+                        {candidate.user.image && !candidate.user.isAnonymous ? (
                           <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
                             <Image
                               src={candidate.user.image}
@@ -197,7 +202,9 @@ export default function SavedCandidatesPage() {
                             />
                           </div>
                         ) : (
-                          <UserCircleIcon className="h-16 w-16 text-gray-400" />
+                          <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                            <UserCircleIcon className="h-16 w-16 text-gray-300" />
+                          </div>
                         )}
                         <div className="flex-1">
                           <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">

@@ -22,6 +22,7 @@ export async function GET() {
     }
 
     const employerId = session.user.id;
+    const isEmployerOrAgency = session.user.role === 'EMPLOYER' || session.user.role === 'AGENCY';
 
     // Fetch saved candidates with their profile information
     const savedCandidates = await prisma.savedCandidate.findMany({
@@ -40,7 +41,7 @@ export async function GET() {
       },
     });
 
-    // Format the response to match the expected structure
+    // Format the response to match the expected structure with anonymization
     const candidates = savedCandidates.map((saved) => ({
       id: saved.candidate.candidateProfile?.id || saved.candidate.id,
       bio: saved.candidate.candidateProfile?.bio,
@@ -55,11 +56,15 @@ export async function GET() {
       savedAt: saved.createdAt,
       user: {
         id: saved.candidate.id,
-        firstName: saved.candidate.firstName,
-        lastName: saved.candidate.lastName,
-        image: saved.candidate.image,
+        // Apply anonymization for employers/agencies
+        firstName: isEmployerOrAgency ? (saved.candidate.firstName?.[0] || '') : saved.candidate.firstName,
+        lastName: isEmployerOrAgency ? (saved.candidate.lastName?.[0] || '') : saved.candidate.lastName,
+        image: isEmployerOrAgency ? null : saved.candidate.image,
         role: saved.candidate.role,
         profileSlug: saved.candidate.profileSlug,
+        email: isEmployerOrAgency ? '' : saved.candidate.email,
+        phoneNumber: isEmployerOrAgency ? null : saved.candidate.phoneNumber,
+        isAnonymous: isEmployerOrAgency ? true : (saved.candidate.isAnonymous || false),
       },
     }));
 
