@@ -16,6 +16,7 @@ import {
   LinkIcon,
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
+import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 import { notFound } from "next/navigation";
 
 interface Experience {
@@ -51,6 +52,7 @@ interface PublicProfile {
   additionalPhotos: string[];
   mediaUrls: string[];
   user: {
+    id: string;
     firstName: string | null;
     lastName: string | null;
     image: string | null;
@@ -128,6 +130,7 @@ async function getProfile(slug: string): Promise<PublicProfile> {
     additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
     mediaUrls: profile.candidateProfile.mediaUrls || [],
     user: {
+      id: profile.id,
       firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,
       lastName: isEmployerOrAgency ? (profile.lastName?.[0] || '') : profile.lastName,
       image: isEmployerOrAgency ? null : profile.image,
@@ -187,43 +190,50 @@ export default async function PublicProfilePage({
             {/* Main Content Column */}
             <div className="lg:col-span-2">
               {/* Profile Header */}
-              <div className="flex items-center mb-6">
-                <div className="flex-shrink-0">
-                  {profile.user.image && !profile.user.isAnonymous ? (
-                    <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
-                      <Image
-                        src={profile.user.image}
-                        alt={getDisplayName(profile)}
-                        width={96}
-                        height={96}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  ) : (
-                    <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                      <UserCircleIcon className="h-24 w-24 text-gray-300" />
-                    </div>
-                  )}
-                </div>
-                <div className="ml-6">
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {getDisplayName(profile)}
-                  </h1>
-                  <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-                  {!profile.user.isAnonymous && profile.user.email && (
-                    <>
-                      <div className="mt-2 flex items-center text-sm text-gray-500">
-                        <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                        {profile.user.email}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    {profile.user.image && !profile.user.isAnonymous ? (
+                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
+                        <Image
+                          src={profile.user.image}
+                          alt={getDisplayName(profile)}
+                          width={96}
+                          height={96}
+                          className="h-full w-full object-cover"
+                        />
                       </div>
-                      {profile.user.phoneNumber && (
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                          <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                          {profile.user.phoneNumber}
+                    ) : (
+                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                        <UserCircleIcon className="h-24 w-24 text-gray-300" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="ml-6">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {getDisplayName(profile)}
+                    </h1>
+                    <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
+                    {!profile.user.isAnonymous && profile.user.email && (
+                      <>
+                        <div className="mt-2 flex items-center text-sm text-gray-500">
+                          <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                          {profile.user.email}
                         </div>
-                      )}
-                    </>
-                  )}
+                        {profile.user.phoneNumber && (
+                          <div className="mt-1 flex items-center text-sm text-gray-500">
+                            <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                            {profile.user.phoneNumber}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+                
+                {/* Save Candidate Button */}
+                <div className="flex-shrink-0">
+                  <SaveCandidateButton candidateId={profile.user.id} />
                 </div>
               </div>
 
