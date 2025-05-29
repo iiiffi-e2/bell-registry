@@ -28,8 +28,8 @@ interface Job {
 }
 
 interface Stats {
-  activeListings: number;
-  recentApplications: number;
+  activeJobs: number;
+  totalApplications: number;
   savedCandidates: number;
   totalViews: number;
 }
@@ -37,8 +37,8 @@ interface Stats {
 export function EmployerDashboard() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({
-    activeListings: 0,
-    recentApplications: 0,
+    activeJobs: 0,
+    totalApplications: 0,
     savedCandidates: 0,
     totalViews: 0,
   });
@@ -104,7 +104,7 @@ export function EmployerDashboard() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Active Listings</p>
-              <p className="text-2xl font-bold">{stats.activeListings}</p>
+              <p className="text-2xl font-bold">{stats.activeJobs}</p>
             </div>
           </div>
         </Card>
@@ -116,7 +116,7 @@ export function EmployerDashboard() {
             </div>
             <div>
               <p className="text-sm font-medium text-gray-600">Recent Applications</p>
-              <p className="text-2xl font-bold">{stats.recentApplications}</p>
+              <p className="text-2xl font-bold">{stats.totalApplications}</p>
             </div>
           </div>
         </Card>
