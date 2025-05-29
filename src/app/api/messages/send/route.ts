@@ -24,15 +24,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user has access and conversation is active
-    const conversation = await prisma.conversation.findFirst({
-      where: {
-        id: conversationId,
-        OR: [
-          { clientId: senderId },
-          { professionalId: senderId }
-        ]
-      }
-    })
+    let conversation;
+    try {
+      conversation = await prisma.conversation.findFirst({
+        where: {
+          id: conversationId,
+          OR: [
+            { clientId: senderId },
+            { professionalId: senderId }
+          ]
+        }
+      })
+    } catch (error) {
+      console.error('Error finding conversation:', error)
+      return NextResponse.json(
+        { error: 'Failed to find conversation' },
+        { status: 500 }
+      )
+    }
 
     if (!conversation) {
       return NextResponse.json(
@@ -51,18 +60,22 @@ export async function POST(request: NextRequest) {
 
     // If sender is professional, verify the conversation was initiated by client
     if (role === 'PROFESSIONAL' && conversation.professionalId === senderId) {
-      const hasClientMessages = await prisma.message.findFirst({
-        where: {
-          conversationId,
-          senderId: conversation.clientId
-        }
-      })
+      try {
+        const hasClientMessages = await prisma.message.findFirst({
+          where: {
+            conversationId,
+            senderId: conversation.clientId
+          }
+        })
 
-      if (!hasClientMessages) {
-        return NextResponse.json(
-          { error: 'You can only reply after the client has messaged you' },
-          { status: 403 }
-        )
+        if (!hasClientMessages) {
+          return NextResponse.json(
+            { error: 'You can only reply after the client has messaged you' },
+            { status: 403 }
+          )
+        }
+      } catch (error) {
+        console.error('Error checking client messages:', error)
       }
     }
 
@@ -72,31 +85,44 @@ export async function POST(request: NextRequest) {
       : conversation.clientId
 
     // Create the message
-    const message = await prisma.message.create({
-      data: {
-        conversationId,
-        senderId,
-        receiverId,
-        content: content.trim()
-      },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            image: true,
-            role: true
+    let message;
+    try {
+      message = await prisma.message.create({
+        data: {
+          conversationId,
+          senderId,
+          content: content.trim()
+        },
+        include: {
+          sender: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              image: true,
+              role: true
+            }
           }
         }
-      }
-    })
+      })
+    } catch (error) {
+      console.error('Error creating message:', error)
+      return NextResponse.json(
+        { error: 'Failed to create message' },
+        { status: 500 }
+      )
+    }
 
     // Update conversation's last message timestamp
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { lastMessageAt: new Date() }
-    })
+    try {
+      await prisma.conversation.update({
+        where: { id: conversationId },
+        data: { lastMessageAt: new Date() }
+      })
+    } catch (error) {
+      console.error('Error updating conversation timestamp:', error)
+      // Don't fail the request for this
+    }
 
     // Emit socket event for real-time updates
     const io = getIO()
