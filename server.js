@@ -23,17 +23,50 @@ app.prepare().then(() => {
 
   // Initialize Socket.IO
   const io = new Server(server, {
-    path: '/api/socket',
     cors: {
       origin: process.env.NEXTAUTH_URL || `http://localhost:${port}`,
       credentials: true,
     },
   })
 
-  // Make io accessible globally
+  console.log('Socket.IO server initialized')
+
+  // Set up Socket.IO authentication and event handlers
+  io.use(async (socket, next) => {
+    try {
+      // For now, allow all connections - in production you'd want proper auth
+      // The authentication will be handled by the API routes
+      console.log('Socket.IO authentication middleware called')
+      next()
+    } catch (error) {
+      console.error('Socket.IO auth error:', error)
+      next(new Error('Authentication failed'))
+    }
+  })
+
+  io.on('connection', (socket) => {
+    console.log('Socket connected:', socket.id)
+
+    socket.on('join-conversation', (conversationId) => {
+      socket.join(`conversation:${conversationId}`)
+      console.log(`Socket ${socket.id} joined conversation:${conversationId}`)
+    })
+
+    socket.on('leave-conversation', (conversationId) => {
+      socket.leave(`conversation:${conversationId}`)
+      console.log(`Socket ${socket.id} left conversation:${conversationId}`)
+    })
+
+    socket.on('disconnect', () => {
+      console.log('Socket disconnected:', socket.id)
+    })
+  })
+
+  // Make io accessible globally for API routes
   global.io = io
 
   server.listen(port, () => {
     console.log(`> Ready on http://${hostname}:${port}`)
+    console.log(`> Socket.IO ready on /socket.io`)
   })
 }) 

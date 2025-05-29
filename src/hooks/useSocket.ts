@@ -10,13 +10,13 @@ export function useSocket() {
 
   useEffect(() => {
     if (!socket) {
+      console.log('Initializing Socket.IO connection...')
       socket = io({
-        path: '/api/socket',
         addTrailingSlash: false,
       })
 
       socket.on('connect', () => {
-        console.log('Socket connected')
+        console.log('Socket connected:', socket?.id)
         setIsConnected(true)
       })
 
@@ -24,13 +24,18 @@ export function useSocket() {
         console.log('Socket disconnected')
         setIsConnected(false)
       })
+
+      socket.on('connect_error', (error) => {
+        console.error('Socket connection error:', error)
+      })
     }
 
     return () => {
-      if (socket) {
-        socket.disconnect()
-        socket = null
-      }
+      // Don't disconnect on component unmount, keep persistent connection
+      // if (socket) {
+      //   socket.disconnect()
+      //   socket = null
+      // }
     }
   }, [])
 

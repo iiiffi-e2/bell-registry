@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { getIO } from '@/lib/socket-client'
+
+// Type declaration for global.io
+declare global {
+  var io: any
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -125,7 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Emit socket event for real-time updates
-    const io = getIO()
+    const io = global.io
     if (io) {
       // Emit to conversation room
       io.to(`conversation:${conversationId}`).emit('new-message', {
