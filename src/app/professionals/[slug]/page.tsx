@@ -233,7 +233,10 @@ export default async function PublicProfilePage({
                 
                 {/* Save Candidate Button */}
                 <div className="flex-shrink-0">
-                  <SaveCandidateButton candidateId={profile.user.id} />
+                  <SaveCandidateButton 
+                    candidateId={profile.user.id} 
+                    candidateName={getDisplayName(profile)}
+                  />
                 </div>
               </div>
 

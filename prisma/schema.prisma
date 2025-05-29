@@ -158,6 +158,7 @@ model Job {
   employer     User             @relation(fields: [employerId], references: [id])
   applications JobApplication[]
   savedBy      SavedJob[]
+  savedCandidates SavedCandidate[]
   viewEvents   JobViewEvent[]
   isDemo       Boolean          @default(false)
 }
@@ -189,9 +190,12 @@ model SavedCandidate {
   id          String   @id @default(cuid())
   candidateId String
   employerId  String
+  jobId       String?  // Optional job to attach candidate to
+  note        String?  // Optional note about the candidate
   createdAt   DateTime @default(now())
   candidate   User     @relation("SavedCandidates", fields: [candidateId], references: [id], onDelete: Cascade)
   employer    User     @relation("SavedByEmployers", fields: [employerId], references: [id], onDelete: Cascade)
+  job         Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
 
   @@unique([candidateId, employerId])
 }

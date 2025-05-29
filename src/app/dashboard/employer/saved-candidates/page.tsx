@@ -26,6 +26,13 @@ interface SavedCandidate {
   payRangeMax: number | null;
   payCurrency: string | null;
   savedAt: string;
+  note: string | null;
+  job: {
+    id: string;
+    title: string;
+    location: string;
+    status: string;
+  } | null;
   user: {
     id: string;
     firstName: string | null;
@@ -245,6 +252,25 @@ export default function SavedCandidatesPage() {
                   
                   {candidate.bio && (
                     <p className="mt-4 text-sm text-gray-500 line-clamp-3">{candidate.bio}</p>
+                  )}
+
+                  {/* Note */}
+                  {candidate.note && (
+                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm text-yellow-800">
+                        <span className="font-medium">Note:</span> {candidate.note}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Attached Job */}
+                  {candidate.job && (
+                    <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-sm text-blue-800">
+                        <span className="font-medium">Attached to job:</span> {candidate.job.title}
+                        <span className="text-blue-600 ml-2">({candidate.job.location})</span>
+                      </p>
+                    </div>
                   )}
 
                   {candidate.skills.length > 0 && (

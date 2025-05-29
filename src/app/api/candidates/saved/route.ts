@@ -35,6 +35,14 @@ export async function GET() {
             candidateProfile: true,
           },
         },
+        job: {
+          select: {
+            id: true,
+            title: true,
+            location: true,
+            status: true,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
@@ -54,6 +62,8 @@ export async function GET() {
       payRangeMax: saved.candidate.candidateProfile?.payRangeMax,
       payCurrency: saved.candidate.candidateProfile?.payCurrency,
       savedAt: saved.createdAt,
+      note: saved.note,
+      job: saved.job,
       user: {
         id: saved.candidate.id,
         // Apply anonymization for employers/agencies
