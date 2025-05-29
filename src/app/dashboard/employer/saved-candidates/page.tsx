@@ -13,6 +13,7 @@ import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import { generateProfileUrl } from "@/lib/utils";
+import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 
 interface SavedCandidate {
   id: string;
@@ -82,21 +83,13 @@ export default function SavedCandidatesPage() {
     }
   };
 
-  const handleUnsave = async (candidateId: string) => {
-    try {
-      const response = await fetch(`/api/candidates/${candidateId}/bookmark`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) throw new Error('Failed to unsave candidate');
-      
-      // Remove the candidate from the list
+  const handleSaveStatusChange = (candidateId: string, saved: boolean) => {
+    if (!saved) {
+      // Remove the candidate from the list if unsaved
       setCandidates(candidates.filter(candidate => candidate.user.id !== candidateId));
-    } catch (error) {
-      console.error('Error unsaving candidate:', error);
+    } else {
+      // Refresh the list to get updated data
+      fetchSavedCandidates();
     }
   };
 
@@ -240,14 +233,12 @@ export default function SavedCandidatesPage() {
                         </div>
                       </div>
                     </Link>
-                    <button
-                      type="button"
-                      onClick={() => handleUnsave(candidate.user.id)}
-                      className="rounded-full p-1 text-blue-600 hover:text-blue-500"
-                      title="Remove from saved candidates"
-                    >
-                      <BookmarkSolidIcon className="h-6 w-6" />
-                    </button>
+                    <SaveCandidateButton
+                      candidateId={candidate.user.id}
+                      candidateName={getDisplayName(candidate)}
+                      className="ml-4"
+                      onSaveStatusChange={(saved) => handleSaveStatusChange(candidate.user.id, saved)}
+                    />
                   </div>
                   
                   {candidate.bio && (

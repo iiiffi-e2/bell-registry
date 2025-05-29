@@ -10,9 +10,15 @@ interface SaveCandidateButtonProps {
   candidateId: string
   candidateName?: string
   className?: string
+  onSaveStatusChange?: (saved: boolean) => void
 }
 
-export function SaveCandidateButton({ candidateId, candidateName = "this candidate", className = "" }: SaveCandidateButtonProps) {
+export function SaveCandidateButton({ 
+  candidateId, 
+  candidateName = "this candidate", 
+  className = "",
+  onSaveStatusChange 
+}: SaveCandidateButtonProps) {
   const { data: session } = useSession()
   const [isSaved, setIsSaved] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -46,6 +52,7 @@ export function SaveCandidateButton({ candidateId, candidateName = "this candida
 
   const handleModalSave = (saved: boolean) => {
     setIsSaved(saved)
+    onSaveStatusChange?.(saved)
   }
 
   const handleModalClose = () => {
