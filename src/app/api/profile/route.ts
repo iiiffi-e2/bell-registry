@@ -63,6 +63,21 @@ export async function PUT(req: Request) {
     } else {
       // Update both user and candidate profile in a transaction
       const result = await prisma.$transaction(async (tx) => {
+        // Check if names are being updated and regenerate slug if needed
+        let profileSlug: string | undefined;
+        if (body.firstName && body.lastName) {
+          const currentUser = await tx.user.findUnique({
+            where: { id: session.user.id },
+            select: { firstName: true, lastName: true, profileSlug: true }
+          });
+          
+          // Only regenerate slug if names are different
+          if (currentUser && 
+              (currentUser.firstName !== body.firstName || currentUser.lastName !== body.lastName)) {
+            profileSlug = await generateProfileSlug(body.firstName, body.lastName);
+          }
+        }
+
         // Update user fields
         const updatedUser = await tx.user.update({
           where: { id: session.user.id },
@@ -71,6 +86,7 @@ export async function PUT(req: Request) {
             lastName: body.lastName,
             phoneNumber: body.phoneNumber,
             isAnonymous: body.isAnonymous,
+            ...(profileSlug && { profileSlug })
           },
         });
 

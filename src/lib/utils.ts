@@ -10,7 +10,11 @@ function generateRandomCode(): string {
 export async function generateProfileSlug(firstName: string | null, lastName: string | null, userId?: string): Promise<string> {
   if (!firstName || !lastName) return '';
   
-  const baseSlug = `${firstName.toLowerCase()}-${lastName.toLowerCase()}`;
+  // Replace spaces with dashes and convert to lowercase for both names
+  const cleanFirstName = firstName.trim().replace(/\s+/g, '-').toLowerCase();
+  const cleanLastName = lastName.trim().replace(/\s+/g, '-').toLowerCase();
+  
+  const baseSlug = `${cleanFirstName}-${cleanLastName}`;
   
   // If we're updating an existing profile, check if we already have a unique slug
   if (userId) {
