@@ -17,6 +17,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
+import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
 import { notFound } from "next/navigation";
 
 interface Experience {
@@ -233,10 +234,15 @@ export default async function PublicProfilePage({
                 
                 {/* Save Candidate Button */}
                 <div className="flex-shrink-0">
-                  <SaveCandidateButton 
-                    candidateId={profile.user.id} 
-                    candidateName={getDisplayName(profile)}
-                  />
+                  <div className="flex gap-2">
+                    <SaveCandidateButton 
+                      candidateId={profile.user.id} 
+                      candidateName={getDisplayName(profile)}
+                    />
+                    <MessageProfessionalButton 
+                      professionalId={profile.user.id}
+                    />
+                  </div>
                 </div>
               </div>
 

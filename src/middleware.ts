@@ -34,10 +34,10 @@ export const config = {
      * Match all protected routes:
      * - /dashboard/*
      * - /profile/*
-     * - /api/* (except /api/auth/*)
+     * - /api/* (except /api/auth/* and /api/socket)
      */
     '/dashboard/:path*',
     '/profile/:path*',
-    '/api/((?!auth).*)',
+    '/api/((?!auth|socket).*)',
   ]
 } 

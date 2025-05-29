@@ -68,25 +68,25 @@ model User {
   image               String?
   password            String?
   profileSlug         String?              @unique
+  isDemo              Boolean              @default(false)
+  resetToken          String?              @unique
+  resetTokenExpiry    DateTime?            @db.Timestamptz(6)
+  isAnonymous         Boolean              @default(false)
   accounts            Account[]
   candidateProfile    CandidateProfile?
   emailChangeRequests EmailChangeRequest[]
   employerProfile     EmployerProfile?
   postedJobs          Job[]
+  jobAlerts           JobAlert[]
   applications        JobApplication[]
+  jobViewEvents       JobViewEvent[]
   receivedMessages    Message[]            @relation("ReceivedMessages")
   sentMessages        Message[]            @relation("SentMessages")
-  savedJobs           SavedJob[]
+  profileViewEvents   ProfileViewEvent[]
   savedCandidates     SavedCandidate[]     @relation("SavedCandidates")
   savedByEmployers    SavedCandidate[]     @relation("SavedByEmployers")
+  savedJobs           SavedJob[]
   sessions            Session[]
-  profileViewEvents   ProfileViewEvent[]
-  jobViewEvents       JobViewEvent[]
-  isDemo              Boolean              @default(false)
-  resetToken          String?              @unique
-  resetTokenExpiry    DateTime?            @db.Timestamptz(6)
-  isAnonymous         Boolean              @default(false)
-  jobAlerts           JobAlert[]
 }
 
 model CandidateProfile {
@@ -139,28 +139,28 @@ model EmployerProfile {
 }
 
 model Job {
-  id           String           @id @default(cuid())
-  employerId   String
-  title        String
-  professionalRole String       // The primary role category for this position
-  description  String
-  location     String
-  salary       Json?
-  requirements String[]
-  status       JobStatus        @default(ACTIVE)
-  jobType      String?         // Full-time, Part-time, Contract, Temporary
-  employmentType String?       // On-site, Remote, Hybrid
-  urlSlug      String           @unique // Unique URL slug combining title and alphanumeric code
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
-  expiresAt    DateTime?
-  featured     Boolean          @default(false)
-  employer     User             @relation(fields: [employerId], references: [id])
-  applications JobApplication[]
-  savedBy      SavedJob[]
-  savedCandidates SavedCandidate[]
-  viewEvents   JobViewEvent[]
-  isDemo       Boolean          @default(false)
+  id               String           @id @default(cuid())
+  employerId       String
+  title            String
+  description      String
+  location         String
+  salary           Json?
+  requirements     String[]
+  status           JobStatus        @default(ACTIVE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  expiresAt        DateTime?
+  featured         Boolean          @default(false)
+  employmentType   String?
+  jobType          String?
+  isDemo           Boolean          @default(false)
+  urlSlug          String           @unique
+  professionalRole String
+  employer         User             @relation(fields: [employerId], references: [id])
+  applications     JobApplication[]
+  viewEvents       JobViewEvent[]
+  savedCandidates  SavedCandidate[]
+  savedBy          SavedJob[]
 }
 
 model JobApplication {
@@ -190,12 +190,12 @@ model SavedCandidate {
   id          String   @id @default(cuid())
   candidateId String
   employerId  String
-  jobId       String?  // Optional job to attach candidate to
-  note        String?  // Optional note about the candidate
   createdAt   DateTime @default(now())
+  jobId       String?
+  note        String?
   candidate   User     @relation("SavedCandidates", fields: [candidateId], references: [id], onDelete: Cascade)
   employer    User     @relation("SavedByEmployers", fields: [employerId], references: [id], onDelete: Cascade)
-  job         Job?     @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  job         Job?     @relation(fields: [jobId], references: [id])
 
   @@unique([candidateId, employerId])
 }
@@ -212,36 +212,36 @@ model Message {
 }
 
 model ProfileViewEvent {
-  id        String   @id @default(cuid())
-  userId    String
-  viewedAt  DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  id       String   @id @default(cuid())
+  userId   String
+  viewedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
 }
 
 model JobViewEvent {
-  id        String   @id @default(cuid())
-  jobId     String
-  userId    String?  // Optional since we want to track views from non-logged in users
-  viewedAt  DateTime @default(now())
-  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id       String   @id @default(cuid())
+  jobId    String
+  userId   String?
+  viewedAt DateTime @default(now())
+  job      Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([jobId])
   @@index([userId])
 }
 
 model JobAlert {
-  id          String         @id @default(cuid())
-  userId      String
-  name        String
-  roles       String[]
-  locations   String[]
-  frequency   AlertFrequency @default(WEEKLY)
-  isActive    Boolean        @default(true)
-  lastSent    DateTime?
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String         @id @default(cuid())
+  userId    String
+  name      String
+  roles     String[]
+  locations String[]
+  frequency AlertFrequency @default(WEEKLY)
+  isActive  Boolean        @default(true)
+  lastSent  DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([isActive])
@@ -258,10 +258,10 @@ enum UserRole {
 enum JobStatus {
   DRAFT
   ACTIVE
-  INTERVIEWING
-  FILLED
-  CLOSED
   EXPIRED
+  FILLED
+  INTERVIEWING
+  CLOSED
 }
 
 enum ApplicationStatus {

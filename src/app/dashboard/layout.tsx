@@ -23,6 +23,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useProfile } from "@/providers/profile-provider";
 import React from "react";
+import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -47,6 +48,7 @@ const professionalNavigation: NavigationItem[] = [
   { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
   { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
+  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
   { name: "Notifications", href: "/dashboard/notifications", icon: InboxIcon },
 ];
@@ -64,6 +66,7 @@ const employerNavigation: NavigationItem[] = [
     ]
   },
   { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
+  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
 ];
 
@@ -72,6 +75,7 @@ const agencyNavigation: NavigationItem[] = [
   { name: "Job Listings", href: "/dashboard/agency/jobs", icon: BriefcaseIcon },
   { name: "Candidates", href: "/dashboard/agency/candidates", icon: UsersIcon },
   { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
+  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
 ];
 
@@ -79,6 +83,7 @@ const adminNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/admin", icon: HomeIcon },
   { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
   { name: "Jobs", href: "/dashboard/admin/jobs", icon: BriefcaseIcon },
+  { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
 ];
 
 export default function DashboardLayout({

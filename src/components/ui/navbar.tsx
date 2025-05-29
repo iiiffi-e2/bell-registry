@@ -10,6 +10,7 @@ import { Fragment } from "react";
 import { signOut } from "next-auth/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Transition } from "@headlessui/react";
+import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 
 export function Navbar() {
   const { data: session } = useSession();
@@ -52,6 +53,9 @@ export function Navbar() {
           
           {session ? (
             <div className="flex items-center space-x-4">
+              <Link href="/dashboard/messages" className="relative">
+                <NotificationBadge />
+              </Link>
               <div className="flex items-center gap-3">
                 <div className="relative w-8 h-8">
                   {imageUrl ? (
