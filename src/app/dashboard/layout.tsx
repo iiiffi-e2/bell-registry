@@ -153,11 +153,11 @@ export default function DashboardLayout({
                       type="button"
                       onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
-                        ${pathname.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                        ${pathname?.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
                       `}
                     >
                       <div className="flex items-center">
-                        <item.icon className={`h-5 w-5 mr-3 ${pathname.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                        <item.icon className={`h-5 w-5 mr-3 ${pathname?.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
                         {item.name}
                       </div>
                       <ChevronDown
