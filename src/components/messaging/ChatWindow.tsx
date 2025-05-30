@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
-import { useSocket } from '@/hooks/useSocket'
+import { useSSE } from '@/hooks/useSSE'
 
 interface Message {
   id: string
@@ -30,28 +30,28 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversationId }: ChatWindowProps) {
   const { data: session } = useSession()
-  const socket = useSocket()
+  const { isConnected, addMessageHandler } = useSSE()
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationData, setConversationData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (conversationId && socket) {
+    if (conversationId) {
       fetchConversation()
       
-      // Join conversation room
-      socket.emit('join-conversation', conversationId)
-      
-      // Listen for new messages
-      socket.on('new-message', handleNewMessage)
+      // Listen for new messages via SSE
+      const unsubscribe = addMessageHandler((data) => {
+        if (data.type === 'new-message' && data.conversationId === conversationId) {
+          setMessages(prev => [...prev, data.data.message])
+        }
+      })
       
       return () => {
-        socket.emit('leave-conversation', conversationId)
-        socket.off('new-message', handleNewMessage)
+        unsubscribe()
       }
     }
-  }, [conversationId, socket])
+  }, [conversationId, addMessageHandler])
 
   useEffect(() => {
     scrollToBottom()
@@ -69,12 +69,6 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
       console.error('Error fetching conversation:', error)
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleNewMessage = (data: any) => {
-    if (data.conversationId === conversationId) {
-      setMessages(prev => [...prev, data.message])
     }
   }
 

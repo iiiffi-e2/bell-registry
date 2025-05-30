@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sendToConversation } from '@/app/api/sse/route'
 
 // Type declaration for global.io
 declare global {
@@ -128,26 +129,19 @@ export async function POST(request: NextRequest) {
       // Don't fail the request for this
     }
 
-    // Emit socket event for real-time updates
+    // Send real-time updates via SSE
     try {
-      // Get the Socket.IO instance from the global server
-      const io = (global as any).io
-      if (io) {
-        // Emit to conversation room
-        io.to(`conversation:${conversationId}`).emit('new-message', {
+      // Send to both conversation participants
+      sendToConversation(conversationId, [conversation.clientId, conversation.professionalId], {
+        type: 'new-message',
+        data: {
           conversationId,
           message
-        })
-
-        // Emit notification to receiver
-        io.to(`user:${receiverId}`).emit('message-notification', {
-          conversationId,
-          message
-        })
-      }
+        }
+      })
     } catch (error) {
-      console.error('Error emitting Socket.IO events:', error)
-      // Don't fail the request for Socket.IO errors
+      console.error('Error sending SSE updates:', error)
+      // Don't fail the request for SSE errors
     }
 
     return NextResponse.json(message)
