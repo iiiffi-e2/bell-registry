@@ -378,7 +378,7 @@ export default function ProfilePage() {
                         </>
                       ) : (
                         <>
-                          Up to {profile.payCurrency} {profile.payRangeMax.toLocaleString()}
+                          Up to {profile.payCurrency} {profile.payRangeMax?.toLocaleString()}
                         </>
                       )}
                     </p>
