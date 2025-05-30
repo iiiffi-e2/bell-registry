@@ -4,14 +4,17 @@ const prisma = new PrismaClient()
 
 async function main() {
   try {
-    // Find all jobs with null professionalRole
+    // Find all jobs with empty professionalRole
     const jobs = await prisma.job.findMany({
       where: {
-        professionalRole: null
+        OR: [
+          { professionalRole: '' },
+          { professionalRole: { equals: '' } }
+        ]
       }
     })
 
-    console.log(`Found ${jobs.length} jobs with null professionalRole`)
+    console.log(`Found ${jobs.length} jobs with empty professionalRole`)
 
     // Update each job
     for (const job of jobs) {
