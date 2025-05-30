@@ -7,7 +7,7 @@ import { RegisterForm } from "@/components/auth/register-form";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
-  const isEmployerRoute = searchParams.get("role")?.toUpperCase() === "EMPLOYER";
+  const isEmployerRoute = searchParams?.get("role")?.toUpperCase() === "EMPLOYER";
   
   // Determine which hero image to use
   const heroImage = isEmployerRoute ? "/images/register-hero-employer.png" : "/images/register-hero.png";
