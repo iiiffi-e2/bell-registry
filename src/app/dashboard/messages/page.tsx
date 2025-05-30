@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { MessageThreadsList } from '@/components/messaging/MessageThreadsList'
 import { ChatWindow } from '@/components/messaging/ChatWindow'
+import { ConnectionStatus } from '@/components/messaging/ConnectionStatus'
 
 export default function MessagesPage() {
   const searchParams = useSearchParams()
@@ -21,7 +22,11 @@ export default function MessagesPage() {
     <div className="h-[calc(100vh-4rem)] flex">
       <div className="w-80 border-r overflow-y-auto">
         <div className="p-4 border-b">
-          <h1 className="text-xl font-semibold">Messages</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-xl font-semibold">Messages</h1>
+            <ConnectionStatus showReconnectButton={true} />
+          </div>
+          <p className="text-sm text-gray-600">Real-time messaging status</p>
         </div>
         <MessageThreadsList
           onSelectConversation={setSelectedConversationId}
