@@ -28,9 +28,9 @@ function LoadingGrid() {
 }
 
 export default function BrowseProfessionalsPage() {
-  const [professionals, setProfessionals] = useState([]);
+  const [professionals, setProfessionals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<CandidateFilters>({});
   const [pagination, setPagination] = useState<PaginationData>({
     total: 0,
