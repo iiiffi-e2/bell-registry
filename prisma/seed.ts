@@ -1,4 +1,4 @@
-import { PrismaClient, UserRole, JobStatus } from '@prisma/client'
+import { PrismaClient, UserRole, JobStatus, Job } from '@prisma/client'
 import { generateJobUrlSlug } from '../src/lib/job-utils'
 
 const prisma = new PrismaClient()
@@ -593,7 +593,7 @@ async function main() {
   }
 
   // Create 50 jobs
-  const jobs = []
+  const jobs: Job[] = []
   for (let i = 0; i < 50; i++) {
     const title = jobTitles[Math.floor(Math.random() * jobTitles.length)]
     const location = locations[Math.floor(Math.random() * locations.length)]
