@@ -125,10 +125,17 @@ const PROFESSIONAL_ROLES = [
 ];
 
 const defaultValues: Partial<JobFormValues> = {
-  featured: false,
+  title: "",
+  professionalRole: "",
+  description: "",
+  location: "",
+  requirements: [{ value: "" }],
+  salaryMin: "",
+  salaryMax: "",
   jobType: "Permanent" as JobType,
   employmentType: "Full-time" as EmploymentType,
-  requirements: [{ value: "" }],
+  featured: false,
+  expiresAt: "",
 };
 
 export default function PostJobPage() {
