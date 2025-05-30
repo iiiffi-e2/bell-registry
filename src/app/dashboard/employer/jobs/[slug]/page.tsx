@@ -67,10 +67,10 @@ export default function JobDetailsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (params.slug) {
+    if (params?.slug) {
       fetchJobDetails(params.slug as string);
     }
-  }, [params.slug]);
+  }, [params?.slug]);
 
   const fetchJobDetails = async (slug: string) => {
     try {
