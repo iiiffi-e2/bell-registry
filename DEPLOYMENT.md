@@ -34,7 +34,7 @@ This application uses **Server-Sent Events (SSE)** for real-time messaging inste
 
 ### Development vs Production
 
-- **Development**: Uses custom server (`node server.js`) for Socket.IO fallback during development
+- **Development**: Uses standard Next.js (`next dev`) with SSE for real-time messaging
 - **Production**: Uses standard Next.js (`next start`) with SSE for Vercel deployment
 
 ### Vercel Considerations
