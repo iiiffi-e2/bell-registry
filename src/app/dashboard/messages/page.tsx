@@ -11,7 +11,7 @@ export default function MessagesPage() {
 
   useEffect(() => {
     // Auto-select conversation if provided in query params
-    const conversationId = searchParams.get('conversation')
+    const conversationId = searchParams?.get('conversation')
     if (conversationId) {
       setSelectedConversationId(conversationId)
     }
