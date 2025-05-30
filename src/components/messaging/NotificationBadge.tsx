@@ -3,25 +3,27 @@
 import { useEffect, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { MessageCircle } from 'lucide-react'
-import { useSocket } from '@/hooks/useSocket'
+import { useSSE } from '@/hooks/useSSE'
 
 export function NotificationBadge() {
-  const socket = useSocket()
+  const { addMessageHandler } = useSSE()
   const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     // Fetch initial unread count
     fetchUnreadCount()
 
-    // Listen for new message notifications
-    socket?.on('message-notification', () => {
-      setUnreadCount(prev => prev + 1)
+    // Listen for new message notifications via SSE
+    const unsubscribe = addMessageHandler((data) => {
+      if (data.type === 'new-message') {
+        setUnreadCount(prev => prev + 1)
+      }
     })
 
     return () => {
-      socket?.off('message-notification')
+      unsubscribe()
     }
-  }, [socket])
+  }, [addMessageHandler])
 
   const fetchUnreadCount = async () => {
     try {
