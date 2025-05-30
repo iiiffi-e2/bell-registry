@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -117,7 +116,7 @@ const jobFormSchema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.array(z.object({
     value: z.string()
-  })).optional().default([]),
+  })).default([]),
   salaryMin: z.string().min(1, "Minimum salary is required"),
   salaryMax: z.string().min(1, "Maximum salary is required"),
   jobType: z.enum(JOB_TYPES, {
@@ -145,7 +144,7 @@ export default function EditJobPage() {
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
 
   const form = useForm<JobFormValues>({
-    resolver: zodResolver(jobFormSchema),
+    // resolver: zodResolver(jobFormSchema),
     defaultValues: {
       title: "",
       professionalRole: "",
