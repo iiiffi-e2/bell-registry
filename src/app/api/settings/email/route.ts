@@ -128,11 +128,12 @@ export async function PUT(request: NextRequest) {
 
       return new NextResponse("Verification email sent to new address");
     } catch (emailError) {
+      const error = emailError as Error;
       console.error("[EMAIL_UPDATE] Failed to send email:", {
         error: emailError,
-        message: emailError.message,
-        code: emailError.code,
-        name: emailError.name
+        message: error.message,
+        code: (error as any).code,
+        name: error.name
       });
       
       // Delete the email change request since email failed
@@ -147,16 +148,17 @@ export async function PUT(request: NextRequest) {
         console.error("[EMAIL_UPDATE] Failed to delete email change request:", deleteError);
       }
 
-      throw new Error(`Failed to send verification email: ${emailError.message}`);
+      throw new Error(`Failed to send verification email: ${error.message}`);
     }
   } catch (error) {
+    const err = error as Error;
     console.error("[EMAIL_UPDATE] Error:", {
       error,
-      message: error.message,
-      stack: error.stack
+      message: err.message,
+      stack: err.stack
     });
     return new NextResponse(
-      error instanceof Error ? error.message : "Internal error", 
+      err instanceof Error ? err.message : "Internal error", 
       { status: 500 }
     );
   }

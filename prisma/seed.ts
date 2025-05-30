@@ -640,7 +640,7 @@ async function main() {
       data: {
         employerId: employer.id,
         title,
-        professionalRole: professionalRoles[title.split(' - ')[0]] || title.split(' - ')[0],
+        professionalRole: (professionalRoles as Record<string, string>)[title.split(' - ')[0]] || title.split(' - ')[0],
         description,
         location,
         requirements: jobRequirements,

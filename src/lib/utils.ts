@@ -40,7 +40,7 @@ export async function generateProfileSlug(firstName: string | null, lastName: st
   }
 
   // If duplicate exists, generate a unique slug with random code
-  let uniqueSlug: string;
+  let uniqueSlug: string = `${baseSlug}-${generateRandomCode()}`;
   let isUnique = false;
 
   while (!isUnique) {

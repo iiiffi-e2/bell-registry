@@ -34,8 +34,8 @@ export const initSocketIO = (httpServer: SocketServer) => {
         return next(new Error('Authentication required'))
       }
 
-      (socket as any).userId = session.user.id
-      (socket as any).userRole = session.user.role
+      (socket as any).userId = session.user.id;
+      (socket as any).userRole = session.user.role;
       next()
     })
 

@@ -43,10 +43,10 @@ export default function PublicJobDetailsPage() {
   const viewTrackedRef = useRef(false); // Track if we've already recorded a view for this page load
 
   useEffect(() => {
-    if (params.slug) {
+    if (params?.slug) {
       fetchJobDetails(params.slug as string);
     }
-  }, [params.slug]);
+  }, [params?.slug]);
 
   useEffect(() => {
     // Reset view tracking when slug changes
