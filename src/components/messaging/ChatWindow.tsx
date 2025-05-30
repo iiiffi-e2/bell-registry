@@ -170,7 +170,7 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
                 <p className={`text-xs mt-1 ${
                   isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                 }`}>
-                  {format(new Date(message.createdAt), 'HH:mm')}
+                  {format(new Date(message.createdAt), 'MMMM d, yyyy \'at\' h:mm a')}
                 </p>
               </div>
             </div>
