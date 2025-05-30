@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     if (searchQuery) {
       // Parse for 'in' to boost role/location matches
       let roleQuery = searchQuery
-      let locationQuery = null
+      let locationQuery: string | null = null
       if (searchQuery.toLowerCase().includes(' in ')) {
         const [role, loc] = searchQuery.split(/ in /i)
         roleQuery = role.trim()
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
         AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
         AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
       `
-      const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1))
+      const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1)) as { count: string }[]
       const total = parseInt(countResult[0].count, 10)
       return NextResponse.json({
         jobs,
