@@ -172,6 +172,12 @@ export default function EditJobPage() {
 
   useEffect(() => {
     async function fetchJobDetails() {
+      if (!params?.slug) {
+        console.error("No slug parameter found");
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const response = await fetch(`/api/jobs/details/${params.slug}`);
         if (!response.ok) {
@@ -207,9 +213,14 @@ export default function EditJobPage() {
     }
 
     fetchJobDetails();
-  }, [params.slug, form]);
+  }, [params?.slug, form]);
 
   async function onSubmit(data: JobFormValues) {
+    if (!params?.slug) {
+      toast.error("Missing job identifier");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
