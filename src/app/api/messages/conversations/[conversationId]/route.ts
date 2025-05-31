@@ -61,6 +61,8 @@ export async function GET(
             firstName: true,
             lastName: true,
             image: true,
+            role: true,
+            isAnonymous: true,
             candidateProfile: {
               select: { title: true }
             }

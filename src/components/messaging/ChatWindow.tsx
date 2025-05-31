@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
 import { useSSE } from '@/hooks/useSSE'
+import { getDisplayName } from '@/lib/name-utils'
 
 interface Message {
   id: string
@@ -123,6 +124,9 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
   const isClient = session?.user.role === 'EMPLOYER' || session?.user.role === 'AGENCY'
   const isActive = conversationData.status === 'ACTIVE'
 
+  // Determine if the other user is a professional for anonymization
+  const isOtherUserProfessional = session?.user.id === conversationData.client.id
+
   return (
     <div className="flex-1 flex flex-col h-full">
       {/* Header */}
@@ -130,7 +134,12 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-semibold">
-              {otherUser.firstName} {otherUser.lastName}
+              {getDisplayName({
+                firstName: otherUser.firstName,
+                lastName: otherUser.lastName,
+                role: isOtherUserProfessional ? conversationData.professional.role : 'EMPLOYER',
+                isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false
+              })}
             </h2>
             {conversationData.status === 'ENDED' && (
               <Badge variant="secondary">Conversation Ended</Badge>

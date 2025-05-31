@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
+import { getDisplayName } from '@/lib/name-utils'
 
 interface Conversation {
   id: string
@@ -24,6 +25,8 @@ interface Conversation {
     firstName: string | null
     lastName: string | null
     image: string | null
+    role: string
+    isAnonymous: boolean
     candidateProfile: {
       title: string | null
     } | null
@@ -93,6 +96,9 @@ export function MessageThreadsList({
           ? conversation.professional
           : conversation.client
         
+        // Determine if the other user is a professional for anonymization
+        const isOtherUserProfessional = session?.user.id === conversation.client.id
+        
         const lastMessage = conversation.messages[0]
         const unreadCount = conversation._count.messages
 
@@ -108,7 +114,12 @@ export function MessageThreadsList({
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">
-                    {otherUser.firstName} {otherUser.lastName}
+                    {getDisplayName({
+                      firstName: otherUser.firstName,
+                      lastName: otherUser.lastName,
+                      role: isOtherUserProfessional ? conversation.professional.role : 'EMPLOYER',
+                      isAnonymous: isOtherUserProfessional ? conversation.professional.isAnonymous : false
+                    })}
                   </h3>
                   {conversation.status === 'ENDED' && (
                     <Badge variant="secondary" className="text-xs">
