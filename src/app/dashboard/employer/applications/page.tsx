@@ -50,6 +50,7 @@ export default function EmployerApplicationsPage() {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedJob, setSelectedJob] = useState<string>("all");
   const [jobs, setJobs] = useState<any[]>([]);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
     if (session?.user?.role !== "EMPLOYER") {
@@ -89,6 +90,7 @@ export default function EmployerApplicationsPage() {
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
     try {
+      setUpdatingStatus(applicationId);
       const response = await fetch(`/api/dashboard/employer/applications/${applicationId}`, {
         method: "PATCH",
         headers: {
@@ -104,9 +106,15 @@ export default function EmployerApplicationsPage() {
             app.id === applicationId ? { ...app, status: newStatus } : app
           )
         );
+      } else {
+        // Revert the change if the update failed
+        alert('Failed to update application status. Please try again.');
       }
     } catch (error) {
       console.error("Error updating application status:", error);
+      alert('Failed to update application status. Please try again.');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -160,6 +168,25 @@ export default function EmployerApplicationsPage() {
         return "Accepted";
       default:
         return status;
+    }
+  };
+
+  const getStatusDescription = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "New application awaiting review";
+      case "REVIEWED":
+        return "Application has been reviewed";
+      case "INTERVIEW":
+        return "Candidate invited for interview";
+      case "OFFER":
+        return "Job offer has been extended";
+      case "REJECTED":
+        return "Application not selected to proceed";
+      case "ACCEPTED":
+        return "Candidate has accepted the offer";
+      default:
+        return "";
     }
   };
 
@@ -328,61 +355,44 @@ export default function EmployerApplicationsPage() {
                       </div>
                     </div>
 
-                    <div className="ml-4 flex flex-col items-end gap-2">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                          application.status
-                        )}`}
-                      >
-                        {getStatusLabel(application.status)}
-                      </span>
-
-                      {application.status === "PENDING" && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, "REVIEWED")}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    <div className="ml-4 flex flex-col items-end gap-2 min-w-[200px]">
+                      <div className="w-full">
+                        <label htmlFor={`status-${application.id}`} className="block text-xs font-medium text-gray-700 mb-1">
+                          Application Status
+                        </label>
+                        <div className="relative">
+                          <select
+                            id={`status-${application.id}`}
+                            value={application.status}
+                            onChange={(e) => updateApplicationStatus(application.id, e.target.value)}
+                            disabled={updatingStatus === application.id}
+                            className={`block w-full rounded-md border-gray-300 py-1.5 pl-3 pr-8 text-sm font-medium shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${
+                              application.status === 'PENDING' ? 'bg-gray-50 text-gray-700 border-gray-300' :
+                              application.status === 'REVIEWED' ? 'bg-yellow-50 text-yellow-700 border-yellow-300' :
+                              application.status === 'INTERVIEW' ? 'bg-blue-50 text-blue-700 border-blue-300' :
+                              application.status === 'OFFER' ? 'bg-green-50 text-green-700 border-green-300' :
+                              application.status === 'REJECTED' ? 'bg-red-50 text-red-700 border-red-300' :
+                              application.status === 'ACCEPTED' ? 'bg-green-50 text-green-700 border-green-300' :
+                              'bg-gray-50 text-gray-700 border-gray-300'
+                            }`}
                           >
-                            Mark as Reviewed
-                          </button>
+                            <option value="PENDING">New Application</option>
+                            <option value="REVIEWED">Under Review</option>
+                            <option value="INTERVIEW">Interview Stage</option>
+                            <option value="OFFER">Offer Extended</option>
+                            <option value="REJECTED">Not Selected</option>
+                            <option value="ACCEPTED">Offer Accepted</option>
+                          </select>
+                          {updatingStatus === application.id && (
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                              <div className="animate-spin h-4 w-4 border-2 border-gray-500 border-t-transparent rounded-full"></div>
+                            </div>
+                          )}
                         </div>
-                      )}
-
-                      {application.status === "REVIEWED" && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, "INTERVIEW")}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                          >
-                            <CheckCircleIcon className="mr-1 h-3 w-3" />
-                            Interview
-                          </button>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, "REJECTED")}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-                          >
-                            <XCircleIcon className="mr-1 h-3 w-3" />
-                            Reject
-                          </button>
-                        </div>
-                      )}
-
-                      {application.status === "INTERVIEW" && (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, "OFFER")}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                          >
-                            Make Offer
-                          </button>
-                          <button
-                            onClick={() => updateApplicationStatus(application.id, "REJECTED")}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      )}
+                        <p className="mt-1 text-xs text-gray-500">
+                          {getStatusDescription(application.status)}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
