@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { getTimeAgo } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import { ApplyJobModal } from "@/components/modals/apply-job-modal";
 
 interface JobDetails {
   id: string;
@@ -37,9 +39,11 @@ interface JobDetails {
 export default function PublicJobDetailsPage() {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const [job, setJob] = useState<JobDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
   const viewTrackedRef = useRef(false); // Track if we've already recorded a view for this page load
 
   useEffect(() => {
@@ -185,6 +189,46 @@ export default function PublicJobDetailsPage() {
               <div className="text-lg font-semibold text-gray-900 mb-2">
                 {formatSalary(job.salary)}
               </div>
+              
+              {/* Apply Button Section */}
+              {session?.user?.role === 'PROFESSIONAL' && (
+                <div className="mt-4">
+                  {job.hasApplied ? (
+                    <button
+                      disabled
+                      className="px-6 py-3 bg-gray-300 text-gray-600 rounded-md font-medium cursor-not-allowed"
+                    >
+                      Already Applied
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setIsApplyModalOpen(true)}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+                    >
+                      Apply for this Job
+                    </button>
+                  )}
+                </div>
+              )}
+              
+              {session?.user?.role === 'EMPLOYER' && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-500">
+                    You cannot apply to jobs as an employer. Switch to a professional account to apply.
+                  </p>
+                </div>
+              )}
+              
+              {!session && (
+                <div className="mt-4">
+                  <button
+                    onClick={() => router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.pathname))}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+                  >
+                    Sign in to Apply
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -270,6 +314,17 @@ export default function PublicJobDetailsPage() {
           </div>
         </div>
       </div>
+      
+      {/* Apply Job Modal */}
+      {job && (
+        <ApplyJobModal
+          isOpen={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          jobId={job.id}
+          jobTitle={job.title}
+          companyName={job.employer.employerProfile.companyName}
+        />
+      )}
     </div>
   );
 } 

@@ -165,15 +165,20 @@ model Job {
 }
 
 model JobApplication {
-  id          String            @id @default(cuid())
-  jobId       String
-  candidateId String
-  status      ApplicationStatus @default(PENDING)
-  coverLetter String?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  candidate   User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  job         Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  id              String            @id @default(cuid())
+  jobId           String
+  candidateId     String
+  status          ApplicationStatus @default(PENDING)
+  coverLetter     String?
+  resumeUrl       String?
+  coverLetterUrl  String?
+  message         String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  candidate       User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job             Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, candidateId])
 }
 
 model SavedJob {

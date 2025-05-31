@@ -36,39 +36,6 @@ const stats = [
   },
 ];
 
-const recentApplications = [
-  {
-    id: 1,
-    position: "Estate Manager",
-    company: "Luxury Estate Services",
-    location: "Beverly Hills, CA",
-    status: "Under Review",
-    statusColor: "bg-yellow-100 text-yellow-800",
-    date: "2024-03-10",
-    salary: "$120,000 - $180,000",
-  },
-  {
-    id: 2,
-    position: "Private Chef",
-    company: "Elite Household Staff",
-    location: "New York, NY",
-    status: "Interview",
-    statusColor: "bg-blue-100 text-blue-800",
-    date: "2024-03-08",
-    salary: "$90,000 - $140,000",
-  },
-  {
-    id: 3,
-    position: "House Manager",
-    company: "Premium Staffing Solutions",
-    location: "Miami, FL",
-    status: "Applied",
-    statusColor: "bg-gray-100 text-gray-800",
-    date: "2024-03-05",
-    salary: "$85,000 - $130,000",
-  },
-];
-
 const upcomingInterviews = [
   {
     id: 1,
@@ -101,7 +68,8 @@ export function ProfessionalDashboard() {
   const [loadingSavedJobs, setLoadingSavedJobs] = useState(true);
   const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
   const [loadingRecommendedJobs, setLoadingRecommendedJobs] = useState(true);
-  const [accordionOpen, setAccordionOpen] = useState(Array(recentApplications.length).fill(false));
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(true);
 
   useEffect(() => {
     async function fetchRecommendedJobs() {
@@ -158,7 +126,87 @@ export function ProfessionalDashboard() {
     fetchSavedJobsCount();
   }, []);
 
+  useEffect(() => {
+    async function fetchApplications() {
+      setLoadingApplications(true);
+      try {
+        const res = await fetch("/api/jobs/apply");
+        if (res.ok) {
+          const data = await res.json();
+          setApplications(data.applications || []);
+        }
+      } catch (e) {
+        console.error('Error fetching applications:', e);
+      } finally {
+        setLoadingApplications(false);
+      }
+    }
+    fetchApplications();
+  }, []);
+
   const isProfileIncomplete = !profileLoading && !profile?.bio;
+
+  const applicationStats = {
+    total: applications.length,
+    pending: applications.filter(app => app.status === 'PENDING').length,
+    interview: applications.filter(app => app.status === 'INTERVIEW').length,
+    reviewed: applications.filter(app => app.status === 'REVIEWED').length,
+  };
+
+  const stats = [
+    {
+      name: "Active Applications",
+      stat: applicationStats.total.toString(),
+      icon: DocumentCheckIcon,
+      change: `${applicationStats.pending} pending`,
+      changeType: "positive",
+    },
+    {
+      name: "Interviews Scheduled",
+      stat: applicationStats.interview.toString(),
+      icon: CalendarIcon,
+      change: applicationStats.interview > 0 ? "Active" : "None scheduled",
+      changeType: applicationStats.interview > 0 ? "positive" : "neutral",
+    },
+  ];
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'bg-gray-100 text-gray-800';
+      case 'REVIEWED':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'INTERVIEW':
+        return 'bg-blue-100 text-blue-800';
+      case 'OFFER':
+        return 'bg-green-100 text-green-800';
+      case 'REJECTED':
+        return 'bg-red-100 text-red-800';
+      case 'ACCEPTED':
+        return 'bg-green-100 text-green-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PENDING':
+        return 'Applied';
+      case 'REVIEWED':
+        return 'Under Review';
+      case 'INTERVIEW':
+        return 'Interview';
+      case 'OFFER':
+        return 'Offer Received';
+      case 'REJECTED':
+        return 'Not Selected';
+      case 'ACCEPTED':
+        return 'Accepted';
+      default:
+        return status;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-hidden">
@@ -296,44 +344,68 @@ export function ProfessionalDashboard() {
                 View all
               </Link>
             </div>
-            <table className="w-full min-w-[700px] divide-y divide-gray-100 text-sm">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Position</th>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employer</th>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied Date</th>
-                  <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-100">
-                {recentApplications.map((application) => (
-                  <tr key={application.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{application.position}</div>
-                      <div className="text-sm text-gray-500">Full-time</div>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap">{application.company}</td>
-                    <td className="px-3 py-4 whitespace-nowrap">{application.location}</td>
-                    <td className="px-3 py-4">{new Date(application.date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
-                    <td className="px-3 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${application.statusColor}`}>
-                        {application.status}
-                      </span>
-                    </td>
-                    <td className="px-3 py-4 whitespace-nowrap text-center">
-                      <Link href="#" className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                      </Link>
-                    </td>
+            
+            {loadingApplications ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="text-center py-12">
+                <DocumentCheckIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No applications yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Start applying to jobs to see them here.
+                </p>
+                <div className="mt-6">
+                  <Link
+                    href="/jobs"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                  >
+                    Browse Jobs
+                    <ArrowRightIcon className="ml-2 h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <table className="w-full min-w-[700px] divide-y divide-gray-100 text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Position</th>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Employer</th>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Location</th>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Applied Date</th>
+                    <th scope="col" className="px-3 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" className="px-3 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-100">
+                  {applications.slice(0, 5).map((application) => (
+                    <tr key={application.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{application.job.title}</div>
+                        <div className="text-sm text-gray-500">{application.job.jobType}</div>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap">{application.job.employer.employerProfile?.companyName || 'N/A'}</td>
+                      <td className="px-3 py-4 whitespace-nowrap">{application.job.location}</td>
+                      <td className="px-3 py-4">{new Date(application.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</td>
+                      <td className="px-3 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
+                          {getStatusLabel(application.status)}
+                        </span>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-center">
+                        <Link href={`/jobs/${application.job.urlSlug}`} className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Widgets Row */}

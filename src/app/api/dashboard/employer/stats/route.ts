@@ -29,6 +29,7 @@ export async function GET() {
     const [
       activeJobsCount,
       totalApplicationsCount,
+      newApplicationsCount,
       savedCandidatesCount,
       totalViewsCount
     ] = await Promise.all([
@@ -46,6 +47,16 @@ export async function GET() {
           job: {
             employerId
           }
+        }
+      }),
+      
+      // New applications count (pending status)
+      prisma.jobApplication.count({
+        where: {
+          job: {
+            employerId
+          },
+          status: 'PENDING'
         }
       }),
       
@@ -69,6 +80,7 @@ export async function GET() {
     return NextResponse.json({
       activeJobs: activeJobsCount,
       totalApplications: totalApplicationsCount,
+      newApplications: newApplicationsCount,
       savedCandidates: savedCandidatesCount,
       totalViews: totalViewsCount
     });

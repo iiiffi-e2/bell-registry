@@ -32,6 +32,7 @@ interface Job {
 interface Stats {
   activeJobs: number;
   totalApplications: number;
+  newApplications: number;
   savedCandidates: number;
   totalViews: number;
 }
@@ -41,6 +42,7 @@ export function EmployerDashboard() {
   const [stats, setStats] = useState<Stats>({
     activeJobs: 0,
     totalApplications: 0,
+    newApplications: 0,
     savedCandidates: 0,
     totalViews: 0,
   });
@@ -112,15 +114,27 @@ export function EmployerDashboard() {
         </Card>
 
         <Card className="p-6 hover:shadow-lg transition-shadow">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-green-100 rounded-full">
-              <Users className="h-6 w-6 text-green-600" />
+          <Link href="/dashboard/employer/applications" className="block">
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-green-100 rounded-full relative">
+                <Users className="h-6 w-6 text-green-600" />
+                {stats.newApplications > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-xs font-medium">
+                    {stats.newApplications > 9 ? '9+' : stats.newApplications}
+                  </span>
+                )}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Applications</p>
+                <p className="text-2xl font-bold">{stats.totalApplications}</p>
+                {stats.newApplications > 0 && (
+                  <p className="text-xs text-green-600 font-medium mt-1">
+                    {stats.newApplications} new
+                  </p>
+                )}
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600">Recent Applications</p>
-              <p className="text-2xl font-bold">{stats.totalApplications}</p>
-            </div>
-          </div>
+          </Link>
         </Card>
 
         <Card className="p-6 hover:shadow-lg transition-shadow">
