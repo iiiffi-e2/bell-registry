@@ -24,6 +24,7 @@ import Image from "next/image";
 import { useProfile } from "@/providers/profile-provider";
 import React from "react";
 import { NotificationBadge } from "@/components/messaging/NotificationBadge";
+import { MessagesMenuBadge } from "@/components/messaging/MessagesMenuBadge";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -186,13 +187,16 @@ export default function DashboardLayout({
                 ) : (
                   <Link
                     href={item.href}
-                    className={`flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors
+                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
                       ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
                     `}
                     onClick={() => setSidebarOpen(false)}
                   >
-                    <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
-                    {item.name}
+                    <div className="flex items-center">
+                      <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                      {item.name}
+                    </div>
+                    {item.name === 'Messages' && <MessagesMenuBadge />}
                   </Link>
                 )}
               </div>
