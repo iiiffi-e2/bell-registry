@@ -211,14 +211,6 @@ export default function PublicJobDetailsPage() {
                 </div>
               )}
               
-              {session?.user?.role === 'EMPLOYER' && (
-                <div className="mt-4">
-                  <p className="text-sm text-gray-500">
-                    You cannot apply to jobs as an employer. Switch to a professional account to apply.
-                  </p>
-                </div>
-              )}
-              
               {!session && (
                 <div className="mt-4">
                   <button
