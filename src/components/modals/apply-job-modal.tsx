@@ -12,10 +12,9 @@ interface ApplyJobModalProps {
   onClose: () => void;
   jobId: string;
   jobTitle: string;
-  companyName: string;
 }
 
-export function ApplyJobModal({ isOpen, onClose, jobId, jobTitle, companyName }: ApplyJobModalProps) {
+export function ApplyJobModal({ isOpen, onClose, jobId, jobTitle }: ApplyJobModalProps) {
   const router = useRouter();
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
@@ -158,11 +157,6 @@ export function ApplyJobModal({ isOpen, onClose, jobId, jobTitle, companyName }:
                     <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900">
                       Apply for {jobTitle}
                     </Dialog.Title>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        at {companyName}
-                      </p>
-                    </div>
 
                     <form onSubmit={handleSubmit} className="mt-6 space-y-6">
                       {error && (
@@ -173,62 +167,58 @@ export function ApplyJobModal({ isOpen, onClose, jobId, jobTitle, companyName }:
 
                       {/* Resume Upload */}
                       <div>
-                        <label htmlFor="resume" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="resume" className="block text-sm font-medium text-gray-700 mb-2">
                           Upload Resume <span className="text-red-500">*</span>
                         </label>
-                        <div className="mt-1">
-                          <label
-                            htmlFor="resume"
-                            className="relative cursor-pointer rounded-md border-2 border-dashed border-gray-300 bg-white px-4 py-8 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-                            <span className="mt-2 block text-sm font-medium text-gray-900">
-                              {resumeFile ? resumeFile.name : 'Click to upload resume'}
-                            </span>
-                            <input
-                              id="resume"
-                              name="resume"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.doc,.docx"
-                              onChange={handleResumeChange}
-                              disabled={isSubmitting}
-                            />
-                          </label>
-                          <p className="mt-1 text-xs text-gray-500">
-                            PDF, DOC, DOCX up to 5MB
-                          </p>
-                        </div>
+                        <label
+                          htmlFor="resume"
+                          className="block relative cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center hover:border-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        >
+                          <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          <span className="mt-2 block text-sm font-medium text-gray-900">
+                            {resumeFile ? resumeFile.name : 'Click to upload resume'}
+                          </span>
+                          <input
+                            id="resume"
+                            name="resume"
+                            type="file"
+                            className="sr-only"
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleResumeChange}
+                            disabled={isSubmitting}
+                          />
+                        </label>
+                        <p className="mt-2 text-xs text-gray-500">
+                          PDF, DOC, DOCX up to 5MB
+                        </p>
                       </div>
 
                       {/* Cover Letter Upload */}
                       <div>
-                        <label htmlFor="coverLetter" className="block text-sm font-medium text-gray-700">
+                        <label htmlFor="coverLetter" className="block text-sm font-medium text-gray-700 mb-2">
                           Upload Cover Letter (Optional)
                         </label>
-                        <div className="mt-1">
-                          <label
-                            htmlFor="coverLetter"
-                            className="relative cursor-pointer rounded-md border-2 border-dashed border-gray-300 bg-white px-4 py-8 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                          >
-                            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-                            <span className="mt-2 block text-sm font-medium text-gray-900">
-                              {coverLetterFile ? coverLetterFile.name : 'Click to upload cover letter'}
-                            </span>
-                            <input
-                              id="coverLetter"
-                              name="coverLetter"
-                              type="file"
-                              className="sr-only"
-                              accept=".pdf,.doc,.docx"
-                              onChange={handleCoverLetterChange}
-                              disabled={isSubmitting}
-                            />
-                          </label>
-                          <p className="mt-1 text-xs text-gray-500">
-                            PDF, DOC, DOCX up to 5MB
-                          </p>
-                        </div>
+                        <label
+                          htmlFor="coverLetter"
+                          className="block relative cursor-pointer rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-10 text-center hover:border-gray-400 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        >
+                          <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
+                          <span className="mt-2 block text-sm font-medium text-gray-900">
+                            {coverLetterFile ? coverLetterFile.name : 'Click to upload cover letter'}
+                          </span>
+                          <input
+                            id="coverLetter"
+                            name="coverLetter"
+                            type="file"
+                            className="sr-only"
+                            accept=".pdf,.doc,.docx"
+                            onChange={handleCoverLetterChange}
+                            disabled={isSubmitting}
+                          />
+                        </label>
+                        <p className="mt-2 text-xs text-gray-500">
+                          PDF, DOC, DOCX up to 5MB
+                        </p>
                       </div>
 
                       {/* Message to Employer */}
@@ -236,7 +226,7 @@ export function ApplyJobModal({ isOpen, onClose, jobId, jobTitle, companyName }:
                         <label htmlFor="message" className="block text-sm font-medium text-gray-700">
                           Message to Employer (Optional)
                         </label>
-                        <div className="mt-1">
+                        <div className="mt-2">
                           <textarea
                             id="message"
                             name="message"

@@ -25,6 +25,8 @@ interface JobDetails {
   createdAt: string;
   expiresAt: string;
   employer: {
+    firstName?: string;
+    lastName?: string;
     employerProfile: {
       companyName: string;
       description: string;
@@ -314,7 +316,6 @@ export default function PublicJobDetailsPage() {
           onClose={() => setIsApplyModalOpen(false)}
           jobId={job.id}
           jobTitle={job.title}
-          companyName={job.employer.employerProfile.companyName}
         />
       )}
     </div>
