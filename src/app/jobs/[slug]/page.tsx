@@ -124,6 +124,16 @@ export default function PublicJobDetailsPage() {
     });
   };
 
+  const handleApplicationSuccess = () => {
+    // Update the job state to reflect that user has applied
+    if (job) {
+      setJob({
+        ...job,
+        hasApplied: true
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -314,6 +324,7 @@ export default function PublicJobDetailsPage() {
         <ApplyJobModal
           isOpen={isApplyModalOpen}
           onClose={() => setIsApplyModalOpen(false)}
+          onSuccess={handleApplicationSuccess}
           jobId={job.id}
           jobTitle={job.title}
         />
