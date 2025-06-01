@@ -358,7 +358,7 @@ export function ProfessionalDashboard() {
                 </p>
                 <div className="mt-6">
                   <Link
-                    href="/jobs"
+                    href="/dashboard/jobs"
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                   >
                     Browse Jobs
@@ -394,7 +394,7 @@ export function ProfessionalDashboard() {
                         </span>
                       </td>
                       <td className="px-3 py-4 whitespace-nowrap text-center">
-                        <Link href={`/jobs/${application.job.urlSlug}`} className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
+                        <Link href={`/dashboard/jobs/${application.job.urlSlug}`} className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -414,7 +414,7 @@ export function ProfessionalDashboard() {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Upcoming Interviews</h3>
-                <Link href="#" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
+                <Link href="/dashboard/interviews" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
               </div>
               <div className="space-y-4">
                 {upcomingInterviews.map((interview) => (
@@ -435,7 +435,7 @@ export function ProfessionalDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">Recommended Jobs</h2>
                   <Link
-                    href="/jobs"
+                    href="/dashboard/jobs"
                     className="text-sm font-medium text-blue-600 hover:text-blue-500"
                   >
                     View all
@@ -452,7 +452,7 @@ export function ProfessionalDashboard() {
                     {recommendedJobs.map((job) => (
                       <Link
                         key={job.id}
-                        href={`/jobs/${job.urlSlug}`}
+                        href={`/dashboard/jobs/${job.urlSlug}`}
                         className="block p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors"
                       >
                         <div className="flex justify-between items-start">
@@ -480,7 +480,7 @@ export function ProfessionalDashboard() {
                     </p>
                     <div className="mt-6">
                       <Link
-                        href="/jobs"
+                        href="/dashboard/jobs"
                         className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
                         Browse Jobs

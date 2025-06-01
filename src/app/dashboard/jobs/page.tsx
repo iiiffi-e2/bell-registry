@@ -271,7 +271,7 @@ function JobSearchPageContent() {
   };
 
   const handleJobClick = (job: Job) => {
-    router.push(`/jobs/${job.urlSlug}`);
+    router.push(`/dashboard/jobs/${job.urlSlug}`);
   };
 
   const JobCard = ({ job, isLoading }: { job: Job; isLoading?: boolean }) => (

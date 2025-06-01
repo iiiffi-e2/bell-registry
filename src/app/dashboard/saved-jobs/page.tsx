@@ -141,7 +141,8 @@ export default function SavedJobsPage() {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow duration-200"
+                className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+                onClick={() => router.push(`/dashboard/jobs/${job.urlSlug}`)}
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start">
@@ -162,7 +163,10 @@ export default function SavedJobsPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleUnsave(job.urlSlug)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUnsave(job.urlSlug);
+                      }}
                       className="rounded-full p-1 text-blue-600 hover:text-blue-500"
                     >
                       <BookmarkIcon className="h-6 w-6" />

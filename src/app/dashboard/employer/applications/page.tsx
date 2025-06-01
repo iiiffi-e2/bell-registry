@@ -295,7 +295,7 @@ export default function EmployerApplicationsPage() {
                         <div className="text-sm">
                           <span className="font-medium text-gray-900">Job:</span>{" "}
                           <Link
-                            href={`/jobs/${application.job.urlSlug}`}
+                            href={`/dashboard/employer/jobs/${application.job.urlSlug}`}
                             className="text-blue-600 hover:text-blue-500"
                           >
                             {application.job.title}
