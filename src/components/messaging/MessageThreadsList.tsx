@@ -90,7 +90,7 @@ export function MessageThreadsList({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1 md:space-y-2">
       {conversations.map((conversation) => {
         const otherUser = session?.user.id === conversation.client.id
           ? conversation.professional
@@ -105,7 +105,7 @@ export function MessageThreadsList({
         return (
           <Card
             key={conversation.id}
-            className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+            className={`p-4 md:p-4 cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors min-h-[4rem] md:min-h-0 ${
               selectedConversationId === conversation.id ? 'bg-blue-50' : ''
             }`}
             onClick={() => onSelectConversation(conversation.id)}

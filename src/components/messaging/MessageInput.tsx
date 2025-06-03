@@ -45,6 +45,7 @@ export function MessageInput({ onSend, disabled, placeholder }: MessageInputProp
           type="submit" 
           disabled={disabled || !message.trim()}
           size="icon"
+          className="h-auto min-h-[2.5rem] md:min-h-[2rem]"
         >
           <Send className="h-4 w-4" />
         </Button>

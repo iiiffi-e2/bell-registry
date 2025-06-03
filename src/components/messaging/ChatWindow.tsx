@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ArrowLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
 import { useSSE } from '@/hooks/useSSE'
@@ -27,9 +28,10 @@ interface Message {
 
 interface ChatWindowProps {
   conversationId: string
+  onBackToList?: () => void
 }
 
-export function ChatWindow({ conversationId }: ChatWindowProps) {
+export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
   const { data: session } = useSession()
   const { isConnected, addMessageHandler } = useSSE()
   const [messages, setMessages] = useState<Message[]>([])
@@ -163,18 +165,31 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
       {/* Header */}
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-semibold">
-              {getDisplayName({
-                firstName: otherUser.firstName,
-                lastName: otherUser.lastName,
-                role: isOtherUserProfessional ? conversationData.professional.role : 'EMPLOYER',
-                isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false
-              })}
-            </h2>
-            {conversationData.status === 'ENDED' && (
-              <Badge variant="secondary">Conversation Ended</Badge>
+          <div className="flex items-center gap-3">
+            {/* Back button for mobile */}
+            {onBackToList && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBackToList}
+                className="md:hidden p-1 h-8 w-8"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
             )}
+            <div>
+              <h2 className="font-semibold">
+                {getDisplayName({
+                  firstName: otherUser.firstName,
+                  lastName: otherUser.lastName,
+                  role: isOtherUserProfessional ? conversationData.professional.role : 'EMPLOYER',
+                  isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false
+                })}
+              </h2>
+              {conversationData.status === 'ENDED' && (
+                <Badge variant="secondary">Conversation Ended</Badge>
+              )}
+            </div>
           </div>
           
           {isClient && isActive && (
