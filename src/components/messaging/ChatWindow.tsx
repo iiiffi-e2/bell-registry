@@ -44,7 +44,11 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
       // Listen for new messages via SSE
       const unsubscribe = addMessageHandler((data) => {
         if (data.type === 'new-message' && data.conversationId === conversationId) {
-          setMessages(prev => [...prev, data.data.message])
+          // Only add messages from other users to avoid duplicates
+          // (our own messages are added optimistically)
+          if (data.data.message.senderId !== session?.user.id) {
+            setMessages(prev => [...prev, data.data.message])
+          }
         }
       })
       
@@ -79,6 +83,25 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
 
   const handleSendMessage = async (content: string) => {
     try {
+      // Create optimistic message for immediate UI update
+      const optimisticMessage: Message = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        content: content.trim(),
+        senderId: session?.user.id || '',
+        createdAt: new Date().toISOString(),
+        read: false,
+        sender: {
+          id: session?.user.id || '',
+          firstName: session?.user.name?.split(' ')[0] || null,
+          lastName: session?.user.name?.split(' ').slice(1).join(' ') || null,
+          image: session?.user.image || null,
+          role: session?.user.role || ''
+        }
+      }
+
+      // Optimistically add message to UI immediately
+      setMessages(prev => [...prev, optimisticMessage])
+
       const response = await fetch('/api/messages/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -86,8 +109,16 @@ export function ChatWindow({ conversationId }: ChatWindowProps) {
       })
 
       if (!response.ok) {
+        // Remove optimistic message on error
+        setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id))
         const error = await response.json()
         throw new Error(error.error || 'Failed to send message')
+      } else {
+        // Replace optimistic message with real message from server
+        const realMessage = await response.json()
+        setMessages(prev => 
+          prev.map(m => m.id === optimisticMessage.id ? realMessage : m)
+        )
       }
     } catch (error) {
       console.error('Error sending message:', error)
