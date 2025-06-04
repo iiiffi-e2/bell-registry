@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { generateProfileUrl } from "@/lib/utils";
 import {
   DocumentArrowDownIcon,
   EnvelopeIcon,
@@ -39,6 +40,7 @@ interface Application {
       location: string | null;
       yearsOfExperience: number | null;
     } | null;
+    profileSlug: string;
   };
 }
 
@@ -346,7 +348,7 @@ export default function EmployerApplicationsPage() {
                           </a>
                         )}
                         <Link
-                          href={`/dashboard/employer/candidates/${application.candidate.id}`}
+                          href={generateProfileUrl(application.candidate.profileSlug)}
                           className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
                         >
                           <UserCircleIcon className="mr-1 h-4 w-4" />

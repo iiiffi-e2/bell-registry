@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
           }
         },
         candidate: {
-          include: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            profileSlug: true,
             candidateProfile: {
               select: {
                 title: true,
