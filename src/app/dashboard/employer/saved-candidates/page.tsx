@@ -12,7 +12,6 @@ import {
 import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
-import { generateProfileUrl } from "@/lib/utils";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 
 interface SavedCandidate {
@@ -187,7 +186,7 @@ export default function SavedCandidatesPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <Link
-                      href={generateProfileUrl(candidate.user.profileSlug)}
+                      href={`/dashboard/employer/candidates/${candidate.user.id}`}
                       className="flex-1"
                     >
                       <div className="flex items-center space-x-4">

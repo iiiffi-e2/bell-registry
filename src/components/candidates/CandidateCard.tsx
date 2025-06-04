@@ -29,9 +29,10 @@ interface CandidateCardProps {
       profileSlug: string | null
     }
   }
+  useDashboardRoutes?: boolean // New prop to determine routing context
 }
 
-export function CandidateCard({ candidate }: CandidateCardProps) {
+export function CandidateCard({ candidate, useDashboardRoutes = false }: CandidateCardProps) {
   const { data: session } = useSession()
   const [isSaved, setIsSaved] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -39,6 +40,14 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
 
   // Check if current user is an employer/agency
   const canSaveCandidate = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY'
+
+  // Determine the appropriate profile URL based on context
+  const getProfileUrl = () => {
+    if (useDashboardRoutes && canSaveCandidate) {
+      return `/dashboard/employer/candidates/${candidate.user.id}`
+    }
+    return generateProfileUrl(candidate.user.profileSlug)
+  }
 
   // Handle anonymized names (single characters) vs full names
   const getDisplayName = () => {
@@ -127,7 +136,7 @@ export function CandidateCard({ candidate }: CandidateCardProps) {
           </button>
         )}
 
-        <Link href={generateProfileUrl(candidate.user.profileSlug)} className="block p-6">
+        <Link href={getProfileUrl()} className="block p-6">
           <div className="flex items-start space-x-4">
             {/* Profile Image */}
             <div className="flex-shrink-0">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Suspense } from "react";
+import { useSession } from "next-auth/react";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateFilterClient } from "@/components/candidates/CandidateFilterClient";
 import { type CandidateFilters } from "@/types/candidate";
@@ -28,6 +29,7 @@ function LoadingGrid() {
 }
 
 export default function BrowseProfessionalsPage() {
+  const { data: session } = useSession();
   const [professionals, setProfessionals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +42,9 @@ export default function BrowseProfessionalsPage() {
   });
   const [locations, setLocations] = useState<string[]>([]);
   const [roleTypes, setRoleTypes] = useState<UserRole[]>([]);
+
+  // Determine if we should use dashboard routes
+  const shouldUseDashboardRoutes = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY';
 
   useEffect(() => {
     Promise.all([
@@ -114,7 +119,11 @@ export default function BrowseProfessionalsPage() {
               <>
                 <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                   {professionals.map((professional) => (
-                    <CandidateCard key={professional.id} candidate={professional} />
+                    <CandidateCard 
+                      key={professional.id} 
+                      candidate={professional} 
+                      useDashboardRoutes={shouldUseDashboardRoutes}
+                    />
                   ))}
                   {professionals.length === 0 && (
                     <div className="col-span-full text-center py-12 text-gray-500">
