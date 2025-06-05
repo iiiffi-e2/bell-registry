@@ -15,6 +15,7 @@ import {
   FileText,
   Building,
   ChevronDown,
+  CreditCard,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -94,6 +95,12 @@ const employerRoutes = [
     color: "text-green-500",
   },
   {
+    label: "Subscription",
+    icon: CreditCard,
+    href: "/dashboard/subscription",
+    color: "text-purple-500",
+  },
+  {
     label: "Company Profile",
     icon: Building,
     href: "/dashboard/employer/profile",
@@ -131,6 +138,12 @@ const agencyRoutes = [
     icon: FileText,
     href: "/dashboard/agency/applications",
     color: "text-green-500",
+  },
+  {
+    label: "Subscription",
+    icon: CreditCard,
+    href: "/dashboard/subscription",
+    color: "text-purple-500",
   },
   {
     label: "Agency Profile",

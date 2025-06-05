@@ -6,6 +6,8 @@ import { JobStatus, Prisma } from '@prisma/client'
 import { getServerSession } from 'next-auth'
 import { generateJobUrlSlug } from '@/lib/job-utils'
 import { authOptions } from "@/lib/auth"
+import { canPostJob, incrementJobPostCount } from '@/lib/subscription-service'
+import { isEmployerOrAgencyRole } from '@/lib/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -253,10 +255,29 @@ export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session || session.user.role !== "EMPLOYER") {
+    if (!session?.user?.id) {
       return NextResponse.json(
-        { error: "Unauthorized - Employers only" },
+        { error: "Unauthorized" },
         { status: 401 }
+      );
+    }
+
+    if (!isEmployerOrAgencyRole(session.user.role)) {
+      return NextResponse.json(
+        { error: "Unauthorized - Employers and Agencies only" },
+        { status: 401 }
+      );
+    }
+
+    // Check if user can post jobs based on subscription
+    const canPost = await canPostJob(session.user.id);
+    if (!canPost) {
+      return NextResponse.json(
+        { 
+          error: "Job posting limit reached or subscription expired", 
+          code: "SUBSCRIPTION_LIMIT_REACHED" 
+        },
+        { status: 403 }
       );
     }
 
@@ -285,6 +306,9 @@ export async function POST(request: Request) {
         status: JobStatus.ACTIVE,
       },
     });
+
+    // Increment the job post count after successful creation
+    await incrementJobPostCount(session.user.id);
 
     return NextResponse.json({ job }, { status: 201 });
   } catch (error) {

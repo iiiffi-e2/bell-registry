@@ -29,6 +29,9 @@ import {
 import { Plus, X } from "lucide-react";
 import { SparklesIcon } from "@heroicons/react/24/outline";
 import ImprovedJobDescriptionModal from "@/components/ui/improved-job-description-modal";
+import { useSession } from "next-auth/react";
+import { AlertTriangle, CreditCard, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 const EMPLOYMENT_TYPES = [
   "Full-time",
@@ -138,14 +141,28 @@ const defaultValues: Partial<JobFormValues> = {
   expiresAt: "",
 };
 
+interface SubscriptionStatus {
+  canPostJob: boolean;
+  hasActiveSubscription: boolean;
+  subscription?: {
+    subscriptionType: string;
+    jobPostLimit: number | null;
+    jobsPostedCount: number;
+    subscriptionEndDate: string | null;
+  };
+}
+
 export default function PostJobPage() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [customTitle, setCustomTitle] = useState<string>("");
   const [showImprovedDescriptionModal, setShowImprovedDescriptionModal] = useState(false);
   const [improvedDescription, setImprovedDescription] = useState("");
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   // Add this alert to verify we're on the correct page
   useEffect(() => {
@@ -178,6 +195,38 @@ export default function PostJobPage() {
       }
     }
   }, [selectedRole, customTitle, form]);
+
+  // Check subscription status on page load
+  useEffect(() => {
+    if (session?.user?.id) {
+      checkSubscriptionStatus();
+    }
+  }, [session]);
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      setLoadingSubscription(true);
+      const [canPostResponse, subscriptionResponse] = await Promise.all([
+        fetch('/api/subscription/can-post-job'),
+        fetch('/api/subscription')
+      ]);
+
+      if (canPostResponse.ok && subscriptionResponse.ok) {
+        const canPostData = await canPostResponse.json();
+        const subscriptionData = await subscriptionResponse.json();
+        
+        setSubscriptionStatus({
+          canPostJob: canPostData.canPostJob,
+          hasActiveSubscription: canPostData.hasActiveSubscription,
+          subscription: subscriptionData.subscription
+        });
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
 
   const handleImproveWithAI = async () => {
     try {
@@ -217,6 +266,12 @@ export default function PostJobPage() {
   };
 
   async function onSubmit(data: JobFormValues) {
+    // Pre-flight check before submission
+    if (!subscriptionStatus?.canPostJob) {
+      toast.error("Cannot post job. Please check your subscription status.");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
@@ -244,6 +299,11 @@ export default function PostJobPage() {
       });
 
       if (!response.ok) {
+        const errorData = await response.json();
+        if (errorData.code === "SUBSCRIPTION_LIMIT_REACHED") {
+          toast.error("Job posting limit reached. Please upgrade your subscription.");
+          return;
+        }
         throw new Error("Failed to create job");
       }
 
@@ -267,6 +327,23 @@ export default function PostJobPage() {
     }
   }
 
+  // Show loading state while checking subscription
+  if (loadingSubscription) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white shadow-sm rounded-lg p-8">
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mr-3" />
+            <span>Checking subscription status...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show subscription warning if can't post jobs
+  const showSubscriptionWarning = subscriptionStatus && !subscriptionStatus.canPostJob;
+
   return (
     <div className="space-y-6">
       <div>
@@ -276,96 +353,68 @@ export default function PostJobPage() {
         </p>
       </div>
 
+      {/* Subscription Warning */}
+      {showSubscriptionWarning && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-start">
+            <AlertTriangle className="h-5 w-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800 mb-1">
+                Cannot Post Job
+              </h3>
+              <p className="text-sm text-red-700 mb-3">
+                {!subscriptionStatus?.hasActiveSubscription 
+                  ? "Your subscription has expired. Upgrade to continue posting jobs."
+                  : "You've reached your job posting limit for this subscription period."
+                }
+              </p>
+              <Link
+                href="/dashboard/subscription"
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <CreditCard className="h-4 w-4 mr-2" />
+                Upgrade Subscription
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Subscription Status Info */}
+      {subscriptionStatus?.subscription && subscriptionStatus.canPostJob && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <CreditCard className="h-5 w-5 text-blue-600 mr-3" />
+            <div>
+              <p className="text-sm text-blue-800">
+                <span className="font-medium">Subscription:</span> {subscriptionStatus.subscription.subscriptionType} | 
+                <span className="font-medium"> Jobs Used:</span> {subscriptionStatus.subscription.jobsPostedCount} / {subscriptionStatus.subscription.jobPostLimit || '∞'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Job Title</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="e.g. Experienced Estate Manager for Luxury Manhattan Property" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Enter a descriptive title for the position
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="professionalRole"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Professional Role</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a professional role" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {PROFESSIONAL_ROLES.map((role) => (
-                        <SelectItem key={role} value={role}>
-                          {role}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Choose the primary role category for this position
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex justify-between items-center mb-1">
-                    <FormLabel>Job Description</FormLabel>
-                    <button
-                      type="button"
-                      onClick={handleImproveWithAI}
-                      disabled={!currentDescription || isSubmitting}
-                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <SparklesIcon className="h-4 w-4 mr-1" />
-                      Improve with AI
-                    </button>
-                  </div>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the role and responsibilities..."
-                      className="min-h-[200px] resize-y"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Disable all form fields if can't post jobs */}
+            <fieldset disabled={showSubscriptionWarning} className={showSubscriptionWarning ? "opacity-50" : ""}>
               <FormField
                 control={form.control}
-                name="location"
+                name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Job Title</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. New York, NY" {...field} />
+                      <Input 
+                        placeholder="e.g. Experienced Estate Manager for Luxury Manhattan Property" 
+                        {...field} 
+                      />
                     </FormControl>
+                    <FormDescription>
+                      Enter a descriptive title for the position
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -373,51 +422,27 @@ export default function PostJobPage() {
 
               <FormField
                 control={form.control}
-                name="jobType"
+                name="professionalRole"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Type</FormLabel>
+                    <FormLabel>Professional Role</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select job type" />
+                          <SelectValue placeholder="Select a professional role" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {JOB_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
+                        {PROFESSIONAL_ROLES.map((role) => (
+                          <SelectItem key={role} value={role}>
+                            {role}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="employmentType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Employment Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select employment type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {EMPLOYMENT_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormDescription>
+                      Choose the primary role category for this position
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -425,116 +450,216 @@ export default function PostJobPage() {
 
               <FormField
                 control={form.control}
-                name="expiresAt"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Expiry Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <FormLabel>Requirements</FormLabel>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => appendRequirement({ value: "" })}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Requirement
-                </Button>
-              </div>
-              
-              <div className="space-y-3">
-                {requirementFields.map((field, index) => (
-                  <div key={field.id} className="flex gap-2">
-                    <FormField
-                      control={form.control}
-                      name={`requirements.${index}.value`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1">
-                          <FormControl>
-                            <Input
-                              placeholder="Enter a job requirement"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {index > 0 && (
-                      <Button
+                    <div className="flex justify-between items-center mb-1">
+                      <FormLabel>Job Description</FormLabel>
+                      <button
                         type="button"
-                        variant="outline"
-                        size="icon"
-                        onClick={() => removeRequirement(index)}
+                        onClick={handleImproveWithAI}
+                        disabled={!currentDescription || isSubmitting || showSubscriptionWarning}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="salaryMin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Minimum Salary (USD)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g. 50000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="salaryMax"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Maximum Salary (USD)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g. 100000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="featured"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Featured Job</FormLabel>
-                    <div className="text-sm text-gray-500">
-                      Featured jobs appear at the top of search results
+                        <SparklesIcon className="h-4 w-4 mr-1" />
+                        Improve with AI
+                      </button>
                     </div>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe the role and responsibilities..."
+                        className="min-h-[200px] resize-y"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. New York, NY" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="jobType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select job type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {JOB_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="employmentType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Employment Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select employment type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {EMPLOYMENT_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="expiresAt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Expiry Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <FormLabel>Requirements</FormLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => appendRequirement({ value: "" })}
+                    disabled={showSubscriptionWarning}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Requirement
+                  </Button>
+                </div>
+                
+                <div className="space-y-3">
+                  {requirementFields.map((field, index) => (
+                    <div key={field.id} className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name={`requirements.${index}.value`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input
+                                placeholder="Enter a job requirement"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {index > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="icon"
+                          onClick={() => removeRequirement(index)}
+                          disabled={showSubscriptionWarning}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="salaryMin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Minimum Salary (USD)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g. 50000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="salaryMax"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Maximum Salary (USD)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g. 100000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="featured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Featured Job</FormLabel>
+                      <div className="text-sm text-gray-500">
+                        Featured jobs appear at the top of search results
+                      </div>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        disabled={showSubscriptionWarning}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </fieldset>
 
             <div className="flex justify-end space-x-4">
               <Button
@@ -546,9 +671,9 @@ export default function PostJobPage() {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting}
+                disabled={isSubmitting || showSubscriptionWarning}
               >
-                {isSubmitting ? "Posting..." : "Post Job"}
+                {isSubmitting ? "Posting..." : showSubscriptionWarning ? "Upgrade Required" : "Post Job"}
               </Button>
             </div>
           </form>

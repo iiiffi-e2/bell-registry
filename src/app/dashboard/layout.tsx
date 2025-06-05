@@ -16,6 +16,7 @@ import {
   InboxIcon,
   UsersIcon,
   BuildingOfficeIcon,
+  CreditCardIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDown } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -25,6 +26,7 @@ import { useProfile } from "@/providers/profile-provider";
 import React from "react";
 import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 import { MessagesMenuBadge } from "@/components/messaging/MessagesMenuBadge";
+import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -68,6 +70,7 @@ const employerNavigation: NavigationItem[] = [
   },
   { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
+  { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
 ];
 
@@ -77,6 +80,7 @@ const agencyNavigation: NavigationItem[] = [
   { name: "Candidates", href: "/dashboard/agency/candidates", icon: UsersIcon },
   { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
+  { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
 ];
 
@@ -257,6 +261,12 @@ export default function DashboardLayout({
               />
             </Link>
           </div>
+          
+          {/* Subscription Status for Employers/Agencies */}
+          <div className="flex-1 max-w-md mx-4">
+            <SubscriptionAlert compact hideWhenHealthy />
+          </div>
+
           <div className="flex items-center space-x-4">
             <button
               type="button"

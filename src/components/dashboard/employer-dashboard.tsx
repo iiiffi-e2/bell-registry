@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { truncateWords } from "@/lib/utils";
+import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
 
 interface Job {
   id: number;
@@ -48,6 +49,7 @@ export function EmployerDashboard() {
   });
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [canPostJob, setCanPostJob] = useState<boolean>(true);
 
   useEffect(() => {
     async function fetchDashboardData() {
@@ -68,6 +70,13 @@ export function EmployerDashboard() {
             job.status === "ACTIVE" || job.status === "INTERVIEWING"
           );
           setJobs(activeJobs);
+        }
+
+        // Check if user can post jobs
+        const canPostRes = await fetch("/api/subscription/can-post-job");
+        if (canPostRes.ok) {
+          const canPostData = await canPostRes.json();
+          setCanPostJob(canPostData.canPostJob);
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
@@ -98,6 +107,9 @@ export function EmployerDashboard() {
           Manage your job listings and view candidate applications
         </p>
       </div>
+
+      {/* Subscription Alert */}
+      <SubscriptionAlert />
 
       {/* Stats Widgets */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -174,11 +186,18 @@ export function EmployerDashboard() {
                   View All Jobs
                 </Link>
               </Button>
-              <Button asChild>
-                <Link href="/dashboard/employer/jobs/post" className="flex items-center">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Post New Job
-                </Link>
+              <Button asChild={canPostJob} variant={canPostJob ? "default" : "outline"}>
+                {canPostJob ? (
+                  <Link href="/dashboard/employer/jobs/post" className="flex items-center">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Post New Job
+                  </Link>
+                ) : (
+                  <Link href="/dashboard/subscription" className="flex items-center">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Upgrade to Post Jobs
+                  </Link>
+                )}
               </Button>
             </div>
           </div>
