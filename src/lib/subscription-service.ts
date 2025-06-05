@@ -129,12 +129,50 @@ export async function canPostJob(employerId: string): Promise<boolean> {
 }
 
 /**
- * Get count of active jobs (jobs that haven't expired after 60 days)
+ * Get count of active jobs posted during the current subscription period
+ * For paid subscriptions, this excludes trial jobs
  */
 async function getActiveJobsCount(employerId: string, subscriptionStartDate: Date): Promise<number> {
   const sixtyDaysAgo = new Date();
   sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
+  // Get the employer's current subscription info
+  const employer = await prisma.employerProfile.findUnique({
+    where: { userId: employerId },
+  });
+
+  if (!employer) return 0;
+
+  const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
+  
+  // For TRIAL subscriptions, count all jobs from account creation
+  if (subscriptionType === SubscriptionType.TRIAL) {
+    const activeJobs = await prisma.job.count({
+      where: {
+        employerId: employerId,
+        createdAt: {
+          gte: subscriptionStartDate,
+        },
+        OR: [
+          { expiresAt: null },
+          { expiresAt: { gt: new Date() } },
+          { 
+            AND: [
+              { expiresAt: null },
+              { createdAt: { gte: sixtyDaysAgo } }
+            ]
+          }
+        ],
+        status: {
+          in: ["ACTIVE", "FILLED"],
+        },
+      },
+    });
+    return activeJobs;
+  }
+
+  // For PAID subscriptions, only count jobs posted AFTER the subscription started
+  // This ensures trial jobs don't count against paid subscription limits
   const activeJobs = await prisma.job.count({
     where: {
       employerId: employerId,
@@ -187,12 +225,20 @@ export async function getEmployerSubscription(employerId: string) {
   
   if (!employer) return null;
   
+  const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
+  const subscriptionStartDate = (employer as any).subscriptionStartDate || employer.createdAt;
+  const subscriptionEndDate = (employer as any).subscriptionEndDate || null;
+  const jobPostLimit = (employer as any).jobPostLimit || 5;
+  
+  // Calculate actual jobs posted in current subscription period
+  const actualJobsPostedCount = await getActiveJobsCount(employerId, subscriptionStartDate);
+  
   return {
-    subscriptionType: (employer as any).subscriptionType || SubscriptionType.TRIAL,
-    subscriptionStartDate: (employer as any).subscriptionStartDate || employer.createdAt,
-    subscriptionEndDate: (employer as any).subscriptionEndDate || null,
-    jobPostLimit: (employer as any).jobPostLimit || 5,
-    jobsPostedCount: (employer as any).jobsPostedCount || 0,
+    subscriptionType,
+    subscriptionStartDate,
+    subscriptionEndDate,
+    jobPostLimit,
+    jobsPostedCount: actualJobsPostedCount, // Use actual count instead of database field
     hasNetworkAccess: (employer as any).hasNetworkAccess || false,
     stripeCustomerId: (employer as any).stripeCustomerId || null,
   };
