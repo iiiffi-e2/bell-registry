@@ -207,25 +207,60 @@ export async function updateEmployerSubscription(
   stripeCustomerId?: string,
   stripeSessionId?: string
 ): Promise<void> {
+  console.log('Updating employer subscription:', {
+    employerId,
+    subscriptionType,
+    stripeCustomerId,
+    stripeSessionId
+  });
+
   const plan = SUBSCRIPTION_PLANS[subscriptionType];
   const startDate = new Date();
   const endDate = new Date();
   endDate.setDate(endDate.getDate() + plan.durationDays);
 
-  // Use raw SQL for now to avoid type issues
-  await prisma.$executeRaw`
-    UPDATE "EmployerProfile" 
-    SET 
-      "subscriptionType" = ${subscriptionType},
-      "subscriptionStartDate" = ${startDate},
-      "subscriptionEndDate" = ${endDate},
-      "jobPostLimit" = ${plan.jobLimit},
-      "jobsPostedCount" = 0,
-      "stripeCustomerId" = ${stripeCustomerId || null},
-      "stripeSessionId" = ${stripeSessionId || null},
-      "hasNetworkAccess" = ${subscriptionType === SubscriptionType.NETWORK}
-    WHERE "userId" = ${employerId}
-  `;
+  console.log('Plan details:', {
+    planName: plan.name,
+    jobLimit: plan.jobLimit,
+    durationDays: plan.durationDays,
+    startDate,
+    endDate
+  });
+
+  try {
+    // Use raw SQL with proper enum casting for PostgreSQL
+    const result = await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET 
+        "subscriptionType" = ${subscriptionType}::"SubscriptionType",
+        "subscriptionStartDate" = ${startDate},
+        "subscriptionEndDate" = ${endDate},
+        "jobPostLimit" = ${plan.jobLimit},
+        "jobsPostedCount" = 0,
+        "stripeCustomerId" = ${stripeCustomerId || null},
+        "stripeSessionId" = ${stripeSessionId || null},
+        "hasNetworkAccess" = ${subscriptionType === SubscriptionType.NETWORK}
+      WHERE "userId" = ${employerId}
+    `;
+    
+    console.log('Database update result:', result);
+    
+    // Verify the update worked
+    const updatedProfile = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+    
+    console.log('Updated profile verification:', {
+      subscriptionType: (updatedProfile as any)?.subscriptionType,
+      jobPostLimit: (updatedProfile as any)?.jobPostLimit,
+      startDate: (updatedProfile as any)?.subscriptionStartDate,
+      endDate: (updatedProfile as any)?.subscriptionEndDate
+    });
+    
+  } catch (error) {
+    console.error('Error updating employer subscription:', error);
+    throw error;
+  }
 }
 
 /**
@@ -292,17 +327,46 @@ function getPackageDescription(subscriptionType: SubscriptionType, plan: any): s
  * Handle successful Stripe payment
  */
 export async function handleSuccessfulPayment(sessionId: string): Promise<void> {
-  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  console.log('Processing successful payment for session:', sessionId);
   
-  if (session.payment_status === "paid" && session.metadata) {
-    const { employerId, subscriptionType } = session.metadata;
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    console.log('Retrieved session:', {
+      id: session.id,
+      payment_status: session.payment_status,
+      metadata: session.metadata,
+      customer: session.customer
+    });
     
-    await updateEmployerSubscription(
-      employerId,
-      subscriptionType as SubscriptionType,
-      session.customer as string,
-      sessionId
-    );
+    if (session.payment_status === "paid" && session.metadata) {
+      const { employerId, subscriptionType } = session.metadata;
+      
+      console.log('Processing subscription update:', {
+        employerId,
+        subscriptionType,
+        customer: session.customer,
+        sessionId
+      });
+      
+      if (!employerId || !subscriptionType) {
+        console.error('Missing employerId or subscriptionType in session metadata:', session.metadata);
+        throw new Error('Missing required metadata in session');
+      }
+      
+      await updateEmployerSubscription(
+        employerId,
+        subscriptionType as SubscriptionType,
+        session.customer as string,
+        sessionId
+      );
+      
+      console.log('Successfully updated subscription for employer:', employerId);
+    } else {
+      console.log('Payment not processed - status:', session.payment_status, 'has metadata:', !!session.metadata);
+    }
+  } catch (error) {
+    console.error('Error processing successful payment:', error);
+    throw error;
   }
 }
 
