@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ProfilePictureUpload } from "./profile-picture-upload";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { CurrencyDollarIcon, SparklesIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { MediaUpload } from "./media-upload";
 import { useSession } from "next-auth/react";
@@ -14,6 +14,7 @@ import { MultiLocationAutocomplete } from '../ui/multi-location-autocomplete';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form } from "@/components/ui/form";
+import { SkillsCombobox } from "@/components/ui/skills-combobox";
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -90,7 +91,9 @@ const profileSchema = z.object({
   
   // Professional Details
   seekingOpportunities: z.array(z.string()).default([]),
-  skills: z.string().optional(),
+  skills: z.array(z.string()).default([]).refine((skills) => skills.length <= 10, {
+    message: "You can select a maximum of 10 skills"
+  }),
   payRangeMin: z.string().optional(),
   payRangeMax: z.string().optional(),
   payType: z.string().default("Salary"),
@@ -118,6 +121,7 @@ function MultiSelect({ options, value, onChange, placeholder }: {
   placeholder: string 
 }) {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const filteredOptions = query === ""
     ? options
@@ -143,8 +147,7 @@ function MultiSelect({ options, value, onChange, placeholder }: {
           <div 
             className="flex flex-wrap gap-2 p-1 border rounded-md border-gray-300 bg-white min-h-[38px]"
             onClick={() => {
-              const input = document.querySelector('[role="combobox"]') as HTMLElement;
-              input?.focus();
+              inputRef.current?.focus();
             }}
           >
             {value.map((item) => (
@@ -166,6 +169,7 @@ function MultiSelect({ options, value, onChange, placeholder }: {
               </span>
             ))}
             <Combobox.Input
+              ref={inputRef}
               className="border-0 p-1 text-sm focus:ring-0 flex-1 min-w-[100px]"
               placeholder={value.length === 0 ? placeholder : "Add more..."}
               onChange={(event) => setQuery(event.target.value)}
@@ -283,7 +287,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             whatSetsApartMe: data.whatSetsApartMe || "",
             idealEnvironment: data.idealEnvironment || "",
             seekingOpportunities: data.seekingOpportunities || [],
-            skills: Array.isArray(data.skills) ? data.skills.join(", ") : data.skills || "",
+            skills: Array.isArray(data.skills) ? data.skills : (data.skills ? data.skills.split(", ").filter(Boolean) : []),
             payRangeMin: data.payRangeMin?.toString() || "",
             payRangeMax: data.payRangeMax?.toString() || "",
             payType: data.payType || "Salary",
@@ -568,19 +572,22 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                   {/* Skills */}
                   <div>
                     <label htmlFor="skills" className="block text-sm font-medium text-gray-700">
-                      Skills & Tags
+                      Skills & Tags <span className="text-gray-500 text-xs">(Max 10)</span>
                     </label>
                     <div className="mt-1">
-                      <input
-                        type="text"
-                        {...form.register("skills")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Enter skills separated by commas (Optional)"
+                      <SkillsCombobox
+                        value={form.watch("skills") || []}
+                        onChange={(newValue) => form.setValue("skills", newValue)}
+                        placeholder="Search and select up to 10 skills..."
+                        maxSelections={10}
                       />
                     </div>
                     {form.formState.errors.skills && (
                       <p className="mt-1 text-sm text-red-600">{form.formState.errors.skills.message}</p>
                     )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      Choose from our curated list of skills organized by category. This helps employers find the right professionals with specific expertise.
+                    </p>
                   </div>
 
                   {/* Pay Range */}

@@ -96,7 +96,7 @@ export async function PUT(req: Request) {
           where: { userId: session.user.id },
           data: {
             bio: body.bio,
-            skills: body.skills ? body.skills.split(",").map((s: string) => s.trim()) : undefined,
+            skills: Array.isArray(body.skills) ? body.skills : (body.skills ? body.skills.split(",").map((s: string) => s.trim()) : undefined),
             experience: body.experience,
             certifications: body.certifications ? body.certifications.split(",").map((c: string) => c.trim()) : undefined,
             availability: body.availability ? new Date(body.availability) : undefined,
