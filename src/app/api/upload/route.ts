@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
-import { prisma } from "@/lib/prisma";
 import { storageProvider } from "@/lib/storage";
 
 export async function POST(request: NextRequest) {
@@ -38,18 +37,7 @@ export async function POST(request: NextRequest) {
     // Upload file using storage provider
     const url = await storageProvider.uploadFile(buffer, fileName, file.type);
 
-    // Update both User.image and CandidateProfile.photoUrl
-    await prisma.$transaction([
-      prisma.user.update({
-        where: { id: session.user.id },
-        data: { image: url },
-      }),
-      prisma.candidateProfile.update({
-        where: { userId: session.user.id },
-        data: { photoUrl: url },
-      }),
-    ]);
-
+    // Just return the URL - let the frontend components decide what to do with it
     return NextResponse.json({ url });
   } catch (error) {
     console.error("Error uploading file:", error);
