@@ -51,7 +51,7 @@ interface CandidateProfile {
   seekingOpportunities: string[];
   payRangeMin: number | null;
   payRangeMax: number | null;
-  payCurrency: string;
+  payType: string;
   additionalPhotos: string[];
   mediaUrls: string[];
   user: {
@@ -403,26 +403,10 @@ export default function CandidateProfilePage({
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Salary Expectations</h4>
                     <p className="text-gray-900">
                       {profile.payRangeMin && profile.payRangeMax
-                        ? `${new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: profile.payCurrency || "USD",
-                            maximumFractionDigits: 0,
-                          }).format(profile.payRangeMin)} - ${new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: profile.payCurrency || "USD",
-                            maximumFractionDigits: 0,
-                          }).format(profile.payRangeMax)}`
+                        ? `$${profile.payRangeMin.toLocaleString()} - $${profile.payRangeMax.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`
                         : profile.payRangeMin
-                        ? `${new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: profile.payCurrency || "USD",
-                            maximumFractionDigits: 0,
-                          }).format(profile.payRangeMin)}+`
-                        : `Up to ${new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: profile.payCurrency || "USD",
-                            maximumFractionDigits: 0,
-                          }).format(profile.payRangeMax!)}`}
+                        ? `$${profile.payRangeMin.toLocaleString()}+${profile.payType === 'Hourly' ? '/hr' : ''}`
+                        : `Up to $${profile.payRangeMax!.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`}
                     </p>
                   </div>
                 )}

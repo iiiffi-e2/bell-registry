@@ -49,7 +49,7 @@ interface PublicProfile {
   seekingOpportunities: string[];
   payRangeMin: number | null;
   payRangeMax: number | null;
-  payCurrency: string;
+  payType: string;
   additionalPhotos: string[];
   mediaUrls: string[];
   user: {
@@ -127,7 +127,7 @@ async function getProfile(slug: string): Promise<PublicProfile> {
     seekingOpportunities: profile.candidateProfile.seekingOpportunities || [],
     payRangeMin: profile.candidateProfile.payRangeMin,
     payRangeMax: profile.candidateProfile.payRangeMax,
-    payCurrency: profile.candidateProfile.payCurrency || 'USD',
+    payType: profile.candidateProfile.payType || 'Salary',
     additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
     mediaUrls: profile.candidateProfile.mediaUrls || [],
     user: {
@@ -412,21 +412,13 @@ export default async function PublicProfilePage({
               {/* Pay Range */}
               {(profile.payRangeMin || profile.payRangeMax) && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Salary Expectations</h4>
                   <p className="text-gray-900">
-                    {profile.payRangeMin && profile.payRangeMax ? (
-                      <>
-                        {profile.payCurrency} {profile.payRangeMin.toLocaleString()} - {profile.payRangeMax.toLocaleString()}
-                      </>
-                    ) : profile.payRangeMin ? (
-                      <>
-                        From {profile.payCurrency} {profile.payRangeMin.toLocaleString()}
-                      </>
-                    ) : (
-                      <>
-                        Up to {profile.payCurrency} {profile.payRangeMax.toLocaleString()}
-                      </>
-                    )}
+                    {profile.payRangeMin && profile.payRangeMax
+                      ? `$${profile.payRangeMin.toLocaleString()} - $${profile.payRangeMax.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`
+                      : profile.payRangeMin
+                      ? `$${profile.payRangeMin.toLocaleString()}+${profile.payType === 'Hourly' ? '/hr' : ''}`
+                      : `Up to $${profile.payRangeMax!.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`}
                   </p>
                 </div>
               )}

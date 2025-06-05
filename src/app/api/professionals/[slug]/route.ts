@@ -26,7 +26,7 @@ type CandidateProfileWithAll = Prisma.CandidateProfileGetPayload<{
     seekingOpportunities: true;
     payRangeMin: true;
     payRangeMax: true;
-    payCurrency: true;
+    payType: true;
     additionalPhotos: true;
     mediaUrls: true;
   }
@@ -101,7 +101,7 @@ export async function GET(
       seekingOpportunities: profile.candidateProfile.seekingOpportunities || [],
       payRangeMin: profile.candidateProfile.payRangeMin,
       payRangeMax: profile.candidateProfile.payRangeMax,
-      payCurrency: profile.candidateProfile.payCurrency || 'USD',
+      payType: profile.candidateProfile.payType || 'Salary',
       additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
       mediaUrls: profile.candidateProfile.mediaUrls || [],
       user: {

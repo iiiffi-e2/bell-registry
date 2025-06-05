@@ -93,7 +93,7 @@ const profileSchema = z.object({
   skills: z.string().optional(),
   payRangeMin: z.string().optional(),
   payRangeMax: z.string().optional(),
-  payCurrency: z.string().default("USD"),
+  payType: z.string().default("Salary"),
   
   // Media
   additionalPhotos: z.array(z.string()).optional(),
@@ -218,7 +218,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     defaultValues: {
       openToRelocation: false,
       isAnonymous: false,
-      payCurrency: "USD",
+      payType: "Salary",
     },
   });
 
@@ -286,7 +286,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             skills: Array.isArray(data.skills) ? data.skills.join(", ") : data.skills || "",
             payRangeMin: data.payRangeMin?.toString() || "",
             payRangeMax: data.payRangeMax?.toString() || "",
-            payCurrency: data.payCurrency || "USD",
+            payType: data.payType || "Salary",
             additionalPhotos: data.additionalPhotos || [],
             mediaUrls: data.mediaUrls || [],
             certifications: Array.isArray(data.certifications) ? data.certifications.join(", ") : data.certifications || "",
@@ -622,18 +622,18 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         </div>
                       </div>
                       <div>
-                        <label htmlFor="payCurrency" className="sr-only">
-                          Currency
+                        <label htmlFor="payType" className="sr-only">
+                          Pay Type
                         </label>
                         <select
-                          {...form.register("payCurrency")}
+                          {...form.register("payType")}
                           className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                         >
-                          <option value="USD">USD</option>
-                          <option value="EUR">EUR</option>
-                          <option value="GBP">GBP</option>
-                          <option value="CAD">CAD</option>
-                          <option value="AUD">AUD</option>
+                          <option value="Salary">Salary</option>
+                          <option value="Hourly">Hourly</option>
+                          <option value="Contract">Contract</option>
+                          <option value="Commission">Commission</option>
+                          <option value="Other">Other</option>
                         </select>
                       </div>
                     </div>

@@ -60,8 +60,8 @@ export async function GET() {
       yearsOfExperience: saved.candidate.candidateProfile?.yearsOfExperience,
       payRangeMin: saved.candidate.candidateProfile?.payRangeMin,
       payRangeMax: saved.candidate.candidateProfile?.payRangeMax,
-      payCurrency: saved.candidate.candidateProfile?.payCurrency,
-      savedAt: saved.createdAt,
+      payType: saved.candidate.candidateProfile?.payType,
+      savedAt: saved.createdAt.toISOString(),
       note: saved.note,
       job: saved.job,
       user: {

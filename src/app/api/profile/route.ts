@@ -109,7 +109,7 @@ export async function PUT(req: Request) {
             idealEnvironment: body.idealEnvironment,
             mediaUrls: body.mediaUrls,
             openToRelocation: body.openToRelocation,
-            payCurrency: body.payCurrency,
+            payType: body.payType,
             payRangeMax: body.payRangeMax ? parseFloat(body.payRangeMax) : undefined,
             payRangeMin: body.payRangeMin ? parseFloat(body.payRangeMin) : undefined,
             preferredRole: body.preferredRole,

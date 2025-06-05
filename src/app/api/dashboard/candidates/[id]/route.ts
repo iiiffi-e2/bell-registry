@@ -69,7 +69,7 @@ export async function GET(
       seekingOpportunities: candidate.candidateProfile.seekingOpportunities || [],
       payRangeMin: candidate.candidateProfile.payRangeMin,
       payRangeMax: candidate.candidateProfile.payRangeMax,
-      payCurrency: candidate.candidateProfile.payCurrency || 'USD',
+      payType: candidate.candidateProfile.payType || 'Salary',
       additionalPhotos: candidate.candidateProfile.additionalPhotos || [],
       mediaUrls: candidate.candidateProfile.mediaUrls || [],
       user: {

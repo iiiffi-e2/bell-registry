@@ -42,7 +42,7 @@ interface CandidateProfile {
   seekingOpportunities: string[];
   payRangeMin: number | null;
   payRangeMax: number | null;
-  payCurrency: string;
+  payType: string;
   additionalPhotos: string[];
   mediaUrls: string[];
   user: {
@@ -370,15 +370,18 @@ export default function ProfilePage() {
                     <p className="text-gray-900">
                       {profile.payRangeMin && profile.payRangeMax ? (
                         <>
-                          {profile.payCurrency} {profile.payRangeMin.toLocaleString()} - {profile.payRangeMax.toLocaleString()}
+                          ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
                         </>
                       ) : profile.payRangeMin ? (
                         <>
-                          From {profile.payCurrency} {profile.payRangeMin.toLocaleString()}
+                          From ${profile.payRangeMin.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
                         </>
                       ) : (
                         <>
-                          Up to {profile.payCurrency} {profile.payRangeMax?.toLocaleString()}
+                          Up to ${profile.payRangeMax?.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
                         </>
                       )}
                     </p>

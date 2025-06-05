@@ -24,7 +24,7 @@ interface SavedCandidate {
   yearsOfExperience: number | null;
   payRangeMin: number | null;
   payRangeMax: number | null;
-  payCurrency: string | null;
+  payType: string | null;
   savedAt: string;
   note: string | null;
   job: {
@@ -110,19 +110,26 @@ export default function SavedCandidatesPage() {
   const formatSalaryRange = (candidate: SavedCandidate) => {
     if (!candidate.payRangeMin && !candidate.payRangeMax) return null;
     
-    const currency = candidate.payCurrency || 'USD';
+    const payType = candidate.payType || 'Salary';
     const formatter = new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency,
+      currency: "USD",
       maximumFractionDigits: 0,
     });
 
+    const formatNumber = (num: number) => {
+      if (payType === 'Hourly') {
+        return `${formatter.format(num)}/hr`;
+      }
+      return formatter.format(num);
+    };
+
     if (candidate.payRangeMin && candidate.payRangeMax) {
-      return `${formatter.format(candidate.payRangeMin)} - ${formatter.format(candidate.payRangeMax)}`;
+      return `${formatNumber(candidate.payRangeMin)} - ${formatNumber(candidate.payRangeMax)}`;
     } else if (candidate.payRangeMin) {
-      return `${formatter.format(candidate.payRangeMin)}+`;
+      return `${formatNumber(candidate.payRangeMin)}+`;
     } else if (candidate.payRangeMax) {
-      return `Up to ${formatter.format(candidate.payRangeMax)}`;
+      return `Up to ${formatNumber(candidate.payRangeMax)}`;
     }
     return null;
   };
