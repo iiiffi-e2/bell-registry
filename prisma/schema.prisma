@@ -145,6 +145,27 @@ model EmployerProfile {
   createdAt              DateTime         @default(now())
   updatedAt              DateTime         @updatedAt
   user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  billingHistory         BillingHistory[]
+}
+
+model BillingHistory {
+  id                String            @id @default(cuid())
+  employerProfileId String
+  amount            Float             // Amount in dollars (e.g., 250.00)
+  currency          String            @default("usd")
+  description       String            // What was purchased (e.g., "Spotlight Plan - 1 Job Post")
+  subscriptionType  SubscriptionType
+  stripeSessionId   String?           // Stripe checkout session ID
+  stripeInvoiceId   String?           // Stripe invoice ID for downloadable invoices
+  status            BillingStatus     @default(PENDING)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  employerProfile   EmployerProfile   @relation(fields: [employerProfileId], references: [id], onDelete: Cascade)
+  
+  @@index([employerProfileId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model Job {
@@ -328,4 +349,11 @@ enum SubscriptionType {
   BUNDLE
   UNLIMITED
   NETWORK
+}
+
+enum BillingStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
 }

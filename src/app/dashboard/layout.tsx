@@ -17,6 +17,7 @@ import {
   UsersIcon,
   BuildingOfficeIcon,
   CreditCardIcon,
+  ReceiptPercentIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDown } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -71,6 +72,7 @@ const employerNavigation: NavigationItem[] = [
   { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
+  { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
   { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
 ];
 
@@ -81,6 +83,7 @@ const agencyNavigation: NavigationItem[] = [
   { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
+  { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
   { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
 ];
 

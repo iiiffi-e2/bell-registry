@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 // import { SubscriptionType } from "@prisma/client";
 import Stripe from "stripe";
+import { createBillingRecord, updateBillingRecordStatus } from "@/lib/billing-service";
 
 // Temporary enum - Prisma client not exporting the enum properly
 export enum SubscriptionType {
@@ -398,6 +399,30 @@ export async function handleSuccessfulPayment(sessionId: string): Promise<void> 
         console.error('Missing employerId or subscriptionType in session metadata:', session.metadata);
         throw new Error('Missing required metadata in session');
       }
+
+      // Get employer profile to create billing record
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId: employerId },
+      });
+
+      if (!employerProfile) {
+        throw new Error('Employer profile not found');
+      }
+
+      // Get plan details for billing record
+      const plan = SUBSCRIPTION_PLANS[subscriptionType as keyof typeof SUBSCRIPTION_PLANS];
+      const description = `${plan.name} - ${getPackageDescription(subscriptionType as SubscriptionType, plan)}`;
+
+      // Create billing record
+      const billingRecord = await createBillingRecord(
+        employerProfile.id,
+        plan.price,
+        description,
+        subscriptionType as any, // Using any to avoid type issues temporarily
+        sessionId
+      );
+
+      console.log('Created billing record:', billingRecord.id);
       
       await updateEmployerSubscription(
         employerId,
@@ -405,13 +430,24 @@ export async function handleSuccessfulPayment(sessionId: string): Promise<void> 
         session.customer as string,
         sessionId
       );
+
+      // Update billing record status to completed
+      await updateBillingRecordStatus(sessionId, 'COMPLETED' as any);
       
-      console.log('Successfully updated subscription for employer:', employerId);
+      console.log('Successfully updated subscription and billing for employer:', employerId);
     } else {
       console.log('Payment not processed - status:', session.payment_status, 'has metadata:', !!session.metadata);
     }
   } catch (error) {
     console.error('Error processing successful payment:', error);
+    
+    // If there was an error, try to mark the billing record as failed
+    try {
+      await updateBillingRecordStatus(sessionId, 'FAILED' as any);
+    } catch (billingError) {
+      console.error('Error updating billing record status to failed:', billingError);
+    }
+    
     throw error;
   }
 }
