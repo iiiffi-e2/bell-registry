@@ -48,6 +48,8 @@ export async function POST(req: NextRequest) {
 
     Guidelines:
     - Maintain a professional tone
+    - Make it sound polished and professional but down to earth and friendly
+    - Keep it concise and stay away from fluffy words like "elevated" and "distinguished"
     - Highlight key achievements and skills
     - Make it more engaging and memorable
     - Keep it concise but comprehensive
