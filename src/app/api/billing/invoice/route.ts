@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Billing record ID is required" }, { status: 400 });
     }
 
+    console.log('Processing invoice request for billing record:', billingRecordId);
+
     // Verify the billing record belongs to the current user
     const billingRecord = await (prisma as any).billingHistory.findUnique({
       where: { id: billingRecordId },
@@ -36,12 +38,29 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!billingRecord || billingRecord.employerProfile.userId !== session.user.id) {
-      return NextResponse.json({ error: "Billing record not found or access denied" }, { status: 404 });
+    if (!billingRecord) {
+      console.log('Billing record not found:', billingRecordId);
+      return NextResponse.json({ error: "Billing record not found" }, { status: 404 });
     }
 
+    if (billingRecord.employerProfile.userId !== session.user.id) {
+      console.log('Access denied - billing record belongs to different user');
+      return NextResponse.json({ error: "Access denied" }, { status: 404 });
+    }
+
+    console.log('Creating invoice for billing record:', {
+      billingRecordId,
+      amount: billingRecord.amount,
+      description: billingRecord.description,
+      hasStripeCustomerId: !!billingRecord.employerProfile.stripeCustomerId,
+      userEmail: billingRecord.employerProfile.user.email
+    });
+
     const invoiceId = await createInvoiceForBillingRecord(billingRecordId);
+    console.log('Invoice created with ID:', invoiceId);
+
     const downloadUrl = await getStripeInvoiceUrl(invoiceId);
+    console.log('Download URL retrieved:', !!downloadUrl);
 
     if (!downloadUrl) {
       return NextResponse.json({ error: "Unable to generate invoice download URL" }, { status: 500 });
@@ -53,6 +72,16 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating invoice:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    
+    // Return more specific error messages for debugging
+    let errorMessage = "Internal server error";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+    }, { status: 500 });
   }
 } 

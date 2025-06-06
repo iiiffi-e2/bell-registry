@@ -72,6 +72,37 @@ export async function getBillingHistory(employerProfileId: string): Promise<Bill
   }));
 }
 
+export async function ensureStripeCustomer(employerProfile: any): Promise<string> {
+  // If we already have a Stripe customer ID, return it
+  if (employerProfile.stripeCustomerId) {
+    return employerProfile.stripeCustomerId;
+  }
+
+  // Create a new Stripe customer
+  try {
+    const customer = await stripe.customers.create({
+      email: employerProfile.user.email,
+      name: employerProfile.companyName || `${employerProfile.user.firstName || ''} ${employerProfile.user.lastName || ''}`.trim(),
+      metadata: {
+        employerProfileId: employerProfile.id,
+        userId: employerProfile.userId,
+      },
+    });
+
+    // Update the employer profile with the new customer ID
+    await prisma.employerProfile.update({
+      where: { id: employerProfile.id },
+      data: { stripeCustomerId: customer.id },
+    });
+
+    console.log('Created new Stripe customer:', customer.id);
+    return customer.id;
+  } catch (error) {
+    console.error('Error creating Stripe customer:', error);
+    throw new Error('Failed to create Stripe customer');
+  }
+}
+
 export async function createStripeInvoice(
   stripeCustomerId: string,
   amount: number,
@@ -131,16 +162,17 @@ export async function createInvoiceForBillingRecord(billingRecordId: string): Pr
     throw new Error('Billing record not found');
   }
 
-  if (!billingRecord.employerProfile.stripeCustomerId) {
-    throw new Error('No Stripe customer ID found');
-  }
-
+  // If we already have an invoice ID, return it
   if (billingRecord.stripeInvoiceId) {
     return billingRecord.stripeInvoiceId;
   }
 
+  // Ensure we have a Stripe customer (create one if needed)
+  const stripeCustomerId = await ensureStripeCustomer(billingRecord.employerProfile);
+
+  // Create the invoice
   const invoiceId = await createStripeInvoice(
-    billingRecord.employerProfile.stripeCustomerId,
+    stripeCustomerId,
     billingRecord.amount,
     billingRecord.description,
     billingRecord.currency
