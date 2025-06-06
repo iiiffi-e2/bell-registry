@@ -52,8 +52,8 @@ export default function ImprovedBioModal({
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100">
                     <SparklesIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />
                   </div>
-                  <div className="mt-3 text-center sm:mt-5">
-                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900">
+                  <div className="mt-3 sm:mt-5">
+                    <Dialog.Title as="h3" className="text-base font-semibold leading-6 text-gray-900 text-center">
                       AI-Improved Professional Bio
                     </Dialog.Title>
                     <div className="mt-4">
@@ -65,12 +65,12 @@ export default function ImprovedBioModal({
                       ) : (
                         <div className="space-y-4">
                           <div>
-                            <h4 className="text-sm font-medium text-gray-700">Original Bio</h4>
-                            <p className="mt-1 text-sm text-gray-500">{originalBio}</p>
+                            <h4 className="text-sm font-medium text-gray-700 text-left">Original Bio</h4>
+                            <p className="mt-1 text-sm text-gray-500 text-left">{originalBio}</p>
                           </div>
                           <div>
-                            <h4 className="text-sm font-medium text-gray-700">Improved Bio</h4>
-                            <p className="mt-1 text-sm text-gray-500">{improvedBio}</p>
+                            <h4 className="text-sm font-medium text-gray-700 text-left">Improved Bio</h4>
+                            <p className="mt-1 text-sm text-gray-500 text-left">{improvedBio}</p>
                           </div>
                         </div>
                       )}
