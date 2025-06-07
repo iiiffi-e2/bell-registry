@@ -1,7 +1,8 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { useSession } from "next-auth/react";
 import {
   UserCircleIcon,
   MapPinIcon,
@@ -14,10 +15,12 @@ import {
   PhoneIcon,
   CheckCircleIcon,
   LinkIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
+import { ReportProfileModal } from "@/components/profile/ReportProfileModal";
 import { notFound } from "next/navigation";
 
 interface Experience {
@@ -66,96 +69,6 @@ interface PublicProfile {
   preferredRole: string | null;
 }
 
-async function getProfile(slug: string): Promise<PublicProfile> {
-  const session = await getServerSession(authOptions);
-  const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY";
-  
-  console.log("[PROFILE_PAGE] Looking for profile with slug:", slug);
-  console.log("[PROFILE_PAGE] User session role:", session?.user?.role);
-  console.log("[PROFILE_PAGE] Is employer or agency:", isEmployerOrAgency);
-
-  // Find the profile using the profileSlug field
-  const profile = await prisma.user.findFirst({
-    where: {
-      profileSlug: slug
-    },
-    include: {
-      candidateProfile: true
-    }
-  });
-
-  console.log("[PROFILE_PAGE] Raw profile data found:", !!profile);
-
-  if (!profile || !profile.candidateProfile) {
-    console.log("[PROFILE_PAGE] Profile not found");
-    throw new Error('Profile not found');
-  }
-
-  // Increment profile views
-  await prisma.candidateProfile.update({
-    where: { id: profile.candidateProfile.id },
-    data: { profileViews: { increment: 1 } }
-  });
-
-  // Log profile view event
-  await prisma.profileViewEvent.create({
-    data: {
-      userId: profile.id,
-    }
-  });
-
-  // Format the response data with anonymization logic
-  const responseData: PublicProfile = {
-    id: profile.candidateProfile.id,
-    bio: profile.candidateProfile.bio,
-    title: profile.candidateProfile.preferredRole,
-    preferredRole: profile.candidateProfile.preferredRole,
-    skills: profile.candidateProfile.skills || [],
-    experience: (profile.candidateProfile.experience as unknown as Experience[]) || [],
-    certifications: profile.candidateProfile.certifications || [],
-    location: profile.candidateProfile.location,
-    availability: profile.candidateProfile.availability ? profile.candidateProfile.availability.toISOString() : null,
-    resumeUrl: isEmployerOrAgency ? null : profile.candidateProfile.resumeUrl,
-    profileViews: profile.candidateProfile.profileViews,
-    workLocations: profile.candidateProfile.workLocations || [],
-    openToRelocation: profile.candidateProfile.openToRelocation || false,
-    yearsOfExperience: profile.candidateProfile.yearsOfExperience,
-    whatImSeeking: profile.candidateProfile.whatImSeeking,
-    whyIEnjoyThisWork: profile.candidateProfile.whyIEnjoyThisWork,
-    whatSetsApartMe: profile.candidateProfile.whatSetsApartMe,
-    idealEnvironment: profile.candidateProfile.idealEnvironment,
-    seekingOpportunities: profile.candidateProfile.seekingOpportunities || [],
-    payRangeMin: profile.candidateProfile.payRangeMin,
-    payRangeMax: profile.candidateProfile.payRangeMax,
-    payType: profile.candidateProfile.payType || 'Salary',
-    additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
-    mediaUrls: profile.candidateProfile.mediaUrls || [],
-    user: {
-      id: profile.id,
-      firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,
-      lastName: isEmployerOrAgency ? (profile.lastName?.[0] || '') : profile.lastName,
-      image: isEmployerOrAgency ? null : profile.image,
-      role: profile.role,
-      createdAt: profile.createdAt.toISOString(),
-      email: isEmployerOrAgency ? '' : profile.email,
-      phoneNumber: isEmployerOrAgency ? null : profile.phoneNumber,
-      isAnonymous: isEmployerOrAgency ? true : (profile.isAnonymous || false),
-    }
-  };
-
-  console.log("[PROFILE_PAGE] Formatted response data:", {
-    ...responseData,
-    user: {
-      ...responseData.user,
-      firstName: responseData.user.firstName,
-      lastName: responseData.user.lastName,
-      isAnonymous: responseData.user.isAnonymous
-    }
-  });
-
-  return responseData;
-}
-
 // Helper function to get display name based on anonymous setting
 function getDisplayName(profile: PublicProfile) {
   const firstName = profile.user.firstName || '';
@@ -171,12 +84,64 @@ function getDisplayName(profile: PublicProfile) {
   return `${firstName} ${lastName}`.trim();
 }
 
-export default async function PublicProfilePage({
+export default function PublicProfilePage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const profile = await getProfile(params.slug);
+  const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const response = await fetch(`/api/professionals/${params.slug}`);
+        if (!response.ok) {
+          throw new Error('Profile not found');
+        }
+        const data = await response.json();
+        setProfile(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        notFound();
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProfile();
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white shadow rounded-lg animate-pulse">
+          <div className="px-4 py-5 sm:p-6">
+            <div className="h-32 bg-gray-200 rounded mb-4"></div>
+            <div className="h-6 bg-gray-200 rounded mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded mb-4"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <div className="space-y-4">
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!profile) {
     notFound();
@@ -447,8 +412,31 @@ export default async function PublicProfilePage({
               )}
             </div>
           </div>
+
+          {/* Report Profile Link - Subtle placement at the bottom */}
+          {session && session.user.id !== profile.user.id && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="text-center">
+                <button
+                  onClick={() => setIsReportModalOpen(true)}
+                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors inline-flex items-center"
+                >
+                  <ExclamationTriangleIcon className="h-3 w-3 mr-1" />
+                  Report this profile
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Report Profile Modal */}
+      <ReportProfileModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        profileId={profile.user.id}
+        profileName={getDisplayName(profile)}
+      />
     </div>
   );
 } 
