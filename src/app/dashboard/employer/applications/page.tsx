@@ -327,7 +327,7 @@ export default function EmployerApplicationsPage() {
 
                       <div className="mt-4 flex items-center gap-4">
                         <a
-                          href={`/api/files/applications/${application.resumeUrl.split('/').pop()}`}
+                          href={application.resumeUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
@@ -337,7 +337,7 @@ export default function EmployerApplicationsPage() {
                         </a>
                         {application.coverLetterUrl && (
                           <a
-                            href={`/api/files/applications/${application.coverLetterUrl.split('/').pop()}`}
+                            href={application.coverLetterUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"

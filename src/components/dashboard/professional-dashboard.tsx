@@ -393,13 +393,27 @@ export function ProfessionalDashboard() {
                           {getStatusLabel(application.status)}
                         </span>
                       </td>
-                      <td className="px-3 py-4 whitespace-nowrap text-center">
-                        <Link href={`/dashboard/jobs/${application.job.urlSlug}`} className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Listing">
+                      <td className="px-3 py-4 text-center space-x-2">
+                        <Link href={`/dashboard/jobs/${application.job.urlSlug}`} className="inline-flex items-center p-2 text-gray-400 hover:text-blue-600" title="View Job Listing">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12C2.25 12 5.25 5.25 12 5.25s9.75 6.75 9.75 6.75-3 6.75-9.75 6.75S2.25 12 2.25 12z" />
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                         </Link>
+                        {application.resumeUrl && (
+                          <a href={application.resumeUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center p-2 text-gray-400 hover:text-green-600" title="Download Resume">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.25a2.25 2.25 0 00-2.25 2.25v10.5a2.25 2.25 0 002.25 2.25h13.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H10.5z" />
+                            </svg>
+                          </a>
+                        )}
+                        {application.coverLetterUrl && (
+                          <a href={application.coverLetterUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center p-2 text-gray-400 hover:text-purple-600" title="Download Cover Letter">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25M8.25 18.75l3.75-3.75 3.75 3.75m-7.5 0h7.5" />
+                            </svg>
+                          </a>
+                        )}
                       </td>
                     </tr>
                   ))}

@@ -5,16 +5,6 @@ import { getToken } from "next-auth/jwt";
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Protect uploaded application files
-  if (pathname.startsWith('/uploads/applications/')) {
-    const session = request.cookies.get('next-auth.session-token');
-    const sessionSecure = request.cookies.get('__Secure-next-auth.session-token');
-    
-    if (!session?.value && !sessionSecure?.value) {
-      return NextResponse.redirect(new URL('/auth/signin', request.url));
-    }
-  }
-
   // Public routes that don't require authentication
   const publicRoutes = [
     '/',

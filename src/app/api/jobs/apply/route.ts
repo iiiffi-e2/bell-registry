@@ -2,22 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import crypto from 'crypto';
+import { storageProvider } from '@/lib/storage';
+import { v4 as uuidv4 } from 'uuid';
 
 const prisma = new PrismaClient();
-
-// Ensure upload directory exists
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'applications');
-
-async function ensureUploadDir() {
-  try {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-  } catch (error) {
-    console.error('Error creating upload directory:', error);
-  }
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -39,6 +27,28 @@ export async function POST(req: NextRequest) {
 
     if (!jobId || !resumeFile) {
       return NextResponse.json({ error: 'Job ID and resume are required' }, { status: 400 });
+    }
+
+    // Validate file types and sizes
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    if (!allowedTypes.includes(resumeFile.type)) {
+      return NextResponse.json({ error: 'Resume must be a PDF or Word document' }, { status: 400 });
+    }
+
+    if (resumeFile.size > maxSize) {
+      return NextResponse.json({ error: 'Resume file size must be less than 5MB' }, { status: 400 });
+    }
+
+    if (coverLetterFile) {
+      if (!allowedTypes.includes(coverLetterFile.type)) {
+        return NextResponse.json({ error: 'Cover letter must be a PDF or Word document' }, { status: 400 });
+      }
+
+      if (coverLetterFile.size > maxSize) {
+        return NextResponse.json({ error: 'Cover letter file size must be less than 5MB' }, { status: 400 });
+      }
     }
 
     // Check if job exists
@@ -67,29 +77,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'You have already applied to this job' }, { status: 400 });
     }
 
-    await ensureUploadDir();
+    // Upload resume file
+    const resumeExt = resumeFile.name.split('.').pop()?.toLowerCase();
+    const resumeFileName = `applications/resume_${session.user.id}_${Date.now()}_${uuidv4()}.${resumeExt}`;
+    const resumeBuffer = Buffer.from(await resumeFile.arrayBuffer());
+    const resumeUrl = await storageProvider.uploadFile(resumeBuffer, resumeFileName, resumeFile.type);
 
-    // Generate unique filenames
-    const timestamp = Date.now();
-    const randomString = crypto.randomBytes(8).toString('hex');
-    
-    // Save resume file
-    const resumeExt = path.extname(resumeFile.name);
-    const resumeFilename = `resume_${session.user.id}_${timestamp}_${randomString}${resumeExt}`;
-    const resumePath = path.join(UPLOAD_DIR, resumeFilename);
-    const resumeBuffer = await resumeFile.arrayBuffer();
-    await writeFile(resumePath, new Uint8Array(resumeBuffer));
-    const resumeUrl = `/uploads/applications/${resumeFilename}`;
-
-    // Save cover letter file if provided
+    // Upload cover letter file if provided
     let coverLetterUrl: string | null = null;
     if (coverLetterFile) {
-      const coverLetterExt = path.extname(coverLetterFile.name);
-      const coverLetterFilename = `cover_${session.user.id}_${timestamp}_${randomString}${coverLetterExt}`;
-      const coverLetterPath = path.join(UPLOAD_DIR, coverLetterFilename);
-      const coverLetterBuffer = await coverLetterFile.arrayBuffer();
-      await writeFile(coverLetterPath, new Uint8Array(coverLetterBuffer));
-      coverLetterUrl = `/uploads/applications/${coverLetterFilename}`;
+      const coverLetterExt = coverLetterFile.name.split('.').pop()?.toLowerCase();
+      const coverLetterFileName = `applications/cover_${session.user.id}_${Date.now()}_${uuidv4()}.${coverLetterExt}`;
+      const coverLetterBuffer = Buffer.from(await coverLetterFile.arrayBuffer());
+      coverLetterUrl = await storageProvider.uploadFile(coverLetterBuffer, coverLetterFileName, coverLetterFile.type);
     }
 
     // Create the application
