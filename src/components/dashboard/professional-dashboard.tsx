@@ -18,7 +18,6 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { OpenToWorkToggle } from "./open-to-work-toggle";
 
 const stats = [
   {
@@ -433,13 +432,6 @@ export function ProfessionalDashboard() {
 
           {/* Widgets Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Open to Work Toggle */}
-            <OpenToWorkToggle
-              isOpenToWork={openToWork}
-              onToggle={setOpenToWork}
-              isLoading={profileLoading}
-            />
-
             {/* Upcoming Interviews */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4">
@@ -525,6 +517,56 @@ export function ProfessionalDashboard() {
             {/* Quick Actions */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              
+              {/* Open to Work Toggle Section */}
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-green-800">Open to Work</h4>
+                      {openToWork && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          Active
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-green-700">
+                      {openToWork ? 'Visible to employers' : 'Not actively seeking'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        const response = await fetch('/api/profile/open-to-work', {
+                          method: 'PATCH',
+                          headers: {
+                            'Content-Type': 'application/json',
+                          },
+                          body: JSON.stringify({ openToWork: !openToWork }),
+                        });
+
+                        if (response.ok) {
+                          setOpenToWork(!openToWork);
+                        }
+                      } catch (error) {
+                        console.error('Error updating open to work status:', error);
+                      }
+                    }}
+                    disabled={profileLoading}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 ${
+                      openToWork ? 'bg-green-600' : 'bg-gray-200'
+                    }`}
+                  >
+                    <span className="sr-only">Toggle open to work status</span>
+                    <span
+                      className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform ${
+                        openToWork ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4 flex-1 justify-center">
                 {quickActions.map((action) => {
                   if (action.name === "Update Profile") {
