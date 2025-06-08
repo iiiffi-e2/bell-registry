@@ -111,6 +111,7 @@ model CandidateProfile {
   idealEnvironment     String?
   mediaUrls            String[]
   openToRelocation     Boolean   @default(false)
+  openToWork           Boolean   @default(false)
   payType              String?   @default("Salary")
   payRangeMax          Float?
   payRangeMin          Float?

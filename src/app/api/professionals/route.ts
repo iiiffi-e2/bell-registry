@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const location = searchParams.get('location')
     const roleType = searchParams.get('roleType') as UserRole | null
     const searchQuery = searchParams.get('search')
+    const openToWork = searchParams.get('openToWork') === 'true'
     const sortBy = searchParams.get('sort') as SortOption || 'recent'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '9')
@@ -35,6 +36,7 @@ export async function GET(request: Request) {
       // Filter conditions
       ...(location ? { location } : {}),
       ...(roleType ? { user: { role: roleType } } : {}),
+      ...(openToWork ? { openToWork: true } : {}),
       ...(searchQuery
         ? {
             OR: [
@@ -108,6 +110,7 @@ export async function GET(request: Request) {
           preferredRole: true,
           location: true,
           skills: true,
+          openToWork: true,
           user: {
             select: {
               id: true,
@@ -117,6 +120,7 @@ export async function GET(request: Request) {
               image: true,
               role: true,
               profileSlug: true,
+              isAnonymous: true,
             },
           },
         },

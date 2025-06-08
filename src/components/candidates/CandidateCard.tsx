@@ -8,6 +8,7 @@ import { UserCircleIcon, MapPinIcon, CurrencyDollarIcon, BookmarkIcon } from '@h
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid'
 import { generateProfileUrl } from '@/lib/utils'
 import { SaveCandidateModal } from './SaveCandidateModal'
+import { OpenToWorkBadge, ProfilePictureWithBadge } from '@/components/profile/open-to-work-badge'
 
 interface CandidateCardProps {
   candidate: {
@@ -21,12 +22,14 @@ interface CandidateCardProps {
     payRangeMin: number | null
     payRangeMax: number | null
     payType: string | null
+    openToWork?: boolean
     user: {
       id: string
       firstName: string | null
       lastName: string | null
       image: string | null
       profileSlug: string | null
+      isAnonymous?: boolean
     }
   }
   useDashboardRoutes?: boolean // New prop to determine routing context
@@ -147,30 +150,27 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
           <div className="flex items-start space-x-4">
             {/* Profile Image */}
             <div className="flex-shrink-0">
-              {candidate.user.image ? (
-                <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                  <Image
-                    src={candidate.user.image}
-                    alt={displayName}
-                    width={64}
-                    height={64}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <UserCircleIcon className="h-16 w-16 text-gray-300" />
-                </div>
-              )}
+              <ProfilePictureWithBadge
+                imageUrl={candidate.user.image}
+                displayName={displayName}
+                isOpenToWork={candidate.openToWork || false}
+                isAnonymous={candidate.user.isAnonymous || false}
+                size="md"
+              />
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                    {displayName}
-                  </h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                      {displayName}
+                    </h3>
+                    {candidate.openToWork && (
+                      <OpenToWorkBadge variant="inline" size="sm" />
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500 mt-1">
                     {candidate.title || candidate.preferredRole || 'Professional'}
                   </p>

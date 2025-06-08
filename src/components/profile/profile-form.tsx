@@ -76,6 +76,7 @@ const profileSchema = z.object({
   location: z.string().min(2, "Current location is required"),
   workLocations: z.array(z.string()).optional().default([]),
   openToRelocation: z.boolean().default(false),
+  openToWork: z.boolean().default(false),
   isAnonymous: z.boolean().default(false),
   yearsOfExperience: z.string().optional(),
   availability: z.string().optional(),
@@ -520,6 +521,30 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     )}
                   </div>
 
+                  <div className="col-span-full">
+                    <FormField
+                      control={form.control}
+                      name="openToWork"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-green-200 bg-green-50 p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                              className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-green-800 font-semibold">Open to Work</FormLabel>
+                            <FormDescription className="text-green-700">
+                              Let employers know you're actively seeking new opportunities. This will display a prominent "Open to Work" badge on your profile.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
                   <div className="col-span-full">
                     <FormField
                       control={form.control}

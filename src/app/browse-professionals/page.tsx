@@ -67,6 +67,7 @@ export default function BrowseProfessionalsPage() {
       if (filters.location) searchParams.append("location", filters.location);
       if (filters.roleType) searchParams.append("roleType", filters.roleType);
       if (filters.searchQuery) searchParams.append("search", filters.searchQuery);
+      if (filters.openToWork) searchParams.append("openToWork", "true");
       searchParams.append("page", page.toString());
       searchParams.append("limit", "9");
 

@@ -21,6 +21,7 @@ import {
 import { PhotoGallery } from "@/components/profile/photo-gallery";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
+import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
 
 interface Experience {
   title: string;
@@ -54,6 +55,7 @@ interface CandidateProfile {
   payType: string;
   additionalPhotos: string[];
   mediaUrls: string[];
+  openToWork: boolean;
   user: {
     id: string;
     firstName: string | null;
@@ -176,6 +178,17 @@ export default function CandidateProfilePage({
           </button>
         </div>
 
+        {/* Open to Work Banner */}
+        {profile.openToWork && (
+          <div className="mb-6">
+            <OpenToWorkBadge 
+              variant="banner" 
+              size="lg" 
+              className="w-full justify-center"
+            />
+          </div>
+        )}
+
         {/* Profile Content */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -186,26 +199,23 @@ export default function CandidateProfilePage({
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
-                      {profile.user.image && !profile.user.isAnonymous ? (
-                        <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
-                          <Image
-                            src={profile.user.image}
-                            alt={getDisplayName(profile)}
-                            width={96}
-                            height={96}
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                          <UserCircleIcon className="h-24 w-24 text-gray-300" />
-                        </div>
-                      )}
+                      <ProfilePictureWithBadge
+                        imageUrl={profile.user.image}
+                        displayName={getDisplayName(profile)}
+                        isOpenToWork={profile.openToWork}
+                        isAnonymous={profile.user.isAnonymous}
+                        size="lg"
+                      />
                     </div>
                     <div className="ml-6">
-                      <h1 className="text-2xl font-bold text-gray-900">
-                        {getDisplayName(profile)}
-                      </h1>
+                      <div className="flex items-center gap-3">
+                        <h1 className="text-2xl font-bold text-gray-900">
+                          {getDisplayName(profile)}
+                        </h1>
+                        {profile.openToWork && (
+                          <OpenToWorkBadge variant="inline" size="sm" />
+                        )}
+                      </div>
                       <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
                       {!profile.user.isAnonymous && profile.user.email && (
                         <>

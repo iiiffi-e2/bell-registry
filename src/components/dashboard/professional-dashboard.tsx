@@ -18,6 +18,7 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { OpenToWorkToggle } from "./open-to-work-toggle";
 
 const stats = [
   {
@@ -70,6 +71,7 @@ export function ProfessionalDashboard() {
   const [loadingRecommendedJobs, setLoadingRecommendedJobs] = useState(true);
   const [applications, setApplications] = useState<any[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(true);
+  const [openToWork, setOpenToWork] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchRecommendedJobs() {
@@ -145,6 +147,13 @@ export function ProfessionalDashboard() {
   }, []);
 
   const isProfileIncomplete = !profileLoading && !profile?.bio;
+
+  // Set openToWork from profile when available
+  useEffect(() => {
+    if (profile?.openToWork !== undefined) {
+      setOpenToWork(profile.openToWork);
+    }
+  }, [profile]);
 
   const applicationStats = {
     total: applications.length,
@@ -424,6 +433,13 @@ export function ProfessionalDashboard() {
 
           {/* Widgets Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Open to Work Toggle */}
+            <OpenToWorkToggle
+              isOpenToWork={openToWork}
+              onToggle={setOpenToWork}
+              isLoading={profileLoading}
+            />
+
             {/* Upcoming Interviews */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4">

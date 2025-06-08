@@ -21,6 +21,7 @@ export interface CandidateFilters {
   roleType?: UserRole
   searchQuery?: string
   sortBy?: SortOption
+  openToWork?: boolean
 }
 
 export interface CandidateSearchParams extends CandidateFilters {

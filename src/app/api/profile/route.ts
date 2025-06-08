@@ -120,6 +120,7 @@ export async function PUT(req: Request) {
             whyIEnjoyThisWork: body.whyIEnjoyThisWork,
             workLocations: body.workLocations,
             yearsOfExperience: body.yearsOfExperience ? parseInt(body.yearsOfExperience) : undefined,
+            openToWork: body.openToWork,
           },
           include: {
             user: true

@@ -32,6 +32,7 @@ export function CandidateFilterClient({
     roleType: searchParams.get('roleType') as UserRole | undefined,
     searchQuery: searchParams.get('search') || undefined,
     sortBy: (searchParams.get('sort') as SortOption) || 'recent',
+    openToWork: searchParams.get('openToWork') === 'true' || undefined,
   }
 
   const handleFiltersChange = useCallback(
@@ -92,6 +93,20 @@ export function CandidateFilterClient({
             </option>
           ))}
         </select>
+        <select
+          value={currentFilters.openToWork ? 'true' : ''}
+          onChange={(e) =>
+            handleFiltersChange({
+              ...currentFilters,
+              openToWork: e.target.value === 'true' ? true : undefined,
+            })
+          }
+          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6"
+        >
+          <option value="">All Professionals</option>
+          <option value="true">Open to Work</option>
+        </select>
+        
         <select
           value={currentFilters.sortBy || 'recent'}
           onChange={(e) =>

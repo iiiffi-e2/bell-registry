@@ -18,6 +18,7 @@ import Image from "next/image";
 import { generateProfileUrl } from "@/lib/utils";
 import Link from "next/link";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
+import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
 
 interface CandidateProfile {
   id: string;
@@ -45,6 +46,7 @@ interface CandidateProfile {
   payType: string;
   additionalPhotos: string[];
   mediaUrls: string[];
+  openToWork: boolean;
   user: {
     firstName: string | null;
     lastName: string | null;
@@ -169,6 +171,17 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Open to Work Banner */}
+        {profile.openToWork && (
+          <div className="mb-6">
+            <OpenToWorkBadge 
+              variant="banner" 
+              size="lg" 
+              className="w-full justify-center"
+            />
+          </div>
+        )}
+
         {/* Profile Content */}
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -178,26 +191,23 @@ export default function ProfilePage() {
                 {/* Profile Header */}
                 <div className="flex items-center mb-6">
                   <div className="flex-shrink-0">
-                    {profile.user.image ? (
-                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100">
-                        <Image
-                          src={profile.user.image}
-                          alt={profile.user.firstName || ''}
-                          width={96}
-                          height={96}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-24 w-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                        <UserCircleIcon className="h-24 w-24 text-gray-300" />
-                      </div>
-                    )}
+                    <ProfilePictureWithBadge
+                      imageUrl={profile.user.image}
+                      displayName={`${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()}
+                      isOpenToWork={profile.openToWork}
+                      isAnonymous={false}
+                      size="lg"
+                    />
                   </div>
                   <div className="ml-6">
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      {`${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()}
-                    </h3>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-2xl font-bold text-gray-900">
+                        {`${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()}
+                      </h3>
+                      {profile.openToWork && (
+                        <OpenToWorkBadge variant="inline" size="sm" />
+                      )}
+                    </div>
                     <p className="mt-1 text-lg text-gray-600">{profile.preferredRole || 'Professional'}</p>
                     <div className="mt-2 flex items-center text-sm text-gray-500">
                       <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
