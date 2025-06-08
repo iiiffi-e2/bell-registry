@@ -72,6 +72,7 @@ export async function GET(
       payType: candidate.candidateProfile.payType || 'Salary',
       additionalPhotos: candidate.candidateProfile.additionalPhotos || [],
       mediaUrls: candidate.candidateProfile.mediaUrls || [],
+      openToWork: (candidate.candidateProfile as any).openToWork || false,
       user: {
         id: candidate.id,
         firstName: candidate.firstName,

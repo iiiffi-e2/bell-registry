@@ -169,55 +169,40 @@ export default function PublicProfilePage({
             {/* Main Content Column */}
             <div className="lg:col-span-2">
               {/* Profile Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <ProfilePictureWithBadge
-                      imageUrl={profile.user.image}
-                      displayName={getDisplayName(profile)}
-                      isOpenToWork={profile.openToWork}
-                      isAnonymous={profile.user.isAnonymous}
-                      size="lg"
-                    />
-                  </div>
-                  <div className="ml-6">
-                    <div className="flex items-center gap-3">
-                      <h1 className="text-2xl font-bold text-gray-900">
-                        {getDisplayName(profile)}
-                      </h1>
-                      {profile.openToWork && (
-                        <OpenToWorkBadge variant="inline" size="sm" />
-                      )}
-                    </div>
-                    <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-                    {!profile.user.isAnonymous && profile.user.email && (
-                      <>
-                        <div className="mt-2 flex items-center text-sm text-gray-500">
-                          <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                          {profile.user.email}
-                        </div>
-                        {profile.user.phoneNumber && (
-                          <div className="mt-1 flex items-center text-sm text-gray-500">
-                            <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                            {profile.user.phoneNumber}
-                          </div>
-                        )}
-                      </>
+              <div className="flex items-center mb-6">
+                <div className="flex-shrink-0">
+                  <ProfilePictureWithBadge
+                    imageUrl={profile.user.image}
+                    displayName={getDisplayName(profile)}
+                    isOpenToWork={profile.openToWork}
+                    isAnonymous={profile.user.isAnonymous}
+                    size="lg"
+                  />
+                </div>
+                <div className="ml-6">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {getDisplayName(profile)}
+                    </h1>
+                    {profile.openToWork && (
+                      <OpenToWorkBadge variant="inline" size="sm" />
                     )}
                   </div>
-                </div>
-                
-                {/* Save Candidate Button */}
-                <div className="flex-shrink-0">
-                  <div className="flex gap-2">
-                    <SaveCandidateButton 
-                      candidateId={profile.user.id} 
-                      candidateName={getDisplayName(profile)}
-                    />
-                    <MessageProfessionalButton 
-                      professionalId={profile.user.id}
-                    />
-                  </div>
+                  <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
+                  {!profile.user.isAnonymous && profile.user.email && (
+                    <>
+                      <div className="mt-2 flex items-center text-sm text-gray-500">
+                        <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                        {profile.user.email}
+                      </div>
+                      {profile.user.phoneNumber && (
+                        <div className="mt-1 flex items-center text-sm text-gray-500">
+                          <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                          {profile.user.phoneNumber}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -298,6 +283,21 @@ export default function PublicProfilePage({
                   Member since {new Date(profile.user.createdAt).toLocaleDateString()}
                 </div>
               </div>
+
+              {/* Action Buttons - Only for Employers/Agencies */}
+              {(session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
+                <div className="space-y-3">
+                  <SaveCandidateButton 
+                    candidateId={profile.user.id} 
+                    candidateName={getDisplayName(profile)}
+                    className="w-full"
+                  />
+                  <MessageProfessionalButton 
+                    professionalId={profile.user.id}
+                    className="w-full"
+                  />
+                </div>
+              )}
 
               {/* Location */}
               {profile.location && (

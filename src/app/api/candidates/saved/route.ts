@@ -61,6 +61,7 @@ export async function GET() {
       payRangeMin: saved.candidate.candidateProfile?.payRangeMin,
       payRangeMax: saved.candidate.candidateProfile?.payRangeMax,
       payType: saved.candidate.candidateProfile?.payType,
+      openToWork: (saved.candidate.candidateProfile as any)?.openToWork || false,
       savedAt: saved.createdAt.toISOString(),
       note: saved.note,
       job: saved.job,

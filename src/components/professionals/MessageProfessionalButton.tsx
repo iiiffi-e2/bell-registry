@@ -9,9 +9,10 @@ import { UserRole } from '@/types'
 
 interface MessageProfessionalButtonProps {
   professionalId: string
+  className?: string
 }
 
-export function MessageProfessionalButton({ professionalId }: MessageProfessionalButtonProps) {
+export function MessageProfessionalButton({ professionalId, className }: MessageProfessionalButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -42,7 +43,7 @@ export function MessageProfessionalButton({ professionalId }: MessageProfessiona
   }
 
   return (
-    <Button onClick={handleInitiateChat} disabled={loading}>
+    <Button onClick={handleInitiateChat} disabled={loading} className={className}>
       <MessageCircle className="mr-2 h-4 w-4" />
       {loading ? 'Starting...' : 'Message'}
     </Button>
