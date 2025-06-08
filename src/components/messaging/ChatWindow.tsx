@@ -182,7 +182,7 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
                 {getDisplayName({
                   firstName: otherUser.firstName,
                   lastName: otherUser.lastName,
-                  role: isOtherUserProfessional ? conversationData.professional.role : 'EMPLOYER',
+                  role: isOtherUserProfessional ? 'PROFESSIONAL' : 'EMPLOYER',
                   isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false
                 })}
               </h2>

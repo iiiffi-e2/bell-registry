@@ -117,7 +117,7 @@ export function MessageThreadsList({
                     {getDisplayName({
                       firstName: otherUser.firstName,
                       lastName: otherUser.lastName,
-                      role: isOtherUserProfessional ? conversation.professional.role : 'EMPLOYER',
+                      role: isOtherUserProfessional ? 'PROFESSIONAL' : 'EMPLOYER',
                       isAnonymous: isOtherUserProfessional ? conversation.professional.isAnonymous : false
                     })}
                   </h3>

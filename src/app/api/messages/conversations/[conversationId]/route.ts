@@ -91,6 +91,48 @@ export async function GET(
       }
     })
 
+    // For employers/agencies viewing professionals, check if names should be revealed
+    const { role } = session.user
+    const isEmployerViewingProfessional = 
+      (role === 'EMPLOYER' || role === 'AGENCY') && conversation.clientId === userId
+
+    if (isEmployerViewingProfessional) {
+      // Check if there's an existing job application between them
+      const hasApplication = await prisma.jobApplication.findFirst({
+        where: {
+          candidateId: conversation.professionalId,
+          job: {
+            employerId: userId
+          }
+        }
+      })
+
+      // If no application exists, anonymize the professional's info
+      if (!hasApplication) {
+        const anonymizedConversation = {
+          ...conversation,
+          professional: {
+            ...conversation.professional,
+            firstName: conversation.professional.firstName?.[0] || '',
+            lastName: conversation.professional.lastName?.[0] || '',
+            image: null,
+            isAnonymous: true
+          },
+          messages: conversation.messages.map(message => ({
+            ...message,
+            sender: message.sender.id === conversation.professionalId
+              ? {
+                  ...message.sender,
+                  firstName: message.sender.firstName?.[0] || '',
+                  lastName: message.sender.lastName?.[0] || ''
+                }
+              : message.sender
+          }))
+        }
+        return NextResponse.json(anonymizedConversation)
+      }
+    }
+
     return NextResponse.json(conversation)
   } catch (error) {
     console.error('Error fetching conversation:', error)

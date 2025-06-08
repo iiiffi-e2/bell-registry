@@ -79,7 +79,43 @@ export async function GET(request: NextRequest) {
       orderBy: { lastMessageAt: 'desc' }
     })
 
-    return NextResponse.json(conversations)
+    // For employers/agencies viewing professionals, check if names should be revealed
+    const processedConversations = await Promise.all(
+      conversations.map(async (conversation) => {
+        const isEmployerViewingProfessional = 
+          (role === 'EMPLOYER' || role === 'AGENCY') && conversation.clientId === userId
+
+        if (isEmployerViewingProfessional) {
+          // Check if there's an existing job application between them
+          const hasApplication = await prisma.jobApplication.findFirst({
+            where: {
+              candidateId: conversation.professionalId,
+              job: {
+                employerId: userId
+              }
+            }
+          })
+
+          // If no application exists, anonymize the professional's info
+          if (!hasApplication) {
+            return {
+              ...conversation,
+              professional: {
+                ...conversation.professional,
+                firstName: conversation.professional.firstName?.[0] || '',
+                lastName: conversation.professional.lastName?.[0] || '',
+                image: null,
+                isAnonymous: true
+              }
+            }
+          }
+        }
+
+        return conversation
+      })
+    )
+
+    return NextResponse.json(processedConversations)
   } catch (error) {
     console.error('Error fetching conversations:', error)
     return NextResponse.json(

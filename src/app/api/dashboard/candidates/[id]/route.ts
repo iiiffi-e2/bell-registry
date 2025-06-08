@@ -57,7 +57,7 @@ export async function GET(
       certifications: candidate.candidateProfile.certifications || [],
       location: candidate.candidateProfile.location,
       availability: candidate.candidateProfile.availability?.toISOString() || null,
-      resumeUrl: candidate.candidateProfile.resumeUrl,
+      resumeUrl: null, // Hide resume from employers
       profileViews: candidate.candidateProfile.profileViews + 1, // Include the incremented view
       workLocations: candidate.candidateProfile.workLocations || [],
       openToRelocation: candidate.candidateProfile.openToRelocation || false,
@@ -70,19 +70,20 @@ export async function GET(
       payRangeMin: candidate.candidateProfile.payRangeMin,
       payRangeMax: candidate.candidateProfile.payRangeMax,
       payType: candidate.candidateProfile.payType || 'Salary',
-      additionalPhotos: candidate.candidateProfile.additionalPhotos || [],
+      additionalPhotos: [], // Hide additional photos from employers
       mediaUrls: candidate.candidateProfile.mediaUrls || [],
       openToWork: (candidate.candidateProfile as any).openToWork || false,
       user: {
         id: candidate.id,
-        firstName: candidate.firstName,
-        lastName: candidate.lastName,
-        image: candidate.image,
+        // Anonymize personal information for employers
+        firstName: candidate.firstName?.[0] || '',
+        lastName: candidate.lastName?.[0] || '',
+        image: null, // Hide profile image
         role: candidate.role,
         createdAt: candidate.createdAt.toISOString(),
-        email: candidate.email,
-        phoneNumber: candidate.phoneNumber,
-        isAnonymous: candidate.isAnonymous || false,
+        email: '', // Hide email
+        phoneNumber: null, // Hide phone number
+        isAnonymous: true, // Mark as anonymous for employers
       }
     };
 
