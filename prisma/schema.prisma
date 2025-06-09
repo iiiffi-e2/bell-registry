@@ -56,43 +56,47 @@ model EmailChangeRequest {
 }
 
 model User {
-  id                  String               @id @default(cuid())
-  email               String               @unique
-  emailVerified       DateTime?
-  role                UserRole             @default(PROFESSIONAL)
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  firstName           String?
-  lastName            String?
-  phoneNumber         String?
-  image               String?
-  password            String?
-  profileSlug         String?              @unique
-  isDemo              Boolean              @default(false)
-  resetToken          String?              @unique
-  resetTokenExpiry    DateTime?            @db.Timestamptz(6)
-  isAnonymous         Boolean              @default(false)
-  isDeleted           Boolean              @default(false)
-  deletedAt           DateTime?            @db.Timestamptz(6)
-  accounts            Account[]
-  candidateProfile    CandidateProfile?
-  emailChangeRequests EmailChangeRequest[]
-  employerProfile     EmployerProfile?
-  postedJobs          Job[]
-  jobAlerts           JobAlert[]
-  applications        JobApplication[]
-  jobViewEvents       JobViewEvent[]
-  sentMessages        Message[]            @relation("SentMessages")
-  profileViewEvents   ProfileViewEvent[]
-  savedCandidates     SavedCandidate[]     @relation("SavedCandidates")
-  savedByEmployers    SavedCandidate[]     @relation("SavedByEmployers")
-  savedJobs           SavedJob[]
-  sessions            Session[]
-  clientConversations       Conversation[] @relation("ClientConversations")
-  professionalConversations Conversation[] @relation("ProfessionalConversations")
+  id                          String               @id @default(cuid())
+  email                       String               @unique
+  emailVerified               DateTime?
+  role                        UserRole             @default(PROFESSIONAL)
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+  firstName                   String?
+  lastName                    String?
+  phoneNumber                 String?
+  image                       String?
+  password                    String?
+  profileSlug                 String?              @unique
+  isDemo                      Boolean              @default(false)
+  resetToken                  String?              @unique
+  resetTokenExpiry            DateTime?            @db.Timestamptz(6)
+  isAnonymous                 Boolean              @default(false)
+  isDeleted                   Boolean              @default(false)
+  deletedAt                   DateTime?            @db.Timestamptz(6)
+  lastLoginAt                 DateTime?            @db.Timestamptz(6)
+  lastProfileReminderSentAt   DateTime?            @db.Timestamptz(6)
+  accounts                    Account[]
+  candidateProfile            CandidateProfile?
+  emailChangeRequests         EmailChangeRequest[]
+  employerProfile             EmployerProfile?
+  postedJobs                  Job[]
+  jobAlerts                   JobAlert[]
+  applications                JobApplication[]
+  jobViewEvents               JobViewEvent[]
+  sentMessages                Message[]            @relation("SentMessages")
+  profileViewEvents           ProfileViewEvent[]
+  savedCandidates             SavedCandidate[]     @relation("SavedCandidates")
+  savedByEmployers            SavedCandidate[]     @relation("SavedByEmployers")
+  savedJobs                   SavedJob[]
+  sessions                    Session[]
+  clientConversations         Conversation[]       @relation("ClientConversations")
+  professionalConversations   Conversation[]       @relation("ProfessionalConversations")
 
   @@index([isDeleted])
   @@index([deletedAt])
+  @@index([lastLoginAt])
+  @@index([lastProfileReminderSentAt])
 }
 
 model CandidateProfile {

@@ -146,6 +146,13 @@ export const authOptions: NextAuthOptions = {
 
           user.id = existingUser.id;
           user.role = fromPrismaUserRole(existingUser.role);
+          
+          // Update last login time
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { lastLoginAt: new Date() }
+          });
+          
           return true;
         }
 
@@ -160,6 +167,7 @@ export const authOptions: NextAuthOptions = {
               firstName: user.name?.split(" ")[0] || "",
               lastName: user.name?.split(" ").slice(1).join(" ") || "",
               image: user.image,
+              lastLoginAt: new Date(),
               accounts: {
                 create: {
                   type: account.type,
@@ -196,8 +204,28 @@ export const authOptions: NextAuthOptions = {
         } else {
           user.id = existingUser.id;
           user.role = fromPrismaUserRole(existingUser.role);
+          
+          // Update last login time for existing user
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: { lastLoginAt: new Date() }
+          });
         }
       }
+
+      // Update last login time for any successful sign-in (including credentials)
+      if (user.id) {
+        try {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLoginAt: new Date() }
+          });
+        } catch (error) {
+          console.error("Failed to update last login time:", error);
+          // Don't fail the sign-in process for this
+        }
+      }
+      
       return true;
     },
     async jwt({ token, user }) {
