@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { v4 as uuidv4 } from "uuid";
 import { storageProvider } from "@/lib/storage";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

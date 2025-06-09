@@ -5,6 +5,8 @@ import { getBillingHistory } from "@/lib/billing-service";
 import { isEmployerOrAgencyRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

@@ -5,6 +5,8 @@ import { createInvoiceForBillingRecord, getStripeInvoiceUrl } from "@/lib/billin
 import { isEmployerOrAgencyRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);

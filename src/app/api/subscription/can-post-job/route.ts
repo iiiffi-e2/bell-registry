@@ -4,6 +4,8 @@ import { authOptions } from "@/lib/auth";
 import { canPostJob, hasActiveSubscription } from "@/lib/subscription-service";
 import { isEmployerOrAgencyRole } from "@/lib/roles";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
