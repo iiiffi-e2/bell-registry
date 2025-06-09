@@ -1,7 +1,7 @@
 import React from 'react'
 
-// Regular expression to match URLs
-const URL_REGEX = /(https?:\/\/[^\s]+)/g
+// Regular expression to match URLs (http/https, www, and bare domains)
+const URL_REGEX = /(https?:\/\/[^\s]+|www\.[^\s]+|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9]*\.(?:[a-zA-Z]{2,}|[a-zA-Z]{2,}\.[a-zA-Z]{2,})(?:\/[^\s]*)?)/g
 
 // Function to detect if text contains URLs
 export function containsUrls(text: string): boolean {
@@ -26,9 +26,15 @@ export function linkifyText(text: string, isOwnMessage: boolean = false): React.
         ? 'text-blue-100 hover:text-white underline break-all'
         : 'text-blue-600 hover:text-blue-800 underline break-all'
       
+      // Add https:// protocol if the URL doesn't have one
+      let href = part
+      if (!part.startsWith('http://') && !part.startsWith('https://')) {
+        href = 'https://' + part
+      }
+      
       return React.createElement('a', {
         key: index,
-        href: part,
+        href: href,
         target: '_blank',
         rel: 'noopener noreferrer',
         className: linkClassName
@@ -41,7 +47,13 @@ export function linkifyText(text: string, isOwnMessage: boolean = false): React.
 // Function to validate URL format
 export function isValidUrl(string: string): boolean {
   try {
-    const url = new URL(string)
+    // Add https:// if no protocol is present
+    let urlToTest = string
+    if (!string.startsWith('http://') && !string.startsWith('https://')) {
+      urlToTest = 'https://' + string
+    }
+    
+    const url = new URL(urlToTest)
     return url.protocol === 'http:' || url.protocol === 'https:'
   } catch (_) {
     return false
