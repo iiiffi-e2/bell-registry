@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/employer-notifications",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/purge-deleted-accounts",
+      "schedule": "0 2 * * *"
     }
   ],
   "headers": [

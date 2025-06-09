@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 
 interface ChangePasswordForm {
   currentPassword: string;
@@ -27,6 +28,7 @@ export default function SettingsPage() {
   const [emailMessage, setEmailMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Force session refresh when component mounts if email was just verified
   useEffect(() => {
@@ -282,7 +284,41 @@ export default function SettingsPage() {
             </form>
           </div>
         </div>
+
+        {/* Delete Account Section */}
+        <div className="bg-white shadow rounded-lg mb-6 border-red-200">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-red-900 mb-4">Delete Account</h2>
+            <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    Permanently delete your account
+                  </h3>
+                  <div className="mt-2 text-sm text-red-700">
+                    <p>
+                      Once you delete your account, there is no going back. Please be certain.
+                      All of your data will be permanently removed from our servers after 30 days.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="w-full flex justify-center py-2 px-4 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Delete My Account
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Delete Account Modal */}
+      <DeleteAccountModal 
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 } 

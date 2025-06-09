@@ -72,6 +72,8 @@ model User {
   resetToken          String?              @unique
   resetTokenExpiry    DateTime?            @db.Timestamptz(6)
   isAnonymous         Boolean              @default(false)
+  isDeleted           Boolean              @default(false)
+  deletedAt           DateTime?            @db.Timestamptz(6)
   accounts            Account[]
   candidateProfile    CandidateProfile?
   emailChangeRequests EmailChangeRequest[]
@@ -88,6 +90,9 @@ model User {
   sessions            Session[]
   clientConversations       Conversation[] @relation("ClientConversations")
   professionalConversations Conversation[] @relation("ProfessionalConversations")
+
+  @@index([isDeleted])
+  @@index([deletedAt])
 }
 
 model CandidateProfile {

@@ -87,6 +87,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No account found with this email address");
         }
 
+        // Check if account is deleted
+        if (user.isDeleted) {
+          throw new Error("This account has been deleted");
+        }
+
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
           user.password
@@ -120,6 +125,11 @@ export const authOptions: NextAuthOptions = {
             accounts: true
           }
         });
+
+        // Check if existing user account is deleted
+        if (existingUser?.isDeleted) {
+          throw new Error("This account has been deleted");
+        }
 
         if (existingUser && existingUser.accounts.length === 0) {
           await prisma.account.create({
