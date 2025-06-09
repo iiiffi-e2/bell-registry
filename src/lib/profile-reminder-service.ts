@@ -42,7 +42,7 @@ export async function findUsersNeedingProfileReminders(): Promise<UserNeedingRem
     where: {
       AND: [
         { isDeleted: false },
-        { role: { in: ['PROFESSIONAL', 'EMPLOYER'] } }, // Only professionals and employers
+        { role: 'PROFESSIONAL' }, // Only professionals for now
         { lastLoginAt: { lte: thirtyDaysAgo } }, // Last login more than 30 days ago
         {
           OR: [
@@ -118,6 +118,7 @@ export async function sendProfileUpdateReminderEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 20px;">
       <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
         <div style="text-align: center; margin-bottom: 32px;">
+          <img src="${baseUrl}/images/brand/logo-full.png" alt="Bell Registry" style="max-width: 200px; height: auto; margin-bottom: 24px;" />
           <h1 style="color: #1f2937; font-size: 24px; font-weight: 700; margin: 0;">
             📝 Keep Your Profile Fresh & Visible
           </h1>

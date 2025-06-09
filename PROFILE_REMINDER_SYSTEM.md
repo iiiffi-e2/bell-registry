@@ -10,7 +10,7 @@ The profile reminder system automatically sends email notifications to professio
 - Monitors user login activity using `lastLoginAt` timestamps
 - Identifies users who haven't logged in for 30+ days
 - Tracks when reminders were last sent to prevent spam
-- Only targets PROFESSIONAL and EMPLOYER roles
+- Only targets PROFESSIONAL users (employer reminders disabled for now)
 
 ### Smart Reminders
 The system provides personalized reminders based on:
@@ -86,7 +86,7 @@ Uses optimized Prisma queries to:
 ### For Users
 No action required - reminders are sent automatically when:
 1. User hasn't logged in for 30+ days
-2. User is a PROFESSIONAL or EMPLOYER
+2. User is a PROFESSIONAL (employers currently excluded)
 3. No reminder has been sent in the last 30 days
 
 ### For Administrators
@@ -116,7 +116,7 @@ Authorization: Bearer YOUR_CRON_SECRET
 SELECT id, email, "lastLoginAt", "lastProfileReminderSentAt", role
 FROM "User" 
 WHERE "isDeleted" = false 
-AND role IN ('PROFESSIONAL', 'EMPLOYER')
+AND role = 'PROFESSIONAL'
 AND "lastLoginAt" < NOW() - INTERVAL '30 days'
 AND ("lastProfileReminderSentAt" IS NULL OR "lastProfileReminderSentAt" < NOW() - INTERVAL '30 days');
 
@@ -145,6 +145,7 @@ The system provides detailed logging:
 ## Email Template Features
 
 ### Visual Elements
+- Bell Registry logo prominently displayed at the top
 - Profile completion progress bar
 - Color-coded completion status
 - Professional icons and styling
@@ -165,12 +166,22 @@ The system provides detailed logging:
 ## Future Enhancements
 
 ### Planned Features
-1. **Multiple Reminder Cadence**: 30, 60, 90 day intervals
-2. **A/B Testing**: Different email templates and timing
-3. **Unsubscribe Options**: Allow users to opt-out of reminders
-4. **Admin Dashboard**: Interface for monitoring reminder effectiveness
-5. **SMS Reminders**: Alternative notification channel
-6. **Profile Health Score**: More sophisticated completeness analysis
+1. **Employer Reminders**: Enable profile reminders for employers (code ready, just change filter)
+2. **Multiple Reminder Cadence**: 30, 60, 90 day intervals
+3. **A/B Testing**: Different email templates and timing
+4. **Unsubscribe Options**: Allow users to opt-out of reminders
+5. **Admin Dashboard**: Interface for monitoring reminder effectiveness
+6. **SMS Reminders**: Alternative notification channel
+7. **Profile Health Score**: More sophisticated completeness analysis
+
+### Enabling Employer Reminders
+To enable employer reminders in the future, simply change the role filter in `findUsersNeedingProfileReminders()`:
+```typescript
+// Change from:
+{ role: 'PROFESSIONAL' }
+// To:
+{ role: { in: ['PROFESSIONAL', 'EMPLOYER'] } }
+```
 
 ### Analytics Integration
 1. **Email Engagement**: Track opens, clicks, and conversions
@@ -227,7 +238,7 @@ ORDER BY "lastProfileReminderSentAt" DESC;
 SELECT COUNT(*) as eligible_users
 FROM "User" 
 WHERE "isDeleted" = false 
-AND role IN ('PROFESSIONAL', 'EMPLOYER')
+AND role = 'PROFESSIONAL'
 AND "lastLoginAt" < NOW() - INTERVAL '30 days'
 AND ("lastProfileReminderSentAt" IS NULL OR "lastProfileReminderSentAt" < NOW() - INTERVAL '30 days');
 ```
