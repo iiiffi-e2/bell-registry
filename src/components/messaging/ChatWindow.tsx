@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
 import { useSSE } from '@/hooks/useSSE'
 import { getDisplayName } from '@/lib/name-utils'
+import { linkifyText } from '@/lib/url-utils'
 
 interface Message {
   id: string
@@ -221,7 +222,7 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
                     : 'bg-gray-100 text-gray-900'
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm">{linkifyText(message.content, isOwnMessage)}</p>
                 <p className={`text-xs mt-1 ${
                   isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                 }`}>

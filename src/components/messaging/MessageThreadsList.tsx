@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 import { getDisplayName } from '@/lib/name-utils'
+import { containsUrls } from '@/lib/url-utils'
 
 interface Conversation {
   id: string
@@ -145,7 +146,7 @@ export function MessageThreadsList({
                 {lastMessage && (
                   <p className="text-sm text-gray-600 mt-1 truncate">
                     {lastMessage.sender.id === session?.user.id ? 'You: ' : ''}
-                    {lastMessage.content}
+                    {containsUrls(lastMessage.content) ? '🔗 ' : ''}{lastMessage.content}
                   </p>
                 )}
               </div>
