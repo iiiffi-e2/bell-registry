@@ -13,6 +13,7 @@ import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 import Link from "next/link";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
+import { ProfilePictureWithBadge, OpenToWorkBadge } from "@/components/profile/open-to-work-badge";
 
 interface SavedCandidate {
   id: string;
@@ -25,6 +26,7 @@ interface SavedCandidate {
   payRangeMin: number | null;
   payRangeMax: number | null;
   payType: string | null;
+  openToWork: boolean;
   savedAt: string;
   note: string | null;
   job: {
@@ -197,25 +199,22 @@ export default function SavedCandidatesPage() {
                       className="flex-1"
                     >
                       <div className="flex items-center space-x-4">
-                        {candidate.user.image && !candidate.user.isAnonymous ? (
-                          <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100">
-                            <Image
-                              src={candidate.user.image}
-                              alt={getDisplayName(candidate)}
-                              width={64}
-                              height={64}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ) : (
-                          <div className="h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                            <UserCircleIcon className="h-16 w-16 text-gray-300" />
-                          </div>
-                        )}
+                        <ProfilePictureWithBadge
+                          imageUrl={candidate.user.image}
+                          displayName={getDisplayName(candidate)}
+                          isOpenToWork={candidate.openToWork}
+                          isAnonymous={candidate.user.isAnonymous}
+                          size="md"
+                        />
                         <div className="flex-1">
-                          <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                            {getDisplayName(candidate)}
-                          </h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                              {getDisplayName(candidate)}
+                            </h3>
+                            {candidate.openToWork && (
+                              <OpenToWorkBadge variant="inline" size="sm" />
+                            )}
+                          </div>
                           <p className="text-sm text-gray-500">
                             {candidate.title || candidate.preferredRole || 'Professional'}
                           </p>
