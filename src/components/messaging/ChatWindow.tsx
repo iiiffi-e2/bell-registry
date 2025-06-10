@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, User } from 'lucide-react'
 import { format } from 'date-fns'
 import { MessageInput } from './MessageInput'
 import { useSSE } from '@/hooks/useSSE'
@@ -34,6 +35,7 @@ interface ChatWindowProps {
 
 export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
   const { data: session } = useSession()
+  const router = useRouter()
   const { isConnected, addMessageHandler } = useSSE()
   const [messages, setMessages] = useState<Message[]>([])
   const [conversationData, setConversationData] = useState<any>(null)
@@ -143,6 +145,12 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
     }
   }
 
+  const handleViewProfile = () => {
+    if (conversationData?.professional?.id) {
+      router.push(`/dashboard/employer/candidates/${conversationData.professional.id}`)
+    }
+  }
+
   if (loading) {
     return <div className="flex-1 p-4">Loading conversation...</div>
   }
@@ -193,14 +201,29 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
             </div>
           </div>
           
-          {isClient && isActive && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEndConversation}
-            >
-              End Conversation
-            </Button>
+          {isClient && (
+            <div className="flex gap-2">
+              {isOtherUserProfessional && conversationData.professional.id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleViewProfile}
+                  className="flex items-center gap-2"
+                >
+                  <User className="h-4 w-4" />
+                  View Profile
+                </Button>
+              )}
+              {isActive && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEndConversation}
+                >
+                  End Conversation
+                </Button>
+              )}
+            </div>
           )}
         </div>
       </div>
