@@ -16,7 +16,9 @@ type FilterContextType = {
   filters: FilterState;
   tempFilters: FilterState;
   toggleFilter: (category: keyof FilterState, value: string) => void;
+  removeFilter: (category: keyof FilterState, value: string) => void;
   applyFilters: () => void;
+  syncTempFilters: () => void;
   resetFilters: () => void;
   setInitialFilters: (filters: FilterState) => void;
 };
@@ -59,8 +61,32 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const removeFilter = (category: keyof FilterState, value: string) => {
+    const updateFilter = (current: FilterState) => {
+      if (Array.isArray(current[category])) {
+        return {
+          ...current,
+          [category]: (current[category] as string[]).filter((item) => item !== value)
+        };
+      }
+      return current;
+    };
+    
+    // Update both filters and tempFilters immediately
+    setFilters(prev => {
+      const updated = updateFilter(prev);
+      setTempFilters(updated); // Keep tempFilters in sync
+      return updated;
+    });
+  };
+
   const applyFilters = () => {
     setFilters(tempFilters);
+  };
+
+  // Sync tempFilters with current filters (useful when opening modal)
+  const syncTempFilters = () => {
+    setTempFilters(filters);
   };
 
   const resetFilters = () => {
@@ -80,7 +106,9 @@ export function FilterProvider({ children }: { children: React.ReactNode }) {
         filters, 
         tempFilters, 
         toggleFilter, 
+        removeFilter,
         applyFilters, 
+        syncTempFilters,
         resetFilters,
         setInitialFilters
       }}

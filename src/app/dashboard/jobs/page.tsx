@@ -143,7 +143,7 @@ function JobSearchPageContent() {
     limit: 10,
   });
 
-  const { filters: selectedFilters, toggleFilter } = useFilters();
+  const { filters: selectedFilters, removeFilter, syncTempFilters } = useFilters();
 
   // Set default view mode based on screen size
   useEffect(() => {
@@ -470,7 +470,10 @@ function JobSearchPageContent() {
               </div>
               <button
                 type="button"
-                onClick={() => setIsFilterModalOpen(true)}
+                onClick={() => {
+                  syncTempFilters(); // Sync temp filters with current filters when opening modal
+                  setIsFilterModalOpen(true);
+                }}
                 className="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
               >
                 <FunnelIcon
@@ -502,7 +505,7 @@ function JobSearchPageContent() {
                       e.preventDefault();
                       e.stopPropagation();
                       const filterCategory = category as keyof typeof selectedFilters;
-                      toggleFilter(filterCategory, value);
+                      removeFilter(filterCategory, value);
                     }}
                     className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-700 hover:bg-blue-200 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   >
