@@ -139,7 +139,8 @@ export async function sendNoApplicationsNotificationEmail(
   employerName: string,
   jobs: JobWithoutApplications[]
 ) {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  // Use app URL for dashboard links
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
   
   const formatSalary = (salary: any) => {
     if (!salary || !salary.min || !salary.max) return 'Salary not specified';
@@ -160,7 +161,7 @@ export async function sendNoApplicationsNotificationEmail(
     return `
       <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 20px; background-color: #ffffff;">
         <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px; font-weight: 600;">
-          <a href="${baseUrl}/dashboard/employer/jobs/${job.urlSlug}" style="color: #121155; text-decoration: none;">${job.title}</a>
+          <a href="${appUrl}/dashboard/employer/jobs/${job.urlSlug}" style="color: #121155; text-decoration: none;">${job.title}</a>
         </h3>
         <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">
           Posted ${Math.ceil((Date.now() - job.createdAt.getTime()) / (1000 * 60 * 60 * 24))} days ago • ${job.location}
@@ -177,10 +178,10 @@ export async function sendNoApplicationsNotificationEmail(
         </div>
         
         <div style="margin-top: 16px;">
-          <a href="${baseUrl}/dashboard/employer/jobs/${job.urlSlug}/edit" style="background-color: #121155; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; margin-right: 8px;">
+          <a href="${appUrl}/dashboard/employer/jobs/${job.urlSlug}/edit" style="background-color: #121155; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; margin-right: 8px;">
             Edit Job
           </a>
-          <a href="${baseUrl}/dashboard/employer/jobs/${job.urlSlug}" style="background-color: #6b7280; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+          <a href="${appUrl}/dashboard/employer/jobs/${job.urlSlug}" style="background-color: #6b7280; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
             View Details
           </a>
         </div>
@@ -220,10 +221,10 @@ export async function sendNoApplicationsNotificationEmail(
         </div>
 
         <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-          <a href="${baseUrl}/dashboard/employer/jobs" style="background-color: #121155; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block; margin-right: 12px;">
+          <a href="${appUrl}/dashboard/employer/jobs" style="background-color: #121155; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block; margin-right: 12px;">
             Manage All Jobs
           </a>
-          <a href="${baseUrl}/dashboard/employer/jobs/post" style="background-color: #059669; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
+          <a href="${appUrl}/dashboard/employer/jobs/post" style="background-color: #059669; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
             Post New Job
           </a>
         </div>
@@ -231,7 +232,7 @@ export async function sendNoApplicationsNotificationEmail(
         <div style="text-align: center; margin-top: 16px;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
             You're receiving this because you have active job postings. 
-            <a href="${baseUrl}/dashboard/settings" style="color: #6b7280;">Manage notification preferences</a>
+            <a href="${appUrl}/dashboard/settings" style="color: #6b7280;">Manage notification preferences</a>
           </p>
         </div>
       </div>

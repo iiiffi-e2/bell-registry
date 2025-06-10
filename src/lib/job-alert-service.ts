@@ -99,7 +99,8 @@ export async function sendJobAlertEmail(
   jobs: JobWithEmployer[],
   frequency: 'DAILY' | 'WEEKLY'
 ) {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  // Use app URL for job links and dashboard
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
   
   const formatSalary = (salary: any) => {
     if (!salary || !salary.min || !salary.max) return 'Salary not specified';
@@ -114,7 +115,7 @@ export async function sendJobAlertEmail(
   const jobsHtml = jobs.map(job => `
     <div style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 16px; background-color: #ffffff;">
       <h3 style="margin: 0 0 8px 0; color: #1f2937; font-size: 18px; font-weight: 600;">
-        <a href="${baseUrl}/jobs/${job.urlSlug}" style="color: #121155; text-decoration: none;">${job.title}</a>
+                        <a href="${appUrl}/jobs/${job.urlSlug}" style="color: #121155; text-decoration: none;">${job.title}</a>
       </h3>
       <p style="margin: 0 0 8px 0; color: #6b7280; font-size: 14px;">
         ${job.employer.employerProfile?.companyName || `${job.employer.firstName} ${job.employer.lastName}`} • ${job.location}
@@ -124,7 +125,7 @@ export async function sendJobAlertEmail(
       </p>
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
         <span style="color: #059669; font-weight: 500; font-size: 14px;">${formatSalary(job.salary)}</span>
-        <a href="${baseUrl}/jobs/${job.urlSlug}" style="background-color: #121155; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+        <a href="${appUrl}/jobs/${job.urlSlug}" style="background-color: #121155; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
           View Job
         </a>
       </div>
@@ -146,12 +147,12 @@ export async function sendJobAlertEmail(
         ${jobsHtml}
 
         <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-          <a href="${baseUrl}/dashboard/job-alerts" style="background-color: #1f2937; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
-            Manage Your Job Alerts
-          </a>
+                  <a href="${appUrl}/dashboard/job-alerts" style="background-color: #1f2937; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
+          Manage Your Job Alerts
+        </a>
           <p style="color: #9ca3af; font-size: 12px; margin: 16px 0 0 0;">
             You're receiving this because you have an active job alert. 
-            <a href="${baseUrl}/dashboard/job-alerts" style="color: #6b7280;">Unsubscribe or modify your alerts</a>
+            <a href="${appUrl}/dashboard/job-alerts" style="color: #6b7280;">Unsubscribe or modify your alerts</a>
           </p>
         </div>
       </div>

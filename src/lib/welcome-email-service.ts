@@ -20,9 +20,10 @@ interface WelcomeEmailData {
 }
 
 export async function sendWelcomeEmail(userData: WelcomeEmailData) {
-  const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-  const signInUrl = `${baseUrl}/login`;
-  const logoUrl = `${baseUrl}/images/brand/logo-full.png`;
+  // Use app URL for images and sign-in links
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+  const signInUrl = `${appUrl}/login`;
+  const logoUrl = `${appUrl}/images/brand/logo-full.png`;
   
   const fullName = `${userData.firstName} ${userData.lastName}`.trim();
   const isEmployer = userData.role === 'EMPLOYER' || userData.role === 'AGENCY';

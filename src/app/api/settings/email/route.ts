@@ -80,9 +80,9 @@ export async function PUT(request: NextRequest) {
       throw new Error("Failed to create email change request");
     }
 
-    // Generate verification URL
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const verificationUrl = `${baseUrl}/api/settings/email/verify?token=${token}`;
+    // Generate verification URL - use app URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const verificationUrl = `${appUrl}/api/settings/email/verify?token=${token}`;
     console.log("[EMAIL_UPDATE] Verification URL:", verificationUrl);
 
     try {
