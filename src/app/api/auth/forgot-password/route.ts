@@ -45,7 +45,8 @@ export async function POST(request: Request) {
     });
 
     // Send reset email
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
     
     // In development, use Resend's test email address
     const toEmail = isDevelopment ? 'delivered@resend.dev' : email;
