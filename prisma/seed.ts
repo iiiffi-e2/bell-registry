@@ -501,7 +501,7 @@ async function main() {
       isDemo: true,
       employerProfile: {
         create: {
-          companyName: 'Bell Registry',
+          companyName: 'The Bell Registry',
           industry: 'Private Service',
           location: 'New York, NY',
           description: 'A premier domestic staffing agency specializing in placement for UHNW households.'

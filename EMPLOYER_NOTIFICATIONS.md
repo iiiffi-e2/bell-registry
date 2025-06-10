@@ -71,7 +71,7 @@ The system uses efficient Prisma queries to:
 ### Email Settings
 - Development: Sends to `delivered@resend.dev`
 - Production: Sends to actual employer email addresses
-- From address: `Bell Registry <alerts@thebellregistry.com>`
+- From address: `The Bell Registry <alerts@thebellregistry.com>`
 
 ## Usage
 

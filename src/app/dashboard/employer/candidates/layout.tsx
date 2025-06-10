@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Candidates | Bell Registry",
+  title: "Candidates | The Bell Registry",
   description: "Manage your candidate interactions",
 };
 

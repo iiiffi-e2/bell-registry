@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { EmployerDashboard } from "@/components/dashboard/employer-dashboard";
 
 export const metadata: Metadata = {
-  title: "Employer Dashboard - Bell Registry",
+  title: "Employer Dashboard - The Bell Registry",
   description: "Manage your job listings and view candidate applications",
 };
 

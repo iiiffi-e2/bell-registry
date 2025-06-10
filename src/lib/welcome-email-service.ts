@@ -10,7 +10,7 @@ const resend = new Resend(RESEND_API_KEY);
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'Bell Registry <welcome@thebellregistry.com>';
+  : 'The Bell Registry <welcome@thebellregistry.com>';
 
 interface WelcomeEmailData {
   email: string;
@@ -31,8 +31,8 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
 
   // Different messaging based on role
   const welcomeMessage = isEmployer
-    ? "Thank you for joining Bell Registry, the premier platform for connecting with top-tier domestic professionals."
-    : "Welcome to Bell Registry, where exceptional opportunities in luxury private service await you.";
+    ? "Thank you for joining The Bell Registry, the premier platform for connecting with top-tier domestic professionals."
+    : "Welcome to The Bell Registry, where exceptional opportunities in luxury private service await you.";
 
   const nextStepsContent = isEmployer
     ? `
@@ -63,7 +63,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
   const platformBenefits = isEmployer
     ? `
       <div style="background-color: #fffbeb; border-radius: 8px; padding: 20px; margin: 24px 0;">
-        <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; font-weight: 600;">Why Bell Registry?</h3>
+        <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; font-weight: 600;">Why The Bell Registry?</h3>
         <ul style="margin: 0; padding-left: 16px; color: #374151; font-size: 14px; line-height: 1.6;">
           <li><strong>Vetted professionals</strong> - All candidates undergo thorough screening and background checks</li>
           <li><strong>Luxury market expertise</strong> - Specialized in high-net-worth household staffing</li>
@@ -74,7 +74,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
     `
     : `
       <div style="background-color: #f0fdf4; border-radius: 8px; padding: 20px; margin: 24px 0;">
-        <h3 style="margin: 0 0 12px 0; color: #166534; font-size: 16px; font-weight: 600;">Why Bell Registry?</h3>
+        <h3 style="margin: 0 0 12px 0; color: #166534; font-size: 16px; font-weight: 600;">Why The Bell Registry?</h3>
         <ul style="margin: 0; padding-left: 16px; color: #374151; font-size: 14px; line-height: 1.6;">
           <li><strong>Exclusive opportunities</strong> - Access to prestigious positions not found elsewhere</li>
           <li><strong>Quality employers</strong> - Work with respectful, professional families and households</li>
@@ -90,14 +90,14 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
         
         <!-- Header with Logo -->
         <div style="background-color: #121155; padding: 32px; text-align: center;">
-          <img src="${logoUrl}" alt="Bell Registry" style="max-width: 200px; height: auto;" />
+          <img src="${logoUrl}" alt="The Bell Registry" style="max-width: 200px; height: auto;" />
         </div>
 
         <!-- Main Content -->
         <div style="padding: 32px;">
           <div style="text-align: center; margin-bottom: 32px;">
             <h1 style="color: #1f2937; font-size: 28px; font-weight: 700; margin: 0 0 16px 0;">
-              Welcome to Bell Registry, ${userData.firstName}! 🎉
+              Welcome to The Bell Registry, ${userData.firstName}! 🎉
             </h1>
             <p style="color: #6b7280; font-size: 18px; margin: 0; line-height: 1.5;">
               ${welcomeMessage}
@@ -123,7 +123,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
           <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin: 24px 0; text-align: center;">
             <h3 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">Need help getting started?</h3>
             <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">
-              Our support team is here to help you make the most of Bell Registry.
+              Our support team is here to help you make the most of The Bell Registry.
             </p>
             <a href="mailto:support@thebellregistry.com" style="color: #121155; font-weight: 600; text-decoration: none;">
               Contact Support →
@@ -132,7 +132,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
 
           <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
             <p style="color: #9ca3af; font-size: 12px; margin: 0 0 8px 0;">
-              Welcome to the Bell Registry community of ${isEmployer ? 'distinguished employers' : 'exceptional professionals'}!
+              Welcome to The Bell Registry community of ${isEmployer ? 'distinguished employers' : 'exceptional professionals'}!
             </p>
             <p style="color: #9ca3af; font-size: 12px; margin: 0;">
               Follow us on social media for industry insights and updates.
@@ -149,7 +149,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
     const emailResponse = await resend.emails.send({
       from: FROM_EMAIL,
       to: toEmail,
-      subject: `Welcome to Bell Registry, ${userData.firstName}! Your account is ready`,
+      subject: `Welcome to The Bell Registry, ${userData.firstName}! Your account is ready`,
       html: emailHtml,
     });
 

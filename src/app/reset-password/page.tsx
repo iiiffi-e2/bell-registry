@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 
 export const metadata: Metadata = {
-  title: "Reset Password - Bell Registry",
+  title: "Reset Password - The Bell Registry",
   description: "Set your new Bell Registry account password",
 };
 

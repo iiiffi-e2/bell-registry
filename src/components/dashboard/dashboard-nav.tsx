@@ -244,7 +244,7 @@ export function DashboardNav() {
       <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4">
           <Link href="/" className="text-xl font-bold text-blue-600">
-            Bell Registry
+                          The Bell Registry
           </Link>
         </div>
         <nav className="mt-5 flex-1 px-2 space-y-1">

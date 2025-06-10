@@ -2,16 +2,16 @@
 
 ## Overview
 
-The welcome email feature automatically sends a personalized welcome email to new users when they sign up for an account, whether they register via email/password or Google OAuth. The email includes the Bell Registry logo, a welcome message, helpful tips for getting started, and a prominent sign-in button.
+The welcome email feature automatically sends a personalized welcome email to new users when they sign up for an account, whether they register via email/password or Google OAuth. The email includes The Bell Registry logo, a welcome message, helpful tips for getting started, and a prominent sign-in button.
 
 ## Features
 
 ### Email Content
-- **Bell Registry logo** prominently displayed at the top
+- **The Bell Registry logo** prominently displayed at the top
 - **Personalized welcome message** using the user's first name
 - **Role-specific content** tailored for professionals vs employers/agencies
 - **Next steps guidance** with actionable tips for getting started
-- **Platform benefits** highlighting why they chose Bell Registry
+- **Platform benefits** highlighting why they chose The Bell Registry
 - **Sign-in button** that directs users to the login page
 - **Support contact** information for assistance
 
@@ -51,7 +51,7 @@ The system uses Resend for email delivery with the following configuration:
 
 - **Development**: Emails sent to `delivered@resend.dev`
 - **Production**: Emails sent to actual user email addresses
-- **From Address**: `Bell Registry <welcome@thebellregistry.com>`
+- **From Address**: `The Bell Registry <welcome@thebellregistry.com>`
 
 ## Environment Variables Required
 
@@ -110,7 +110,7 @@ Test with different user roles:
 ## Email Template Features
 
 - **Responsive design** that works on desktop and mobile
-- **Professional styling** matching Bell Registry branding
+- **Professional styling** matching The Bell Registry branding
 - **Clear call-to-action** with the sign-in button
 - **Helpful onboarding content** to guide new users
 - **Support contact** for user assistance

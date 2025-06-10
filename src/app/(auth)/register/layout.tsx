@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Register - Bell Registry",
+  title: "Register - The Bell Registry",
   description: "Create your Bell Registry account",
 };
 

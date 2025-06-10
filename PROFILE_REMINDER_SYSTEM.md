@@ -79,7 +79,7 @@ Uses optimized Prisma queries to:
 ### Email Settings
 - Development: Sends to `delivered@resend.dev`
 - Production: Sends to actual user email addresses
-- From address: `Bell Registry <notifications@thebellregistry.com>`
+- From address: `The Bell Registry <notifications@thebellregistry.com>`
 
 ## Usage
 
@@ -145,7 +145,7 @@ The system provides detailed logging:
 ## Email Template Features
 
 ### Visual Elements
-- Bell Registry logo prominently displayed at the top
+- The Bell Registry logo prominently displayed at the top
 - Profile completion progress bar
 - Color-coded completion status
 - Professional icons and styling

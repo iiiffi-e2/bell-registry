@@ -6,7 +6,7 @@ import { Providers } from "@/providers/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Bell Registry - Luxury Private Service Professionals",
+  title: "The Bell Registry - Luxury Private Service Professionals",
   description: "The premier platform for luxury private service professionals",
   icons: {
     icon: '/images/brand/favicon.png',

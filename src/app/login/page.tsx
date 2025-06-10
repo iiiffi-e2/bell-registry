@@ -4,7 +4,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Login - Bell Registry",
+  title: "Login - The Bell Registry",
   description: "Login to your Bell Registry account",
 };
 

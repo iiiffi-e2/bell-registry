@@ -11,7 +11,7 @@ const resend = new Resend(RESEND_API_KEY);
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'Bell Registry <notifications@thebellregistry.com>';
+          : 'The Bell Registry <notifications@thebellregistry.com>';
 
 interface UserNeedingReminder {
   id: string;
@@ -118,7 +118,7 @@ export async function sendProfileUpdateReminderEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 20px;">
       <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
         <div style="text-align: center; margin-bottom: 32px;">
-          <img src="${baseUrl}/images/brand/logo-full.png" alt="Bell Registry" style="max-width: 200px; height: auto; margin-bottom: 24px;" />
+          <img src="${baseUrl}/images/brand/logo-full.png" alt="The Bell Registry" style="max-width: 200px; height: auto; margin-bottom: 24px;" />
           <h1 style="color: #1f2937; font-size: 24px; font-weight: 700; margin: 0;">
             📝 Keep Your Profile Fresh & Visible
           </h1>
@@ -189,7 +189,7 @@ export async function sendProfileUpdateReminderEmail(
 
         <div style="text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
           <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-            You're receiving this because you're a valued Bell Registry ${roleText}. 
+            You're receiving this because you're a valued The Bell Registry ${roleText}. 
             <br>
             <a href="${baseUrl}/dashboard/settings" style="color: #6b7280;">Manage notification preferences</a>
           </p>

@@ -1,6 +1,6 @@
-# Bell Registry
+# The Bell Registry
 
-Bell Registry is a high-end, full-stack web application for the luxury private service industry, connecting elite service professionals with prestigious employers.
+The Bell Registry is a high-end, full-stack web application for the luxury private service industry, connecting elite service professionals with prestigious employers.
 
 ## Features
 

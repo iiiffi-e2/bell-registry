@@ -70,7 +70,7 @@ export default function Home() {
         <section className="py-20 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">
-              Why Choose Bell Registry?
+                              Why Choose The Bell Registry?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
@@ -108,7 +108,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">Bell Registry</h3>
+                              <h3 className="text-xl font-bold mb-4">The Bell Registry</h3>
               <p className="text-gray-400">
                 The premier platform for luxury private service professionals.
               </p>
@@ -172,7 +172,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} Bell Registry. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} The Bell Registry. All rights reserved.</p>
           </div>
         </div>
       </footer>
