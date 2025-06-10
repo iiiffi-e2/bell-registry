@@ -19,6 +19,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useFilters } from '@/contexts/FilterContext';
+import { PROFESSIONAL_ROLES } from '@/lib/constants';
 
 const FilterButton = React.memo(({ 
   children, 
@@ -128,6 +129,20 @@ export function FilterModal({ isOpen, onClose, filters }: FilterModalProps) {
                   )}
                 >
                   {range.label}
+                </FilterButton>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <Label>Professional Role</Label>
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+              {PROFESSIONAL_ROLES.map((role) => (
+                <FilterButton
+                  key={role}
+                  isSelected={tempFilters.professionalRole.includes(role)}
+                  onClick={handleFilterClick("professionalRole", role)}
+                >
+                  {role}
                 </FilterButton>
               ))}
             </div>

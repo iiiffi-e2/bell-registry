@@ -8,6 +8,7 @@ type FilterState = {
   employmentType: string[];
   salaryRange: string[];
   status: string[];
+  professionalRole: string[];
   sortBy: string;
 };
 
@@ -26,6 +27,7 @@ const defaultFilters: FilterState = {
   employmentType: [],
   salaryRange: [],
   status: [],
+  professionalRole: [],
   sortBy: "recent",
 };
 

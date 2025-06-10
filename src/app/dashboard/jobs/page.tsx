@@ -185,6 +185,9 @@ function JobSearchPageContent() {
       if (selectedFilters.employmentType.length > 0) {
         searchParams.append("employmentType", selectedFilters.employmentType.join(','));
       }
+      if (selectedFilters.professionalRole.length > 0) {
+        searchParams.append("professionalRole", selectedFilters.professionalRole.join(','));
+      }
       if (selectedFilters.status.length > 0) {
         searchParams.append("status", selectedFilters.status.join(','));
       }

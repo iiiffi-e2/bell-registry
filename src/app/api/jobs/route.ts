@@ -17,6 +17,7 @@ export async function GET(request: Request) {
     const location = searchParams.get('location')
     const searchQuery = searchParams.get('search')
     const jobType = searchParams.get('jobType')
+    const professionalRole = searchParams.get('professionalRole')
     const salaryMin = searchParams.get('salaryMin')
     const salaryMax = searchParams.get('salaryMax')
     const status = searchParams.get('status')
@@ -62,6 +63,25 @@ export async function GET(request: Request) {
         LIMIT $2 OFFSET $3
       `
       let jobs = await prisma.$queryRawUnsafe(query, ...params) as any[];
+      
+      // Apply additional filters to fuzzy search results
+      if (professionalRole) {
+        const professionalRoles = professionalRole.split(',');
+        jobs = jobs.filter((job: any) => 
+          professionalRoles.some(role => 
+            job.professionalRole && job.professionalRole.includes(role)
+          )
+        );
+      }
+      if (jobType) {
+        const jobTypes = jobType.split(',');
+        jobs = jobs.filter((job: any) => jobTypes.includes(job.jobType));
+      }
+      if (employmentType) {
+        const employmentTypes = employmentType.split(',');
+        jobs = jobs.filter((job: any) => employmentTypes.includes(job.employmentType));
+      }
+      
       // Fetch employer and employerProfile for each job
       jobs = await Promise.all(jobs.map(async (job: any) => {
         const employer = await prisma.user.findUnique({
@@ -138,6 +158,11 @@ export async function GET(request: Request) {
       ...(employmentType ? { 
         employmentType: {
           in: employmentType.split(',')
+        }
+      } : {}),
+      ...(professionalRole ? { 
+        professionalRole: {
+          in: professionalRole.split(',')
         }
       } : {}),
       ...(salaryMin || salaryMax ? {
