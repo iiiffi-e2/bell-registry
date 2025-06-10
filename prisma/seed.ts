@@ -488,6 +488,14 @@ const professionalRoles = {
   'Household Staff Supervisor': 'House Manager'
 }
 
+const EMPLOYMENT_TYPES = [
+  "Full-time",
+  "Part-time", 
+  "Event",
+  "Contract",
+  "Seasonal"
+] as const;
+
 async function main() {
   // Create a demo employer
   const employer = await prisma.user.upsert({
@@ -512,9 +520,22 @@ async function main() {
 
   // Create professionals
   console.log('Creating demo professionals...')
-  for (const prof of professionals) {
+  for (let i = 0; i < professionals.length; i++) {
+    const prof = professionals[i];
     const email = `${prof.firstName.toLowerCase()}.${prof.lastName.toLowerCase()}@gmail.com`
     const profileSlug = `${prof.firstName.toLowerCase()}-${prof.lastName.toLowerCase()}`
+    
+    // Assign employment type based on professional role (with some variety)
+    let employmentType: string;
+    if (prof.preferredRole.includes('Event') || prof.preferredRole.includes('Yacht') || prof.preferredRole.includes('Jet')) {
+      employmentType = i % 2 === 0 ? 'Event' : 'Contract';
+    } else if (prof.preferredRole.includes('Seasonal') || prof.preferredRole.includes('Caretaker')) {
+      employmentType = 'Seasonal';
+    } else if (prof.preferredRole.includes('Assistant') && i % 3 === 0) {
+      employmentType = 'Part-time';
+    } else {
+      employmentType = i % 4 === 0 ? 'Contract' : 'Full-time';
+    }
     
     const user = await prisma.user.upsert({
       where: { email },
@@ -540,6 +561,7 @@ async function main() {
               payRangeMin: 80000,
               payRangeMax: 200000,
               payType: 'Salary',
+              employmentType: employmentType,
               whatImSeeking: 'Seeking a position that allows me to utilize my expertise while maintaining the highest standards of service.',
               whyIEnjoyThisWork: 'I am passionate about delivering exceptional service and creating memorable experiences.',
               whatSetsApartMe: 'My attention to detail, discretion, and commitment to excellence sets me apart.',
@@ -581,6 +603,7 @@ async function main() {
             payRangeMin: 80000,
             payRangeMax: 200000,
             payType: 'Salary',
+            employmentType: employmentType,
             whatImSeeking: 'Seeking a position that allows me to utilize my expertise while maintaining the highest standards of service.',
             whyIEnjoyThisWork: 'I am passionate about delivering exceptional service and creating memorable experiences.',
             whatSetsApartMe: 'My attention to detail, discretion, and commitment to excellence sets me apart.',

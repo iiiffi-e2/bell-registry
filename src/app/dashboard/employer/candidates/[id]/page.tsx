@@ -56,6 +56,7 @@ interface CandidateProfile {
   additionalPhotos: string[];
   mediaUrls: string[];
   openToWork: boolean;
+  employmentType: string | null;
   user: {
     id: string;
     firstName: string | null;
@@ -391,6 +392,17 @@ export default function CandidateProfilePage({
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Years of Experience</h4>
                     <p className="text-gray-900">{profile.yearsOfExperience} years</p>
+                  </div>
+                )}
+
+                {/* Employment Type */}
+                {profile.employmentType && (
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Employment Type Preference</h4>
+                    <p className="text-gray-900 flex items-center">
+                      <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-400" />
+                      {profile.employmentType}
+                    </p>
                   </div>
                 )}
 

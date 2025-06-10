@@ -121,6 +121,7 @@ export async function PUT(req: Request) {
             workLocations: body.workLocations,
             yearsOfExperience: body.yearsOfExperience ? parseInt(body.yearsOfExperience) : undefined,
             openToWork: body.openToWork,
+            employmentType: body.employmentType,
           },
           include: {
             user: true

@@ -106,6 +106,7 @@ export async function GET(
       additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
       mediaUrls: profile.candidateProfile.mediaUrls || [],
       openToWork: profile.candidateProfile.openToWork || false,
+      employmentType: (profile.candidateProfile as any).employmentType || null,
       user: {
         id: profile.id,
         firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,

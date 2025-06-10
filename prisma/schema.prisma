@@ -131,6 +131,7 @@ model CandidateProfile {
   whyIEnjoyThisWork    String?
   workLocations        String[]
   yearsOfExperience    Int?
+  employmentType       String?
   user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

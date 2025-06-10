@@ -111,6 +111,7 @@ export async function GET(request: Request) {
           location: true,
           skills: true,
           openToWork: true,
+          employmentType: true,
           user: {
             select: {
               id: true,

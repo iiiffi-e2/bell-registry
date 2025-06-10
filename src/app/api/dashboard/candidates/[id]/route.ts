@@ -73,6 +73,7 @@ export async function GET(
       additionalPhotos: [], // Hide additional photos from employers
       mediaUrls: candidate.candidateProfile.mediaUrls || [],
       openToWork: (candidate.candidateProfile as any).openToWork || false,
+      employmentType: (candidate.candidateProfile as any).employmentType || null,
       user: {
         id: candidate.id,
         // Anonymize personal information for employers

@@ -67,6 +67,14 @@ const PROFESSIONAL_ROLES = [
   "Other"
 ];
 
+const EMPLOYMENT_TYPES = [
+  "Full-time",
+  "Part-time", 
+  "Event",
+  "Contract",
+  "Seasonal"
+] as const;
+
 const profileSchema = z.object({
   // Basic Info
   firstName: z.string().min(1, "First name is required"),
@@ -80,6 +88,7 @@ const profileSchema = z.object({
   isAnonymous: z.boolean().default(false),
   yearsOfExperience: z.string().optional(),
   availability: z.string().optional(),
+  employmentType: z.string().optional(),
   
   // Professional Bio
   bio: z.string().min(50, "Bio must be at least 50 characters"),
@@ -282,6 +291,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             isAnonymous: Boolean(data.user?.isAnonymous), // Ensure boolean value
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
             availability: data.availability ? data.availability.split('T')[0] : "",
+            employmentType: data.employmentType || "",
             bio: data.bio || "",
             whatImSeeking: data.whatImSeeking || "",
             whyIEnjoyThisWork: data.whyIEnjoyThisWork || "",
@@ -612,6 +622,32 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     )}
                     <p className="mt-1 text-xs text-gray-500">
                       Choose from our curated list of skills organized by category. This helps employers find the right professionals with specific expertise.
+                    </p>
+                  </div>
+
+                  {/* Employment Type */}
+                  <div>
+                    <label htmlFor="employmentType" className="block text-sm font-medium text-gray-700">
+                      Employment Type Preference (Optional)
+                    </label>
+                    <div className="mt-1">
+                      <select
+                        {...form.register("employmentType")}
+                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                      >
+                        <option value="">Select employment type...</option>
+                        {EMPLOYMENT_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {form.formState.errors.employmentType && (
+                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.employmentType.message}</p>
+                    )}
+                    <p className="mt-1 text-xs text-gray-500">
+                      Specify your preferred employment arrangement to help employers find the right match.
                     </p>
                   </div>
 
