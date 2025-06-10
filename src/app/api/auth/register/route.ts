@@ -4,6 +4,7 @@ import * as z from "zod";
 import { UserRole } from "@/types";
 import bcrypt from "bcryptjs";
 import { generateProfileSlug } from "@/lib/utils";
+import { sendWelcomeEmail } from "@/lib/welcome-email-service";
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -65,6 +66,20 @@ export async function POST(req: Request) {
           companyName: "", // Will be set during onboarding
         },
       });
+    }
+
+    // Send welcome email to the new user
+    try {
+      await sendWelcomeEmail({
+        email: body.email,
+        firstName: body.firstName,
+        lastName: body.lastName,
+        role: body.role as any, // Convert from string to UserRole enum
+      });
+      console.log(`Welcome email sent to ${body.email}`);
+    } catch (emailError) {
+      // Log email error but don't fail the registration
+      console.error(`Failed to send welcome email to ${body.email}:`, emailError);
     }
 
     return NextResponse.json(

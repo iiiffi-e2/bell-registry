@@ -6,6 +6,7 @@ import { prisma } from "./prisma";
 import { UserRole } from "@/types";
 import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
+import { sendWelcomeEmail } from "./welcome-email-service";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
@@ -197,6 +198,20 @@ export const authOptions: NextAuthOptions = {
                 companyName: "",
               }
             });
+          }
+
+          // Send welcome email to new Google OAuth user
+          try {
+            await sendWelcomeEmail({
+              email: newUser.email,
+              firstName: newUser.firstName || user.name?.split(" ")[0] || "",
+              lastName: newUser.lastName || user.name?.split(" ").slice(1).join(" ") || "",
+              role: role as any,
+            });
+            console.log(`Welcome email sent to Google OAuth user: ${newUser.email}`);
+          } catch (emailError) {
+            // Log email error but don't fail the authentication
+            console.error(`Failed to send welcome email to Google OAuth user ${newUser.email}:`, emailError);
           }
 
           user.id = newUser.id;
