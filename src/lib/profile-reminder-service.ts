@@ -91,6 +91,9 @@ export async function sendProfileUpdateReminderEmail(
        ? `${appUrl}/professionals/${profileSlug}` 
        : `${appUrl}/dashboard/profile`)
     : `${appUrl}/dashboard/profile`;
+    
+  // Always use production URL for images in emails (localhost won't work in emails)
+  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
 
   // Analyze profile completeness
   const getProfileCompleteness = () => {
@@ -119,7 +122,7 @@ export async function sendProfileUpdateReminderEmail(
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f9fafb; padding: 20px;">
       <div style="background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);">
         <div style="text-align: center; margin-bottom: 32px;">
-          <img src="${appUrl}/images/brand/logo-bell-registry-email.png" alt="The Bell Registry" style="max-width: 200px; height: auto; margin-bottom: 24px;" />
+          <img src="${imageBaseUrl}/images/brand/logo-bell-registry-email.png" alt="The Bell Registry" style="max-width: 200px; height: auto; margin-bottom: 24px;" />
           <h1 style="color: #1f2937; font-size: 24px; font-weight: 700; margin: 0;">
             📝 Keep Your Profile Fresh & Visible
           </h1>

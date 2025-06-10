@@ -23,7 +23,10 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
   // Use app URL for images and sign-in links
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const signInUrl = `${appUrl}/login`;
-  const logoUrl = `${appUrl}/images/brand/logo-bell-registry-email.png`;
+  
+  // Always use production URL for images in emails (localhost won't work in emails)
+  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
+  const logoUrl = `${imageBaseUrl}/images/brand/logo-bell-registry-email.png`;
   
   const fullName = `${userData.firstName} ${userData.lastName}`.trim();
   const isEmployer = userData.role === 'EMPLOYER' || userData.role === 'AGENCY';
