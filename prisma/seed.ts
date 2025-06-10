@@ -491,10 +491,10 @@ const professionalRoles = {
 async function main() {
   // Create a demo employer
   const employer = await prisma.user.upsert({
-    where: { email: 'employer@bellregistry.com' },
+          where: { email: 'employer@thebellregistry.com' },
     update: {},
     create: {
-      email: 'employer@bellregistry.com',
+              email: 'employer@thebellregistry.com',
       firstName: 'Victoria',
       lastName: 'Bell',
       role: UserRole.EMPLOYER,

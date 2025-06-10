@@ -176,7 +176,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
           Your payment information is never stored on our servers.
         </p>
         <p>
-          <strong>Support:</strong> Need help choosing the right plan? Contact our team at support@bellregistry.com
+                          <strong>Support:</strong> Need help choosing the right plan? Contact our team at support@thebellregistry.com
         </p>
       </div>
     </div>

@@ -11,7 +11,7 @@ const resend = new Resend(RESEND_API_KEY);
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'Bell Registry <notifications@bellregistry.com>';
+          : 'Bell Registry <notifications@thebellregistry.com>';
 
 interface UserNeedingReminder {
   id: string;
