@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ExternalLink, RefreshCw, Sparkles, MapPin, Building, DollarSign } from 'lucide-react';
+import { BookmarkIcon } from '@heroicons/react/24/outline';
+import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 
 interface JobMatch {
@@ -43,6 +45,10 @@ interface JobMatch {
 interface AIJobMatchesResponse {
   matches: JobMatch[];
   totalMatches: number;
+  cached?: boolean;
+  hasCache?: boolean;
+  isRecent?: boolean;
+  lastUpdated?: string;
 }
 
 export default function AIJobMatches() {
@@ -50,18 +56,54 @@ export default function AIJobMatches() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [needsGeneration, setNeedsGeneration] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<string | undefined>();
+  const [savedJobs, setSavedJobs] = useState<{ [key: string]: boolean }>({});
+  const [savingJobs, setSavingJobs] = useState<{ [key: string]: boolean }>({});
 
-  const fetchMatches = async () => {
+  const fetchMatches = async (forceRefresh = false) => {
     try {
       setError(null);
-      const response = await fetch('/api/ai/job-matches');
-      const data: AIJobMatchesResponse = await response.json();
       
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch job matches');
+      let url = '/api/ai/job-matches/cached';
+      let data: AIJobMatchesResponse;
+      
+      if (forceRefresh) {
+        // Generate new matches using AI
+        const response = await fetch('/api/ai/job-matches', { method: 'POST' });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to refresh job matches');
+        }
+        // After refresh, fetch the cached results
+        const cachedResponse = await fetch('/api/ai/job-matches/cached');
+        data = await cachedResponse.json();
+      } else {
+        // Try to get cached matches first
+        const response = await fetch(url);
+        data = await response.json();
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to fetch job matches');
+        }
+        
+        // If no cache exists, show empty state with option to generate
+        if (!data.hasCache) {
+          setMatches([]);
+          setNeedsGeneration(true);
+          return;
+        }
       }
       
       setMatches(data.matches);
+      setNeedsGeneration(!data.isRecent);
+      setLastUpdated(data.lastUpdated);
+      
+      // Fetch saved status for all matched jobs
+      if (data.matches.length > 0) {
+        fetchSavedStatus(data.matches);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -74,15 +116,7 @@ export default function AIJobMatches() {
       setIsRefreshing(true);
       setError(null);
       
-      const response = await fetch('/api/ai/job-matches', { method: 'POST' });
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to refresh matches');
-      }
-      
-      // Fetch updated matches
-      await fetchMatches();
+      await fetchMatches(true);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -90,8 +124,13 @@ export default function AIJobMatches() {
     }
   };
 
+  const generateMatches = async () => {
+    setIsLoading(true);
+    await fetchMatches(true);
+  };
+
   useEffect(() => {
-    fetchMatches();
+    fetchMatches(false);
   }, []);
 
   const getScoreColor = (score: number) => {
@@ -104,6 +143,56 @@ export default function AIJobMatches() {
     if (score >= 80) return 'bg-green-100 border-green-200';
     if (score >= 60) return 'bg-yellow-100 border-yellow-200';
     return 'bg-red-100 border-red-200';
+  };
+
+  const fetchSavedStatus = async (jobs: JobMatch[]) => {
+    try {
+      const savedStatus: { [key: string]: boolean } = {};
+      
+      // Fetch saved status for all jobs
+      await Promise.all(
+        jobs.map(async (match) => {
+          try {
+            const response = await fetch(`/api/jobs/${match.job.urlSlug}/bookmark`);
+            if (response.ok) {
+              const { bookmarked } = await response.json();
+              savedStatus[match.job.urlSlug] = bookmarked;
+            } else {
+              savedStatus[match.job.urlSlug] = false;
+            }
+          } catch (error) {
+            console.error(`Error fetching save status for job ${match.job.urlSlug}:`, error);
+            savedStatus[match.job.urlSlug] = false;
+          }
+        })
+      );
+      
+      setSavedJobs(savedStatus);
+    } catch (error) {
+      console.error('Error fetching saved job statuses:', error);
+    }
+  };
+
+  const handleSaveJob = async (jobSlug: string) => {
+    setSavingJobs(prev => ({ ...prev, [jobSlug]: true }));
+    
+    try {
+      const response = await fetch(`/api/jobs/${jobSlug}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to save job');
+
+      const { bookmarked } = await response.json();
+      setSavedJobs(prev => ({ ...prev, [jobSlug]: bookmarked }));
+    } catch (error) {
+      console.error('Error saving job:', error);
+    } finally {
+      setSavingJobs(prev => ({ ...prev, [jobSlug]: false }));
+    }
   };
 
   const formatFactorName = (factor: string) => {
@@ -141,16 +230,22 @@ export default function AIJobMatches() {
               </CardTitle>
               <CardDescription>
                 Jobs specifically selected for you based on your profile, skills, and preferences
+                {lastUpdated && (
+                  <span className="block text-xs text-gray-400 mt-1">
+                    Last updated: {new Date(lastUpdated).toLocaleString()}
+                  </span>
+                )}
               </CardDescription>
             </div>
             <Button 
               onClick={refreshMatches} 
               disabled={isRefreshing}
-              variant="outline"
+              variant={needsGeneration ? "default" : "outline"}
               size="sm"
+              className={needsGeneration ? "bg-blue-600 hover:bg-blue-700" : ""}
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-              {isRefreshing ? 'Refreshing...' : 'Refresh Matches'}
+              {isRefreshing ? 'Generating...' : needsGeneration ? 'Generate Fresh Matches' : 'Refresh Matches'}
             </Button>
           </div>
         </CardHeader>
@@ -160,7 +255,7 @@ export default function AIJobMatches() {
             <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
               <p className="text-red-600">{error}</p>
               <Button 
-                onClick={fetchMatches} 
+                onClick={() => fetchMatches(false)} 
                 variant="outline" 
                 size="sm" 
                 className="mt-2"
@@ -173,9 +268,25 @@ export default function AIJobMatches() {
           {matches.length === 0 && !error && (
             <div className="text-center py-8">
               <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500">
-                No job matches found. Complete your profile to get better matches!
-              </p>
+              {needsGeneration ? (
+                <div>
+                  <p className="text-gray-500 mb-4">
+                    Generate personalized job matches using AI
+                  </p>
+                  <Button 
+                    onClick={generateMatches}
+                    disabled={isLoading}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {isLoading ? 'Generating Matches...' : 'Generate AI Job Matches'}
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  No job matches found. Complete your profile to get better matches!
+                </p>
+              )}
             </div>
           )}
           
@@ -237,10 +348,23 @@ export default function AIJobMatches() {
                           <ExternalLink className="h-4 w-4 ml-2" />
                         </Link>
                       </Button>
-                      <Button variant="outline" asChild>
-                        <Link href={`/dashboard/jobs/${match.job.urlSlug}/apply`}>
-                          Apply Now
-                        </Link>
+                      <Button 
+                        variant="outline"
+                        onClick={() => handleSaveJob(match.job.urlSlug)}
+                        disabled={savingJobs[match.job.urlSlug]}
+                        className="flex items-center gap-2"
+                      >
+                        {savedJobs[match.job.urlSlug] ? (
+                          <BookmarkSolidIcon className="h-4 w-4 text-blue-600" />
+                        ) : (
+                          <BookmarkIcon className="h-4 w-4" />
+                        )}
+                        {savingJobs[match.job.urlSlug] 
+                          ? 'Saving...' 
+                          : savedJobs[match.job.urlSlug] 
+                          ? 'Saved' 
+                          : 'Save Job'
+                        }
                       </Button>
                     </div>
                   </div>

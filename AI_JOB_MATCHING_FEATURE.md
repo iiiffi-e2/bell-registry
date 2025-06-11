@@ -12,6 +12,7 @@ The AI-Powered Job Matching feature revolutionizes how professionals discover re
 - **Human-Readable Reasoning**: Clear explanations for each recommendation
 - **Top 5 Results**: Shows the most relevant job matches
 - **Real-Time Refresh**: Manual refresh capability for updated matches
+- **Save Job Functionality**: One-click saving of interesting matches for later review
 
 ### 🎯 Scoring Factors
 1. **Role Match** (0-100): Job title/role alignment with preferences
@@ -147,18 +148,25 @@ The AI Job Matches component appears prominently on the professional dashboard:
 - **Match Scores**: Color-coded badges (green: 80+, yellow: 60-79, red: <60)
 - **Progress Bars**: Visual representation of each matching factor
 - **Company Info**: Company name, location, salary (if available)
-- **Action Buttons**: "View Job Details" and "Apply Now"
+- **Action Buttons**: "View Job Details" and "Save Job" (encourages users to read full details before applying)
 
 ## Performance & Optimization
 
-### Caching Strategy
-- Results stored in database to avoid re-computation
-- Manual refresh allows users to update when needed
-- Automatic cleanup of old matches during refresh
+### Smart Caching Strategy
+- **Intelligent Loading**: Checks for cached matches first, avoids unnecessary AI calls on every page load
+- **24-Hour Cache Validity**: Cached matches remain fresh for 24 hours to balance accuracy and efficiency
+- **Database Storage**: Results stored in JobMatch table to avoid re-computation
+- **Manual Refresh**: Users can force refresh when needed or when cache is stale
+- **Visual Indicators**: Shows last updated timestamp and suggests refresh when needed
+- **Cost Optimization**: Prevents excessive OpenAI API usage on dashboard reloads
+
+### API Endpoints
+- **GET `/api/ai/job-matches/cached`**: Returns cached matches without AI processing
+- **POST `/api/ai/job-matches`**: Forces new AI analysis and refreshes cache
 
 ### Rate Limiting
 - OpenAI API has built-in rate limiting
-- 50 job limit per analysis for performance
+- 20 job limit per analysis for token optimization
 - Timeout protection (30 seconds)
 
 ### Error Handling
