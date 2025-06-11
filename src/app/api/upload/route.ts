@@ -68,8 +68,11 @@ export async function POST(request: NextRequest) {
       return new NextResponse("Invalid file name", { status: 400 });
     }
 
-    // Generate unique filename
-    const fileName = `${uuidv4()}.${ext}`;
+    // Generate unique filename while preserving original name
+    const originalName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
+    const cleanName = originalName.replace(/[^a-zA-Z0-9.-]/g, "_"); // Clean special chars
+    const uniqueId = uuidv4().split('-')[0]; // Use first part of UUID for shorter ID
+    const fileName = `${uniqueId}_${cleanName}.${ext}`;
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 

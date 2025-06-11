@@ -20,7 +20,17 @@ function getFileType(url: string): 'video' | 'document' {
 
 // Helper function to get file name from URL
 function getFileName(url: string): string {
-  return url.split('/').pop() || 'Download';
+  const fullFileName = url.split('/').pop() || 'Download';
+  
+  // If the filename contains a UUID prefix (format: uuid_originalname.ext), extract the original name
+  const match = fullFileName.match(/^[a-f0-9]{8}_(.+)(\.[^.]+)$/);
+  if (match) {
+    const originalName = match[1].replace(/_/g, ' '); // Convert underscores back to spaces
+    const extension = match[2];
+    return originalName + extension;
+  }
+  
+  return fullFileName;
 }
 
 // Helper function to get file extension for display
