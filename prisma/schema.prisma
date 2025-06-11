@@ -56,43 +56,43 @@ model EmailChangeRequest {
 }
 
 model User {
-  id                          String               @id @default(cuid())
-  email                       String               @unique
-  emailVerified               DateTime?
-  role                        UserRole             @default(PROFESSIONAL)
-  createdAt                   DateTime             @default(now())
-  updatedAt                   DateTime             @updatedAt
-  firstName                   String?
-  lastName                    String?
-  phoneNumber                 String?
-  image                       String?
-  password                    String?
-  profileSlug                 String?              @unique
-  isDemo                      Boolean              @default(false)
-  resetToken                  String?              @unique
-  resetTokenExpiry            DateTime?            @db.Timestamptz(6)
-  isAnonymous                 Boolean              @default(false)
-  isDeleted                   Boolean              @default(false)
-  deletedAt                   DateTime?            @db.Timestamptz(6)
-  lastLoginAt                 DateTime?            @db.Timestamptz(6)
-  lastProfileReminderSentAt   DateTime?            @db.Timestamptz(6)
-  accounts                    Account[]
-  candidateProfile            CandidateProfile?
-  emailChangeRequests         EmailChangeRequest[]
-  employerProfile             EmployerProfile?
-  postedJobs                  Job[]
-  jobAlerts                   JobAlert[]
-  applications                JobApplication[]
-  jobViewEvents               JobViewEvent[]
-  sentMessages                Message[]            @relation("SentMessages")
-  profileViewEvents           ProfileViewEvent[]
-  savedCandidates             SavedCandidate[]     @relation("SavedCandidates")
-  savedByEmployers            SavedCandidate[]     @relation("SavedByEmployers")
-  savedJobs                   SavedJob[]
-  sessions                    Session[]
-  clientConversations         Conversation[]       @relation("ClientConversations")
-  professionalConversations   Conversation[]       @relation("ProfessionalConversations")
-  jobMatches                  JobMatch[]
+  id                        String               @id @default(cuid())
+  email                     String               @unique
+  emailVerified             DateTime?
+  role                      UserRole             @default(PROFESSIONAL)
+  createdAt                 DateTime             @default(now())
+  updatedAt                 DateTime             @updatedAt
+  firstName                 String?
+  lastName                  String?
+  phoneNumber               String?
+  image                     String?
+  password                  String?
+  profileSlug               String?              @unique
+  isDemo                    Boolean              @default(false)
+  resetToken                String?              @unique
+  resetTokenExpiry          DateTime?            @db.Timestamptz(6)
+  isAnonymous               Boolean              @default(false)
+  isDeleted                 Boolean              @default(false)
+  deletedAt                 DateTime?            @db.Timestamptz(6)
+  lastLoginAt               DateTime?            @db.Timestamptz(6)
+  lastProfileReminderSentAt DateTime?            @db.Timestamptz(6)
+  accounts                  Account[]
+  candidateProfile          CandidateProfile?
+  clientConversations       Conversation[]       @relation("ClientConversations")
+  professionalConversations Conversation[]       @relation("ProfessionalConversations")
+  emailChangeRequests       EmailChangeRequest[]
+  employerProfile           EmployerProfile?
+  postedJobs                Job[]
+  jobAlerts                 JobAlert[]
+  applications              JobApplication[]
+  jobMatches                JobMatch[]
+  jobViewEvents             JobViewEvent[]
+  sentMessages              Message[]            @relation("SentMessages")
+  profileViewEvents         ProfileViewEvent[]
+  savedCandidates           SavedCandidate[]     @relation("SavedCandidates")
+  savedByEmployers          SavedCandidate[]     @relation("SavedByEmployers")
+  savedJobs                 SavedJob[]
+  sessions                  Session[]
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -137,44 +137,43 @@ model CandidateProfile {
 }
 
 model EmployerProfile {
-  id                     String           @id @default(cuid())
-  userId                 String           @unique
-  companyName            String
-  industry               String?
-  description            String?
-  website                String?
-  logoUrl                String?
-  location               String?
-  subscriptionPlan       String?
-  subscriptionType       SubscriptionType @default(TRIAL)
-  subscriptionStartDate  DateTime         @default(now())
-  subscriptionEndDate    DateTime?
-  jobPostLimit           Int?             @default(5)
-  jobsPostedCount        Int              @default(0)
-  stripeCustomerId       String?
-  stripeSessionId        String?
-  hasNetworkAccess       Boolean          @default(false)
-  createdAt              DateTime         @default(now())
-  updatedAt              DateTime         @updatedAt
-  user                   User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  billingHistory         BillingHistory[]
+  id                    String           @id @default(cuid())
+  userId                String           @unique
+  companyName           String
+  industry              String?
+  description           String?
+  website               String?
+  logoUrl               String?
+  location              String?
+  subscriptionPlan      String?
+  subscriptionType      SubscriptionType @default(TRIAL)
+  subscriptionStartDate DateTime         @default(now())
+  subscriptionEndDate   DateTime?
+  jobPostLimit          Int?             @default(5)
+  jobsPostedCount       Int              @default(0)
+  stripeCustomerId      String?
+  stripeSessionId       String?
+  hasNetworkAccess      Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  billingHistory        BillingHistory[]
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model BillingHistory {
-  id                String            @id @default(cuid())
+  id                String           @id @default(cuid())
   employerProfileId String
-  amount            Float             // Amount in dollars (e.g., 250.00)
-  currency          String            @default("usd")
-  description       String            // What was purchased (e.g., "Spotlight Plan - 1 Job Post")
+  amount            Float
+  currency          String           @default("usd")
+  description       String
   subscriptionType  SubscriptionType
-  stripeSessionId   String?           // Stripe checkout session ID
-  stripeInvoiceId   String?           // Stripe invoice ID for downloadable invoices
-  status            BillingStatus     @default(PENDING)
-  createdAt         DateTime          @default(now())
-  updatedAt         DateTime          @updatedAt
-  
-  employerProfile   EmployerProfile   @relation(fields: [employerProfileId], references: [id], onDelete: Cascade)
-  
+  stripeSessionId   String?
+  stripeInvoiceId   String?
+  status            BillingStatus    @default(PENDING)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  employerProfile   EmployerProfile  @relation(fields: [employerProfileId], references: [id], onDelete: Cascade)
+
   @@index([employerProfileId])
   @@index([status])
   @@index([createdAt])
@@ -200,25 +199,25 @@ model Job {
   professionalRole String
   employer         User             @relation(fields: [employerId], references: [id])
   applications     JobApplication[]
+  matches          JobMatch[]
   viewEvents       JobViewEvent[]
   savedCandidates  SavedCandidate[]
   savedBy          SavedJob[]
-  matches          JobMatch[]
 }
 
 model JobApplication {
-  id              String            @id @default(cuid())
-  jobId           String
-  candidateId     String
-  status          ApplicationStatus @default(PENDING)
-  coverLetter     String?
-  resumeUrl       String?
-  coverLetterUrl  String?
-  message         String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  candidate       User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  job             Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  id             String            @id @default(cuid())
+  jobId          String
+  candidateId    String
+  status         ApplicationStatus @default(PENDING)
+  coverLetter    String?
+  resumeUrl      String?
+  coverLetterUrl String?
+  message        String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  candidate      User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job            Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@unique([jobId, candidateId])
 }
@@ -249,18 +248,17 @@ model SavedCandidate {
 }
 
 model Conversation {
-  id            String           @id @default(cuid())
-  clientId      String           // The employer/agency who initiated
-  professionalId String          // The professional
-  status        ConversationStatus @default(ACTIVE)
-  lastMessageAt DateTime?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  
-  client        User             @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
-  professional  User             @relation("ProfessionalConversations", fields: [professionalId], references: [id], onDelete: Cascade)
-  messages      Message[]
-  
+  id             String             @id @default(cuid())
+  clientId       String
+  professionalId String
+  status         ConversationStatus @default(ACTIVE)
+  lastMessageAt  DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  client         User               @relation("ClientConversations", fields: [clientId], references: [id], onDelete: Cascade)
+  professional   User               @relation("ProfessionalConversations", fields: [professionalId], references: [id], onDelete: Cascade)
+  messages       Message[]
+
   @@unique([clientId, professionalId])
   @@index([professionalId])
   @@index([clientId])
@@ -275,10 +273,9 @@ model Message {
   read           Boolean      @default(false)
   readAt         DateTime?
   createdAt      DateTime     @default(now())
-  
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-  
+
   @@index([conversationId])
   @@index([senderId])
   @@index([read])
@@ -325,15 +322,14 @@ model JobMatch {
   id           String   @id @default(cuid())
   userId       String
   jobId        String
-  score        Float    // 0-100 matching score
-  reasoning    String   // AI-generated reasoning
-  matchFactors Json     // Detailed factors that contributed to the match
+  score        Float
+  reasoning    String
+  matchFactors Json
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, jobId])
   @@index([userId])
   @@index([score])
