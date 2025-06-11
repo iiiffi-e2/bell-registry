@@ -49,7 +49,9 @@ export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [stepOneData, setStepOneData] = useState<StepOneData | null>(null);
-  const isEmployerRoute = searchParams.get("role")?.toUpperCase() === "EMPLOYER";
+  const roleParam = searchParams.get("role")?.toUpperCase();
+  const isEmployerRoute = roleParam === "EMPLOYER";
+  const isAgencyRoute = roleParam === "AGENCY";
 
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
@@ -61,7 +63,7 @@ export function RegisterForm() {
   const stepTwoForm = useForm<StepTwoData>({
     resolver: zodResolver(stepTwoSchema),
     defaultValues: {
-      role: isEmployerRoute ? "EMPLOYER" : "PROFESSIONAL",
+      role: isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "PROFESSIONAL",
     },
   });
 
@@ -260,7 +262,7 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-6">
-      {isEmployerRoute && (
+      {(isEmployerRoute || isAgencyRoute) && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium">I am registering as a:</h3>
           <RadioGroup
