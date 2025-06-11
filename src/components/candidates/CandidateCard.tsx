@@ -30,6 +30,7 @@ interface CandidateCardProps {
       image: string | null
       profileSlug: string | null
       isAnonymous?: boolean
+      customInitials?: string | null
     }
   }
   useDashboardRoutes?: boolean // New prop to determine routing context
@@ -59,6 +60,17 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
     
     // If names are single characters (anonymized), show as initials
     if (firstName.length === 1 && lastName.length === 1) {
+      // Use custom initials if provided, otherwise use name initials
+      if (candidate.user.customInitials && candidate.user.customInitials.length >= 2) {
+        const initials = candidate.user.customInitials.toUpperCase();
+        if (initials.length === 2) {
+          return `${initials[0]}. ${initials[1]}.`;
+        } else if (initials.length === 3) {
+          return `${initials[0]}. ${initials[1]}. ${initials[2]}.`;
+        }
+      }
+      
+      // Fallback to name initials
       return `${firstName}. ${lastName}.`;
     }
     

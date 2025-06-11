@@ -86,6 +86,7 @@ export async function PUT(req: Request) {
             lastName: body.lastName,
             phoneNumber: body.phoneNumber,
             isAnonymous: body.isAnonymous,
+            customInitials: body.customInitials || null,
             dontContactMe: body.dontContactMe,
             ...(body.photoUrl && { image: body.photoUrl }),
             ...(profileSlug && { profileSlug })

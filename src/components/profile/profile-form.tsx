@@ -86,6 +86,7 @@ const profileSchema = z.object({
   openToRelocation: z.boolean().default(false),
   openToWork: z.boolean().default(false),
   isAnonymous: z.boolean().default(false),
+  customInitials: z.string().regex(/^[A-Za-z]{2,3}$/, "Must be 2-3 letters only").optional().or(z.literal("")),
   dontContactMe: z.boolean().default(false),
   yearsOfExperience: z.string().optional(),
   availability: z.string().optional(),
@@ -233,6 +234,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     defaultValues: {
       openToRelocation: false,
       isAnonymous: false,
+      customInitials: "",
       dontContactMe: false,
       payType: "Salary",
     },
@@ -291,6 +293,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             workLocations: data.workLocations || [],
             openToRelocation: data.openToRelocation || false,
             isAnonymous: Boolean(data.user?.isAnonymous), // Ensure boolean value
+            customInitials: data.user?.customInitials || "",
             dontContactMe: Boolean(data.user?.dontContactMe), // Ensure boolean value
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
             availability: data.availability ? data.availability.split('T')[0] : "",
@@ -393,6 +396,34 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       )}
                     </div>
                   </div>
+
+                  {/* Custom Initials */}
+                  <FormField
+                    control={form.control}
+                    name="customInitials"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Custom Initials (Optional)</FormLabel>
+                        <FormControl>
+                          <input
+                            type="text"
+                            {...field}
+                            placeholder="e.g., JD or JDS"
+                            maxLength={3}
+                            className="w-20 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 uppercase"
+                            style={{ textTransform: 'uppercase' }}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+                              field.onChange(value);
+                            }}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          Customize the initials shown when your profile is anonymous. Leave blank to use your name initials automatically. Must be 2-3 letters only.
+                        </FormDescription>
+                      </FormItem>
+                    )}
+                  />
 
                   {/* Professional Bio */}
                   <div>
@@ -816,7 +847,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                   </FormItem>
                 )}
               />
-              
+
+
               <FormField
                 control={form.control}
                 name="dontContactMe"

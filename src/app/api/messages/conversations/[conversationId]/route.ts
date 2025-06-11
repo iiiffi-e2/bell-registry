@@ -21,29 +21,9 @@ export async function GET(
     const { conversationId } = params
 
     // Verify user has access to this conversation
-    const conversation = await prisma.conversation.findFirst({
-      where: {
-        id: conversationId,
-        OR: [
-          { clientId: userId },
-          { professionalId: userId }
-        ]
-      },
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
       include: {
-        messages: {
-          include: {
-            sender: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                image: true,
-                role: true
-              }
-            }
-          },
-          orderBy: { createdAt: 'asc' }
-        },
         client: {
           select: {
             id: true,
@@ -51,7 +31,9 @@ export async function GET(
             lastName: true,
             image: true,
             employerProfile: {
-              select: { companyName: true }
+              select: {
+                companyName: true
+              }
             }
           }
         },
@@ -64,7 +46,23 @@ export async function GET(
             role: true,
             isAnonymous: true,
             candidateProfile: {
-              select: { title: true }
+              select: {
+                title: true
+              }
+            }
+          }
+        },
+        messages: {
+          orderBy: { createdAt: 'desc' },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                image: true,
+                role: true,
+              }
             }
           }
         }
@@ -72,10 +70,45 @@ export async function GET(
     })
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: 'Conversation not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Conversation not found' }, { status: 404 })
+    }
+
+    // Verify user has access to this conversation
+    if (conversation.clientId !== userId && conversation.professionalId !== userId) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+
+    // Manually fetch customInitials for all users in the conversation
+    const allUserIds = new Set<string>()
+    allUserIds.add(conversation.clientId)
+    allUserIds.add(conversation.professionalId)
+    conversation.messages.forEach(msg => allUserIds.add(msg.sender.id))
+
+    // Use raw query to get customInitials to work around Prisma client issues
+    const usersWithInitials = await prisma.$queryRaw`
+      SELECT id, "customInitials" FROM "User" WHERE id = ANY(${Array.from(allUserIds)})
+    ` as Array<{ id: string; customInitials: string | null }>
+
+    const initialsMap = new Map(usersWithInitials.map(u => [u.id, u.customInitials]))
+
+    // Add customInitials to the response
+    const enhancedConversation = {
+      ...conversation,
+      client: {
+        ...conversation.client,
+        customInitials: initialsMap.get(conversation.clientId) || null
+      },
+      professional: {
+        ...conversation.professional,
+        customInitials: initialsMap.get(conversation.professionalId) || null
+      },
+      messages: conversation.messages.map(msg => ({
+        ...msg,
+        sender: {
+          ...msg.sender,
+          customInitials: initialsMap.get(msg.sender.id) || null
+        }
+      }))
     }
 
     // Mark messages as read
@@ -110,21 +143,23 @@ export async function GET(
       // If no application exists, anonymize the professional's info
       if (!hasApplication) {
         const anonymizedConversation = {
-          ...conversation,
+          ...enhancedConversation,
           professional: {
-            ...conversation.professional,
-            firstName: conversation.professional.firstName?.[0] || '',
-            lastName: conversation.professional.lastName?.[0] || '',
+            ...enhancedConversation.professional,
+            firstName: enhancedConversation.professional.firstName?.[0] || '',
+            lastName: enhancedConversation.professional.lastName?.[0] || '',
             image: null,
-            isAnonymous: true
+            isAnonymous: true,
+            customInitials: enhancedConversation.professional.customInitials
           },
-          messages: conversation.messages.map(message => ({
+          messages: enhancedConversation.messages.map(message => ({
             ...message,
-            sender: message.sender.id === conversation.professionalId
+            sender: message.sender.id === enhancedConversation.professionalId
               ? {
                   ...message.sender,
                   firstName: message.sender.firstName?.[0] || '',
-                  lastName: message.sender.lastName?.[0] || ''
+                  lastName: message.sender.lastName?.[0] || '',
+                  customInitials: message.sender.customInitials
                 }
               : message.sender
           }))
@@ -133,7 +168,7 @@ export async function GET(
       }
     }
 
-    return NextResponse.json(conversation)
+    return NextResponse.json(enhancedConversation)
   } catch (error) {
     console.error('Error fetching conversation:', error)
     return NextResponse.json(

@@ -122,6 +122,7 @@ export async function GET(request: Request) {
               role: true,
               profileSlug: true,
               isAnonymous: true,
+              customInitials: true,
             },
           },
         },
@@ -142,6 +143,7 @@ export async function GET(request: Request) {
             lastName: professional.user.lastName?.[0] || '',
             image: null, // Hide profile image
             email: '', // Hide email
+            customInitials: (professional.user as any).customInitials || null,
           }
         };
       }

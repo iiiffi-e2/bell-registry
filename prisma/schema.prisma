@@ -72,6 +72,7 @@ model User {
   resetToken                String?              @unique
   resetTokenExpiry          DateTime?            @db.Timestamptz(6)
   isAnonymous               Boolean              @default(false)
+  customInitials            String?              @db.VarChar(3)
   dontContactMe             Boolean              @default(false)
   isDeleted                 Boolean              @default(false)
   deletedAt                 DateTime?            @db.Timestamptz(6)

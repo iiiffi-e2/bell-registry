@@ -17,6 +17,7 @@ interface Conversation {
     firstName: string | null
     lastName: string | null
     image: string | null
+    customInitials?: string | null
     employerProfile: {
       companyName: string
     } | null
@@ -28,6 +29,7 @@ interface Conversation {
     image: string | null
     role: string
     isAnonymous: boolean
+    customInitials?: string | null
     candidateProfile: {
       title: string | null
     } | null
@@ -40,6 +42,7 @@ interface Conversation {
       id: string
       firstName: string | null
       lastName: string | null
+      customInitials?: string | null
     }
   }>
   _count: {
@@ -119,7 +122,8 @@ export function MessageThreadsList({
                       firstName: otherUser.firstName,
                       lastName: otherUser.lastName,
                       role: isOtherUserProfessional ? 'PROFESSIONAL' : 'EMPLOYER',
-                      isAnonymous: isOtherUserProfessional ? conversation.professional.isAnonymous : false
+                      isAnonymous: isOtherUserProfessional ? conversation.professional.isAnonymous : false,
+                      customInitials: isOtherUserProfessional ? conversation.professional.customInitials : conversation.client.customInitials
                     })}
                   </h3>
                   {conversation.status === 'ENDED' && (

@@ -69,6 +69,7 @@ interface PublicProfile {
     email: string;
     phoneNumber: string | null;
     isAnonymous: boolean;
+    customInitials?: string | null;
     dontContactMe?: boolean;
   };
   preferredRole: string | null;
@@ -81,6 +82,17 @@ function getDisplayName(profile: PublicProfile) {
   
   // Check if anonymized (either by isAnonymous flag or single character names)
   if (profile.user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
+    // Use custom initials if provided, otherwise use name initials
+    if (profile.user.customInitials && profile.user.customInitials.length >= 2) {
+      const initials = profile.user.customInitials.toUpperCase();
+      if (initials.length === 2) {
+        return `${initials[0]}. ${initials[1]}.`;
+      } else if (initials.length === 3) {
+        return `${initials[0]}. ${initials[1]}. ${initials[2]}.`;
+      }
+    }
+    
+    // Fallback to name initials
     const firstInitial = firstName[0] || '';
     const lastInitial = lastName[0] || '';
     return `${firstInitial}. ${lastInitial}.`;

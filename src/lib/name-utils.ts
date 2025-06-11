@@ -9,6 +9,7 @@ export function getDisplayName(
     firstName: string | null
     lastName: string | null
     isAnonymous?: boolean
+    customInitials?: string | null
     role?: string
   }
 ): string {
@@ -19,6 +20,17 @@ export function getDisplayName(
   if (user.role === 'PROFESSIONAL') {
     // Check if anonymized (either by isAnonymous flag or single character names)
     if (user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
+      // Use custom initials if provided, otherwise use name initials
+      if (user.customInitials && user.customInitials.length >= 2) {
+        const initials = user.customInitials.toUpperCase();
+        if (initials.length === 2) {
+          return `${initials[0]}. ${initials[1]}.`;
+        } else if (initials.length === 3) {
+          return `${initials[0]}. ${initials[1]}. ${initials[2]}.`;
+        }
+      }
+      
+      // Fallback to name initials
       const firstInitial = firstName[0] || '';
       const lastInitial = lastName[0] || '';
       return `${firstInitial}. ${lastInitial}.`;

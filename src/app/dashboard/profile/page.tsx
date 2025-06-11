@@ -58,6 +58,7 @@ interface CandidateProfile {
     profileSlug: string | null;
     id: string;
     isAnonymous: boolean;
+    customInitials?: string | null;
   };
   preferredRole: string | null;
 }
@@ -65,6 +66,17 @@ interface CandidateProfile {
 // Helper function to get display name based on anonymous setting
 function getDisplayName(profile: CandidateProfile) {
   if (profile.user.isAnonymous) {
+    // Use custom initials if provided, otherwise use name initials
+    if (profile.user.customInitials && profile.user.customInitials.length >= 2) {
+      const initials = profile.user.customInitials.toUpperCase();
+      if (initials.length === 2) {
+        return `${initials[0]}. ${initials[1]}.`;
+      } else if (initials.length === 3) {
+        return `${initials[0]}. ${initials[1]}. ${initials[2]}.`;
+      }
+    }
+    
+    // Fallback to name initials
     const firstInitial = profile.user.firstName?.[0] || '';
     const lastInitial = profile.user.lastName?.[0] || '';
     return `${firstInitial}. ${lastInitial}.`;

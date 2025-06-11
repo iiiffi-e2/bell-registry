@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
             image: true,
             employerProfile: {
               select: {
+                id: true,
                 companyName: true
               }
             }
@@ -47,14 +48,17 @@ export async function GET(request: NextRequest) {
             isAnonymous: true,
             candidateProfile: {
               select: {
+                id: true,
                 title: true
               }
             }
           }
         },
         messages: {
-          orderBy: { createdAt: 'desc' },
           take: 1,
+          orderBy: {
+            createdAt: 'desc'
+          },
           include: {
             sender: {
               select: {
@@ -69,19 +73,56 @@ export async function GET(request: NextRequest) {
           select: {
             messages: {
               where: {
-                read: false,
-                senderId: { not: userId }
+                senderId: { not: userId },
+                read: false
               }
             }
           }
         }
       },
-      orderBy: { lastMessageAt: 'desc' }
+      orderBy: {
+        lastMessageAt: 'desc'
+      }
     })
+
+    // Manually fetch customInitials for all users in the conversations
+    const allUserIds = new Set<string>()
+    conversations.forEach(conv => {
+      allUserIds.add(conv.clientId)
+      allUserIds.add(conv.professionalId)
+      conv.messages.forEach(msg => allUserIds.add(msg.sender.id))
+    })
+
+    // Use raw query to get customInitials to work around Prisma client issues
+    const usersWithInitials = await prisma.$queryRaw`
+      SELECT id, "customInitials" FROM "User" WHERE id = ANY(${Array.from(allUserIds)})
+    ` as Array<{ id: string; customInitials: string | null }>
+
+    const initialsMap = new Map(usersWithInitials.map(u => [u.id, u.customInitials]))
+
+    // Add customInitials to the response
+    const enhancedConversations = conversations.map(conv => ({
+      ...conv,
+      client: {
+        ...conv.client,
+        customInitials: initialsMap.get(conv.clientId) || null
+      },
+      professional: {
+        ...conv.professional,
+        customInitials: initialsMap.get(conv.professionalId) || null
+      },
+      messages: conv.messages.map(msg => ({
+        ...msg,
+        sender: {
+          ...msg.sender,
+          customInitials: initialsMap.get(msg.sender.id) || null
+        }
+      }))
+    }))
 
     // For employers/agencies viewing professionals, check if names should be revealed
     const processedConversations = await Promise.all(
-      conversations.map(async (conversation) => {
+      enhancedConversations.map(async (conversation) => {
         const isEmployerViewingProfessional = 
           (role === 'EMPLOYER' || role === 'AGENCY') && conversation.clientId === userId
 
@@ -105,7 +146,8 @@ export async function GET(request: NextRequest) {
                 firstName: conversation.professional.firstName?.[0] || '',
                 lastName: conversation.professional.lastName?.[0] || '',
                 image: null,
-                isAnonymous: true
+                isAnonymous: true,
+                customInitials: conversation.professional.customInitials
               }
             }
           }

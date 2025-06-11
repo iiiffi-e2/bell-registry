@@ -25,6 +25,7 @@ interface Message {
     lastName: string | null
     image: string | null
     role: string
+    customInitials?: string | null
   }
 }
 
@@ -100,7 +101,8 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
           firstName: session?.user.name?.split(' ')[0] || null,
           lastName: session?.user.name?.split(' ').slice(1).join(' ') || null,
           image: session?.user.image || null,
-          role: session?.user.role || ''
+          role: session?.user.role || '',
+          customInitials: (session?.user as any)?.customInitials || null
         }
       }
 
@@ -192,7 +194,8 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
                   firstName: otherUser.firstName,
                   lastName: otherUser.lastName,
                   role: isOtherUserProfessional ? 'PROFESSIONAL' : 'EMPLOYER',
-                  isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false
+                  isAnonymous: isOtherUserProfessional ? conversationData.professional.isAnonymous : false,
+                  customInitials: isOtherUserProfessional ? conversationData.professional.customInitials : conversationData.client.customInitials
                 })}
               </h2>
               {conversationData.status === 'ENDED' && (
