@@ -15,14 +15,51 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const uploadType = formData.get("uploadType") as string; // "image", "media", "document"
     
     if (!file) {
       return new NextResponse("No file uploaded", { status: 400 });
     }
 
+    // Define allowed file types
+    const allowedTypes = {
+      image: {
+        mimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"],
+        maxSize: 10 * 1024 * 1024, // 10MB for images
+      },
+      media: {
+        mimeTypes: [
+          // Videos
+          "video/mp4", "video/mpeg", "video/quicktime", "video/webm", "video/x-msvideo",
+          // Documents
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ],
+        maxSize: 50 * 1024 * 1024, // 50MB for media files
+      },
+      document: {
+        mimeTypes: [
+          "application/pdf",
+          "application/msword",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ],
+        maxSize: 5 * 1024 * 1024, // 5MB for documents
+      },
+    };
+
+    // Default to image if no upload type specified (for backward compatibility)
+    const typeConfig = allowedTypes[uploadType as keyof typeof allowedTypes] || allowedTypes.image;
+
     // Validate file type
-    if (!file.type.startsWith("image/")) {
-      return new NextResponse("Invalid file type", { status: 400 });
+    if (!typeConfig.mimeTypes.includes(file.type)) {
+      return new NextResponse(`Invalid file type. Allowed types: ${typeConfig.mimeTypes.join(", ")}`, { status: 400 });
+    }
+
+    // Validate file size
+    if (file.size > typeConfig.maxSize) {
+      const maxSizeMB = Math.round(typeConfig.maxSize / (1024 * 1024));
+      return new NextResponse(`File size too large. Maximum size: ${maxSizeMB}MB`, { status: 400 });
     }
 
     // Get file extension

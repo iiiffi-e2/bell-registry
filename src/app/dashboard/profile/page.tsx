@@ -18,6 +18,7 @@ import Image from "next/image";
 import { generateProfileUrl } from "@/lib/utils";
 import Link from "next/link";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
+import { MediaViewer } from "@/components/profile/media-viewer";
 import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
 
 interface CandidateProfile {
@@ -431,6 +432,11 @@ export default function ProfilePage() {
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <PhotoGallery photos={profile.additionalPhotos} />
                   </div>
+                )}
+
+                {/* Media Files */}
+                {profile.mediaUrls.length > 0 && (
+                  <MediaViewer mediaUrls={profile.mediaUrls} />
                 )}
               </div>
             </div>

@@ -19,6 +19,7 @@ import {
   ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
+import { MediaViewer } from "@/components/profile/media-viewer";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
 import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
@@ -453,6 +454,11 @@ export default function CandidateProfilePage({
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <PhotoGallery photos={profile.additionalPhotos} />
                   </div>
+                )}
+
+                {/* Media Files */}
+                {profile.mediaUrls.length > 0 && (
+                  <MediaViewer mediaUrls={profile.mediaUrls} />
                 )}
               </div>
             </div>

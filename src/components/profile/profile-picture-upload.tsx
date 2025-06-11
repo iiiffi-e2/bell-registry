@@ -119,6 +119,7 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
       // Create FormData and upload
       const formData = new FormData();
       formData.append("file", blob, "cropped-profile.jpg");
+      formData.append("uploadType", "image");
 
       const response = await fetch("/api/upload", {
         method: "POST",

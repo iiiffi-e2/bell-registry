@@ -35,9 +35,27 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
           continue;
         }
 
+        // For media files, validate allowed types
+        if (type === "media") {
+          const allowedMediaTypes = [
+            // Videos
+            "video/mp4", "video/mpeg", "video/quicktime", "video/webm", "video/x-msvideo",
+            // Documents
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          ];
+          
+          if (!allowedMediaTypes.includes(file.type)) {
+            alert(`File type ${file.type} is not supported. Please upload videos (MP4, MOV, WebM, AVI), PDFs, or Word documents only.`);
+            continue;
+          }
+        }
+
         // Create FormData
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("uploadType", type === "photo" ? "image" : "media");
 
         // Upload the file
         const response = await fetch("/api/upload", {
@@ -80,8 +98,11 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex h-full items-center justify-center">
-                    <PhotoIcon className="h-12 w-12 text-gray-300" />
+                  <div className="flex h-full items-center justify-center flex-col">
+                    <PhotoIcon className="h-8 w-8 text-gray-300 mb-1" />
+                    <span className="text-xs text-gray-500 text-center px-1 break-all">
+                      {url.split('/').pop()?.split('.')[0]?.substring(0, 10)}...
+                    </span>
                   </div>
                 )}
               </div>
@@ -112,7 +133,11 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
                   type="file"
                   id={`${type}-upload`}
                   name={`${type}-upload`}
-                  accept={type === "photo" ? "image/*" : undefined}
+                  accept={
+                    type === "photo" 
+                      ? "image/*" 
+                      : "video/*,.pdf,.doc,.docx"
+                  }
                   onChange={handleFileChange}
                   className="sr-only"
                   multiple
@@ -124,8 +149,8 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
         </div>
         <p className="mt-2 text-sm text-gray-500">
           {type === "photo"
-            ? `Upload up to ${maxFiles} photos of your work or portfolio`
-            : `Upload up to ${maxFiles} media files (videos, documents, etc.)`}
+            ? `Upload up to ${maxFiles} photos of your work or portfolio (JPG, PNG, GIF, WebP)`
+            : `Upload up to ${maxFiles} media files (Videos, PDFs, Word docs). No resumes please.`}
         </p>
       </div>
     </div>
