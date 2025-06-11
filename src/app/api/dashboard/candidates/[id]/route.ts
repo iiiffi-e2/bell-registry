@@ -85,6 +85,7 @@ export async function GET(
         email: '', // Hide email
         phoneNumber: null, // Hide phone number
         isAnonymous: true, // Mark as anonymous for employers
+        dontContactMe: (candidate as any).dontContactMe || false,
       }
     };
 

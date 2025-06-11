@@ -117,6 +117,7 @@ export async function GET(
         email: isEmployerOrAgency ? '' : profile.email,
         phoneNumber: isEmployerOrAgency ? null : profile.phoneNumber,
         isAnonymous: isEmployerOrAgency ? true : (profile.isAnonymous || false),
+        dontContactMe: (profile as any).dontContactMe || false,
       }
     };
 

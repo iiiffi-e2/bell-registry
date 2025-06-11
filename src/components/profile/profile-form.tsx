@@ -86,6 +86,7 @@ const profileSchema = z.object({
   openToRelocation: z.boolean().default(false),
   openToWork: z.boolean().default(false),
   isAnonymous: z.boolean().default(false),
+  dontContactMe: z.boolean().default(false),
   yearsOfExperience: z.string().optional(),
   availability: z.string().optional(),
   employmentType: z.string().optional(),
@@ -232,6 +233,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     defaultValues: {
       openToRelocation: false,
       isAnonymous: false,
+      dontContactMe: false,
       payType: "Salary",
     },
   });
@@ -289,6 +291,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             workLocations: data.workLocations || [],
             openToRelocation: data.openToRelocation || false,
             isAnonymous: Boolean(data.user?.isAnonymous), // Ensure boolean value
+            dontContactMe: Boolean(data.user?.dontContactMe), // Ensure boolean value
             yearsOfExperience: data.yearsOfExperience?.toString() || "",
             availability: data.availability ? data.availability.split('T')[0] : "",
             employmentType: data.employmentType || "",
@@ -531,52 +534,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     )}
                   </div>
 
-                  <div className="col-span-full">
-                    <FormField
-                      control={form.control}
-                      name="openToWork"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-green-200 bg-green-50 p-4">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel className="text-green-800 font-semibold">Open to Work</FormLabel>
-                            <FormDescription className="text-green-700">
-                              Let employers know you're actively seeking new opportunities. This will display a prominent "Open to Work" badge on your profile.
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="col-span-full">
-                    <FormField
-                      control={form.control}
-                      name="isAnonymous"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
-                          </FormControl>
-                          <div className="space-y-1 leading-none">
-                            <FormLabel>Anonymous Profile</FormLabel>
-                            <FormDescription>
-                              When enabled, your profile will display only your initials and hide your headshot and email address
-                            </FormDescription>
-                          </div>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+
                 </div>
               </div>
             </div>
@@ -733,7 +691,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         {...form.register("whatImSeeking")}
                         rows={4}
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Describe the type of position and environment you're looking for... (Optional)"
+                        placeholder="Describe your ideal work environment and culture... (Optional)"
                       />
                     </div>
                     {form.formState.errors.whatImSeeking && (
@@ -776,24 +734,6 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       <p className="mt-1 text-sm text-red-600">{form.formState.errors.whatSetsApartMe.message}</p>
                     )}
                   </div>
-
-                  {/* Ideal Environment */}
-                  <div>
-                    <label htmlFor="idealEnvironment" className="block text-sm font-medium text-gray-700">
-                      Ideal Environment
-                    </label>
-                    <div className="mt-1">
-                      <textarea
-                        {...form.register("idealEnvironment")}
-                        rows={4}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Describe your ideal work environment and culture... (Optional)"
-                      />
-                    </div>
-                    {form.formState.errors.idealEnvironment && (
-                      <p className="mt-1 text-sm text-red-600">{form.formState.errors.idealEnvironment.message}</p>
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -825,6 +765,79 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                   />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Settings Section */}
+        <div className="bg-white shadow sm:rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg font-medium leading-6 text-gray-900">Profile Settings</h3>
+            <div className="mt-6 space-y-6">
+              <FormField
+                control={form.control}
+                name="openToWork"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-green-200 bg-green-50 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-green-800 font-semibold">Open to Work</FormLabel>
+                      <FormDescription className="text-green-700">
+                        Let employers know you're actively seeking new opportunities. This will display a prominent "Open to Work" badge on your profile.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="isAnonymous"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 bg-gray-50 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Anonymous Profile</FormLabel>
+                      <FormDescription>
+                        When enabled, your profile will display only your initials and hide your headshot and email address from public view.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="dontContactMe"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-red-200 bg-red-50 p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="data-[state=checked]:bg-red-600 data-[state=checked]:border-red-600"
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-red-800 font-semibold">Don't Contact Me</FormLabel>
+                      <FormDescription className="text-red-700">
+                        When enabled, employers will not be able to message you directly through your profile. You can still apply to jobs and respond to existing conversations.
+                      </FormDescription>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
         </div>

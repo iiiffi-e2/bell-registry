@@ -10,15 +10,21 @@ import { UserRole } from '@/types'
 interface MessageProfessionalButtonProps {
   professionalId: string
   className?: string
+  dontContactMe?: boolean
 }
 
-export function MessageProfessionalButton({ professionalId, className }: MessageProfessionalButtonProps) {
+export function MessageProfessionalButton({ professionalId, className, dontContactMe }: MessageProfessionalButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
   // Only show for employers and agencies
   if (!session || (session.user.role !== UserRole.EMPLOYER && session.user.role !== UserRole.AGENCY)) {
+    return null
+  }
+
+  // Don't show if professional has disabled contact
+  if (dontContactMe) {
     return null
   }
 

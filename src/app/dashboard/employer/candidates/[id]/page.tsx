@@ -67,6 +67,7 @@ interface CandidateProfile {
     email: string;
     phoneNumber: string | null;
     isAnonymous: boolean;
+    dontContactMe?: boolean;
   };
   preferredRole: string | null;
 }
@@ -354,6 +355,7 @@ export default function CandidateProfilePage({
                   <MessageProfessionalButton 
                     professionalId={profile.user.id}
                     className="w-full"
+                    dontContactMe={profile.user.dontContactMe}
                   />
                 </div>
 
