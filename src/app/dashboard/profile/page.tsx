@@ -7,8 +7,8 @@ import {
   UserCircleIcon,
   PencilSquareIcon,
   MapPinIcon,
-  EnvelopeIcon,
-  PhoneIcon,
+
+
   BriefcaseIcon,
   AcademicCapIcon,
   CheckCircleIcon,
@@ -211,16 +211,8 @@ export default function ProfilePage() {
                       )}
                     </div>
                     <p className="mt-1 text-lg text-gray-600">{profile.preferredRole || 'Professional'}</p>
-                    <div className="mt-2 flex items-center text-sm text-gray-500">
-                      <EnvelopeIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                      {profile.user.email}
-                    </div>
-                    {profile.user.phoneNumber && (
-                      <div className="mt-1 flex items-center text-sm text-gray-500">
-                        <PhoneIcon className="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                        {profile.user.phoneNumber}
-                      </div>
-                    )}
+
+                    
                   </div>
                 </div>
 
