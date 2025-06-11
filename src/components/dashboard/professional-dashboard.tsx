@@ -18,6 +18,7 @@ import {
   BellIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import AIJobMatches from "@/components/ai-job-matches";
 
 const stats = [
   {
@@ -429,6 +430,9 @@ export function ProfessionalDashboard() {
               </table>
             )}
           </div>
+
+          {/* AI Job Matches */}
+          <AIJobMatches />
 
           {/* Widgets Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

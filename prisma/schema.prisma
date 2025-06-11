@@ -92,6 +92,7 @@ model User {
   sessions                    Session[]
   clientConversations         Conversation[]       @relation("ClientConversations")
   professionalConversations   Conversation[]       @relation("ProfessionalConversations")
+  jobMatches                  JobMatch[]
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -202,6 +203,7 @@ model Job {
   viewEvents       JobViewEvent[]
   savedCandidates  SavedCandidate[]
   savedBy          SavedJob[]
+  matches          JobMatch[]
 }
 
 model JobApplication {
@@ -317,6 +319,24 @@ model JobAlert {
   @@index([userId])
   @@index([isActive])
   @@index([frequency])
+}
+
+model JobMatch {
+  id           String   @id @default(cuid())
+  userId       String
+  jobId        String
+  score        Float    // 0-100 matching score
+  reasoning    String   // AI-generated reasoning
+  matchFactors Json     // Detailed factors that contributed to the match
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job          Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, jobId])
+  @@index([userId])
+  @@index([score])
 }
 
 enum UserRole {
