@@ -14,13 +14,52 @@ The AI-Powered Job Matching feature revolutionizes how professionals discover re
 - **Real-Time Refresh**: Manual refresh capability for updated matches
 - **Save Job Functionality**: One-click saving of interesting matches for later review
 
-### 🎯 Scoring Factors
-1. **Role Match** (0-100): Job title/role alignment with preferences
-2. **Location Match** (0-100): Geographic compatibility and relocation willingness
-3. **Skills Match** (0-100): Technical and soft skills alignment
-4. **Experience Match** (0-100): Years of experience compatibility
-5. **Salary Match** (0-100): Compensation expectations vs. offer
-6. **Preference Match** (0-100): Overall career preference alignment
+### 🎯 Detailed Scoring Factors
+
+#### **Role Match** (0-100): Job title similarity to preferred role
+- **90-100**: Exact or very similar role match
+- **70-89**: Related role with transferable skills  
+- **50-69**: Somewhat related role
+- **30-49**: Different but possibly relevant
+- **0-29**: Unrelated role
+
+#### **Location Match** (0-100): Geographic compatibility with proximity scoring
+- **100**: Same city as current/preferred location
+- **80-99**: Same metro area or within 25 miles
+- **60-79**: Same state or within 50 miles
+- **40-59**: Same region or within 100 miles  
+- **20-39**: Different region, relocation required
+- **0-19**: Very distant, major relocation needed
+- **+20 bonus**: If candidate is open to relocation
+
+#### **Salary Match** (0-100): Salary range overlap and adequacy
+- **90-100**: Job range fully meets or exceeds candidate expectations
+- **70-89**: Good overlap (50%+ of candidate range covered)
+- **50-69**: Partial overlap (25-50% coverage)
+- **30-49**: Minimal overlap (job max touches candidate min)
+- **10-29**: Below expectations but possibly negotiable
+- **0-9**: Far below candidate expectations
+
+#### **Experience Match** (0-100): Years of experience vs role requirements
+- **90-100**: Perfect experience match for role level
+- **70-89**: Good fit, slightly under/over qualified
+- **50-69**: Acceptable fit with some gaps
+- **30-49**: Under/over qualified but workable
+- **0-29**: Significant experience mismatch
+
+#### **Skills Match** (0-100): Skills alignment with job requirements
+- **90-100**: Candidate has most/all required skills
+- **70-89**: Strong skill overlap
+- **50-69**: Moderate skill match
+- **30-49**: Some relevant skills
+- **0-29**: Few matching skills
+
+#### **Preference Match** (0-100): Alignment with seeking opportunities
+- **90-100**: Perfect alignment with stated preferences
+- **70-89**: Good match for most preferences
+- **50-69**: Mixed alignment
+- **30-49**: Some misalignment but acceptable
+- **0-29**: Poor fit with preferences
 
 ## Technical Implementation
 
