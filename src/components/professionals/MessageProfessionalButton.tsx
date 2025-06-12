@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -13,18 +13,59 @@ interface MessageProfessionalButtonProps {
   dontContactMe?: boolean
 }
 
+interface MessagePermission {
+  canMessage: boolean
+  reason?: 'NO_ACTIVE_SUBSCRIPTION' | 'TRIAL_SUBSCRIPTION' | 'NO_ACTIVE_APPLICATION'
+  subscriptionType?: string
+}
+
 export function MessageProfessionalButton({ professionalId, className, dontContactMe }: MessageProfessionalButtonProps) {
   const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [permission, setPermission] = useState<MessagePermission | null>(null)
+  const [checkingPermission, setCheckingPermission] = useState(true)
 
-  // Only show for employers and agencies
+  useEffect(() => {
+    async function checkPermission() {
+      if (!session?.user?.id || (session.user.role !== UserRole.EMPLOYER && session.user.role !== UserRole.AGENCY)) {
+        setCheckingPermission(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/messages/can-message?professionalId=${professionalId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setPermission(data)
+        }
+      } catch (error) {
+        console.error('Error checking messaging permission:', error)
+      } finally {
+        setCheckingPermission(false)
+      }
+    }
+
+    checkPermission()
+  }, [session, professionalId])
+
+  // Don't show if not an employer/agency
   if (!session || (session.user.role !== UserRole.EMPLOYER && session.user.role !== UserRole.AGENCY)) {
     return null
   }
 
   // Don't show if professional has disabled contact
   if (dontContactMe) {
+    return null
+  }
+
+  // Don't show if checking permission
+  if (checkingPermission) {
+    return null
+  }
+
+  // Don't show if no permission to message
+  if (!permission?.canMessage) {
     return null
   }
 
