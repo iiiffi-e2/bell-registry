@@ -49,7 +49,7 @@ export default function RegisterPage() {
                       </>
                     ) : (
                       <>
-                        Sign up for BellRegistry —
+                        Sign up for The Bell Registry —
                         <br />
                         <span className="text-gray-500">free forever</span>
                       </>
