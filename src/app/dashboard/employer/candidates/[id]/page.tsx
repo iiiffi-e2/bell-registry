@@ -248,7 +248,7 @@ export default function CandidateProfilePage({
                   <div className="space-y-8">
                     {profile.whatImSeeking && (
                       <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">What I'm Seeking</h4>
+                        <h4 className="text-lg font-medium text-gray-900 mb-2">What I&apos;m Seeking</h4>
                         <p className="text-gray-700 whitespace-pre-wrap">{profile.whatImSeeking}</p>
                       </div>
                     )}

@@ -358,7 +358,7 @@ export default function JobAlertsPage() {
                     options={PROFESSIONAL_ROLES}
                     value={form.watch("roles") || []}
                     onChange={(value) => form.setValue("roles", value)}
-                    placeholder="Select roles you're interested in..."
+                                              placeholder="Select roles you&apos;re interested in..."
                   />
                   {form.formState.errors.roles && (
                     <p className="mt-1 text-sm text-red-600">{form.formState.errors.roles.message}</p>

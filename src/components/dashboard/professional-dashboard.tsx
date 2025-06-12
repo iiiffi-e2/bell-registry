@@ -227,7 +227,7 @@ export function ProfessionalDashboard() {
               Welcome back, {session?.user?.name?.split(' ')[0] || 'Professional'}
             </h1>
             <p className="mt-2 text-gray-600">
-              Here's what's happening with your job search
+              Here&apos;s what&apos;s happening with your job search
             </p>
           </div>
 
@@ -502,7 +502,7 @@ export function ProfessionalDashboard() {
                     <BriefcaseIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <h3 className="mt-2 text-sm font-medium text-gray-900">No recommended jobs found</h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      We couldn't find any jobs matching your profile. Try browsing all jobs.
+                      We couldn&apos;t find any jobs matching your profile. Try browsing all jobs.
                     </p>
                     <div className="mt-6">
                       <Link

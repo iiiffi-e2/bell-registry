@@ -35,7 +35,7 @@ const stepTwoSchema = z.object({
   confirmPassword: z.string(),
   role: z.enum(ROLES).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+      message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
 });
 
@@ -175,7 +175,7 @@ export function RegisterForm() {
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           <label htmlFor="terms" className="ml-2 block text-sm text-gray-600">
-            By signing up, I agree to BellRegistry's{" "}
+            By signing up, I agree to BellRegistry&apos;s{" "}
             <Link href="/terms" className="text-blue-600 hover:text-blue-500">
               Terms of Service
             </Link>{" "}

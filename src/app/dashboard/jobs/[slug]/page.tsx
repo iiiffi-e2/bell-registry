@@ -193,7 +193,7 @@ export default function DashboardJobDetailsPage() {
         
         <div className="bg-white rounded-lg shadow p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Job Not Found</h2>
-          <p className="text-gray-600 mb-4">{error || "The job you're looking for doesn't exist or has been removed."}</p>
+                      <p className="text-gray-600 mb-4">{error || "The job you&apos;re looking for doesn&apos;t exist or has been removed."}</p>
           <Button onClick={() => router.push("/dashboard/jobs")}>
             Browse Jobs
           </Button>

@@ -133,18 +133,18 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
     title = 'Action Required';
     message = isExpired 
       ? 'Your subscription has expired. Upgrade to continue posting jobs.'
-      : 'You\'ve reached your job posting limit. Upgrade to post more jobs.';
+      : 'You&apos;ve reached your job posting limit. Upgrade to post more jobs.';
     showUpgradeButton = true;
   } else if (isExpiringSoon || isNearLimit) {
     alertType = 'warning';
     icon = Clock;
     title = 'Heads Up';
     if (isExpiringSoon && isNearLimit) {
-      message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''} and you're near your job posting limit.`;
+      message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''} and you&apos;re near your job posting limit.`;
     } else if (isExpiringSoon) {
       message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''}.`;
     } else {
-      message = `You've used ${subscription.jobsPostedCount} of ${subscription.jobPostLimit} job posts.`;
+      message = `You&apos;ve used ${subscription.jobsPostedCount} of ${subscription.jobPostLimit} job posts.`;
     }
     showUpgradeButton = true;
   } else {

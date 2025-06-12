@@ -585,7 +585,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         options={PROFESSIONAL_ROLES}
                         value={form.watch("seekingOpportunities") || []}
                         onChange={(newValue) => form.setValue("seekingOpportunities", newValue)}
-                        placeholder="Select roles you're interested in..."
+                        placeholder="Select roles you&apos;re interested in..."
                       />
                     </div>
                     {form.formState.errors.seekingOpportunities && (
@@ -715,7 +715,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                   {/* What I'm Seeking */}
                   <div>
                     <label htmlFor="whatImSeeking" className="block text-sm font-medium text-gray-700">
-                      What I'm Seeking
+                      What I&apos;m Seeking
                     </label>
                     <div className="mt-1">
                       <textarea
@@ -740,7 +740,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         {...form.register("whyIEnjoyThisWork")}
                         rows={4}
                         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                        placeholder="Share what motivates you and why you're passionate about this field... (Optional)"
+                                                  placeholder="Share what motivates you and why you&apos;re passionate about this field... (Optional)"
                       />
                     </div>
                     {form.formState.errors.whyIEnjoyThisWork && (
@@ -820,7 +820,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-green-800 font-semibold">Open to Work</FormLabel>
                       <FormDescription className="text-green-700">
-                        Let employers know you're actively seeking new opportunities. This will display a prominent "Open to Work" badge on your profile.
+                        Let employers know you&apos;re actively seeking new opportunities. This will display a prominent &quot;Open to Work&quot; badge on your profile.
                       </FormDescription>
                     </div>
                   </FormItem>
@@ -862,7 +862,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="text-red-800 font-semibold">Don't Contact Me</FormLabel>
+                                              <FormLabel className="text-red-800 font-semibold">Don&apos;t Contact Me</FormLabel>
                       <FormDescription className="text-red-700">
                         When enabled, employers will not be able to message you directly through your profile. You can still apply to jobs and respond to existing conversations.
                       </FormDescription>

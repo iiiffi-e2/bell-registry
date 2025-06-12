@@ -42,7 +42,7 @@ export function OpenToWorkToggle({ isOpenToWork, onToggle, isLoading }: OpenToWo
         <div className="flex-1">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Open to Work Status</h3>
           <p className="text-sm text-gray-600 mb-4">
-            Let employers know you're actively seeking new opportunities
+            Let employers know you&apos;re actively seeking new opportunities
           </p>
           
           {isOpenToWork && (

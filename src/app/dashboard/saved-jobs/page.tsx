@@ -124,7 +124,7 @@ export default function SavedJobsPage() {
             <BookmarkIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No saved jobs</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Start saving jobs you're interested in by clicking the bookmark icon.
+                              Start saving jobs you&apos;re interested in by clicking the bookmark icon.
             </p>
             <div className="mt-6">
               <button

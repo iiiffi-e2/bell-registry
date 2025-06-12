@@ -24,7 +24,7 @@ export default function Error({
               Profile Not Found
             </h1>
             <p className="text-gray-600 mb-8">
-              The profile you're looking for doesn't exist or has been removed.
+              The profile you&apos;re looking for doesn&apos;t exist or has been removed.
             </p>
             <div className="flex justify-center space-x-4">
               <button

@@ -56,7 +56,7 @@ export function ForgotPasswordForm() {
         <div className="flex">
           <div className="ml-3">
             <h3 className="text-sm font-medium text-green-800">
-              Check your email for a link to reset your password. If it doesn't appear within a few minutes, check your spam folder.
+              Check your email for a link to reset your password. If it doesn&apos;t appear within a few minutes, check your spam folder.
             </h3>
           </div>
         </div>
