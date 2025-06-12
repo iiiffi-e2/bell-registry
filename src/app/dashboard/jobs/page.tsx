@@ -158,11 +158,7 @@ function JobSearchPageContent() {
     return () => mediaQuery.removeEventListener('change', handleResize);
   }, []);
 
-  useEffect(() => {
-    fetchJobs(1);
-  }, [searchTerm, selectedFilters]);
-
-  const fetchJobs = async (page: number) => {
+  const fetchJobs = useCallback(async (page: number) => {
     try {
       setLoading(true);
       const searchParams = new URLSearchParams();
@@ -228,7 +224,11 @@ function JobSearchPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, selectedFilters]);
+
+  useEffect(() => {
+    fetchJobs(1);
+  }, [fetchJobs]);
 
   const handleBookmark = async (jobSlug: string) => {
     try {

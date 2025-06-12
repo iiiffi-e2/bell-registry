@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -61,7 +61,35 @@ export default function AIJobMatches() {
   const [savedJobs, setSavedJobs] = useState<{ [key: string]: boolean }>({});
   const [savingJobs, setSavingJobs] = useState<{ [key: string]: boolean }>({});
 
-  const fetchMatches = async (forceRefresh = false) => {
+  const fetchSavedStatus = useCallback(async (jobs: JobMatch[]) => {
+    try {
+      const savedStatus: { [key: string]: boolean } = {};
+      
+      // Fetch saved status for all jobs
+      await Promise.all(
+        jobs.map(async (match) => {
+          try {
+            const response = await fetch(`/api/jobs/${match.job.urlSlug}/bookmark`);
+            if (response.ok) {
+              const { bookmarked } = await response.json();
+              savedStatus[match.job.urlSlug] = bookmarked;
+            } else {
+              savedStatus[match.job.urlSlug] = false;
+            }
+          } catch (error) {
+            console.error(`Error fetching save status for job ${match.job.urlSlug}:`, error);
+            savedStatus[match.job.urlSlug] = false;
+          }
+        })
+      );
+      
+      setSavedJobs(savedStatus);
+    } catch (error) {
+      console.error('Error fetching saved job statuses:', error);
+    }
+  }, []);
+
+  const fetchMatches = useCallback(async (forceRefresh = false) => {
     try {
       setError(null);
       
@@ -109,7 +137,7 @@ export default function AIJobMatches() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchSavedStatus]);
 
   const refreshMatches = async () => {
     try {
@@ -131,7 +159,7 @@ export default function AIJobMatches() {
 
   useEffect(() => {
     fetchMatches(false);
-  }, []);
+  }, [fetchMatches]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
@@ -143,34 +171,6 @@ export default function AIJobMatches() {
     if (score >= 80) return 'bg-green-100 border-green-200';
     if (score >= 60) return 'bg-yellow-100 border-yellow-200';
     return 'bg-red-100 border-red-200';
-  };
-
-  const fetchSavedStatus = async (jobs: JobMatch[]) => {
-    try {
-      const savedStatus: { [key: string]: boolean } = {};
-      
-      // Fetch saved status for all jobs
-      await Promise.all(
-        jobs.map(async (match) => {
-          try {
-            const response = await fetch(`/api/jobs/${match.job.urlSlug}/bookmark`);
-            if (response.ok) {
-              const { bookmarked } = await response.json();
-              savedStatus[match.job.urlSlug] = bookmarked;
-            } else {
-              savedStatus[match.job.urlSlug] = false;
-            }
-          } catch (error) {
-            console.error(`Error fetching save status for job ${match.job.urlSlug}:`, error);
-            savedStatus[match.job.urlSlug] = false;
-          }
-        })
-      );
-      
-      setSavedJobs(savedStatus);
-    } catch (error) {
-      console.error('Error fetching saved job statuses:', error);
-    }
   };
 
   const handleSaveJob = async (jobSlug: string) => {

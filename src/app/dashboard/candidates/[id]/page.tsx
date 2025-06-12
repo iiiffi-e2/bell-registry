@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -107,22 +107,7 @@ export default function CandidateProfilePage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!session?.user) {
-      router.push("/login");
-      return;
-    }
-
-    // Allow access for professionals, employers, and agencies
-    if (!["PROFESSIONAL", "EMPLOYER", "AGENCY"].includes(session.user.role)) {
-      router.push("/dashboard");
-      return;
-    }
-
-    fetchProfile();
-  }, [session, params.id, router]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/dashboard/candidates/${params.id}`);
@@ -144,7 +129,22 @@ export default function CandidateProfilePage({
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id]);
+
+  useEffect(() => {
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
+
+    // Allow access for professionals, employers, and agencies
+    if (!["PROFESSIONAL", "EMPLOYER", "AGENCY"].includes(session.user.role)) {
+      router.push("/dashboard");
+      return;
+    }
+
+    fetchProfile();
+  }, [session, params.id, router, fetchProfile]);
 
   if (loading) {
     return (
