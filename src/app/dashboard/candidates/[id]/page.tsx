@@ -195,17 +195,6 @@ export default function CandidateProfilePage({
           </button>
         </div>
 
-        {/* Open to Work Banner */}
-        {profile.openToWork && (
-          <div className="mb-6">
-            <OpenToWorkBadge 
-              variant="banner" 
-              size="lg" 
-              className="w-full justify-center"
-            />
-          </div>
-        )}
-
         {/* Profile Content */}
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
