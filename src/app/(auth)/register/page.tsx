@@ -7,11 +7,14 @@ import { RegisterForm } from "@/components/auth/register-form";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
-  const isEmployerRoute = searchParams?.get("role")?.toUpperCase() === "EMPLOYER";
+  const userRole = searchParams?.get("role")?.toUpperCase();
+  const isEmployerRoute = userRole === "EMPLOYER";
+  const isAgencyRoute = userRole === "AGENCY";
+  const isEmployerOrAgency = isEmployerRoute || isAgencyRoute;
   
   // Determine which hero image to use
-  const heroImage = isEmployerRoute ? "/images/register-hero-employer.png" : "/images/register-hero.png";
-  const heroAlt = isEmployerRoute ? "Luxury estate employer" : "Luxury estate professional";
+  const heroImage = isEmployerOrAgency ? "/images/register-hero-employer.png" : "/images/register-hero.png";
+  const heroAlt = isEmployerOrAgency ? "Luxury estate employer" : "Luxury estate professional";
 
   return (
     <div className="min-h-screen bg-[#FFFFF0] p-4 md:p-8">
@@ -38,12 +41,25 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                    Sign up for BellRegistry —
-                    <br />
-                    <span className="text-gray-500">free forever</span>
+                    {isEmployerOrAgency ? (
+                      <>
+                        The Bell Registry —
+                        <br />
+                        <span className="text-gray-500">free to get started</span>
+                      </>
+                    ) : (
+                      <>
+                        Sign up for BellRegistry —
+                        <br />
+                        <span className="text-gray-500">free forever</span>
+                      </>
+                    )}
                   </h1>
                   <p className="mt-4 text-base text-gray-600">
-                    Find, connect, and secure your ideal position in luxury private service. Join the premier platform for estate professionals.
+                    {isEmployerOrAgency 
+                      ? "Find, connect with, and hire top-tier estate professionals. Join the premier platform trusted by discerning employers in luxury private service."
+                      : "Find, connect, and secure your ideal position in luxury private service. Join the premier platform for estate professionals."
+                    }
                   </p>
                 </div>
                 <RegisterForm />
