@@ -14,8 +14,8 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only employers and agencies can view candidate profiles in dashboard
-    if (session.user.role !== 'EMPLOYER' && session.user.role !== 'AGENCY') {
+    // Allow employers, agencies, and professionals to view candidate profiles in dashboard
+    if (!['EMPLOYER', 'AGENCY', 'PROFESSIONAL'].includes(session.user.role)) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

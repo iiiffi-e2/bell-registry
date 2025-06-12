@@ -44,7 +44,7 @@ export default function BrowseProfessionalsPage() {
   const [roleTypes, setRoleTypes] = useState<UserRole[]>([]);
 
   // Determine if we should use dashboard routes
-  const shouldUseDashboardRoutes = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY';
+  const shouldUseDashboardRoutes = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY' || session?.user?.role === 'PROFESSIONAL';
 
   useEffect(() => {
     Promise.all([

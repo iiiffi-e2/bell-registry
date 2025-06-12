@@ -44,11 +44,18 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
 
   // Check if current user is an employer/agency
   const canSaveCandidate = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY'
+  const isProfessional = session?.user?.role === 'PROFESSIONAL'
 
   // Determine the appropriate profile URL based on context
   const getProfileUrl = () => {
-    if (useDashboardRoutes && canSaveCandidate) {
-      return `/dashboard/employer/candidates/${candidate.user.id}`
+    if (useDashboardRoutes && (canSaveCandidate || isProfessional)) {
+      if (canSaveCandidate) {
+        // Employers and agencies use the employer-specific route
+        return `/dashboard/employer/candidates/${candidate.user.id}`
+      } else if (isProfessional) {
+        // Professionals use a general dashboard candidates route
+        return `/dashboard/candidates/${candidate.user.id}`
+      }
     }
     return generateProfileUrl(candidate.user.profileSlug)
   }
