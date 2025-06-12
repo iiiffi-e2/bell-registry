@@ -79,6 +79,13 @@ export async function GET(
       }
     });
 
+    // Determine if we should anonymize the profile
+    // Anonymize if:
+    // 1. Viewer is an employer/agency, OR
+    // 2. Viewer is a professional viewing someone else's profile (not their own)
+    const isViewingOwnProfile = session?.user?.id === profile.id;
+    const shouldAnonymize = isEmployerOrAgency || (session?.user?.role === "PROFESSIONAL" && !isViewingOwnProfile);
+
     // Format the response data
     const responseData = {
       id: profile.candidateProfile.id,
@@ -90,7 +97,7 @@ export async function GET(
       certifications: profile.candidateProfile.certifications || [],
       location: profile.candidateProfile.location,
       availability: profile.candidateProfile.availability ? profile.candidateProfile.availability.toISOString() : null,
-      resumeUrl: isEmployerOrAgency ? null : profile.candidateProfile.resumeUrl,
+      resumeUrl: shouldAnonymize ? null : profile.candidateProfile.resumeUrl,
       profileViews: profile.candidateProfile.profileViews,
       workLocations: profile.candidateProfile.workLocations || [],
       openToRelocation: profile.candidateProfile.openToRelocation || false,
@@ -103,21 +110,21 @@ export async function GET(
       payRangeMin: profile.candidateProfile.payRangeMin,
       payRangeMax: profile.candidateProfile.payRangeMax,
       payType: profile.candidateProfile.payType || 'Salary',
-      additionalPhotos: isEmployerOrAgency ? [] : (profile.candidateProfile.additionalPhotos || []),
+      additionalPhotos: shouldAnonymize ? [] : (profile.candidateProfile.additionalPhotos || []),
       mediaUrls: profile.candidateProfile.mediaUrls || [],
       openToWork: profile.candidateProfile.openToWork || false,
       employmentType: (profile.candidateProfile as any).employmentType || null,
       user: {
         id: profile.id,
-        firstName: isEmployerOrAgency ? (profile.firstName?.[0] || '') : profile.firstName,
-        lastName: isEmployerOrAgency ? (profile.lastName?.[0] || '') : profile.lastName,
-        image: isEmployerOrAgency ? null : profile.image,
+        firstName: shouldAnonymize ? (profile.firstName?.[0] || '') : profile.firstName,
+        lastName: shouldAnonymize ? (profile.lastName?.[0] || '') : profile.lastName,
+        image: shouldAnonymize ? null : profile.image,
         role: profile.role,
         createdAt: profile.createdAt.toISOString(),
-        email: isEmployerOrAgency ? '' : profile.email,
-        phoneNumber: isEmployerOrAgency ? null : profile.phoneNumber,
-        isAnonymous: isEmployerOrAgency ? true : (profile.isAnonymous || false),
-        customInitials: isEmployerOrAgency ? null : ((profile as any).customInitials || null),
+        email: shouldAnonymize ? '' : profile.email,
+        phoneNumber: shouldAnonymize ? null : profile.phoneNumber,
+        isAnonymous: shouldAnonymize ? true : (profile.isAnonymous || false),
+        customInitials: shouldAnonymize ? ((profile as any).customInitials || null) : ((profile as any).customInitials || null),
         dontContactMe: (profile as any).dontContactMe || false,
       }
     };

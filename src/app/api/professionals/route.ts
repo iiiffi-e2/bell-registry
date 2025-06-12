@@ -132,9 +132,10 @@ export async function GET(request: Request) {
 
     console.log('Found professionals:', professionals)
 
-    // Anonymize data for employers and agencies
+    // Anonymize data for employers and agencies, and professionals viewing other professionals
+    const shouldAnonymizeForAll = isEmployerOrAgency || session?.user?.role === "PROFESSIONAL";
     const anonymizedProfessionals = professionals.map(professional => {
-      if (isEmployerOrAgency) {
+      if (shouldAnonymizeForAll) {
         return {
           ...professional,
           user: {
