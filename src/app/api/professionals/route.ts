@@ -130,7 +130,7 @@ export async function GET(request: Request) {
       prisma.candidateProfile.count({ where }),
     ])
 
-    console.log('Found professionals:', professionals)
+    console.log('Found professionals count:', professionals.length)
 
     // Anonymize data for employers and agencies, and professionals viewing other professionals
     const shouldAnonymizeForAll = isEmployerOrAgency || session?.user?.role === "PROFESSIONAL";

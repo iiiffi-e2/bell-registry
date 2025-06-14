@@ -59,12 +59,12 @@ export async function GET(
       }
     });
 
-    console.log("[PROFILE_GET] Raw profile data:", profile);
-
     if (!profile || !profile.candidateProfile) {
       console.log("[PROFILE_GET] Profile not found");
       return new NextResponse("Profile not found", { status: 404 });
     }
+
+    console.log("[PROFILE_GET] Profile found for user ID:", profile.id);
 
     // Increment profile views
     await prisma.candidateProfile.update({
@@ -129,7 +129,7 @@ export async function GET(
       }
     };
 
-    console.log("[PROFILE_GET] Formatted response data:", responseData);
+    console.log("[PROFILE_GET] Successfully returning profile data for user ID:", profile.id);
 
     return NextResponse.json(responseData, {
       headers: {
