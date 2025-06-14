@@ -192,7 +192,7 @@ export function HomePageClient() {
                 <h4 className="font-semibold mb-4">For Professionals</h4>
                 <ul className="space-y-2">
                   <li>
-                    <Link href="/search" className="text-gray-400 hover:text-white">
+                    <Link href="/jobs" className="text-gray-400 hover:text-white">
                       Browse Jobs
                     </Link>
                   </li>

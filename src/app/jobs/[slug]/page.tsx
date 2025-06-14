@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import { getTimeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { ApplyJobModal } from "@/components/modals/apply-job-modal";
@@ -24,6 +24,7 @@ interface JobDetails {
   featured: boolean;
   createdAt: string;
   expiresAt: string;
+  urlSlug: string;
   employer: {
     firstName?: string;
     lastName?: string;
@@ -134,6 +135,37 @@ export default function PublicJobDetailsPage() {
     }
   };
 
+  const handleSaveJob = async () => {
+    if (!session?.user?.id) {
+      // Redirect to login with callback to current page
+      router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
+      return;
+    }
+
+    if (!job) return;
+
+    try {
+      const response = await fetch(`/api/jobs/${job.urlSlug}/bookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) throw new Error('Failed to bookmark job');
+
+      const { bookmarked } = await response.json();
+      
+      // Update the job state to reflect the new bookmark status
+      setJob({
+        ...job,
+        isBookmarked: bookmarked
+      });
+    } catch (error) {
+      console.error('Error bookmarking job:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -202,37 +234,52 @@ export default function PublicJobDetailsPage() {
                 {formatSalary(job.salary)}
               </div>
               
-              {/* Apply Button Section */}
-              {session?.user?.role === 'PROFESSIONAL' && (
-                <div className="mt-4">
-                  {job.hasApplied ? (
-                    <button
-                      disabled
-                      className="px-6 py-3 bg-gray-300 text-gray-600 rounded-md font-medium cursor-not-allowed"
-                    >
-                      Already Applied
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setIsApplyModalOpen(true)}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
-                    >
-                      Apply for this Job
-                    </button>
-                  )}
-                </div>
-              )}
-              
-              {!session && (
-                <div className="mt-4">
+              {/* Apply and Save Button Section */}
+              <div className="mt-4 flex flex-wrap gap-3">
+                {/* Apply Button */}
+                {session?.user?.role === 'PROFESSIONAL' && (
+                  <>
+                    {job.hasApplied ? (
+                      <button
+                        disabled
+                        className="px-6 py-3 bg-gray-300 text-gray-600 rounded-md font-medium cursor-not-allowed"
+                      >
+                        Already Applied
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setIsApplyModalOpen(true)}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+                      >
+                        Apply for this Job
+                      </button>
+                    )}
+                  </>
+                )}
+                
+                {!session && (
                   <button
-                    onClick={() => router.push('/auth/signin?callbackUrl=' + encodeURIComponent(window.location.pathname))}
+                    onClick={() => router.push('/login?callbackUrl=' + encodeURIComponent(window.location.pathname))}
                     className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
                   >
                     Sign in to Apply
                   </button>
-                </div>
-              )}
+                )}
+
+                {/* Save Button */}
+                <button
+                  onClick={handleSaveJob}
+                  className={`inline-flex items-center px-4 py-3 rounded-md font-medium transition-colors ${
+                    job.isBookmarked 
+                      ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  title={session?.user?.id ? (job.isBookmarked ? 'Remove from saved jobs' : 'Save job') : 'Sign in to save jobs'}
+                >
+                  <BookmarkIcon className={`h-5 w-5 mr-2 ${job.isBookmarked ? 'text-blue-600' : 'text-gray-500'}`} />
+                  {job.isBookmarked ? 'Saved' : 'Save Job'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

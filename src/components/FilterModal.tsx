@@ -78,14 +78,14 @@ export function FilterModal({ isOpen, onClose, filters }: FilterModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Filter Jobs</DialogTitle>
           <DialogDescription>
             Apply filters to find the perfect job match.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
+        <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto pr-2">
           <div className="grid gap-2">
             <Label>Job Type</Label>
             <div className="flex flex-wrap gap-2">
@@ -135,7 +135,7 @@ export function FilterModal({ isOpen, onClose, filters }: FilterModalProps) {
           </div>
           <div className="grid gap-2">
             <Label>Professional Role</Label>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto border rounded-md p-2 bg-gray-50">
               {PROFESSIONAL_ROLES.map((role) => (
                 <FilterButton
                   key={role}

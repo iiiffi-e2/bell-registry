@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
     '/',
     '/jobs',
     '/candidates',
-    '/auth/signin',
+    '/auth/signin', 
     '/auth/signup',
     '/auth/error',
     '/auth/verify-request',
@@ -19,6 +19,11 @@ export async function middleware(request: NextRequest) {
     '/privacy',
     '/terms',
   ];
+
+  // Check if it's a public route (including dynamic job routes)
+  const isPublicRoute = publicRoutes.some(route => pathname === route) || 
+                       pathname.startsWith('/jobs/') ||
+                       pathname.startsWith('/candidates/');
 
   // Add dynamic header for API routes
   if (pathname.startsWith('/api/')) {
@@ -33,7 +38,7 @@ export async function middleware(request: NextRequest) {
 
   // Check for authentication
   const token = await getToken({ req: request });
-  if (!token) {
+  if (!token && !isPublicRoute) {
     const url = new URL('/login', request.url);
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
