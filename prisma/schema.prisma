@@ -78,6 +78,7 @@ model User {
   deletedAt                 DateTime?            @db.Timestamptz(6)
   lastLoginAt               DateTime?            @db.Timestamptz(6)
   lastProfileReminderSentAt DateTime?            @db.Timestamptz(6)
+  surveyDismissedAt         DateTime?            @db.Timestamptz(6)
   accounts                  Account[]
   candidateProfile          CandidateProfile?
   clientConversations       Conversation[]       @relation("ClientConversations")

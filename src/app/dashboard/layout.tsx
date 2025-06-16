@@ -30,6 +30,8 @@ import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 import { MessagesMenuBadge } from "@/components/messaging/MessagesMenuBadge";
 import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
 import { FeedbackModal } from "@/components/modals/feedback-modal";
+import { SurveyBanner } from "@/components/survey/survey-banner";
+import { useSurvey } from "@/hooks/use-survey";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -135,6 +137,14 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
+  
+  // Survey state
+  const {
+    surveyStatus,
+    isLoading: isSurveyLoading,
+    dismissSurveyPermanently,
+    dismissSurveyTemporarily,
+  } = useSurvey();
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -359,7 +369,16 @@ export default function DashboardLayout({
           </div>
         </div>
         {/* Main content area */}
-        <main className="flex-1 p-6 bg-gray-50 min-h-screen">{children}</main>
+        <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+          {/* Survey Banner */}
+          {surveyStatus.shouldShowBanner && !isSurveyLoading && (
+            <SurveyBanner 
+              onDismissPermanently={dismissSurveyPermanently}
+              onDismissTemporarily={dismissSurveyTemporarily}
+            />
+          )}
+          {children}
+        </main>
       </div>
 
       {/* Feedback Modal */}
