@@ -18,6 +18,7 @@ import {
   BuildingOfficeIcon,
   CreditCardIcon,
   ReceiptPercentIcon,
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDown } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
@@ -28,6 +29,7 @@ import React from "react";
 import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 import { MessagesMenuBadge } from "@/components/messaging/MessagesMenuBadge";
 import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
+import { FeedbackModal } from "@/components/modals/feedback-modal";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -117,6 +119,12 @@ export default function DashboardLayout({
       icon: ChatBubbleLeftRightIcon,
     },
     {
+      name: "Feedback",
+      href: "#",
+      icon: ExclamationCircleIcon,
+      action: () => setIsFeedbackModalOpen(true),
+    },
+    {
       name: "Sign Out",
       href: "#",
       icon: XMarkIcon,
@@ -126,6 +134,7 @@ export default function DashboardLayout({
 
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const [openSubmenu, setOpenSubmenu] = React.useState<string | null>(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -212,13 +221,21 @@ export default function DashboardLayout({
         </nav>
         <div className="mt-auto px-4 py-6 space-y-2">
           {secondaryNav.map((item) => (
-            item.name === 'Sign Out' ? (
+            item.action ? (
               <button
                 key={item.name}
                 onClick={item.action}
-                className="flex w-full items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-red-600 transition-colors"
+                className={`flex w-full items-center px-3 py-2 rounded-lg text-base font-medium transition-colors ${
+                  item.name === 'Sign Out' 
+                    ? 'text-gray-700 hover:bg-gray-100 hover:text-red-600' 
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                }`}
               >
-                <item.icon className="h-5 w-5 mr-3 text-gray-400 group-hover:text-red-600" />
+                <item.icon className={`h-5 w-5 mr-3 ${
+                  item.name === 'Sign Out' 
+                    ? 'text-gray-400 group-hover:text-red-600' 
+                    : 'text-gray-400 group-hover:text-blue-600'
+                }`} />
                 {item.name}
               </button>
             ) : (
@@ -344,6 +361,12 @@ export default function DashboardLayout({
         {/* Main content area */}
         <main className="flex-1 p-6 bg-gray-50 min-h-screen">{children}</main>
       </div>
+
+      {/* Feedback Modal */}
+      <FeedbackModal 
+        isOpen={isFeedbackModalOpen} 
+        onClose={() => setIsFeedbackModalOpen(false)} 
+      />
     </div>
   );
 } 
