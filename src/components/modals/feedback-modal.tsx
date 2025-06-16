@@ -114,7 +114,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          Thank you for your feedback. We'll review it and get back to you if needed.
+                          Thank you for your feedback. We&apos;ll review it and get back to you if needed.
                         </p>
                       </div>
                     </div>
