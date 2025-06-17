@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     const userResult = await prisma.$queryRaw`
       SELECT 
         "createdAt",
-        "surveyDismissedAt",
+
         "lastLoginAt"
       FROM "User" 
       WHERE id = ${userId}

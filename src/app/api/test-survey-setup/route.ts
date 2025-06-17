@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
     // Update user's created date and optionally reset survey dismissal
     // Also reset lastLoginAt to simulate first login since the new date
     if (resetSurvey) {
-      await prisma.$executeRaw`
-        UPDATE "User" 
-        SET "createdAt" = ${testCreatedAt}::timestamptz, "surveyDismissedAt" = NULL, "lastLoginAt" = NULL
-        WHERE id = ${userId}
-      `;
+          await prisma.$executeRaw`
+      UPDATE "User" 
+      SET "createdAt" = ${testCreatedAt}::timestamptz, "lastLoginAt" = NULL
+      WHERE id = ${userId}
+    `;
     } else {
       await prisma.$executeRaw`
         UPDATE "User" 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Get updated user info
     const updatedUserResult = await prisma.$queryRaw`
-      SELECT id, email, "createdAt", "surveyDismissedAt"
+      SELECT id, email, "createdAt"
       FROM "User"
       WHERE id = ${userId}
       LIMIT 1
@@ -96,7 +96,7 @@ export async function DELETE(request: NextRequest) {
     
     await prisma.$executeRaw`
       UPDATE "User" 
-      SET "createdAt" = ${now}::timestamptz, "surveyDismissedAt" = NULL
+      SET "createdAt" = ${now}::timestamptz
       WHERE id = ${userId}
     `;
 
@@ -104,8 +104,7 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: "User reset to 'new' status - created today with no survey dismissal",
       user: {
-        createdAt: now,
-        surveyDismissedAt: null
+        createdAt: now
       }
     });
   } catch (error) {
