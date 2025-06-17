@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // Get updated user info
     const updatedUserResult = await prisma.$queryRaw`
-      SELECT id, email, "createdAt"
+      SELECT id, email, "createdAt", "surveyDismissedAt"
       FROM "User"
       WHERE id = ${userId}
       LIMIT 1
@@ -96,7 +96,7 @@ export async function DELETE(request: NextRequest) {
     
     await prisma.$executeRaw`
       UPDATE "User" 
-      SET "createdAt" = ${now}::timestamptz
+      SET "createdAt" = ${now}::timestamptz, "surveyDismissedAt" = NULL
       WHERE id = ${userId}
     `;
 
@@ -104,7 +104,8 @@ export async function DELETE(request: NextRequest) {
       success: true,
       message: "User reset to 'new' status - created today with no survey dismissal",
       user: {
-        createdAt: now
+        createdAt: now,
+        surveyDismissedAt: null
       }
     });
   } catch (error) {

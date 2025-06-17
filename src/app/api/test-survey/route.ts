@@ -85,11 +85,11 @@ export async function POST(request: NextRequest) {
 
     // Also get raw user data for debugging
     const userResult = await prisma.$queryRaw`
-      SELECT 
-        "createdAt",
-
-        "lastLoginAt"
-      FROM "User" 
+              SELECT 
+          "createdAt",
+          "surveyDismissedAt",
+          "lastLoginAt"
+        FROM "User" 
       WHERE id = ${userId}
       LIMIT 1
     `;

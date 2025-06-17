@@ -8,16 +8,18 @@ export interface SurveyStatus {
 
 export async function getSurveyStatus(userId: string): Promise<SurveyStatus> {
   try {
-    // Get user data
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        createdAt: true,
-        lastLoginAt: true,
-      }
-    });
+    // Get user data using raw query to handle the new field
+    const userResult = await prisma.$queryRaw`
+      SELECT 
+        "createdAt",
+        "surveyDismissedAt",
+        "lastLoginAt"
+      FROM "User" 
+      WHERE id = ${userId}
+      LIMIT 1
+    `;
 
-    if (!user) {
+    if (!userResult || !Array.isArray(userResult) || userResult.length === 0) {
       return {
         shouldShowSurvey: false,
         shouldShowBanner: false,
@@ -25,13 +27,27 @@ export async function getSurveyStatus(userId: string): Promise<SurveyStatus> {
       };
     }
 
+    const user = userResult[0] as {
+      createdAt: Date;
+      surveyDismissedAt: Date | null;
+      lastLoginAt: Date | null;
+    };
+
     const now = new Date();
     const signupDate = new Date(user.createdAt);
     const daysSinceSignup = Math.floor((now.getTime() - signupDate.getTime()) / (1000 * 60 * 60 * 24));
 
-    // For now, disable survey functionality since the database field was removed
-    // You can re-enable this by checking localStorage or implementing a different tracking method
-    const shouldShowSurvey = false;
+    // Don't show survey if permanently dismissed (took survey)
+    if (user.surveyDismissedAt) {
+      return {
+        shouldShowSurvey: false,
+        shouldShowBanner: false,
+        daysSinceSignup,
+      };
+    }
+
+    // Show survey on every fresh page load unless permanently dismissed
+    const shouldShowSurvey = true;
 
     return {
       shouldShowSurvey,
@@ -50,12 +66,11 @@ export async function getSurveyStatus(userId: string): Promise<SurveyStatus> {
 
 export async function dismissSurveyPermanently(userId: string): Promise<void> {
   try {
-    // Since the database field was removed, we could implement this using:
-    // 1. localStorage on the frontend
-    // 2. A separate table for survey dismissals
-    // 3. Re-add the field to the database
-    // For now, this is a no-op
-    console.log("[SURVEY_SERVICE] Survey dismissal requested for user:", userId);
+    await prisma.$executeRaw`
+      UPDATE "User" 
+      SET "surveyDismissedAt" = NOW()::timestamptz 
+      WHERE id = ${userId}
+    `;
   } catch (error) {
     console.error("[SURVEY_SERVICE] Error permanently dismissing survey:", error);
     throw error;
