@@ -130,13 +130,13 @@ export function HomePageClient() {
                   Join as a Professional
                   <ArrowRightIcon className="w-5 h-5 ml-2" />
                 </Link>
-                <Link
+                {/* <Link
                   href="/register?role=employer"
                   className="inline-flex items-center px-6 py-3 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50"
                 >
                   Hire Talent
                   <ArrowRightIcon className="w-5 h-5 ml-2" />
-                </Link>
+                </Link> */}
               </div>
             </div>
           </section>
