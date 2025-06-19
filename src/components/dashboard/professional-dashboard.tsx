@@ -37,20 +37,7 @@ const stats = [
   },
 ];
 
-const upcomingInterviews = [
-  {
-    id: 1,
-    employer: "Rothschild Estate",
-    date: "May 20, 2023",
-    time: "10:00 AM",
-  },
-  {
-    id: 2,
-    employer: "Wellington Family",
-    date: "May 25, 2023",
-    time: "2:30 PM",
-  },
-];
+
 
 const quickActions = [
   { name: "Job Alerts", icon: BellIcon },
@@ -440,18 +427,15 @@ export function ProfessionalDashboard() {
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Upcoming Interviews</h3>
-                <Link href="/dashboard/interviews" className="text-sm font-medium text-blue-600 hover:text-blue-500">View all</Link>
               </div>
-              <div className="space-y-4">
-                {upcomingInterviews.map((interview) => (
-                  <div key={interview.id} className="flex items-center">
-                    <CalendarIcon className="h-6 w-6 text-blue-400 mr-3" />
-                    <div>
-                      <div className="font-medium text-gray-900">{interview.employer}</div>
-                      <div className="text-sm text-gray-500">{interview.date} • {interview.time}</div>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex-1 flex items-center justify-center py-8">
+                <div className="text-center">
+                  <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
+                  <h4 className="mt-2 text-sm font-medium text-gray-900">No interviews scheduled</h4>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Interviews will appear here when employers schedule them.
+                  </p>
+                </div>
               </div>
             </div>
 

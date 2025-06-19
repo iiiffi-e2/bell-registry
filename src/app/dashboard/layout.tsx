@@ -114,11 +114,11 @@ export default function DashboardLayout({
   else if (session?.user?.role === ROLES.ADMIN) navigation = adminNavigation;
 
   const secondaryNav = [
-    {
-      name: "Help & Support",
-      href: "/dashboard/help",
-      icon: ChatBubbleLeftRightIcon,
-    },
+    // {
+    //   name: "Help & Support",
+    //   href: "/dashboard/help",
+    //   icon: ChatBubbleLeftRightIcon,
+    // },
     {
       name: "Feedback",
       href: "#",
