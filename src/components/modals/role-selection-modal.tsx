@@ -107,68 +107,85 @@ export function RoleSelectionModal({ isOpen, onClose }: RoleSelectionModalProps)
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       {roles.map((role) => {
                         const isEnabled = role.enabled;
-                        const Component = isEnabled ? Link : 'div';
-                        const componentProps = isEnabled 
-                          ? { href: role.href, onClick: onClose }
-                          : {};
 
-                        return (
-                          <Component
-                            key={role.id}
-                            {...componentProps}
-                            className={`group relative rounded-lg border-2 p-6 transition-all duration-200 ${
-                              isEnabled 
-                                ? 'border-gray-200 hover:border-blue-500 hover:shadow-lg cursor-pointer' 
-                                : 'border-gray-200 opacity-60 cursor-not-allowed'
-                            }`}
-                          >
-                            <div className="flex flex-col items-center text-center h-full">
-                              <div className={`flex h-16 w-16 items-center justify-center rounded-lg mb-4 transition-colors duration-200 ${
-                                isEnabled 
-                                  ? 'bg-blue-100 group-hover:bg-blue-200' 
-                                  : 'bg-gray-100'
-                              }`}>
-                                <role.icon className={`h-8 w-8 ${
-                                  isEnabled ? 'text-blue-600' : 'text-gray-400'
-                                }`} aria-hidden="true" />
+                        if (isEnabled) {
+                          return (
+                            <Link
+                              key={role.id}
+                              href={role.href}
+                              onClick={onClose}
+                              className="group relative rounded-lg border-2 border-gray-200 p-6 hover:border-blue-500 hover:shadow-lg cursor-pointer transition-all duration-200"
+                            >
+                              <div className="flex flex-col items-center text-center h-full">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-blue-100 group-hover:bg-blue-200 transition-colors duration-200 mb-4">
+                                  <role.icon className="h-8 w-8 text-blue-600" aria-hidden="true" />
+                                </div>
+                                
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                  {role.title}
+                                </h3>
+                                
+                                <p className="text-sm text-gray-600 mb-4 flex-grow">
+                                  {role.description}
+                                </p>
+                                
+                                <div className="mt-auto">
+                                  <ul className="text-xs text-gray-500 space-y-1">
+                                    {role.benefits.map((benefit, index) => (
+                                      <li key={index} className="flex items-center">
+                                        <span className="w-1 h-1 bg-blue-500 rounded-full mr-2"></span>
+                                        {benefit}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  
+                                  <div className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-md group-hover:bg-blue-700 transition-colors duration-200">
+                                    Get Started as {role.title}
+                                  </div>
+                                </div>
                               </div>
-                              
-                              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                {role.title}
-                                {!isEnabled && (
+                            </Link>
+                          );
+                        } else {
+                          return (
+                            <div
+                              key={role.id}
+                              className="group relative rounded-lg border-2 border-gray-200 p-6 opacity-60 cursor-not-allowed transition-all duration-200"
+                            >
+                              <div className="flex flex-col items-center text-center h-full">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 transition-colors duration-200 mb-4">
+                                  <role.icon className="h-8 w-8 text-gray-400" aria-hidden="true" />
+                                </div>
+                                
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                                  {role.title}
                                   <span className="ml-2 text-sm font-normal text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
                                     Coming Soon
                                   </span>
-                                )}
-                              </h3>
-                              
-                              <p className="text-sm text-gray-600 mb-4 flex-grow">
-                                {role.description}
-                              </p>
-                              
-                              <div className="mt-auto">
-                                <ul className="text-xs text-gray-500 space-y-1">
-                                  {role.benefits.map((benefit, index) => (
-                                    <li key={index} className="flex items-center">
-                                      <span className={`w-1 h-1 rounded-full mr-2 ${
-                                        isEnabled ? 'bg-blue-500' : 'bg-gray-400'
-                                      }`}></span>
-                                      {benefit}
-                                    </li>
-                                  ))}
-                                </ul>
+                                </h3>
                                 
-                                <div className={`mt-4 px-4 py-2 text-sm rounded-md transition-colors duration-200 ${
-                                  isEnabled 
-                                    ? 'bg-blue-600 text-white group-hover:bg-blue-700' 
-                                    : 'bg-gray-300 text-gray-500'
-                                }`}>
-                                  {isEnabled ? `Get Started as ${role.title}` : 'Coming Soon'}
+                                <p className="text-sm text-gray-600 mb-4 flex-grow">
+                                  {role.description}
+                                </p>
+                                
+                                <div className="mt-auto">
+                                  <ul className="text-xs text-gray-500 space-y-1">
+                                    {role.benefits.map((benefit, index) => (
+                                      <li key={index} className="flex items-center">
+                                        <span className="w-1 h-1 bg-gray-400 rounded-full mr-2"></span>
+                                        {benefit}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                  
+                                  <div className="mt-4 px-4 py-2 bg-gray-300 text-gray-500 text-sm rounded-md transition-colors duration-200">
+                                    Coming Soon
+                                  </div>
                                 </div>
                               </div>
                             </div>
-                          </Component>
-                        );
+                          );
+                        }
                       })}
                     </div>
 
