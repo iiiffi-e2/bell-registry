@@ -103,7 +103,7 @@ export default function CandidateProfilePage({
 }: {
   params: { id: string };
 }) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +134,12 @@ export default function CandidateProfilePage({
   }, [params.id]);
 
   useEffect(() => {
-    if (!session?.user) {
+    // Wait for session to load, don't redirect during loading state
+    if (status === "loading") {
+      return;
+    }
+
+    if (status === "unauthenticated" || !session?.user) {
       router.push("/login");
       return;
     }
@@ -145,9 +150,10 @@ export default function CandidateProfilePage({
     }
 
     fetchProfile();
-  }, [session, params.id, router, fetchProfile]);
+  }, [session, status, params.id, router, fetchProfile]);
 
-  if (loading) {
+  // Show loading state while session is loading or while fetching profile
+  if (status === "loading" || loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
