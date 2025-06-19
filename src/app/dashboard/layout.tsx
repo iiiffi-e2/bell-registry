@@ -151,9 +151,10 @@ export default function DashboardLayout({
       <div className={
         `fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0`
+        lg:translate-x-0`
       }>
-        <div className="flex h-16 items-center px-6 pt-4 border-b border-gray-100">
+        {/* Header - Fixed at top */}
+        <div className="flex h-16 items-center px-6 pt-4 border-b border-gray-100 flex-shrink-0">
           <Link href="/dashboard" className="hidden lg:block max-w-[175px]">
             <Image
               src="/images/brand/logo-full.png"
@@ -165,70 +166,76 @@ export default function DashboardLayout({
             />
           </Link>
         </div>
-        <nav className="flex-1 px-4 py-6 space-y-2">
-          {status === "loading" ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            navigation.map((item) => (
-              <div key={item.name}>
-                {item.submenu ? (
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
-                        ${pathname?.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+        
+        {/* Scrollable Navigation Area */}
+        <div className="flex-1 overflow-y-auto">
+          <nav className="px-4 py-6 space-y-2">
+            {status === "loading" ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              navigation.map((item) => (
+                <div key={item.name}>
+                  {item.submenu ? (
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
+                          ${pathname?.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                        `}
+                      >
+                        <div className="flex items-center">
+                          <item.icon className={`h-5 w-5 mr-3 ${pathname?.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                          {item.name}
+                        </div>
+                        <ChevronDown
+                          className={`h-5 w-5 transition-transform duration-200 ${
+                            openSubmenu === item.name ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+                      {openSubmenu === item.name && (
+                        <div className="mt-1 ml-8 space-y-1">
+                          {item.submenu.map((subItem) => (
+                            <Link
+                              key={subItem.name}
+                              href={subItem.href}
+                              className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors
+                                ${pathname === subItem.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                              `}
+                              onClick={() => setSidebarOpen(false)}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
+                        ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
                       `}
+                      onClick={() => setSidebarOpen(false)}
                     >
                       <div className="flex items-center">
-                        <item.icon className={`h-5 w-5 mr-3 ${pathname?.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                        <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
                         {item.name}
                       </div>
-                      <ChevronDown
-                        className={`h-5 w-5 transition-transform duration-200 ${
-                          openSubmenu === item.name ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </button>
-                    {openSubmenu === item.name && (
-                      <div className="mt-1 ml-8 space-y-1">
-                        {item.submenu.map((subItem) => (
-                          <Link
-                            key={subItem.name}
-                            href={subItem.href}
-                            className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                              ${pathname === subItem.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
-                            `}
-                            onClick={() => setSidebarOpen(false)}
-                          >
-                            {subItem.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
-                      ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
-                    `}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <div className="flex items-center">
-                      <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
-                      {item.name}
-                    </div>
-                    {item.name === 'Messages' && <MessagesMenuBadge />}
-                  </Link>
-                )}
-              </div>
-            ))
-          )}
-        </nav>
-        <div className="mt-auto px-4 py-6 space-y-2">
+                      {item.name === 'Messages' && <MessagesMenuBadge />}
+                    </Link>
+                  )}
+                </div>
+              ))
+            )}
+          </nav>
+        </div>
+        
+        {/* Fixed Bottom Section - Feedback and Sign Out */}
+        <div className="px-4 py-6 space-y-2 border-t border-gray-100 flex-shrink-0">
           {secondaryNav.map((item) => (
             item.action ? (
               <button
@@ -274,7 +281,7 @@ export default function DashboardLayout({
         {sidebarOpen ? <XMarkIcon className="h-6 w-6" /> : <Bars3Icon className="h-6 w-6" />}
       </button>
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         {/* Top bar */}
         <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-100">
           <div className="flex items-center">
