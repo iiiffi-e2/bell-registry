@@ -233,39 +233,54 @@ export default function CandidateProfilePage({
 
                 {/* Bio */}
                 {profile.bio && (
-                  <div className="mb-8">
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">Professional Bio</h4>
+                  <div className="mb-8 bg-gray-50 rounded-lg p-6 border-l-4 border-blue-200">
+                    <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                      <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Bio</span>
+                      Professional Bio
+                    </h4>
                     <FormattedText text={profile.bio} />
                   </div>
                 )}
 
                 {/* About Me Sections */}
                 {(profile.whatImSeeking || profile.whyIEnjoyThisWork || profile.whatSetsApartMe || profile.idealEnvironment) && (
-                  <div className="space-y-8">
+                  <div className="space-y-6">
                     {profile.whatImSeeking && (
-                      <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">What I&apos;m Seeking</h4>
+                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-purple-200">
+                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                          <span className="bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Goals</span>
+                          What I&apos;m Seeking
+                        </h4>
                         <FormattedText text={profile.whatImSeeking} />
                       </div>
                     )}
 
                     {profile.whyIEnjoyThisWork && (
-                      <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">Why I Enjoy This Work</h4>
+                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-green-200">
+                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                          <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Passion</span>
+                          Why I Enjoy This Work
+                        </h4>
                         <FormattedText text={profile.whyIEnjoyThisWork} />
                       </div>
                     )}
 
                     {profile.whatSetsApartMe && (
-                      <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">What Sets Me Apart</h4>
+                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-amber-200">
+                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                          <span className="bg-amber-100 text-amber-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Strengths</span>
+                          What Sets Me Apart
+                        </h4>
                         <FormattedText text={profile.whatSetsApartMe} />
                       </div>
                     )}
 
                     {profile.idealEnvironment && (
-                      <div>
-                        <h4 className="text-lg font-medium text-gray-900 mb-2">Ideal Environment</h4>
+                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-indigo-200">
+                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                          <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Culture</span>
+                          Ideal Environment
+                        </h4>
                         <FormattedText text={profile.idealEnvironment} />
                       </div>
                     )}
