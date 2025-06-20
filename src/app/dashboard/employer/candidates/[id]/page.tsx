@@ -109,6 +109,7 @@ export default function CandidateProfilePage({
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -126,6 +127,7 @@ export default function CandidateProfilePage({
 
       const data = await response.json();
       setProfile(data);
+      setProfileLoaded(true);
     } catch (error) {
       console.error("Error fetching profile:", error);
       setError("Failed to load profile");
@@ -150,8 +152,11 @@ export default function CandidateProfilePage({
       return;
     }
 
-    fetchProfile();
-  }, [session, status, params.id, router, fetchProfile]);
+    // Only fetch profile if it hasn't been loaded yet
+    if (!profileLoaded) {
+      fetchProfile();
+    }
+  }, [session?.user?.id, session?.user?.role, status, params.id, router, fetchProfile, profileLoaded]);
 
   // Show loading state while session is loading or while fetching profile
   if (status === "loading" || loading) {

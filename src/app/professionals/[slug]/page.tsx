@@ -110,6 +110,7 @@ export default function PublicProfilePage({
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [profileLoaded, setProfileLoaded] = useState(false);
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -121,6 +122,7 @@ export default function PublicProfilePage({
         }
         const data = await response.json();
         setProfile(data);
+        setProfileLoaded(true);
       } catch (error) {
         console.error('Error fetching profile:', error);
         notFound();
@@ -129,8 +131,11 @@ export default function PublicProfilePage({
       }
     }
 
-    fetchProfile();
-  }, [params.slug]);
+    // Only fetch profile if it hasn't been loaded yet
+    if (!profileLoaded) {
+      fetchProfile();
+    }
+  }, [params.slug, profileLoaded]);
 
   if (loading) {
     return (
