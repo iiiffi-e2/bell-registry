@@ -276,6 +276,9 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     setShowImprovedBioModal(false);
   };
 
+  // Track if profile has been loaded to prevent re-loading when user has made changes
+  const [profileLoaded, setProfileLoaded] = useState(false);
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -318,16 +321,18 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
           form.reset(formValues);
           setUploadedPhotos(data.additionalPhotos || []);
           setUploadedMedia(data.mediaUrls || []);
+          setProfileLoaded(true);
         }
       } catch (error) {
         console.error("Error loading profile:", error);
       }
     };
 
-    if (session?.user) {
+    // Only load profile if session exists and profile hasn't been loaded yet
+    if (session?.user && !profileLoaded) {
       loadProfile();
     }
-  }, [session, form]);
+  }, [session?.user?.id, profileLoaded, form]);
 
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
