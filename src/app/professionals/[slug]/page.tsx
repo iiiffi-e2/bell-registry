@@ -23,6 +23,7 @@ import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton
 import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
 import { ReportProfileModal } from "@/components/profile/ReportProfileModal";
 import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
+import { FormattedText } from "@/components/ui/formatted-text";
 import { notFound } from "next/navigation";
 
 interface Experience {
@@ -201,7 +202,7 @@ export default function PublicProfilePage({
               {profile.bio && (
                 <div className="mb-8">
                   <h4 className="text-lg font-medium text-gray-900 mb-2">Professional Bio</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
+                  <FormattedText text={profile.bio} />
                 </div>
               )}
 
@@ -211,28 +212,28 @@ export default function PublicProfilePage({
                   {profile.whatImSeeking && (
                     <div>
                       <h4 className="text-lg font-medium text-gray-900 mb-2">What I&apos;m Seeking</h4>
-                      <p className="text-gray-700 whitespace-pre-wrap">{profile.whatImSeeking}</p>
+                      <FormattedText text={profile.whatImSeeking} />
                     </div>
                   )}
 
                   {profile.whyIEnjoyThisWork && (
                     <div>
                       <h4 className="text-lg font-medium text-gray-900 mb-2">Why I Enjoy This Work</h4>
-                      <p className="text-gray-700 whitespace-pre-wrap">{profile.whyIEnjoyThisWork}</p>
+                      <FormattedText text={profile.whyIEnjoyThisWork} />
                     </div>
                   )}
 
                   {profile.whatSetsApartMe && (
                     <div>
                       <h4 className="text-lg font-medium text-gray-900 mb-2">What Sets Me Apart</h4>
-                      <p className="text-gray-700 whitespace-pre-wrap">{profile.whatSetsApartMe}</p>
+                      <FormattedText text={profile.whatSetsApartMe} />
                     </div>
                   )}
 
                   {profile.idealEnvironment && (
                     <div>
                       <h4 className="text-lg font-medium text-gray-900 mb-2">Ideal Environment</h4>
-                      <p className="text-gray-700 whitespace-pre-wrap">{profile.idealEnvironment}</p>
+                      <FormattedText text={profile.idealEnvironment} />
                     </div>
                   )}
                 </div>
@@ -252,9 +253,9 @@ export default function PublicProfilePage({
                         <p className="text-sm text-gray-500">
                           {exp.startDate} - {exp.endDate || "Present"}
                         </p>
-                        <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap">
-                          {exp.description}
-                        </p>
+                        <div className="mt-1">
+                          <FormattedText text={exp.description} className="text-sm text-gray-500" />
+                        </div>
                       </div>
                     ))}
                   </div>

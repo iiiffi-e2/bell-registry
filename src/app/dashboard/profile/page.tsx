@@ -20,6 +20,7 @@ import Link from "next/link";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
 import { MediaViewer } from "@/components/profile/media-viewer";
 import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
+import { FormattedText } from "@/components/ui/formatted-text";
 
 interface CandidateProfile {
   id: string;
@@ -137,7 +138,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen py-8">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="md:flex md:items-center md:justify-between mb-8">
           <div className="flex-1 min-w-0">
@@ -221,7 +222,7 @@ export default function ProfilePage() {
                 {profile.bio && (
                   <div className="mb-8">
                     <h4 className="text-lg font-medium text-gray-900 mb-2">Professional Bio</h4>
-                    <p className="text-gray-700 whitespace-pre-wrap">{profile.bio}</p>
+                    <FormattedText text={profile.bio} />
                   </div>
                 )}
 
@@ -231,28 +232,28 @@ export default function ProfilePage() {
                     {profile.whatImSeeking && (
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">What I&apos;m Seeking</h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whatImSeeking}</p>
+                        <FormattedText text={profile.whatImSeeking} />
                       </div>
                     )}
 
                     {profile.whyIEnjoyThisWork && (
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">Why I Enjoy This Work</h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whyIEnjoyThisWork}</p>
+                        <FormattedText text={profile.whyIEnjoyThisWork} />
                       </div>
                     )}
 
                     {profile.whatSetsApartMe && (
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">What Sets Me Apart</h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{profile.whatSetsApartMe}</p>
+                        <FormattedText text={profile.whatSetsApartMe} />
                       </div>
                     )}
 
                     {profile.idealEnvironment && (
                       <div>
                         <h4 className="text-lg font-medium text-gray-900 mb-2">Ideal Environment</h4>
-                        <p className="text-gray-700 whitespace-pre-wrap">{profile.idealEnvironment}</p>
+                        <FormattedText text={profile.idealEnvironment} />
                       </div>
                     )}
                   </div>

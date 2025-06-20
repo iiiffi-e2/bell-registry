@@ -95,4 +95,16 @@ export function truncateWords(text: string, wordLimit: number): string {
   const words = text.trim().split(/\s+/);
   if (words.length <= wordLimit) return text;
   return words.slice(0, wordLimit).join(' ') + '...';
-} 
+}
+
+export function splitTextIntoParagraphs(text: string | null): string[] {
+  if (!text) return [];
+  
+  // Split text by double line breaks (paragraph breaks)
+  const paragraphs = text
+    .split(/\n\s*\n/) // Split on double line breaks (paragraph separators)
+    .map(paragraph => paragraph.trim())
+    .filter(paragraph => paragraph.length > 0);
+  
+  return paragraphs;
+}
