@@ -13,6 +13,7 @@ import {
   ChevronRightIcon,
   ListBulletIcon,
   Squares2X2Icon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon } from "@heroicons/react/24/solid";
 import {
@@ -39,6 +40,7 @@ import {
 import { FilterProvider, useFilters } from "@/contexts/FilterContext";
 import { FilterModal } from "@/components/FilterModal";
 import { truncateWords } from "@/lib/utils";
+import AIJobSearch from "@/components/ai-job-search";
 
 interface Job {
   id: string;
@@ -130,6 +132,7 @@ FilterButton.displayName = 'FilterButton';
 
 function JobSearchPageContent() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"traditional" | "ai">("traditional");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -425,8 +428,52 @@ function JobSearchPageContent() {
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="mt-4">
+        {/* Tab Navigation */}
+        <div className="mt-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                onClick={() => setActiveTab("traditional")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "traditional"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                  Traditional Search
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab("ai")}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === "ai"
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <SparklesIcon className="h-5 w-5" />
+                  AI Job Search
+                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+                    New
+                  </span>
+                </div>
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "ai" ? (
+          <div className="mt-6">
+            <AIJobSearch />
+          </div>
+        ) : (
+          <>
+            {/* Traditional Search and Filters */}
+            <div className="mt-4">
           <div className="flex space-x-4">
             <div className="flex-1">
               <div className="relative">
@@ -619,6 +666,8 @@ function JobSearchPageContent() {
           onClose={() => setIsFilterModalOpen(false)}
           filters={filters}
         />
+            </>
+          )}
       </div>
     </div>
   );
