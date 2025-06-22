@@ -123,6 +123,7 @@ export default function AIJobSearch() {
   const audioChunksRef = useRef<Blob[]>([]);
   const recognitionRef = useRef<any>(null);
   const shouldAutoSearchRef = useRef<boolean>(false);
+  const speechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Add message to conversation
   const addToConversation = useCallback((type: 'user' | 'ai', content: string) => {
@@ -227,39 +228,93 @@ export default function AIJobSearch() {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = 'en-US';
+      recognitionRef.current.maxAlternatives = 1; // Reduce alternatives to minimize confusion
+      
+      // Mobile-specific settings
+      if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        recognitionRef.current.continuous = false; // Less continuous on mobile to reduce duplicates
+      }
 
       let finalTranscript = '';
 
       recognitionRef.current.onresult = (event: any) => {
         let interimTranscript = '';
+        let newFinalTranscript = '';
         
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
+        // Process all results to build the complete transcript
+        for (let i = 0; i < event.results.length; ++i) {
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-            shouldAutoSearchRef.current = true; // Mark that we should auto-search
+            newFinalTranscript += event.results[i][0].transcript;
           } else {
             interimTranscript += event.results[i][0].transcript;
           }
         }
         
-        // Update the query with both final and interim results
-        setQuery(finalTranscript + interimTranscript);
+        // Clean up the transcript by removing duplicates and extra spaces
+        const cleanTranscript = (text: string) => {
+          return text
+            .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+            .replace(/(\b\w+\b)(\s+\1\b)+/gi, '$1') // Remove repeated words
+            .trim();
+        };
+        
+        // Update final transcript only if we have new content
+        if (newFinalTranscript && newFinalTranscript !== finalTranscript) {
+          finalTranscript = cleanTranscript(newFinalTranscript);
+          shouldAutoSearchRef.current = true; // Mark that we should auto-search
+        }
+        
+        // Clean interim transcript as well
+        const cleanInterim = cleanTranscript(interimTranscript);
+        
+        // Update the query with cleaned final and interim results
+        const combinedTranscript = cleanTranscript(finalTranscript + ' ' + cleanInterim);
+        setQuery(combinedTranscript);
       };
 
       recognitionRef.current.onerror = (event: any) => {
         console.error('Speech recognition error:', event.error);
-        setError('Speech recognition error. Please try again or type your search.');
+        
+        // Clear any timeout
+        if (speechTimeoutRef.current) {
+          clearTimeout(speechTimeoutRef.current);
+          speechTimeoutRef.current = null;
+        }
+        
+        // Handle different error types
+        if (event.error === 'no-speech') {
+          setError('No speech detected. Please try speaking again.');
+        } else if (event.error === 'network') {
+          setError('Network error. Please check your connection and try again.');
+        } else {
+          setError('Speech recognition error. Please try again or type your search.');
+        }
         setIsListening(false);
       };
 
       recognitionRef.current.onend = () => {
         setIsListening(false);
+        
+        // Clear any timeout
+        if (speechTimeoutRef.current) {
+          clearTimeout(speechTimeoutRef.current);
+          speechTimeoutRef.current = null;
+        }
+        
         // Auto-search will be triggered by useEffect when shouldAutoSearchRef changes
       };
 
       recognitionRef.current.start();
       setIsListening(true);
       shouldAutoSearchRef.current = false; // Reset auto-search flag
+      
+      // Set a timeout to automatically stop listening after 30 seconds
+      speechTimeoutRef.current = setTimeout(() => {
+        if (recognitionRef.current && isListening) {
+          recognitionRef.current.stop();
+          setError('Speech recognition timed out. Please try again.');
+        }
+      }, 30000);
     } catch (error) {
       console.error('Error accessing microphone:', error);
       setError('Could not access microphone. Please check permissions and try again.');
@@ -267,6 +322,12 @@ export default function AIJobSearch() {
   }, [query]);
 
   const stopListening = useCallback(() => {
+    // Clear any timeout
+    if (speechTimeoutRef.current) {
+      clearTimeout(speechTimeoutRef.current);
+      speechTimeoutRef.current = null;
+    }
+    
     if (recognitionRef.current && isListening) {
       recognitionRef.current.stop();
     } else if (mediaRecorderRef.current && isListening) {
@@ -414,38 +475,51 @@ export default function AIJobSearch() {
         <CardContent>
           {/* Search Input */}
           <div className="space-y-4">
-            <div className="relative">
+            <div className="space-y-3">
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Example: I want a live-in chef position for a family with young kids in the Hamptons, willing to travel with them to their ski house in Aspen during winter. I specialize in organic, kid-friendly meals and have experience with food allergies."
-                className={`w-full min-h-[120px] p-4 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ${
+                placeholder="Describe your ideal job... (e.g., live-in chef for a family in the Hamptons)"
+                className={`w-full min-h-[100px] md:min-h-[120px] p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-base ${
                   isProcessing ? 'bg-gray-50 cursor-not-allowed' : ''
                 }`}
                 disabled={isProcessing}
               />
               
-              <div className="absolute bottom-3 right-3 flex gap-2">
+              {/* Mobile-friendly button layout */}
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
-                  size="sm"
                   variant={isListening ? "destructive" : "outline"}
                   onClick={isListening ? stopListening : startListening}
                   disabled={isProcessing}
-                  className="flex items-center gap-1"
+                  className="flex items-center justify-center gap-2 h-11"
                 >
-                  <MicrophoneIcon className={`h-4 w-4 ${isListening ? 'animate-pulse' : ''}`} />
-                  {isListening ? 'Stop' : 'Speak'}
+                  <MicrophoneIcon className={`h-5 w-5 ${isListening ? 'animate-pulse' : ''}`} />
+                  {isListening ? 'Stop Recording' : 'Speak Your Request'}
                 </Button>
                 
                 <Button
-                  size="sm"
                   onClick={handleTextSearch}
                   disabled={isProcessing || !query.trim()}
-                  className="flex items-center gap-1"
+                  className="flex items-center justify-center gap-2 h-11 flex-1"
                 >
-                  <MagnifyingGlassIcon className="h-4 w-4" />
-                  Search
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                  Search Jobs
                 </Button>
+              </div>
+              
+              {/* Example text for mobile */}
+              <div className="block sm:hidden">
+                <details className="text-sm text-gray-600">
+                  <summary className="cursor-pointer text-blue-600 hover:text-blue-700">
+                    See example searches
+                  </summary>
+                  <div className="mt-2 space-y-1 text-gray-700 pl-4">
+                    <p>• "Live-in chef for a family with young kids"</p>
+                    <p>• "Estate manager in California, $100k+"</p>
+                    <p>• "Housekeeper position, no travel required"</p>
+                  </div>
+                </details>
               </div>
             </div>
 
