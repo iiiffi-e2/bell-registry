@@ -319,7 +319,7 @@ export default function AIJobSearch() {
       console.error('Error accessing microphone:', error);
       setError('Could not access microphone. Please check permissions and try again.');
     }
-  }, [query]);
+  }, [query, isListening]);
 
   const stopListening = useCallback(() => {
     // Clear any timeout
@@ -515,9 +515,9 @@ export default function AIJobSearch() {
                     See example searches
                   </summary>
                   <div className="mt-2 space-y-1 text-gray-700 pl-4">
-                    <p>• "Live-in chef for a family with young kids"</p>
-                    <p>• "Estate manager in California, $100k+"</p>
-                    <p>• "Housekeeper position, no travel required"</p>
+                    <p>• &quot;Live-in chef for a family with young kids&quot;</p>
+                    <p>• &quot;Estate manager in California, $100k+&quot;</p>
+                    <p>• &quot;Housekeeper position, no travel required&quot;</p>
                   </div>
                 </details>
               </div>
