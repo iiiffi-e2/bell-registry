@@ -1,9 +1,9 @@
-import { PrismaClient, UserRole, JobStatus, Job } from '@prisma/client'
-import { generateJobUrlSlug } from '../src/lib/job-utils'
-import { PROFESSIONAL_ROLES } from '../src/lib/constants'
+import { PrismaClient, UserRole } from '@prisma/client'
+import { generateProfileSlug } from '../src/lib/utils'
 
 const prisma = new PrismaClient()
 
+// Array of locations from the main seed file
 const locations = [
   'New York, NY',
   'Los Angeles, CA',
@@ -20,94 +20,14 @@ const locations = [
   'Aspen, CO',
   'Hamptons, NY',
   'Newport, RI',
-  'Martha\'s Vineyard, MA',
+  "Martha's Vineyard, MA",
   'Lake Tahoe, CA',
   'Scottsdale, AZ',
   'Dallas, TX',
-  'Naples, FL',
-  'Portland, OR',
-  'San Diego, CA',
-  'Denver, CO',
-  'Austin, TX',
-  'Atlanta, GA',
-  'Philadelphia, PA',
-  'Phoenix, AZ',
-  'Las Vegas, NV',
-  'Nashville, TN',
-  'Malibu, CA',
-  'Westchester County, NY',
-  'Boca Raton, FL',
-  'Vail, CO',
-  'East Hampton, NY',
-  'Nantucket, MA',
-  'Carmel, CA',
-  'Park City, UT',
-  'Paradise Valley, AZ',
-  'Fort Worth, TX',
-  'Sarasota, FL',
-  'Santa Barbara, CA',
-  'Montecito, CA',
-  'Jupiter, FL',
-  'Telluride, CO',
-  'Watch Hill, RI'
+  'Naples, FL'
 ]
 
-const requirements = [
-  'Minimum 5 years of experience in private service',
-  'Excellent communication and interpersonal skills',
-  'Valid driver\'s license and clean driving record',
-  'Flexible schedule including evenings and weekends',
-  'Background check and references required',
-  'Current CPR and First Aid certification',
-  'Culinary degree from accredited institution',
-  'Estate management experience',
-  'Multi-lingual (French, Spanish, Mandarin preferred)',
-  'Security clearance and relevant certifications',
-  'Proven discretion and confidentiality',
-  'International travel required',
-  'Live-in position available',
-  'Experience with UHNW families',
-  'Knowledge of formal service protocols',
-  'Strong organizational and planning skills',
-  'Ability to manage multiple properties',
-  'Wine knowledge and WSET certification',
-  'Experience with staff supervision',
-  'Proficiency with household management software',
-  'Experience with smart home technology',
-  'Knowledge of sustainable practices',
-  'Ability to travel internationally',
-  'Experience with luxury vehicles',
-  'Strong project management skills',
-  'Proficiency in household accounting',
-  'Experience with art collections',
-  'Knowledge of antiques and fine furnishings',
-  'Understanding of security protocols',
-  'Experience with private aviation',
-  'Yacht crew experience',
-  'Knowledge of formal etiquette',
-  'Experience with special events',
-  'Understanding of wine collections',
-  'Knowledge of fine dining service',
-  'Experience with wardrobe management',
-  'Understanding of art handling',
-  'Knowledge of pet care',
-  'Experience with historic properties',
-  'Understanding of privacy protocols'
-]
-
-const descriptions = [
-  'A distinguished UHNW family seeks an experienced professional to join their formal household staff. The ideal candidate will demonstrate exceptional attention to detail, discretion, and the ability to maintain the highest standards of service.',
-  'Our client, a high-profile executive, requires a seasoned professional to manage their multiple residential properties. This role demands strong leadership abilities and experience coordinating complex household operations.',
-  'A prestigious family office is seeking a dedicated professional for their principal residence. The position involves overseeing daily operations, staff supervision, and ensuring seamless household management.',
-  'An international family requires a skilled professional to join their established team. The role offers excellent compensation, benefits, and opportunity for professional growth in a formal household setting.',
-  'A private estate is looking for an accomplished professional to oversee their extensive property. The position requires expertise in managing staff, coordinating events, and maintaining exceptional standards.',
-  'Our client seeks a highly qualified individual to join their household staff. The role involves managing complex schedules, travel arrangements, and ensuring smooth operation of the residence.',
-  'A well-respected family requires a professional to manage their seasonal properties. The position demands flexibility, strong organizational skills, and experience with high-net-worth families.',
-  'An exclusive residence is seeking a detail-oriented professional to join their established team. The role requires discretion, professionalism, and experience in formal service.',
-  'A prominent family office requires a seasoned professional to oversee multiple aspects of their household operations. The ideal candidate will have extensive experience in private service.',
-  'Our client is looking for an experienced professional to manage their luxury property portfolio. The role offers competitive compensation and benefits for the right candidate.'
-]
-
+// Professional profiles data
 const professionals = [
   {
     firstName: 'James',
@@ -485,314 +405,335 @@ const professionals = [
     preferredRole: 'Chief of Staff',
     workLocations: ['Silicon Valley', 'Los Angeles', 'New York'],
     seekingOpportunities: ['Chief of Staff', 'Operations Director', 'Executive Assistant'],
+  },
+  {
+    firstName: 'Elena',
+    lastName: 'Rossi',
+    title: 'Event Chef',
+    location: 'Miami, FL',
+    yearsOfExperience: 11,
+    bio: 'Innovative event chef specializing in luxury catering and special events. Expert in menu design, presentation, and managing high-profile gatherings.',
+    skills: ['Event Catering', 'Menu Design', 'Team Management', 'Food Styling', 'Dietary Accommodations'],
+    certifications: ['Culinary Arts Degree', 'Food Safety Manager', 'Wine Pairing Specialist'],
+    preferredRole: 'Event Chef',
+    workLocations: ['Miami', 'Palm Beach', 'New York'],
+    seekingOpportunities: ['Event Chef', 'Private Chef', 'Catering Director'],
+  },
+  {
+    firstName: 'Adrian',
+    lastName: 'Blackwood',
+    title: 'Estate Security Director',
+    location: 'Los Angeles, CA',
+    yearsOfExperience: 18,
+    bio: 'Former law enforcement professional specializing in estate security and risk management. Expert in security system implementation and staff training.',
+    skills: ['Security Management', 'Risk Assessment', 'Staff Training', 'Emergency Response', 'Technology Integration'],
+    certifications: ['Security Management Professional', 'Advanced Security Training', 'Crisis Management'],
+    preferredRole: 'Estate Security Director',
+    workLocations: ['Los Angeles', 'Beverly Hills', 'International'],
+    seekingOpportunities: ['Estate Security Director', 'Security Manager', 'Risk Management'],
+  },
+  {
+    firstName: 'Camille',
+    lastName: 'Dubois',
+    title: 'Drop-Off Chef',
+    location: 'San Francisco, CA',
+    yearsOfExperience: 8,
+    bio: 'Culinary professional specializing in weekly meal preparation and dietary specific cooking. Expert in nutrition and meal planning for busy families.',
+    skills: ['Meal Planning', 'Dietary Restrictions', 'Food Safety', 'Recipe Development', 'Nutrition'],
+    certifications: ['Nutritional Cooking Certificate', 'Food Safety Manager', 'Dietary Specialist'],
+    preferredRole: 'Drop-Off Chef',
+    workLocations: ['San Francisco', 'Silicon Valley', 'Bay Area'],
+    seekingOpportunities: ['Drop-Off Chef', 'Personal Chef', 'Meal Prep Specialist'],
+  },
+  {
+    firstName: 'Marcus',
+    lastName: 'Alvarez',
+    title: 'Seasonal Chef',
+    location: 'Hamptons, NY',
+    yearsOfExperience: 14,
+    bio: 'Experienced chef specializing in seasonal residences and summer entertaining. Expert in local ingredients and coastal cuisine.',
+    skills: ['Seasonal Cooking', 'Event Planning', 'Staff Management', 'Menu Development', 'Wine Pairing'],
+    certifications: ['Culinary Arts Degree', 'Sommelier Level 2', 'Seafood Specialist'],
+    preferredRole: 'Seasonal Chef',
+    workLocations: ['Hamptons', 'Martha\'s Vineyard', 'Palm Beach'],
+    seekingOpportunities: ['Seasonal Chef', 'Private Chef', 'Estate Chef'],
+  },
+  {
+    firstName: 'Rebecca',
+    lastName: 'Hamilton',
+    title: 'Family Office CEO',
+    location: 'Greenwich, CT',
+    yearsOfExperience: 22,
+    bio: 'Seasoned family office executive with extensive experience in wealth management and family enterprise leadership. Expert in strategic planning and multi-generational wealth preservation.',
+    skills: ['Wealth Management', 'Strategic Planning', 'Team Leadership', 'Family Governance', 'Investment Oversight'],
+    certifications: ['CFA', 'Family Office Management', 'Wealth Management Professional'],
+    preferredRole: 'Family Office CEO',
+    workLocations: ['Greenwich', 'New York', 'Palm Beach'],
+    seekingOpportunities: ['Family Office CEO', 'Executive Director', 'Wealth Management'],
+  },
+  {
+    firstName: 'Jonathan',
+    lastName: 'Price',
+    title: 'Family Office COO',
+    location: 'Palm Beach, FL',
+    yearsOfExperience: 19,
+    bio: 'Experienced operations executive specializing in family office management and process optimization. Expert in team building and operational efficiency.',
+    skills: ['Operations Management', 'Process Improvement', 'Team Development', 'Risk Management', 'Strategic Planning'],
+    certifications: ['MBA', 'Operations Management', 'Project Management Professional'],
+    preferredRole: 'Family Office COO',
+    workLocations: ['Palm Beach', 'Miami', 'New York'],
+    seekingOpportunities: ['Family Office COO', 'Operations Director', 'Family Office Executive'],
+  },
+  {
+    firstName: 'Sarah',
+    lastName: 'Mitchell',
+    title: 'Administrative Assistant',
+    location: 'Boston, MA',
+    yearsOfExperience: 6,
+    bio: 'Detail-oriented administrative professional with experience in high-net-worth family offices. Strong skills in organization and communication.',
+    skills: ['Office Administration', 'Calendar Management', 'Document Preparation', 'Client Relations', 'Data Management'],
+    certifications: ['Administrative Professional', 'Microsoft Office Specialist', 'Business Administration'],
+    preferredRole: 'Administrative Assistant',
+    workLocations: ['Boston', 'New York', 'Remote'],
+    seekingOpportunities: ['Administrative Assistant', 'Executive Assistant', 'Office Coordinator'],
+  },
+  {
+    firstName: 'Michael',
+    lastName: 'Reynolds',
+    title: 'Human Resources Director',
+    location: 'Chicago, IL',
+    yearsOfExperience: 16,
+    bio: 'HR professional specializing in private service and family office staff management. Expert in recruitment, training, and employee relations.',
+    skills: ['HR Management', 'Recruitment', 'Employee Relations', 'Training Development', 'Policy Implementation'],
+    certifications: ['SHRM-SCP', 'HR Management Professional', 'Diversity & Inclusion'],
+    preferredRole: 'Human Resources Director',
+    workLocations: ['Chicago', 'New York', 'Remote'],
+    seekingOpportunities: ['HR Director', 'People Operations', 'Talent Management'],
+  },
+  {
+    firstName: 'Isabella',
+    lastName: 'Santos',
+    title: 'Director of Residences',
+    location: 'Miami, FL',
+    yearsOfExperience: 15,
+    bio: 'Experienced property professional managing multiple luxury residences. Expert in staff coordination and property operations.',
+    skills: ['Property Management', 'Staff Supervision', 'Project Management', 'Vendor Relations', 'Budget Management'],
+    certifications: ['Property Management Professional', 'Real Estate License', 'Facilities Management'],
+    preferredRole: 'Director of Residences',
+    workLocations: ['Miami', 'Palm Beach', 'New York'],
+    seekingOpportunities: ['Director of Residences', 'Estate Manager', 'Property Director'],
+  },
+  {
+    firstName: 'Robert',
+    lastName: 'Nash',
+    title: 'Estate Hospitality Manager',
+    location: 'Beverly Hills, CA',
+    yearsOfExperience: 13,
+    bio: 'Hospitality professional specializing in luxury estate guest services and event management. Expert in creating exceptional experiences.',
+    skills: ['Guest Services', 'Event Planning', 'Staff Training', 'Luxury Hospitality', 'Protocol'],
+    certifications: ['Hospitality Management', 'Event Planning Professional', 'Wine Service'],
+    preferredRole: 'Estate Hospitality Manager',
+    workLocations: ['Beverly Hills', 'Los Angeles', 'International'],
+    seekingOpportunities: ['Estate Hospitality Manager', 'Guest Relations Director', 'Events Manager'],
+  },
+  {
+    firstName: 'Katherine',
+    lastName: 'Walsh',
+    title: 'Director of Operations',
+    location: 'New York, NY',
+    yearsOfExperience: 17,
+    bio: 'Operations professional with extensive experience in estate and household management. Expert in process improvement and staff development.',
+    skills: ['Operations Management', 'Team Leadership', 'Process Improvement', 'Project Management', 'Budget Administration'],
+    certifications: ['Operations Management', 'Project Management Professional', 'Six Sigma Green Belt'],
+    preferredRole: 'Director of Operations',
+    workLocations: ['New York', 'Hamptons', 'Connecticut'],
+    seekingOpportunities: ['Director of Operations', 'COO', 'Operations Manager'],
+  },
+  {
+    firstName: 'Andrew',
+    lastName: 'Barrett',
+    title: 'Director of Real Estate and Construction',
+    location: 'Los Angeles, CA',
+    yearsOfExperience: 20,
+    bio: 'Real estate and construction professional specializing in luxury property development and renovation. Expert in project management and contractor coordination.',
+    skills: ['Real Estate Development', 'Construction Management', 'Project Planning', 'Vendor Management', 'Budget Control'],
+    certifications: ['Real Estate License', 'Construction Management', 'LEED AP'],
+    preferredRole: 'Director of Real Estate and Construction',
+    workLocations: ['Los Angeles', 'San Francisco', 'New York'],
+    seekingOpportunities: ['Real Estate Director', 'Construction Director', 'Development Manager'],
+  },
+  {
+    firstName: 'Claire',
+    lastName: 'Montgomery',
+    title: 'Facilities Manager',
+    location: 'Washington, DC',
+    yearsOfExperience: 12,
+    bio: 'Facilities professional specializing in luxury property maintenance and systems management. Expert in preventive maintenance and vendor coordination.',
+    skills: ['Facilities Management', 'Maintenance Planning', 'Vendor Coordination', 'Safety Compliance', 'Budget Management'],
+    certifications: ['Facilities Management Professional', 'HVAC Systems', 'Building Operations'],
+    preferredRole: 'Facilities Manager',
+    workLocations: ['Washington DC', 'Virginia', 'Maryland'],
+    seekingOpportunities: ['Facilities Manager', 'Property Manager', 'Operations Manager'],
+  },
+  {
+    firstName: 'Derek',
+    lastName: 'Zhang',
+    title: 'Office Chef',
+    location: 'San Francisco, CA',
+    yearsOfExperience: 10,
+    bio: 'Corporate chef specializing in healthy, diverse cuisine for office environments. Expert in dietary accommodations and large-scale meal planning.',
+    skills: ['Corporate Catering', 'Menu Planning', 'Dietary Restrictions', 'Team Management', 'Food Safety'],
+    certifications: ['Culinary Arts Degree', 'Food Safety Manager', 'Nutrition Specialist'],
+    preferredRole: 'Office Chef',
+    workLocations: ['San Francisco', 'Silicon Valley', 'Bay Area'],
+    seekingOpportunities: ['Office Chef', 'Corporate Chef', 'Catering Manager'],
+  },
+  {
+    firstName: 'Sophia',
+    lastName: 'Kowalski',
+    title: 'Yacht Chef',
+    location: 'Fort Lauderdale, FL',
+    yearsOfExperience: 11,
+    bio: 'Maritime chef with extensive experience on luxury yachts. Expert in international cuisine and provisioning in remote locations.',
+    skills: ['Maritime Cooking', 'Provisioning', 'Menu Planning', 'Dietary Restrictions', 'Inventory Management'],
+    certifications: ['Maritime Culinary Certificate', 'STCW', 'Food Safety at Sea'],
+    preferredRole: 'Yacht Chef',
+    workLocations: ['Fort Lauderdale', 'Mediterranean', 'Caribbean'],
+    seekingOpportunities: ['Yacht Chef', 'Private Chef', 'Maritime Culinary'],
+  },
+  {
+    firstName: 'James',
+    lastName: 'Harrison',
+    title: 'Jet Chef',
+    location: 'Las Vegas, NV',
+    yearsOfExperience: 13,
+    bio: 'Aviation culinary professional specializing in private jet dining. Expert in high-altitude cooking and international cuisine.',
+    skills: ['Aviation Catering', 'High-Altitude Cooking', 'Menu Development', 'Food Safety', 'Wine Selection'],
+    certifications: ['Aviation Culinary Certificate', 'Food Safety Manager', 'Wine Specialist'],
+    preferredRole: 'Jet Chef',
+    workLocations: ['Las Vegas', 'Los Angeles', 'International'],
+    seekingOpportunities: ['Jet Chef', 'Private Aviation Chef', 'Executive Chef'],
+  },
+  {
+    firstName: 'Olivia',
+    lastName: 'Reeves',
+    title: 'Estate Couple - Property Manager',
+    location: 'Aspen, CO',
+    yearsOfExperience: 15,
+    bio: 'Part of an experienced estate couple specializing in luxury property management. Expert in household operations and maintenance.',
+    skills: ['Property Management', 'Household Operations', 'Maintenance', 'Guest Services', 'Staff Coordination'],
+    certifications: ['Property Management', 'Household Management', 'First Aid'],
+    preferredRole: 'Estate Couple',
+    workLocations: ['Aspen', 'Vail', 'International'],
+    seekingOpportunities: ['Estate Couple', 'Property Managers', 'Caretakers'],
+  },
+  {
+    firstName: 'William',
+    lastName: 'Reeves',
+    title: 'Estate Couple - Chef',
+    location: 'Aspen, CO',
+    yearsOfExperience: 15,
+    bio: 'Part of an experienced estate couple specializing in private chef services and property management. Expert in fine dining and event planning.',
+    skills: ['Culinary Arts', 'Event Planning', 'Wine Service', 'Property Maintenance', 'Guest Services'],
+    certifications: ['Culinary Arts Degree', 'Wine Service', 'Property Management'],
+    preferredRole: 'Estate Couple',
+    workLocations: ['Aspen', 'Vail', 'International'],
+    seekingOpportunities: ['Estate Couple', 'Property Managers', 'Caretakers'],
+  },
+  {
+    firstName: 'Henry',
+    lastName: 'Whitman',
+    title: 'Property Caretaker',
+    location: 'Martha\'s Vineyard, MA',
+    yearsOfExperience: 19,
+    bio: 'Experienced property caretaker specializing in seasonal estate maintenance. Expert in building systems and grounds care.',
+    skills: ['Property Maintenance', 'Grounds Care', 'Building Systems', 'Security Monitoring', 'Storm Preparation'],
+    certifications: ['Property Maintenance Professional', 'HVAC Systems', 'Boat Handling'],
+    preferredRole: 'Property Caretaker',
+    workLocations: ['Martha\'s Vineyard', 'Nantucket', 'Cape Cod'],
+    seekingOpportunities: ['Property Caretaker', 'Estate Manager', 'Facilities Manager'],
+  },
+  {
+    firstName: 'Maria',
+    lastName: 'Vasquez',
+    title: 'Estate Couple - Housekeeper',
+    location: 'Greenwich, CT',
+    yearsOfExperience: 14,
+    bio: 'Part of an experienced estate couple specializing in formal housekeeping and property maintenance. Expert in fine textile care and silver service.',
+    skills: ['Formal Housekeeping', 'Silver Service', 'Fine Textile Care', 'Event Support', 'Inventory Management'],
+    certifications: ['Housekeeping Professional', 'Textile Care', 'First Aid'],
+    preferredRole: 'Estate Couple',
+    workLocations: ['Greenwich', 'Westchester', 'Hamptons'],
+    seekingOpportunities: ['Estate Couple', 'Property Managers', 'Caretakers'],
+  },
+  {
+    firstName: 'Carlos',
+    lastName: 'Vasquez',
+    title: 'Estate Couple - Maintenance',
+    location: 'Greenwich, CT',
+    yearsOfExperience: 14,
+    bio: 'Part of an experienced estate couple specializing in property maintenance and grounds care. Expert in building systems and security.',
+    skills: ['Property Maintenance', 'Grounds Care', 'Security Systems', 'Building Systems', 'Project Management'],
+    certifications: ['Property Maintenance', 'HVAC Systems', 'Security Systems'],
+    preferredRole: 'Estate Couple',
+    workLocations: ['Greenwich', 'Westchester', 'Hamptons'],
+    seekingOpportunities: ['Estate Couple', 'Property Managers', 'Caretakers'],
+  },
+  {
+    firstName: 'Alexandra',
+    lastName: 'Kensington',
+    title: 'Nanny',
+    location: 'Beverly Hills, CA',
+    yearsOfExperience: 10,
+    bio: 'Experienced nanny specializing in newborn and infant care. Expert in child development and creating nurturing environments.',
+    skills: ['Newborn Care', 'Child Development', 'Sleep Training', 'Activity Planning', 'First Aid'],
+    certifications: ['Newborn Care Specialist', 'Child Development Associate', 'CPR & First Aid'],
+    preferredRole: 'Nanny',
+    workLocations: ['Beverly Hills', 'Los Angeles', 'International'],
+    seekingOpportunities: ['Nanny', 'Newborn Specialist', 'Childcare Professional'],
   }
 ]
-
-// Map job titles to official professional roles
-const jobTitleToRole: Record<string, string> = {
-  // Chef roles
-  'Private Chef - French Cuisine Specialist': 'Private Chef',
-  'Personal Chef - Plant-Based Specialist': 'Personal Chef',
-  'Private Yacht Chef': 'Yacht Chef',
-  'Private Yacht Chef - Mediterranean Cuisine': 'Yacht Chef',
-  'Event Chef - Special Occasions': 'Event Chef',
-  'Drop-Off Chef - Weekly Meal Service': 'Drop-Off Chef',
-  'Seasonal Chef - Summer Residence': 'Seasonal Chef',
-  'Office Chef - Corporate Dining': 'Office Chef',
-  'Private Jet Chef': 'Jet Chef',
-  'Household Manager & Chef': 'Private Chef',
-
-  // Estate & Property Management
-  'Estate Manager - Multiple Properties': 'Estate Manager',
-  'House Manager - City Residence': 'House Manager',
-  'Estate Operations Director': 'Director of Operations',
-  'Estate Operations Manager': 'Director of Operations',
-  'Estate Hospitality Director': 'Estate Hospitality Manager',
-  'Estate IT Systems Manager': 'Estate IT Director',
-  'Director of Real Estate Portfolio': 'Director of Real Estate and Construction',
-  'Construction & Development Manager': 'Construction Manager',
-  'Property Manager - Luxury Residences': 'Property Manager',
-  'Facilities Operations Manager': 'Facilities Manager',
-  'Landscape & Grounds Director': 'Landscape Director',
-  'Villa Manager': 'House Manager',
-  'Residential Property Manager': 'Property Manager',
-  'Estate Sustainability Manager': 'Other',
-  'Head Gardener': 'Landscape Director',
-
-  // Personal Assistance & Administrative
-  'Senior Personal Assistant': 'Personal Assistant',
-  'Personal Assistant to CEO': 'Personal Assistant',
-  'Executive Personal Assistant': 'Executive Assistant',
-  'Executive Assistant to CEO': 'Executive Assistant',
-  'Administrative Support Manager': 'Administrative Assistant',
-  'Family Assistant & Coordinator': 'Family Assistant',
-  'Office Operations Manager': 'Office Manager',
-  'Personal Concierge & Lifestyle Manager': 'Personal Assistant',
-  'Executive Support Professional': 'Executive Assistant',
-  'Lifestyle Manager': 'Personal Assistant',
-  'Private Travel Coordinator': 'Personal Assistant',
-  'Residential Concierge Manager': 'Personal Assistant',
-  'Personal Care Assistant': 'Personal Assistant',
-
-  // Household Staff
-  'Butler - Formal Household': 'Butler',
-  'Private Chauffeur - UHNW Family': 'Driver',
-  'Executive Chauffeur': 'Driver',
-  'Head of Housekeeping': 'Executive Housekeeper',
-  'Head Housekeeper': 'Executive Housekeeper',
-  'Laundry & Wardrobe Manager': 'Laundress',
-  'Housekeeper - Formal Residence': 'Housekeeper',
-  'Houseman - Estate Staff': 'Houseman',
-  'Estate Couple - Property Caretakers': 'Estate Couple',
-  'Property Caretaker - Seasonal Estate': 'Property Caretaker',
-  'Household Staff Manager': 'House Manager',
-  'Domestic Staff Coordinator': 'House Manager',
-  'Residential Staff Coordinator': 'House Manager',
-
-  // Education & Childcare
-  'Governess - International Education': 'Governess',
-  'Private Teacher - IB Curriculum': 'Private Teacher',
-  'Private Tutor': 'Private Teacher',
-  'Nanny Educator - Multiple Languages': 'Nanny | Educator',
-  'Professional Nanny - Newborn Specialist': 'Nanny',
-  'Early Childhood Educator': 'Private Teacher',
-
-  // Family Office
-  'Family Office Chief Executive': 'Family Office CEO',
-  'Family Office Operations Director': 'Family Office COO',
-  'Family Office Manager': 'Family Office COO',
-  'Chief of Staff - UHNW Family': 'Chief of Staff',
-  'HR Director - Family Office': 'Human Resources Director',
-  'Household Administrative Director': 'Chief of Staff',
-
-  // Yacht & Aviation
-  'Yacht Captain - Mediterranean': 'Yacht Captain',
-  'Yacht Engineer - Luxury Vessels': 'Yacht Engineer',
-  'Yacht Chief Steward/ess': 'Yacht Steward | Stewardess',
-  'Private Aviation Attendant': 'Flight Attendant',
-  'Private Flight Attendant': 'Flight Attendant',
-  'Corporate Flight Attendant': 'Flight Attendant',
-
-  // Security
-  'Executive Protection Specialist': 'Executive Protection',
-  'Head of Estate Security': 'Estate Security Director',
-  'Security Operations Manager': 'Executive Protection',
-  'Personal Protection Specialist': 'Executive Protection',
-  'Security Director': 'Estate Security Director',
-  'Private Security Team Lead': 'Executive Protection',
-  'Estate Security Specialist': 'Estate Security Director',
-
-  // Wellness & Other
-  'Wellness Director & Personal Trainer': 'Other',
-  'Estate Wellness Coordinator': 'Other',
-  'Wine Cellar Manager & Sommelier': 'Other',
-  'Personal Wellness Director': 'Other',
-  'Personal Trainer & Wellness Coach': 'Other',
-  'Fine Art Curator': 'Other',
-  'Sustainable Living Director': 'Other'
-}
-
-// Get job titles from the mapping
-const jobTitles = Object.keys(jobTitleToRole)
-
-const EMPLOYMENT_TYPES = [
-  "Full-time",
-  "Part-time", 
-  "Event",
-  "Contract",
-  "Seasonal"
-] as const;
-
-const salaryRanges = [
-  { min: 75000, max: 95000 },
-  { min: 85000, max: 110000 },
-  { min: 95000, max: 125000 },
-  { min: 100000, max: 150000 },
-  { min: 120000, max: 180000 },
-  { min: 150000, max: 200000 },
-  { min: 175000, max: 250000 },
-  { min: 200000, max: 300000 },
-  { min: 250000, max: 350000 },
-  { min: 300000, max: 400000 }
-]
-
-const employmentTypes = [
-  'Full-time',
-  'Part-time',
-  'Live-in',
-  'Live-out',
-  'Seasonal',
-  'Contract',
-  'Temporary',
-  'Permanent'
-]
-
-const benefits = [
-  'Health insurance',
-  'Dental insurance',
-  'Vision insurance',
-  'Life insurance',
-  '401(k) matching',
-  'Paid time off',
-  'Sick leave',
-  'Holiday pay',
-  'Travel allowance',
-  'Car allowance',
-  'Housing provided',
-  'Meals provided',
-  'Cell phone allowance',
-  'Uniform allowance',
-  'Professional development',
-  'Gym membership',
-  'Relocation assistance',
-  'Performance bonus',
-  'Annual bonus',
-  'Flexible schedule'
-]
-
-function getRandomItems<T>(array: T[], count: number): T[] {
-  const shuffled = [...array].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, count)
-}
-
-function getRandomItem<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)]
-}
-
-async function generateJobPosting() {
-  // Create an employer with profile first
-  const employer = await prisma.user.create({
-    data: {
-      email: `employer${Math.random().toString(36).substring(7)}@example.com`,
-      firstName: `Employer${Math.random().toString(36).substring(7)}`,
-      lastName: `LastName${Math.random().toString(36).substring(7)}`,
-      role: UserRole.EMPLOYER,
-      emailVerified: new Date(),
-      employerProfile: {
-        create: {
-          companyName: `${getRandomItem([
-            'Elite', 'Luxury', 'Premier', 'Royal', 'Imperial', 'Noble', 'Grand', 'Prestige', 'Exclusive', 'Distinguished'
-          ])} ${getRandomItem([
-            'Estate Services', 'Household Management', 'Private Staff', 'Family Office', 'Residential Services',
-            'Property Management', 'Domestic Staffing', 'Estate Management', 'Lifestyle Management', 'Concierge Services'
-          ])}`,
-          description: 'A leading provider of private service professionals.',
-          website: 'https://example.com',
-          location: getRandomItem(locations)
-        }
-      }
-    }
-  });
-
-  // Generate random job details
-  const jobTitle = getRandomItem(Object.keys(jobTitleToRole));
-  const professionalRole = jobTitleToRole[jobTitle];
-  
-  if (!PROFESSIONAL_ROLES.includes(professionalRole)) {
-    throw new Error(`Invalid professional role: ${professionalRole}`);
-  }
-
-  const jobReqs = getRandomItems(requirements, Math.floor(Math.random() * 5) + 3);
-  const description = getRandomItem(descriptions);
-  const location = getRandomItem(locations);
-  const minSalary = Math.floor(Math.random() * 150000) + 50000;
-  const maxSalary = minSalary + Math.floor(Math.random() * 100000);
-
-  const urlSlug = await generateJobUrlSlug(jobTitle);
-
-  // Create the job posting
-  return await prisma.job.create({
-    data: {
-      title: jobTitle,
-      professionalRole,
-      description,
-      location,
-      requirements: jobReqs,
-      salary: {
-        min: minSalary,
-        max: maxSalary,
-        currency: 'USD'
-      },
-      status: JobStatus.ACTIVE,
-      featured: Math.random() < 0.2,
-      employerId: employer.id,
-      urlSlug,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
-    }
-  });
-}
 
 async function main() {
-  // Create test users if they don't exist
-  const testEmployer = await prisma.user.upsert({
-    where: { email: 'employer@test.com' },
-    update: {},
-    create: {
-      email: 'employer@test.com',
-      firstName: 'Test',
-      lastName: 'Employer',
-      role: UserRole.EMPLOYER,
-      emailVerified: new Date(),
-      employerProfile: {
-        create: {
-          companyName: 'Test Employer Services',
-          description: 'A leading provider of private service professionals.',
-          website: 'https://example.com',
-          location: 'New York, NY'
-        }
-      }
-    }
-  });
-
-  // Generate and create 300 job postings
-  console.log('Creating 300 job postings...');
+  console.log('Creating 50 professional profiles...')
   
-  let count = 0;
-  for (let i = 0; i < 300; i++) {
-    // Generate random job details
-    const jobTitle = getRandomItem(Object.keys(jobTitleToRole));
-    const professionalRole = jobTitleToRole[jobTitle];
-    
-    if (!PROFESSIONAL_ROLES.includes(professionalRole)) {
-      throw new Error(`Invalid professional role: ${professionalRole}`);
-    }
-
-    const jobReqs = getRandomItems(requirements, Math.floor(Math.random() * 5) + 3);
-    const description = getRandomItem(descriptions);
-    const location = getRandomItem(locations);
-    const minSalary = Math.floor(Math.random() * 150000) + 50000;
-    const maxSalary = minSalary + Math.floor(Math.random() * 100000);
-
-    const urlSlug = await generateJobUrlSlug(jobTitle);
-
-    // Create the job posting
-    await prisma.job.create({
+  let count = 0
+  for (const professional of professionals) {
+    // Create user account
+    const user = await prisma.user.create({
       data: {
-        title: jobTitle,
-        professionalRole,
-        description,
-        location,
-        requirements: jobReqs,
-        salary: {
-          min: minSalary,
-          max: maxSalary,
-          currency: 'USD'
-        },
-        status: JobStatus.ACTIVE,
-        featured: Math.random() < 0.2,
-        employerId: testEmployer.id,
-        urlSlug,
-        expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days from now
+        email: `${professional.firstName.toLowerCase()}.${professional.lastName.toLowerCase()}@example.com`,
+        firstName: professional.firstName,
+        lastName: professional.lastName,
+        role: UserRole.PROFESSIONAL,
+        emailVerified: new Date(),
+        profileSlug: await generateProfileSlug(professional.firstName, professional.lastName),
       }
-    });
+    })
 
-    count++;
-    if (count % 50 === 0) {
-      console.log(`Created ${count} job postings...`);
-    }
+    // Create candidate profile
+    await prisma.candidateProfile.create({
+      data: {
+        userId: user.id,
+        bio: professional.bio,
+        title: professional.title,
+        location: professional.location,
+        yearsOfExperience: professional.yearsOfExperience,
+        skills: professional.skills,
+        certifications: professional.certifications,
+        preferredRole: professional.preferredRole,
+        workLocations: professional.workLocations,
+        seekingOpportunities: professional.seekingOpportunities,
+        openToWork: true,
+        employmentType: 'Full-time'
+      }
+    })
+
+    count++
+    console.log(`Created professional profile ${count}/50: ${professional.firstName} ${professional.lastName}`)
   }
 
-  console.log('Seed completed successfully');
+  console.log('Professional profiles seed completed successfully')
 }
 
 main()
@@ -802,4 +743,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect()
-  })
+  }) 
