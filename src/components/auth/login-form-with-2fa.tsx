@@ -15,6 +15,7 @@ const loginSchema = z.object({
 
 const twoFactorSchema = z.object({
   code: z.string().min(4, "Code must be at least 4 characters"),
+  trustDevice: z.boolean().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -40,6 +41,9 @@ export function LoginFormWith2FA() {
 
   const twoFactorForm = useForm<TwoFactorData>({
     resolver: zodResolver(twoFactorSchema),
+    defaultValues: {
+      trustDevice: false,
+    },
   });
 
   // Check for email update success message
@@ -79,6 +83,25 @@ export function LoginFormWith2FA() {
     }
   };
 
+  const checkTrustedDevice = async (email: string): Promise<{ isTrusted: boolean; requires2FA: boolean }> => {
+    try {
+      const response = await fetch('/api/auth/check-trusted-device', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return { isTrusted: data.isTrusted, requires2FA: data.requires2FA };
+      }
+      return { isTrusted: false, requires2FA: true };
+    } catch (error) {
+      console.error('Error checking trusted device:', error);
+      return { isTrusted: false, requires2FA: true };
+    }
+  };
+
   const sendVerificationCode = async (email: string) => {
     try {
       const response = await fetch('/api/auth/2fa/send-code', {
@@ -110,6 +133,9 @@ export function LoginFormWith2FA() {
       const { has2FA, phone } = await checkUserHas2FA(data.email);
 
       if (has2FA) {
+        // Check if this device is trusted
+        const { isTrusted } = await checkTrustedDevice(data.email);
+        
         // Verify credentials without logging in
         const credentialCheck = await fetch('/api/auth/verify-credentials', {
           method: 'POST',
@@ -126,7 +152,25 @@ export function LoginFormWith2FA() {
           return;
         }
 
-        // Send 2FA code
+        // If device is trusted, skip 2FA
+        if (isTrusted) {
+          // Complete login directly
+          const result = await signIn("credentials", {
+            redirect: false,
+            email: data.email,
+            password: data.password,
+          });
+
+          if (result?.error) {
+            setError(result.error);
+            return;
+          }
+
+          router.push("/dashboard");
+          return;
+        }
+
+        // Device not trusted, proceed with 2FA
         const codeSent = await sendVerificationCode(data.email);
         if (codeSent) {
           setEmail(data.email);
@@ -160,13 +204,14 @@ export function LoginFormWith2FA() {
       setIsLoading(true);
       setError(null);
 
-      // Verify the 2FA code
+      // Verify the 2FA code and optionally trust the device
       const response = await fetch('/api/auth/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email,
           code: data.code,
+          trustDevice: data.trustDevice,
         }),
       });
 
@@ -185,6 +230,9 @@ export function LoginFormWith2FA() {
       });
 
       if (signInResult?.ok) {
+        if (result.deviceTrusted) {
+          setSuccessMessage('Device trusted for 30 days. You won\'t need 2FA on this device.');
+        }
         router.push("/dashboard");
       } else {
         setError("Failed to complete login. Please try again.");
@@ -225,6 +273,12 @@ export function LoginFormWith2FA() {
           </div>
         )}
 
+        {successMessage && (
+          <div className="rounded-md bg-green-50 p-4">
+            <p className="text-sm text-green-800">{successMessage}</p>
+          </div>
+        )}
+
         <form onSubmit={twoFactorForm.handleSubmit(onTwoFactorSubmit)} className="space-y-4">
           <div>
             <label htmlFor="code" className="block text-sm font-medium text-gray-700">
@@ -245,6 +299,37 @@ export function LoginFormWith2FA() {
               </p>
             )}
           </div>
+
+          {!showBackupCode && (
+            <div className="flex items-center">
+              <input
+                {...twoFactorForm.register("trustDevice")}
+                id="trustDevice"
+                type="checkbox"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="trustDevice" className="ml-2 block text-sm text-gray-700">
+                Trust this device for 30 days
+              </label>
+            </div>
+          )}
+
+          {!showBackupCode && (
+            <div className="rounded-md bg-amber-50 p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-amber-700">
+                    Only check this on your personal devices. You&apos;ll still need your password to sign in.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest) {
     // Get user with their password hash
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { password: true }
+      select: { id: true, password: true }
     });
 
     if (!user?.password) {
@@ -43,7 +43,23 @@ export async function PUT(request: NextRequest) {
       data: { password: hashedPassword },
     });
 
-    return new NextResponse("Password updated successfully");
+    // Revoke all trusted devices for security (after migration)
+    try {
+      // This will work after the database migration is run
+      await prisma.trustedDevice.deleteMany({
+        where: { userId: user.id },
+      });
+    } catch (error) {
+      // Silently fail if trusted devices table doesn't exist yet
+      console.log('Trusted devices table not yet available');
+    }
+
+    const response = new NextResponse("Password updated successfully");
+    
+    // Clear device token cookie since all trusted devices are revoked
+    response.cookies.delete('device_token');
+    
+    return response;
   } catch (error) {
     console.error("[PASSWORD_UPDATE]", error);
     return new NextResponse(

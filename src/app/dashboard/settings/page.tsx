@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
 import { TwoFactorSetup } from "@/components/auth/two-factor-setup";
+import { TrustedDevicesManager } from "@/components/auth/trusted-devices-manager";
 
 interface ChangePasswordForm {
   currentPassword: string;
@@ -435,6 +436,14 @@ export default function SettingsPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Trusted Devices Section */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Trusted Devices</h2>
+            <TrustedDevicesManager />
           </div>
         </div>
 

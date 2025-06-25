@@ -101,6 +101,7 @@ model User {
   savedByEmployers          SavedCandidate[]     @relation("SavedByEmployers")
   savedJobs                 SavedJob[]
   sessions                  Session[]
+  trustedDevices            TrustedDevice[]
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -341,6 +342,23 @@ model JobMatch {
   @@unique([userId, jobId])
   @@index([userId])
   @@index([score])
+}
+
+model TrustedDevice {
+  id          String   @id @default(cuid())
+  userId      String
+  deviceToken String   @unique
+  deviceName  String?
+  userAgent   String
+  ipAddress   String
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @default(now())
+  expiresAt   DateTime
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceToken])
+  @@index([expiresAt])
 }
 
 enum UserRole {

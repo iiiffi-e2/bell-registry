@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -35,7 +35,17 @@ export function TwoFactorSetup({ onComplete, className = "" }: TwoFactorSetupPro
 
   const codeForm = useForm<CodeFormData>({
     resolver: zodResolver(codeSchema),
+    defaultValues: {
+      code: ''
+    }
   });
+
+  // Reset code form when entering verify step
+  useEffect(() => {
+    if (step === 'verify') {
+      codeForm.reset({ code: '' });
+    }
+  }, [step, codeForm]);
 
   const onSetupSubmit = async (data: PhoneFormData) => {
     try {
@@ -191,15 +201,22 @@ export function TwoFactorSetup({ onComplete, className = "" }: TwoFactorSetupPro
 
         <form onSubmit={codeForm.handleSubmit(onVerifySubmit)} className="space-y-4">
           <div>
-            <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="verification-code" className="block text-sm font-medium text-gray-700">
               Verification Code
             </label>
             <input
               {...codeForm.register("code")}
               type="text"
-              id="code"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              id="verification-code"
+              name="verification-code"
               placeholder="Enter 6-digit code"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck="false"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-center text-lg tracking-widest"
               maxLength={6}
             />
             {codeForm.formState.errors.code && (
@@ -212,7 +229,10 @@ export function TwoFactorSetup({ onComplete, className = "" }: TwoFactorSetupPro
           <div className="flex gap-3">
             <button
               type="button"
-              onClick={() => setStep('setup')}
+              onClick={() => {
+                setStep('setup');
+                codeForm.reset();
+              }}
               className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               Back
@@ -254,7 +274,9 @@ export function TwoFactorSetup({ onComplete, className = "" }: TwoFactorSetupPro
             {...phoneForm.register("phoneNumber")}
             type="tel"
             id="phoneNumber"
+            name="phoneNumber"
             placeholder="+1 (555) 123-4567"
+            autoComplete="tel"
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
           {phoneForm.formState.errors.phoneNumber && (

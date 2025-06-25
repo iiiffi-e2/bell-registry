@@ -36,12 +36,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Remove all trusted devices since 2FA is disabled
+    await prisma.trustedDevice.deleteMany({
+      where: { userId: session.user.id },
+    });
+
     // Note: Twilio Verify handles verification cleanup automatically
 
-    return NextResponse.json({ 
+    const response = NextResponse.json({ 
       success: true,
-      message: 'Two-factor authentication has been disabled'
+      message: 'Two-factor authentication has been disabled. All trusted devices have been removed.'
     });
+
+    // Clear device token cookie
+    response.cookies.delete('device_token');
+
+    return response;
   } catch (error) {
     console.error('2FA disable error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
