@@ -274,7 +274,7 @@ export function LoginFormWith2FA() {
                 onClick={() => setShowBackupCode(true)}
                 className="text-blue-600 hover:text-blue-500"
               >
-                Can't access your phone? Use a backup code
+                Can&apos;t access your phone? Use a backup code
               </button>
             </>
           ) : (
