@@ -7,7 +7,7 @@ import { UserRole } from "@/types";
 import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "./welcome-email-service";
-import { verifyTwoFactorSession } from "@/app/api/auth/2fa/create-session/route";
+import { verifyTwoFactorSession } from "@/lib/2fa-session";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
