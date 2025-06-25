@@ -7,6 +7,7 @@ import { UserRole } from "@/types";
 import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "./welcome-email-service";
+import { verifyTwoFactorSession } from "@/app/api/auth/2fa/create-session/route";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
@@ -78,6 +79,33 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // Handle 2FA-verified login
+        if (credentials.password === "__2FA_VERIFIED__") {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: credentials.email
+            }
+          });
+
+          if (!user) {
+            throw new Error("No account found with this email address");
+          }
+
+          // Check if account is deleted
+          if (user.isDeleted) {
+            throw new Error("This account has been deleted");
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            role: fromPrismaUserRole(user.role),
+            name: `${user.firstName} ${user.lastName}`.trim(),
+            image: user.image,
+          } as any;
+        }
+
+        // Normal credential verification
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import { LoginForm } from "@/components/auth/login-form";
+import { LoginFormWith2FA } from "@/components/auth/login-form-with-2fa";
 import Image from "next/image";
 
 export const metadata: Metadata = {
@@ -40,7 +40,7 @@ export default function LoginPage() {
                     Sign in to continue your journey in luxury private service.
                   </p>
                 </div>
-                <LoginForm />
+                <LoginFormWith2FA />
               </div>
             </div>
 

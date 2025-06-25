@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { DeleteAccountModal } from "@/components/modals/DeleteAccountModal";
+import { TwoFactorSetup } from "@/components/auth/two-factor-setup";
 
 interface ChangePasswordForm {
   currentPassword: string;
@@ -29,6 +30,10 @@ export default function SettingsPage() {
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState<boolean>(false);
+  const [twoFactorPhone, setTwoFactorPhone] = useState<string>("");
+  const [showTwoFactorSetup, setShowTwoFactorSetup] = useState(false);
+  const [twoFactorMessage, setTwoFactorMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Force session refresh when component mounts if email was just verified
   useEffect(() => {
@@ -86,6 +91,26 @@ export default function SettingsPage() {
       status
     });
   }, [session, status]);
+
+  // Fetch 2FA status
+  useEffect(() => {
+    const fetchTwoFactorStatus = async () => {
+      if (session?.user?.id) {
+        try {
+          const response = await fetch('/api/auth/2fa/status');
+          if (response.ok) {
+            const data = await response.json();
+            setTwoFactorEnabled(data.enabled);
+            setTwoFactorPhone(data.phone || "");
+          }
+        } catch (error) {
+          console.error('Failed to fetch 2FA status:', error);
+        }
+      }
+    };
+
+    fetchTwoFactorStatus();
+  }, [session?.user?.id]);
 
   const handleEmailChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +177,54 @@ export default function SettingsPage() {
         text: error instanceof Error ? error.message : "Failed to update password" 
       });
     }
+  };
+
+  const handleDisableTwoFactor = async () => {
+    if (!confirm("Are you sure you want to disable two-factor authentication? This will make your account less secure.")) {
+      return;
+    }
+
+    setTwoFactorMessage(null);
+
+    try {
+      const response = await fetch("/api/auth/2fa/disable", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error);
+      }
+
+      setTwoFactorEnabled(false);
+      setTwoFactorPhone("");
+      setTwoFactorMessage({ 
+        type: "success", 
+        text: "Two-factor authentication has been disabled" 
+      });
+    } catch (error) {
+      setTwoFactorMessage({ 
+        type: "error", 
+        text: error instanceof Error ? error.message : "Failed to disable two-factor authentication" 
+      });
+    }
+  };
+
+  const handleTwoFactorSetupComplete = () => {
+    setShowTwoFactorSetup(false);
+    setTwoFactorEnabled(true);
+    setTwoFactorMessage({ 
+      type: "success", 
+      text: "Two-factor authentication has been enabled successfully!" 
+    });
+    // Refresh 2FA status
+    fetch('/api/auth/2fa/status')
+      .then(res => res.json())
+      .then(data => {
+        setTwoFactorPhone(data.phone || "");
+      })
+      .catch(console.error);
   };
 
   return (
@@ -282,6 +355,86 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+
+        {/* Two-Factor Authentication Section */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Two-Factor Authentication</h2>
+            
+            {!showTwoFactorSetup && (
+              <>
+                <div className="mb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Add an extra layer of security to your account with SMS verification.
+                      </p>
+                      {twoFactorEnabled && twoFactorPhone && (
+                        <p className="text-sm text-green-600">
+                          ✓ Enabled for {twoFactorPhone}
+                        </p>
+                      )}
+                      {!twoFactorEnabled && (
+                        <p className="text-sm text-gray-500">
+                          Not enabled
+                        </p>
+                      )}
+                    </div>
+                    <div className="ml-4">
+                      {twoFactorEnabled ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          Enabled
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          Disabled
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {twoFactorMessage && (
+                  <div className={`mb-4 text-sm ${twoFactorMessage.type === "success" ? "text-green-600" : "text-red-600"}`}>
+                    {twoFactorMessage.text}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  {!twoFactorEnabled ? (
+                    <button
+                      onClick={() => setShowTwoFactorSetup(true)}
+                      className="flex-1 flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      Enable Two-Factor Authentication
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleDisableTwoFactor}
+                      className="flex-1 flex justify-center py-2 px-4 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      Disable Two-Factor Authentication
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
+
+            {showTwoFactorSetup && (
+              <div>
+                <TwoFactorSetup onComplete={handleTwoFactorSetupComplete} />
+                <div className="mt-4">
+                  <button
+                    onClick={() => setShowTwoFactorSetup(false)}
+                    className="text-sm text-gray-600 hover:text-gray-500"
+                  >
+                    Cancel Setup
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

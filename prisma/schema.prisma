@@ -79,6 +79,11 @@ model User {
   lastLoginAt               DateTime?            @db.Timestamptz(6)
   lastProfileReminderSentAt DateTime?            @db.Timestamptz(6)
   surveyDismissedAt         DateTime?            @db.Timestamptz(6)
+  // 2FA fields
+  twoFactorEnabled          Boolean              @default(false)
+  twoFactorPhone            String?
+  twoFactorSecret           String?
+  twoFactorBackupCodes      String[]
   accounts                  Account[]
   candidateProfile          CandidateProfile?
   clientConversations       Conversation[]       @relation("ClientConversations")
