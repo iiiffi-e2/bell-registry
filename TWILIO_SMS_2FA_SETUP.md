@@ -25,19 +25,6 @@ This guide walks you through setting up SMS-based two-factor authentication usin
 ### 4. Configure Environment Variables
 Create/update your `.env.local` file:
 
-```bash
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_account_sid_here
-TWILIO_AUTH_TOKEN=your_auth_token_here
-TWILIO_VERIFY_SERVICE_SID=your_verify_service_sid_here
-```
-
-**Example:**
-```bash
-TWILIO_ACCOUNT_SID=AC1234567890abcdef1234567890abcdef
-TWILIO_AUTH_TOKEN=1234567890abcdef1234567890abcdef
-TWILIO_VERIFY_SERVICE_SID=VA1234567890abcdef1234567890abcdef
-```
 
 ### 5. Test Your Setup
 1. Start your development server: `npm run dev`
