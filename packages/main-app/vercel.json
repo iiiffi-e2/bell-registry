@@ -1,0 +1,58 @@
+{
+  "name": "bell-registry-main",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next",
+      "config": {
+        "prisma": {
+          "generate": true
+        }
+      }
+    }
+  ],
+  "installCommand": "cd ../.. && npm install",
+  "buildCommand": "cd ../.. && npm run build:main",
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/employer-notifications",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/purge-deleted-accounts",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/profile-reminders",
+      "schedule": "0 10 * * 1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
+} 

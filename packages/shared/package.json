@@ -1,0 +1,39 @@
+{
+  "name": "@bell-registry/shared",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx src/database/seed.ts",
+    "db:generate": "prisma generate",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@auth/prisma-adapter": "^2.9.1",
+    "@prisma/client": "^6.7.0",
+    "bcryptjs": "^2.4.3",
+    "next-auth": "^4.24.11",
+    "nodemailer": "^6.10.1",
+    "twilio": "^5.7.1",
+    "zod": "^3.25.23",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "20.11.24",
+    "@types/nodemailer": "^6.4.17",
+    "prisma": "^6.7.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "schema": "src/database/schema.prisma"
+  }
+} 
