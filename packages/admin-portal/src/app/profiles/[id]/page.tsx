@@ -168,6 +168,13 @@ export default function ProfileDetailPage({
             Suspended
           </span>
         );
+      case 'BANNED':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+            <XCircleIcon className="h-4 w-4 mr-1" />
+            Banned
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">

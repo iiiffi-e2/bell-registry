@@ -33,7 +33,7 @@ interface Profile {
   profileViews: number;
   openToWork: boolean;
   createdAt: string;
-  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED';
+  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED' | 'BANNED';
   reportCount?: number;
   lastReportDate?: string;
 }
@@ -195,6 +195,13 @@ export default function ProfileManagementPage() {
             Suspended
           </span>
         );
+      case 'BANNED':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <XCircleIcon className="h-3 w-3 mr-1" />
+            Banned
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -270,6 +277,7 @@ export default function ProfileManagementPage() {
                   <option value="PENDING">Pending</option>
                   <option value="REJECTED">Rejected</option>
                   <option value="SUSPENDED">Suspended</option>
+                  <option value="BANNED">Banned</option>
                 </select>
               </div>
               

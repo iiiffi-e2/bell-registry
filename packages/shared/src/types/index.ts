@@ -26,6 +26,7 @@ export enum ProfileStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
   SUSPENDED = "SUSPENDED",
+  BANNED = "BANNED",
 }
 
 export enum JobAdminStatus {

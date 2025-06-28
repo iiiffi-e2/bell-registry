@@ -90,6 +90,17 @@ export async function POST(request: NextRequest) {
           rejectedBy: null,
           rejectionReason: null,
         };
+        // Clear suspension/ban flags when approving
+        userUpdateData = {
+          isSuspended: false,
+          isBanned: false,
+          suspensionReason: null,
+          suspensionNote: null,
+          suspendedAt: null,
+          suspendedBy: null,
+          bannedAt: null,
+          bannedBy: null,
+        };
         break;
       case 'suspend':
         logAction = "BULK_PROFILE_SUSPENDED";
@@ -98,23 +109,31 @@ export async function POST(request: NextRequest) {
         };
         userUpdateData = {
           isSuspended: true,
+          isBanned: false, // Clear banned flag when suspending
           suspensionReason: reason,
           suspensionNote: note,
           suspendedAt: new Date(),
           suspendedBy: session.user.id,
+          // Clear ban fields
+          bannedAt: null,
+          bannedBy: null,
         };
         break;
       case 'ban':
         logAction = "BULK_PROFILE_BANNED";
         profileUpdateData = {
-          status: ProfileStatus.SUSPENDED, // Use suspended status for now, add BANNED later
+          status: ProfileStatus.BANNED, // Use the BANNED status
         };
         userUpdateData = {
           isBanned: true,
-          suspensionReason: reason, // Use suspension reason for ban reason for now
-          suspensionNote: note, // Use suspension note for ban note for now
+          isSuspended: false, // Clear suspended flag when banning
+          suspensionReason: reason, // Keep reason for now
+          suspensionNote: note, // Keep note for now
           bannedAt: new Date(),
           bannedBy: session.user.id,
+          // Clear suspension fields
+          suspendedAt: null,
+          suspendedBy: null,
         };
         break;
       case 'flag':

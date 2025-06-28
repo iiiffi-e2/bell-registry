@@ -501,6 +501,7 @@ enum ProfileStatus {
   APPROVED
   REJECTED
   SUSPENDED
+  BANNED
 }
 
 enum JobAdminStatus {
