@@ -3,6 +3,24 @@ import { getServerSession } from "next-auth";
 import { prisma, adminAuthOptions, logAdminAction } from "@bell-registry/shared";
 import { UserRole } from "@bell-registry/shared";
 
+// Helper function to convert relative image URLs to absolute URLs
+function getImageUrl(imagePath: string | null): string | null {
+  if (!imagePath) return null;
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // If it's a relative path, prepend the main app URL
+  const MAIN_APP_URL = process.env.MAIN_APP_URL || 'http://localhost:3000';
+  
+  // Handle paths that start with / or don't start with /
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  return `${MAIN_APP_URL}${cleanPath}`;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(adminAuthOptions);
@@ -116,7 +134,7 @@ export async function GET(request: NextRequest) {
           lastName: profile.user.lastName,
           email: profile.user.email,
           createdAt: profile.user.createdAt,
-          image: profile.user.image,
+          image: getImageUrl(profile.user.image), // Transform image URL
           profileSlug: profile.user.profileSlug,
         },
         preferredRole: profile.preferredRole,

@@ -3,6 +3,24 @@ import { getServerSession } from "next-auth";
 import { prisma, adminAuthOptions, logAdminAction } from "@bell-registry/shared";
 import { UserRole } from "@bell-registry/shared";
 
+// Helper function to convert relative image URLs to absolute URLs
+function getImageUrl(imagePath: string | null): string | null {
+  if (!imagePath) return null;
+  
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+  
+  // If it's a relative path, prepend the main app URL
+  const MAIN_APP_URL = process.env.MAIN_APP_URL || 'http://localhost:3000';
+  
+  // Handle paths that start with / or don't start with /
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  
+  return `${MAIN_APP_URL}${cleanPath}`;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,27 +34,56 @@ export async function GET(
 
     const profileId = params.id;
 
-    // Get detailed profile information
-    const user = await prisma.user.findUnique({
-      where: { id: profileId },
+    // Get profile with user data
+    const profile = await prisma.candidateProfile.findFirst({
+      where: { 
+        userId: profileId,
+        user: { 
+          isDeleted: false,
+          role: 'PROFESSIONAL'
+        }
+      },
       include: {
-        candidateProfile: true
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phoneNumber: true,
+            createdAt: true,
+            lastLoginAt: true,
+            image: true,
+            profileSlug: true,
+          }
+        }
       }
     });
 
-    // Get profile reports separately
-    let profileReports: any[] = [];
+    if (!profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+    }
+
+    // Get report count for this user
+    let reportCount = 0;
+    let reports = [];
     try {
-             profileReports = await (prisma as any).profileReport.findMany({
+      reportCount = await (prisma as any).profileReport.count({
         where: {
-          reportedUserId: profileId
+          reportedUserId: profile.user.id
+        }
+      });
+      
+      reports = await (prisma as any).profileReport.findMany({
+        where: {
+          reportedUserId: profile.user.id
         },
         include: {
-          reporterUser: {
+          reporter: {
             select: {
               firstName: true,
               lastName: true,
-              email: true
+              email: true,
             }
           }
         },
@@ -45,47 +92,42 @@ export async function GET(
         }
       });
     } catch (error) {
-      // If profileReport table doesn't exist yet, use empty array
-      profileReports = [];
+      console.warn("ProfileReport table not available yet:", error);
     }
 
-    if (!user || !user.candidateProfile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 404 });
-    }
-
-    // Transform the data for the frontend
-    const profileDetail = {
-      id: user.candidateProfile.id,
+    // Transform the profile data
+    const transformedProfile = {
+      id: profile.id,
       user: {
-        id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        createdAt: user.createdAt,
-        lastLoginAt: user.lastLoginAt,
-        image: user.image,
-        profileSlug: user.profileSlug,
+        id: profile.user.id,
+        firstName: profile.user.firstName,
+        lastName: profile.user.lastName,
+        email: profile.user.email,
+        phoneNumber: profile.user.phoneNumber,
+        createdAt: profile.user.createdAt,
+        lastLoginAt: profile.user.lastLoginAt,
+        image: getImageUrl(profile.user.image), // Transform image URL
+        profileSlug: profile.user.profileSlug,
       },
-      bio: user.candidateProfile.bio,
-      preferredRole: user.candidateProfile.preferredRole,
-      location: user.candidateProfile.location,
-      profileViews: user.candidateProfile.profileViews,
-      openToWork: user.candidateProfile.openToWork,
-      skills: user.candidateProfile.skills,
-      experience: user.candidateProfile.experience,
-      certifications: user.candidateProfile.certifications,
-      workLocations: user.candidateProfile.workLocations,
-      seekingOpportunities: user.candidateProfile.seekingOpportunities,
-      payRangeMin: user.candidateProfile.payRangeMin,
-      payRangeMax: user.candidateProfile.payRangeMax,
-      payType: user.candidateProfile.payType,
-      yearsOfExperience: user.candidateProfile.yearsOfExperience,
-      createdAt: user.candidateProfile.createdAt,
-      updatedAt: user.candidateProfile.updatedAt,
-      status: (user.candidateProfile as any).status || 'PENDING', // Use actual status from database with fallback
-      reportCount: profileReports.length, // Use actual report count
-      reports: profileReports, // Include the actual reports
+      bio: profile.bio,
+      preferredRole: profile.preferredRole,
+      location: profile.location,
+      profileViews: profile.profileViews,
+      openToWork: profile.openToWork,
+      skills: profile.skills,
+      experience: profile.experience,
+      certifications: profile.certifications,
+      workLocations: profile.workLocations,
+      seekingOpportunities: profile.seekingOpportunities,
+      payRangeMin: profile.payRangeMin,
+      payRangeMax: profile.payRangeMax,
+      payType: profile.payType,
+      yearsOfExperience: profile.yearsOfExperience,
+      createdAt: profile.createdAt,
+      updatedAt: profile.updatedAt,
+      status: (profile as any).status || 'PENDING',
+      reportCount: reportCount,
+      reports: reports,
     };
 
     // Log this admin action
@@ -94,20 +136,20 @@ export async function GET(
       "VIEW_PROFILE_DETAIL",
       { 
         endpoint: `/api/profiles/${profileId}`,
-        targetUserId: profileId,
-        targetUserEmail: user.email,
-        targetUserName: `${user.firstName} ${user.lastName}`.trim()
+        targetUserId: profile.user.id,
+        targetUserEmail: profile.user.email,
+        targetUserName: `${profile.user.firstName} ${profile.user.lastName}`.trim(),
       },
       request.ip,
       request.headers.get("user-agent") || undefined
     );
 
-    return NextResponse.json(profileDetail);
+    return NextResponse.json(transformedProfile);
 
   } catch (error) {
-    console.error("Error fetching profile detail:", error);
+    console.error("Error fetching profile:", error);
     return NextResponse.json(
-      { error: "Failed to fetch profile detail" },
+      { error: "Failed to fetch profile" },
       { status: 500 }
     );
   }
