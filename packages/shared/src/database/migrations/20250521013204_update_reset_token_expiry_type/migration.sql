@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ALTER COLUMN "resetTokenExpiry" SET DATA TYPE TIMESTAMPTZ(6);

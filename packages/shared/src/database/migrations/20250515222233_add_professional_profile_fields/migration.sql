@@ -1,0 +1,17 @@
+-- AlterTable
+ALTER TABLE "CandidateProfile" ADD COLUMN     "additionalPhotos" TEXT[],
+ADD COLUMN     "currentLocation" TEXT,
+ADD COLUMN     "headshot" TEXT,
+ADD COLUMN     "idealEnvironment" TEXT,
+ADD COLUMN     "mediaUrls" TEXT[],
+ADD COLUMN     "openToRelocation" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "payCurrency" TEXT DEFAULT 'USD',
+ADD COLUMN     "payRangeMax" DOUBLE PRECISION,
+ADD COLUMN     "payRangeMin" DOUBLE PRECISION,
+ADD COLUMN     "preferredRole" TEXT,
+ADD COLUMN     "seekingOpportunities" TEXT[],
+ADD COLUMN     "whatImSeeking" TEXT,
+ADD COLUMN     "whatSetsApartMe" TEXT,
+ADD COLUMN     "whyIEnjoyThisWork" TEXT,
+ADD COLUMN     "workLocations" TEXT[],
+ADD COLUMN     "yearsOfExperience" INTEGER;
