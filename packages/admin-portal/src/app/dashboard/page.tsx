@@ -1,6 +1,8 @@
 ﻿'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { UserGroupIcon, BriefcaseIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
 
 interface AdminStats {
@@ -15,6 +17,8 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalProfessionals: 0,
@@ -26,23 +30,62 @@ export default function AdminDashboard() {
     activeConversations: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    // Mock data for demonstration
-    setTimeout(() => {
-      setStats({
-        totalUsers: 1247,
-        totalProfessionals: 856,
-        totalEmployers: 391,
-        pendingProfiles: 23,
-        pendingJobs: 8,
-        totalJobs: 342,
-        totalApplications: 1589,
-        activeConversations: 67,
-      });
-      setLoading(false);
-    }, 1000);
-  }, []);
+    if (status === 'loading') return; // Still loading
+    
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+  }, [status, router]);
+
+  // Fetch real data from API
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/api/stats');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch statistics');
+        }
+        
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+        setError('Failed to load dashboard statistics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [status]);
+
+  // Show loading state while checking authentication
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (status === 'unauthenticated') {
+    return null;
+  }
 
   const StatCard = ({ title, value, icon: Icon, color = 'blue', pending = false }: {
     title: string;
@@ -111,17 +154,31 @@ export default function AdminDashboard() {
                     <dt className='sr-only'>Last updated</dt>
                     <dd className='mt-3 flex items-center text-sm text-gray-500 font-medium sm:mr-6 sm:mt-0'>
                       <ClockIcon className='flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400' />
-                      Last updated: {new Date().toLocaleString()}
+                      Welcome, {session?.user?.name || session?.user?.email}
                     </dd>
                   </dl>
                 </div>
               </div>
+            </div>
+            <div className='mt-6 flex space-x-3 md:mt-0 md:ml-4'>
+              <button
+                onClick={() => router.push('/api/auth/signout')}
+                className='inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>
       </div>
 
       <div className='max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+        {error && (
+          <div className='mb-6 rounded-md bg-red-50 p-4'>
+            <div className='text-sm text-red-700'>{error}</div>
+          </div>
+        )}
+
         <div className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'>
           <StatCard
             title='Total Users'
@@ -211,19 +268,19 @@ export default function AdminDashboard() {
         </div>
 
         <div className='mt-8'>
-          <div className='bg-blue-50 border border-blue-200 rounded-md p-4'>
+          <div className='bg-green-50 border border-green-200 rounded-md p-4'>
             <div className='flex'>
               <div className='flex-shrink-0'>
-                <CheckCircleIcon className='h-5 w-5 text-blue-400' />
+                <CheckCircleIcon className='h-5 w-5 text-green-400' />
               </div>
               <div className='ml-3'>
-                <h3 className='text-sm font-medium text-blue-800'>
-                  Admin Portal Active
+                <h3 className='text-sm font-medium text-green-800'>
+                  Real Data Integration Active
                 </h3>
-                <div className='mt-2 text-sm text-blue-700'>
+                <div className='mt-2 text-sm text-green-700'>
                   <p>
-                    The admin portal is successfully running as a separate service. 
-                    This demonstrates the monorepo setup with shared database access and independent deployment capabilities.
+                    The admin portal is now connected to real data from the Bell Registry database. 
+                    All statistics and information are pulled live from the production system.
                   </p>
                 </div>
               </div>

@@ -3,11 +3,11 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";
-import { UserRole } from "@/types";
+import { UserRole } from "../types";
 import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "./welcome-email-service";
-import { verifyTwoFactorSession } from "@/lib/2fa-session";
+import { verifyTwoFactorSession } from "./2fa-session";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
