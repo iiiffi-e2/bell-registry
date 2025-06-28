@@ -2,13 +2,18 @@
 /node_modules
 /.pnp
 .pnp.js
+# In mono repo, also ignore node_modules in packages
+**/node_modules/
 
 # testing
 /coverage
 
-# next.js
-/.next/
+# next.js - ignore .next directories anywhere in the repo
+.next/
 /out/
+# Also ignore any dist directories in packages
+**/dist/
+**/build/
 
 # production
 /build
@@ -59,5 +64,21 @@ Thumbs.db
 # Sentry Config File
 .sentryclirc
 
-# Uploads directory
-/public/uploads/ 
+# Uploads directory (root and all packages)
+/public/uploads/
+**/public/uploads/
+
+# Package manager lock files (when using different package managers in mono repo)
+# Uncomment if needed:
+# pnpm-lock.yaml
+# yarn.lock (if using npm primarily)
+
+# Turbo
+.turbo/
+
+# Package-specific ignores
+packages/**/.next/
+packages/**/node_modules/
+packages/**/dist/
+packages/**/build/
+packages/**/.env*.local 
