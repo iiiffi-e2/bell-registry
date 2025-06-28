@@ -1,1 +1,0 @@
-export type SortOption = 'recent' | 'experience' | 'certifications' | 'views' | 'relevance'; 
