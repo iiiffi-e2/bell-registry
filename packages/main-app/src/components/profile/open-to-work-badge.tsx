@@ -1,7 +1,6 @@
 "use client";
 
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import Image from "next/image";
 
 interface OpenToWorkBadgeProps {
   variant?: "overlay" | "inline" | "banner";
@@ -92,11 +91,9 @@ export function ProfilePictureWithBadge({
         </div>
       ) : (
         <div className={`${sizeClasses[size]} rounded-full overflow-hidden bg-gray-100 flex items-center justify-center`}>
-          <Image
+          <img
             src="/images/brand/bell-registry-b-gold-on-blue.png"
             alt="Bell Registry"
-            width={128}
-            height={128}
             className="h-full w-full object-cover"
           />
         </div>

@@ -64,8 +64,9 @@ Thumbs.db
 # Sentry Config File
 .sentryclirc
 
-# Uploads directory
+# Uploads directory (root and all packages)
 /public/uploads/
+**/public/uploads/
 
 # Package manager lock files (when using different package managers in mono repo)
 # Uncomment if needed:
