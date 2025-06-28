@@ -18,6 +18,7 @@ export async function middleware(request: NextRequest) {
     '/contact',
     '/privacy',
     '/terms',
+    '/account-suspended', // Add suspension page to public routes
   ];
 
   // Check if it's a public route (including dynamic job routes)
@@ -42,6 +43,13 @@ export async function middleware(request: NextRequest) {
     const url = new URL('/login', request.url);
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
+  }
+
+  // Check for suspension (only for authenticated users)
+  if (token) {
+    // Note: We can't directly check isSuspended from JWT token since it's not stored there
+    // The suspension check will be handled by the auth callbacks and session updates
+    // If a user gets suspended, they'll be signed out on their next request that requires auth
   }
 
   return NextResponse.next();

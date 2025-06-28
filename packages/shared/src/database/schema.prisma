@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../../../../node_modules/.prisma/client"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -72,47 +72,64 @@ model User {
   resetToken                String?              @unique
   resetTokenExpiry          DateTime?            @db.Timestamptz(6)
   isAnonymous               Boolean              @default(false)
-  customInitials            String?              @db.VarChar(3)
-  dontContactMe             Boolean              @default(false)
-  isDeleted                 Boolean              @default(false)
   deletedAt                 DateTime?            @db.Timestamptz(6)
+  isDeleted                 Boolean              @default(false)
   lastLoginAt               DateTime?            @db.Timestamptz(6)
   lastProfileReminderSentAt DateTime?            @db.Timestamptz(6)
+  dontContactMe             Boolean              @default(false)
+  customInitials            String?              @db.VarChar(3)
   surveyDismissedAt         DateTime?            @db.Timestamptz(6)
-  // 2FA fields
+  twoFactorBackupCodes      String[]
   twoFactorEnabled          Boolean              @default(false)
   twoFactorPhone            String?
   twoFactorSecret           String?
-  twoFactorBackupCodes      String[]
+  isSuspended               Boolean              @default(false)
+  isBanned                  Boolean              @default(false)
+  suspensionReason          String?
+  suspensionNote            String?
+  suspendedAt               DateTime?            @db.Timestamptz(6)
+  suspendedBy               String?
+  bannedAt                  DateTime?            @db.Timestamptz(6)
+  bannedBy                  String?
   accounts                  Account[]
+  adminAuditLogs            AdminAuditLog[]      @relation("AdminAuditLogs")
+  approvedProfiles          CandidateProfile[]   @relation("ProfileApprover")
+  rejectedProfiles          CandidateProfile[]   @relation("ProfileRejecter")
   candidateProfile          CandidateProfile?
   clientConversations       Conversation[]       @relation("ClientConversations")
   professionalConversations Conversation[]       @relation("ProfessionalConversations")
   emailChangeRequests       EmailChangeRequest[]
   employerProfile           EmployerProfile?
+  approvedJobs              Job[]                @relation("JobApprover")
   postedJobs                Job[]
+  rejectedJobs              Job[]                @relation("JobRejecter")
   jobAlerts                 JobAlert[]
   applications              JobApplication[]
   jobMatches                JobMatch[]
   jobViewEvents             JobViewEvent[]
   sentMessages              Message[]            @relation("SentMessages")
+  profileReports            ProfileReport[]      @relation("ReportedUser")
+  reportsMade               ProfileReport[]      @relation("ReporterUser")
+  reviewedReports           ProfileReport[]      @relation("ReviewerUser")
   profileViewEvents         ProfileViewEvent[]
   savedCandidates           SavedCandidate[]     @relation("SavedCandidates")
   savedByEmployers          SavedCandidate[]     @relation("SavedByEmployers")
   savedJobs                 SavedJob[]
   sessions                  Session[]
   trustedDevices            TrustedDevice[]
-  // Admin relations
-  profileApprovals          CandidateProfile[]   @relation("ProfileApprovals")
-  profileRejections         CandidateProfile[]   @relation("ProfileRejections")
-  jobApprovals              Job[]                @relation("JobApprovals")
-  jobRejections             Job[]                @relation("JobRejections")
-  adminAuditLogs            AdminAuditLog[]
+  suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
+  suspendedUsers            User[]               @relation("SuspendedByAdmin")
+  bannedByAdmin             User?                @relation("BannedByAdmin", fields: [bannedBy], references: [id])
+  bannedUsers               User[]               @relation("BannedByAdmin")
 
   @@index([isDeleted])
   @@index([deletedAt])
   @@index([lastLoginAt])
   @@index([lastProfileReminderSentAt])
+  @@index([isSuspended])
+  @@index([isBanned])
+  @@index([suspendedAt])
+  @@index([bannedAt])
 }
 
 model CandidateProfile {
@@ -136,8 +153,6 @@ model CandidateProfile {
   idealEnvironment     String?
   mediaUrls            String[]
   openToRelocation     Boolean       @default(false)
-  openToWork           Boolean       @default(false)
-  payType              String?       @default("Salary")
   payRangeMax          Float?
   payRangeMin          Float?
   preferredRole        String?
@@ -147,17 +162,18 @@ model CandidateProfile {
   whyIEnjoyThisWork    String?
   workLocations        String[]
   yearsOfExperience    Int?
+  payType              String?       @default("Salary")
+  openToWork           Boolean       @default(false)
   employmentType       String?
-  // Admin approval fields
-  status               ProfileStatus @default(PENDING)
   approvedAt           DateTime?
   approvedBy           String?
   rejectedAt           DateTime?
   rejectedBy           String?
   rejectionReason      String?
+  status               ProfileStatus @default(PENDING)
+  approver             User?         @relation("ProfileApprover", fields: [approvedBy], references: [id])
+  rejecter             User?         @relation("ProfileRejecter", fields: [rejectedBy], references: [id])
   user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  approvedByUser       User?         @relation("ProfileApprovals", fields: [approvedBy], references: [id])
-  rejectedByUser       User?         @relation("ProfileRejections", fields: [rejectedBy], references: [id])
 }
 
 model EmployerProfile {
@@ -170,16 +186,16 @@ model EmployerProfile {
   logoUrl               String?
   location              String?
   subscriptionPlan      String?
-  subscriptionType      SubscriptionType @default(TRIAL)
-  subscriptionStartDate DateTime         @default(now())
-  subscriptionEndDate   DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  hasNetworkAccess      Boolean          @default(false)
   jobPostLimit          Int?             @default(5)
   jobsPostedCount       Int              @default(0)
   stripeCustomerId      String?
   stripeSessionId       String?
-  hasNetworkAccess      Boolean          @default(false)
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
+  subscriptionEndDate   DateTime?
+  subscriptionStartDate DateTime         @default(now())
+  subscriptionType      SubscriptionType @default(TRIAL)
   billingHistory        BillingHistory[]
   user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -221,21 +237,20 @@ model Job {
   isDemo           Boolean          @default(false)
   urlSlug          String           @unique
   professionalRole String
-  // Admin approval fields
   adminStatus      JobAdminStatus   @default(PENDING)
   approvedAt       DateTime?
   approvedBy       String?
   rejectedAt       DateTime?
   rejectedBy       String?
   rejectionReason  String?
+  approver         User?            @relation("JobApprover", fields: [approvedBy], references: [id])
   employer         User             @relation(fields: [employerId], references: [id])
+  rejecter         User?            @relation("JobRejecter", fields: [rejectedBy], references: [id])
   applications     JobApplication[]
   matches          JobMatch[]
   viewEvents       JobViewEvent[]
   savedCandidates  SavedCandidate[]
   savedBy          SavedJob[]
-  approvedByUser   User?            @relation("JobApprovals", fields: [approvedBy], references: [id])
-  rejectedByUser   User?            @relation("JobRejections", fields: [rejectedBy], references: [id])
 }
 
 model JobApplication {
@@ -244,11 +259,11 @@ model JobApplication {
   candidateId    String
   status         ApplicationStatus @default(PENDING)
   coverLetter    String?
-  resumeUrl      String?
-  coverLetterUrl String?
-  message        String?
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+  coverLetterUrl String?
+  message        String?
+  resumeUrl      String?
   candidate      User              @relation(fields: [candidateId], references: [id], onDelete: Cascade)
   job            Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
@@ -300,12 +315,12 @@ model Conversation {
 
 model Message {
   id             String       @id @default(cuid())
-  conversationId String
-  senderId       String
   content        String
+  senderId       String
   read           Boolean      @default(false)
-  readAt         DateTime?
   createdAt      DateTime     @default(now())
+  conversationId String
+  readAt         DateTime?
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender         User         @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
 
@@ -385,6 +400,27 @@ model TrustedDevice {
   @@index([expiresAt])
 }
 
+model ProfileReport {
+  id             String              @id @default(cuid())
+  reportedUserId String
+  reporterUserId String?
+  reason         String
+  details        String?
+  status         ProfileReportStatus @default(PENDING)
+  reviewedAt     DateTime?
+  reviewedBy     String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  reportedUser   User                @relation("ReportedUser", fields: [reportedUserId], references: [id], onDelete: Cascade)
+  reporterUser   User?               @relation("ReporterUser", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  reviewer       User?               @relation("ReviewerUser", fields: [reviewedBy], references: [id])
+
+  @@index([reportedUserId])
+  @@index([reporterUserId])
+  @@index([status])
+  @@index([createdAt])
+}
+
 model AdminAuditLog {
   id         String   @id @default(cuid())
   adminId    String
@@ -395,12 +431,12 @@ model AdminAuditLog {
   ipAddress  String?
   userAgent  String?
   createdAt  DateTime @default(now())
-  admin      User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
 
-  @@index([adminId])
   @@index([action])
-  @@index([targetType])
+  @@index([adminId])
   @@index([createdAt])
+  @@index([targetType])
 }
 
 enum UserRole {
@@ -451,6 +487,13 @@ enum BillingStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum ProfileReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
 }
 
 enum ProfileStatus {

@@ -1,0 +1,492 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { 
+  ArrowLeftIcon,
+  UserIcon,
+  EnvelopeIcon,
+  MapPinIcon,
+  CalendarIcon,
+  EyeIcon,
+  FlagIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  ExclamationTriangleIcon,
+  ClockIcon,
+  BriefcaseIcon,
+  GlobeAltIcon,
+  PhoneIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
+
+interface ProfileDetail {
+  id: string;
+  user: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phoneNumber: string | null;
+    createdAt: string;
+    lastLoginAt: string | null;
+    image: string | null;
+    profileSlug: string | null;
+  };
+  bio: string | null;
+  preferredRole: string | null;
+  location: string | null;
+  profileViews: number;
+  openToWork: boolean;
+  skills: string[];
+  experience: any[];
+  certifications: string[];
+  workLocations: string[];
+  seekingOpportunities: string[];
+  payRangeMin: number | null;
+  payRangeMax: number | null;
+  payType: string | null;
+  yearsOfExperience: number | null;
+  createdAt: string;
+  updatedAt: string;
+  status?: string;
+  reportCount?: number;
+  reports?: any[];
+}
+
+export default function ProfileDetailPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [profile, setProfile] = useState<ProfileDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (status === 'loading') return;
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+  }, [status, router]);
+
+  // Fetch profile details
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    fetchProfile();
+  }, [status, params.id]);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/profiles/${params.id}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Profile not found');
+        }
+        throw new Error('Failed to fetch profile');
+      }
+      
+      const data = await response.json();
+      setProfile(data);
+    } catch (error: any) {
+      console.error('Error fetching profile:', error);
+      setError(error.message || 'Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban') => {
+    if (!profile) return;
+    
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/profiles/${params.id}/action`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Action failed');
+      }
+      
+      const result = await response.json();
+      
+      // Show success message
+      alert(result.message || `Profile ${action} successful`);
+      
+      // Refresh profile data
+      await fetchProfile();
+    } catch (error) {
+      console.error('Action error:', error);
+      alert(`Failed to ${action} profile`);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status?: string, reportCount?: number) => {
+    if (reportCount && reportCount > 0) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+          <FlagIcon className="h-4 w-4 mr-1" />
+          {reportCount} Report{reportCount > 1 ? 's' : ''}
+        </span>
+      );
+    }
+    
+    switch (status) {
+      case 'APPROVED':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <CheckCircleIcon className="h-4 w-4 mr-1" />
+            Approved
+          </span>
+        );
+      case 'PENDING':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            <ClockIcon className="h-4 w-4 mr-1" />
+            Pending
+          </span>
+        );
+      case 'SUSPENDED':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+            <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+            Suspended
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <CheckCircleIcon className="h-4 w-4 mr-1" />
+            Active
+          </span>
+        );
+    }
+  };
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    return null;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Error</h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <button
+              onClick={() => router.back()}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow">
+        <div className="px-4 sm:px-6 lg:max-w-6xl lg:mx-auto lg:px-8">
+          <div className="py-6 md:flex md:items-center md:justify-between">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center">
+                <button
+                  onClick={() => router.back()}
+                  className="mr-4 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
+                >
+                  <ArrowLeftIcon className="h-5 w-5" />
+                </button>
+                <div>
+                  <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:leading-9 sm:truncate">
+                    {profile.user.firstName} {profile.user.lastName}
+                  </h1>
+                  <div className="mt-1 flex items-center space-x-4">
+                    {getStatusBadge(profile.status, profile.reportCount)}
+                    {profile.openToWork && (
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        Open to Work
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
+              <button
+                onClick={() => handleAction('approve')}
+                disabled={actionLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+              >
+                <CheckCircleIcon className="h-4 w-4 mr-2" />
+                Approve
+              </button>
+              <button
+                onClick={() => handleAction('suspend')}
+                disabled={actionLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
+              >
+                <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                Suspend
+              </button>
+              <button
+                onClick={() => handleAction('ban')}
+                disabled={actionLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              >
+                <XMarkIcon className="h-4 w-4 mr-2" />
+                Ban
+              </button>
+              <button
+                onClick={() => handleAction('flag')}
+                disabled={actionLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              >
+                <FlagIcon className="h-4 w-4 mr-2" />
+                Flag
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Profile Content */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Basic Info */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <div className="flex items-center space-x-6 mb-6">
+                <div className="flex-shrink-0">
+                  {profile.user.image ? (
+                    <img
+                      className="h-20 w-20 rounded-full object-cover"
+                      src={profile.user.image}
+                      alt=""
+                    />
+                  ) : (
+                    <div className="h-20 w-20 rounded-full bg-gray-200 flex items-center justify-center">
+                      <UserIcon className="h-12 w-12 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {profile.user.firstName} {profile.user.lastName}
+                  </h2>
+                  {profile.preferredRole && (
+                    <p className="text-lg text-gray-600">{profile.preferredRole}</p>
+                  )}
+                  <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                    <span className="flex items-center">
+                      <EyeIcon className="h-4 w-4 mr-1" />
+                      {profile.profileViews} views
+                    </span>
+                    <span className="flex items-center">
+                      <CalendarIcon className="h-4 w-4 mr-1" />
+                      Joined {new Date(profile.user.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              {profile.bio && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Bio</h3>
+                  <p className="text-gray-900">{profile.bio}</p>
+                </div>
+              )}
+
+              {/* Skills */}
+              {profile.skills.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Skills</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {profile.skills.map((skill, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                      >
+                        {skill}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Experience */}
+              {profile.experience.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-3">Experience</h3>
+                  <div className="space-y-4">
+                    {profile.experience.map((exp: any, index) => (
+                      <div key={index} className="border-l-4 border-blue-200 pl-4">
+                        <div className="flex items-center">
+                          <BriefcaseIcon className="h-5 w-5 text-gray-400 mr-2" />
+                          <h4 className="font-medium text-gray-900">{exp.title || 'Position'}</h4>
+                        </div>
+                        {exp.company && (
+                          <p className="text-gray-600">{exp.company}</p>
+                        )}
+                        {(exp.startDate || exp.endDate) && (
+                          <p className="text-sm text-gray-500">
+                            {exp.startDate} - {exp.endDate || 'Present'}
+                          </p>
+                        )}
+                        {exp.description && (
+                          <p className="text-sm text-gray-700 mt-1">{exp.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Contact Info */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+              <div className="space-y-3">
+                <div className="flex items-center">
+                  <EnvelopeIcon className="h-5 w-5 text-gray-400 mr-3" />
+                  <span className="text-sm text-gray-900">{profile.user.email}</span>
+                </div>
+                {profile.user.phoneNumber && (
+                  <div className="flex items-center">
+                    <PhoneIcon className="h-5 w-5 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-900">{profile.user.phoneNumber}</span>
+                  </div>
+                )}
+                {profile.location && (
+                  <div className="flex items-center">
+                    <MapPinIcon className="h-5 w-5 text-gray-400 mr-3" />
+                    <span className="text-sm text-gray-900">{profile.location}</span>
+                  </div>
+                )}
+                {profile.user.profileSlug && (
+                  <div className="flex items-center">
+                    <GlobeAltIcon className="h-5 w-5 text-gray-400 mr-3" />
+                    <a
+                      href={`${window.location.origin}/professionals/${profile.user.profileSlug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-500"
+                    >
+                      View Public Profile
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Work Preferences */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Work Preferences</h3>
+              <div className="space-y-3">
+                {profile.payRangeMin && profile.payRangeMax && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Salary Range</h4>
+                    <p className="text-sm text-gray-900">
+                      ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
+                      {profile.payType && ` (${profile.payType})`}
+                    </p>
+                  </div>
+                )}
+                {profile.yearsOfExperience && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Years of Experience</h4>
+                    <p className="text-sm text-gray-900">{profile.yearsOfExperience} years</p>
+                  </div>
+                )}
+                {profile.workLocations.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500">Work Locations</h4>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {profile.workLocations.map((location, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                        >
+                          {location}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Account Stats */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Account Statistics</h3>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Profile Views</span>
+                  <span className="text-gray-900">{profile.profileViews}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Member Since</span>
+                  <span className="text-gray-900">
+                    {new Date(profile.user.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {profile.user.lastLoginAt && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Last Login</span>
+                    <span className="text-gray-900">
+                      {new Date(profile.user.lastLoginAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Profile Updated</span>
+                  <span className="text-gray-900">
+                    {new Date(profile.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+} 

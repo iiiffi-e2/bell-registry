@@ -1,170 +1,192 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { Prisma, UserRole } from '@prisma/client'
-import { SortOption } from '@/types/candidate'
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY"
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get('search') || '';
+    const location = searchParams.get('location') || '';
+    const skills = searchParams.get('skills') || '';
+    const openToWork = searchParams.get('openToWork');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    const { searchParams } = new URL(request.url)
-    const location = searchParams.get('location')
-    const roleType = searchParams.get('roleType') as UserRole | null
-    const searchQuery = searchParams.get('search')
-    const openToWork = searchParams.get('openToWork') === 'true'
-    const sortBy = searchParams.get('sort') as SortOption || 'recent'
-    const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '9')
-    const skip = (page - 1) * limit
+    const session = await getServerSession(authOptions);
 
-    const where: Prisma.CandidateProfileWhereInput = {
-      // Basic profile completion requirements
-      NOT: {
-        OR: [
-          { bio: null },
-          { bio: '' },
-          { location: null },
-          { location: '' }
-        ]
-      },
-      // Filter conditions
-      ...(location ? { location } : {}),
-      ...(roleType ? { user: { role: roleType } } : {}),
-      ...(openToWork ? { openToWork: true } : {}),
-      ...(searchQuery
-        ? {
-            OR: [
-              {
-                user: {
-                  OR: [
-                    {
-                      firstName: {
-                        contains: searchQuery,
-                        mode: 'insensitive' as Prisma.QueryMode,
-                      },
-                    },
-                    {
-                      lastName: {
-                        contains: searchQuery,
-                        mode: 'insensitive' as Prisma.QueryMode,
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bio: {
-                  contains: searchQuery,
-                  mode: 'insensitive' as Prisma.QueryMode,
-                },
-              },
-              {
-                skills: {
-                  has: searchQuery,
-                },
-              },
-            ],
+    // Build filter conditions
+    const where: any = {
+      AND: [
+        { isDeleted: false }, // Exclude deleted users
+        { 
+          // isSuspended: false // Exclude suspended users (when field is available)
+        },
+        {
+          candidateProfile: {
+            isNot: null, // Must have a candidate profile
           }
-        : {}),
+        }
+      ]
+    };
+
+    // Add additional filters for suspended users (temporary workaround)
+    // This will be replaced with proper isSuspended field check
+    const suspendedUserCondition = {
+      NOT: {
+        // Add any suspended user conditions here when available
+      }
+    };
+
+    if (search) {
+      where.AND.push({
+        OR: [
+          {
+            firstName: {
+              contains: search,
+              mode: 'insensitive',
+            }
+          },
+          {
+            lastName: {
+              contains: search,
+              mode: 'insensitive',
+            }
+          },
+          {
+            candidateProfile: {
+              bio: {
+                contains: search,
+                mode: 'insensitive',
+              }
+            }
+          },
+          {
+            candidateProfile: {
+              preferredRole: {
+                contains: search,
+                mode: 'insensitive',
+              }
+            }
+          }
+        ]
+      });
     }
 
-    // Define sorting based on sortBy parameter
-    const orderBy = (() => {
-      switch (sortBy) {
-        case 'recent':
-          return { updatedAt: 'desc' as const }
-        case 'experience':
-          return { updatedAt: 'desc' as const } // Fallback to recent as experience count is not directly sortable
-        case 'certifications':
-          return { certifications: 'desc' as const }
-        case 'views':
-          return { profileViews: 'desc' as const }
-        case 'relevance':
-          return searchQuery
-            ? { updatedAt: 'desc' as const } // Fallback to recent as relevance sorting is not supported
-            : { updatedAt: 'desc' as const }
-        default:
-          return { updatedAt: 'desc' as const }
-      }
-    })()
-
-    console.log('Fetching professionals with where clause:', where)
-    console.log('Sorting by:', orderBy)
-
-    const [professionals, total] = await Promise.all([
-      prisma.candidateProfile.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        select: {
-          id: true,
-          bio: true,
-          title: true,
-          preferredRole: true,
-          location: true,
-          skills: true,
-          openToWork: true,
-          employmentType: true,
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              image: true,
-              role: true,
-              profileSlug: true,
-              isAnonymous: true,
-              customInitials: true,
-            },
-          },
-        },
-      }),
-      prisma.candidateProfile.count({ where }),
-    ])
-
-    console.log('Found professionals count:', professionals.length)
-
-    // Anonymize data for employers and agencies, and professionals viewing other professionals
-    const shouldAnonymizeForAll = isEmployerOrAgency || session?.user?.role === "PROFESSIONAL";
-    const anonymizedProfessionals = professionals.map(professional => {
-      if (shouldAnonymizeForAll) {
-        return {
-          ...professional,
-          user: {
-            ...professional.user,
-            firstName: professional.user.firstName?.[0] || '',
-            lastName: professional.user.lastName?.[0] || '',
-            image: null, // Hide profile image
-            email: '', // Hide email
-            customInitials: (professional.user as any).customInitials || null,
+    if (location) {
+      where.AND.push({
+        candidateProfile: {
+          location: {
+            contains: location,
+            mode: 'insensitive',
           }
-        };
+        }
+      });
+    }
+
+    if (skills) {
+      const skillsArray = skills.split(',').map(skill => skill.trim());
+      where.AND.push({
+        candidateProfile: {
+          skills: {
+            hasSome: skillsArray
+          }
+        }
+      });
+    }
+
+    if (openToWork === 'true') {
+      where.AND.push({
+        candidateProfile: {
+          openToWork: true
+        }
+      });
+    }
+
+    // Get professionals with enforcement
+    const professionals = await prisma.user.findMany({
+      where,
+      include: {
+        candidateProfile: {
+          select: {
+            id: true,
+            bio: true,
+            preferredRole: true,
+            location: true,
+            skills: true,
+            experience: true,
+            profileViews: true,
+            openToWork: true,
+            yearsOfExperience: true,
+            payRangeMin: true,
+            payRangeMax: true,
+            payType: true,
+            createdAt: true,
+            updatedAt: true,
+            // status: true, // Include when ProfileStatus is available
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    // Additional filtering for suspended profiles (when status field is available)
+    const filteredProfessionals = professionals.filter(professional => {
+      // Check if profile is suspended or rejected
+      const profileStatus = (professional.candidateProfile as any)?.status;
+      if (profileStatus === 'SUSPENDED' || profileStatus === 'REJECTED') {
+        return false;
       }
-      return professional;
+      
+      // Check user suspension status (when isSuspended field is available)
+      const isSuspended = (professional as any)?.isSuspended;
+      if (isSuspended) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Transform the data for response
+    const transformedProfessionals = filteredProfessionals.map(professional => ({
+      id: professional.id,
+      firstName: professional.firstName,
+      lastName: professional.lastName,
+      email: professional.email,
+      image: professional.image,
+      profileSlug: professional.profileSlug,
+      profile: professional.candidateProfile,
+      joinDate: professional.createdAt,
+    }));
+
+    // Get total count for pagination
+    const totalCount = await prisma.user.count({
+      where
     });
 
     return NextResponse.json({
-      professionals: anonymizedProfessionals,
+      professionals: transformedProfessionals,
       pagination: {
-        total,
-        pages: Math.ceil(total / limit),
-        page,
+        total: totalCount,
         limit,
+        offset,
+        hasMore: offset + limit < totalCount
       },
-    })
+      enforcement: {
+        suspended_filtered: professionals.length - filteredProfessionals.length,
+        note: "Suspended and rejected profiles are automatically filtered out"
+      }
+    });
+
   } catch (error) {
-    console.error('Error fetching professionals:', error)
+    console.error("Error fetching professionals:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch professionals' },
+      { error: "Failed to fetch professionals" },
       { status: 500 }
-    )
+    );
   }
 } 

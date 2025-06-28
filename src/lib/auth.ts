@@ -84,8 +84,18 @@ export const authOptions: NextAuthOptions = {
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email
+            },
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              firstName: true,
+              lastName: true,
+              image: true,
+              isDeleted: true,
+              isBanned: true,
             }
-          });
+          } as any);
 
           if (!user) {
             throw new Error("No account found with this email address");
@@ -95,6 +105,15 @@ export const authOptions: NextAuthOptions = {
           if (user.isDeleted) {
             throw new Error("This account has been deleted");
           }
+
+          // Check if account is banned (complete login block)
+          // Use type casting for fields that may not exist in schema yet
+          const userWithEnforcement = user as any;
+          if (userWithEnforcement.isBanned) {
+            throw new Error("Your account has been permanently banned. Please contact support if you believe this is an error.");
+          }
+
+          // Note: Suspended users are allowed to log in but will see suspension notifications in the dashboard
 
           return {
             id: user.id,
@@ -109,8 +128,19 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email
+          },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            firstName: true,
+            lastName: true,
+            image: true,
+            password: true,
+            isDeleted: true,
+            isBanned: true,
           }
-        });
+        } as any);
 
         if (!user || !user.password) {
           throw new Error("No account found with this email address");
@@ -120,6 +150,15 @@ export const authOptions: NextAuthOptions = {
         if (user.isDeleted) {
           throw new Error("This account has been deleted");
         }
+
+        // Check if account is banned (complete login block)
+        // Use type casting for fields that may not exist in schema yet
+        const userWithEnforcement = user as any;
+        if (userWithEnforcement.isBanned) {
+          throw new Error("Your account has been permanently banned. Please contact support if you believe this is an error.");
+        }
+
+        // Note: Suspended users are allowed to log in but will see suspension notifications in the dashboard
 
         const isCorrectPassword = await bcrypt.compare(
           credentials.password,
@@ -150,17 +189,38 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google") {
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email! },
-          include: {
-            accounts: true
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            firstName: true,
+            lastName: true,
+            image: true,
+            isDeleted: true,
+            isBanned: true,
           }
-        });
+        } as any);
+
+        // Also get accounts separately to avoid schema issues
+        const userAccounts = existingUser ? await prisma.account.findMany({
+          where: { userId: existingUser.id }
+        }) : [];
 
         // Check if existing user account is deleted
         if (existingUser?.isDeleted) {
           throw new Error("This account has been deleted");
         }
 
-        if (existingUser && existingUser.accounts.length === 0) {
+        // Check if existing user account is banned (complete login block)
+        // Use type casting for fields that may not exist in schema yet
+        const userWithEnforcement = existingUser as any;
+        if (userWithEnforcement?.isBanned) {
+          throw new Error("Your account has been permanently banned. Please contact support if you believe this is an error.");
+        }
+
+        // Note: Suspended users are allowed to log in but will see suspension notifications in the dashboard
+
+        if (existingUser && userAccounts.length === 0) {
           await prisma.account.create({
             data: {
               userId: existingUser.id,
