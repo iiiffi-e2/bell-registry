@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { Resend } from 'resend';
-import { JobStatus } from '@prisma/client';
+import { JobStatus } from '@bell-registry/shared';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 if (!RESEND_API_KEY) {

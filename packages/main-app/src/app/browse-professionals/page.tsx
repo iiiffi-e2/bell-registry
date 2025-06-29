@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateFilterClient } from "@/components/candidates/CandidateFilterClient";
 import { type CandidateFilters } from "@/types/candidate";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@bell-registry/shared";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 interface PaginationData {

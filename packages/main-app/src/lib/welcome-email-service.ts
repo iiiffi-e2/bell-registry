@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@bell-registry/shared';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 if (!RESEND_API_KEY) {

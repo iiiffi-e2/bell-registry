@@ -399,7 +399,7 @@ export default function PostJobPage() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Disable all form fields if can't post jobs */}
-            <fieldset disabled={showSubscriptionWarning} className={showSubscriptionWarning ? "opacity-50" : ""}>
+            <fieldset disabled={!!showSubscriptionWarning} className={showSubscriptionWarning ? "opacity-50" : ""}>
               <FormField
                 control={form.control}
                 name="title"
@@ -458,7 +458,7 @@ export default function PostJobPage() {
                       <button
                         type="button"
                         onClick={handleImproveWithAI}
-                        disabled={!currentDescription || isSubmitting || showSubscriptionWarning}
+                        disabled={!currentDescription || isSubmitting || !!showSubscriptionWarning}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <SparklesIcon className="h-4 w-4 mr-1" />
@@ -567,7 +567,7 @@ export default function PostJobPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => appendRequirement({ value: "" })}
-                    disabled={showSubscriptionWarning}
+                    disabled={!!showSubscriptionWarning}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Requirement
@@ -598,7 +598,7 @@ export default function PostJobPage() {
                           variant="outline"
                           size="icon"
                           onClick={() => removeRequirement(index)}
-                          disabled={showSubscriptionWarning}
+                          disabled={!!showSubscriptionWarning}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -653,7 +653,7 @@ export default function PostJobPage() {
                       <Switch
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        disabled={showSubscriptionWarning}
+                        disabled={!!showSubscriptionWarning}
                       />
                     </FormControl>
                   </FormItem>
@@ -671,7 +671,7 @@ export default function PostJobPage() {
               </Button>
               <Button 
                 type="submit" 
-                disabled={isSubmitting || showSubscriptionWarning}
+                disabled={isSubmitting || !!showSubscriptionWarning}
               >
                 {isSubmitting ? "Posting..." : showSubscriptionWarning ? "Upgrade Required" : "Post Job"}
               </Button>

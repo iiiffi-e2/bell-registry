@@ -14,6 +14,14 @@ export enum JobStatus {
   CLOSED = "CLOSED",
 }
 
+export enum SubscriptionType {
+  TRIAL = "TRIAL",
+  SPOTLIGHT = "SPOTLIGHT",
+  BUNDLE = "BUNDLE",
+  UNLIMITED = "UNLIMITED",
+  NETWORK = "NETWORK",
+}
+
 export const UserRoleValues = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
   EMPLOYER: UserRole.EMPLOYER,

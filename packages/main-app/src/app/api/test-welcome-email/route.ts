@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/welcome-email-service";
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@bell-registry/shared';
 
 export async function POST(request: NextRequest) {
   // Only allow in development

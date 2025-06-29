@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@bell-registry/shared'
 
 export async function GET() {
   try {

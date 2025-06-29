@@ -165,7 +165,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                       <FormControl>
                         <GoogleMapsLoader>
                           <LocationAutocomplete
-                            value={field.value}
+                            value={field.value || ""}
                             onChange={field.onChange}
                             placeholder="Enter company location..."
                           />

@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Test endpoint disabled in production' }, { status: 403 });
     }
 
-    const tests = [];
+    const tests: any[] = [];
 
     // Test 1: Check if 2FA fields exist in database
     try {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendProfileUpdateReminderEmail } from "@/lib/profile-reminder-service";
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@bell-registry/shared';
 
 export async function POST(request: NextRequest) {
   // Only allow in development

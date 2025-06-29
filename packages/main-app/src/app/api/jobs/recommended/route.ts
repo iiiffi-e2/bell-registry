@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { JobStatus, Prisma } from '@prisma/client'
+import { JobStatus, Prisma } from '@bell-registry/shared'
 
 export const dynamic = 'force-dynamic'
 

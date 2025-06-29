@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { hasActiveSubscription } from '@/lib/subscription-service';
-import { SubscriptionType } from '@prisma/client';
+import { SubscriptionType } from '@bell-registry/shared';
 
 export async function GET(request: NextRequest) {
   try {

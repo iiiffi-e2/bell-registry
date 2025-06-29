@@ -2,7 +2,7 @@
 // CREATE EXTENSION IF NOT EXISTS pg_trgm;
 import { NextResponse, NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { JobStatus, Prisma } from '@prisma/client'
+import { JobStatus, Prisma } from '@bell-registry/shared'
 import { getServerSession } from 'next-auth'
 import { generateJobUrlSlug } from '@/lib/job-utils'
 import { authOptions } from "@/lib/auth"

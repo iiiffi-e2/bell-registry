@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { type CandidateFilters } from '@/types/candidate'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@bell-registry/shared'
 import { Search } from 'lucide-react'
 
 interface CandidateFiltersProps {

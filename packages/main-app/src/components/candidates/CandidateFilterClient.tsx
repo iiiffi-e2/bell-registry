@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
-import { UserRole } from '@prisma/client'
+import { UserRole } from '@bell-registry/shared'
 import { type CandidateFilters } from '@/types/candidate'
 import { type SortOption } from '@/types/sort'
 

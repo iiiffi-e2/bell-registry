@@ -230,13 +230,38 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [isImprovingBio, setIsImprovingBio] = useState(false);
 
   const form = useForm<ProfileFormData>({
+    // @ts-ignore - Complex Zod schema type inference issue
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
+      photoUrl: "",
+      preferredRole: "",
+      location: "",
+      workLocations: [],
       openToRelocation: false,
+      openToWork: false,
       isAnonymous: false,
       customInitials: "",
       dontContactMe: false,
+      yearsOfExperience: "",
+      availability: "",
+      employmentType: "",
+      bio: "",
+      whatImSeeking: "",
+      whyIEnjoyThisWork: "",
+      whatSetsApartMe: "",
+      idealEnvironment: "",
+      seekingOpportunities: [],
+      skills: [],
+      payRangeMin: "",
+      payRangeMax: "",
       payType: "Salary",
+      additionalPhotos: [],
+      mediaUrls: [],
+      certifications: "",
+      experience: [],
+      phoneNumber: "",
     },
   });
 

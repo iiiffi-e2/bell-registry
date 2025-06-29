@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         FROM "User" 
       WHERE id = ${userId}
       LIMIT 1
-    `;
+    ` as any[];
 
     return NextResponse.json({ 
       success: true,

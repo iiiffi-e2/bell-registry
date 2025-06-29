@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
-import { JobStatus, Prisma } from '@prisma/client';
+import { JobStatus, Prisma } from '@bell-registry/shared';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,

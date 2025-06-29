@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Resend } from 'resend';
-import { UserRole } from '@prisma/client';
+import { UserRole } from '@bell-registry/shared';
+import { fromPrismaUserRole } from '@/lib/prisma-types';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 if (!RESEND_API_KEY) {
@@ -72,7 +73,10 @@ export async function findUsersNeedingProfileReminders(): Promise<UserNeedingRem
     take: 100 // Limit to prevent overwhelming the email service
   });
 
-  return users;
+  return users.map(user => ({
+    ...user,
+    role: fromPrismaUserRole(user.role)
+  }));
 }
 
 export async function sendProfileUpdateReminderEmail(

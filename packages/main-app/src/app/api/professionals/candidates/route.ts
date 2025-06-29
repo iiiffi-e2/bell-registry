@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Prisma, UserRole } from '@prisma/client'
+import { Prisma, UserRole } from '@bell-registry/shared'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
