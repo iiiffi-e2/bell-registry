@@ -39,7 +39,7 @@
     }
   ],
   "functions": {
-    "packages/admin-portal/src/app/api/**": {
+    "src/app/api/**": {
       "maxDuration": 30
     }
   }
