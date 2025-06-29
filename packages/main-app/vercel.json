@@ -12,7 +12,7 @@
     }
   ],
   "installCommand": "cd ../.. && npm install",
-  "buildCommand": "cd ../.. && npm run build:main",
+  "buildCommand": "cd ../.. && npm run build:shared && npm run db:generate && npm run build:main",
   "crons": [
     {
       "path": "/api/cron/cleanup",
