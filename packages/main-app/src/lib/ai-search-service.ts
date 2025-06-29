@@ -604,7 +604,7 @@ Return JSON array with scores:
 
       // Combine scores with job data
       const matches: AIJobMatch[] = scores.map((score: any) => {
-        const job = jobs.find(j => j.id === score.jobId);
+        const job = jobs.find((j: any) => j.id === score.jobId);
         if (!job) return null;
 
         return {

@@ -43,7 +43,7 @@ export async function GET() {
 
     // Combine match data with job details
     const enrichedMatches = matches.map(match => {
-      const job = jobDetails.find(j => j.id === match.jobId);
+      const job = jobDetails.find((j: any) => j.id === match.jobId);
       return {
         ...match,
         job,
