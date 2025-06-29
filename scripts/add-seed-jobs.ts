@@ -10,7 +10,7 @@ const defaultContent = {
   descriptions: [
     'We are seeking an experienced professional to join our client\'s household staff. The ideal candidate will have a proven track record in similar roles.',
     'Our distinguished client is looking for a skilled individual to join their team. This role requires strong attention to detail and professional experience.',
-    'A high-net-worth family is seeking a dedicated professional. The position offers excellent compensation and benefits for the right candidate.'
+    'A distinguished family is seeking a dedicated professional. The position offers excellent compensation and benefits for the right candidate.'
   ],
   requirements: [
     'Minimum 5 years of experience in a similar role',
