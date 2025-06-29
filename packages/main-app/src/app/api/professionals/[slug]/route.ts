@@ -1,43 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { prisma, Prisma } from "@bell-registry/shared";
-
-// Use Prisma generated User type
-type User = Prisma.UserGetPayload<{}>;
-
-type CandidateProfileWithAll = Prisma.CandidateProfileGetPayload<{
-  select: {
-    id: true;
-    bio: true;
-    preferredRole: true;
-    skills: true;
-    experience: true;
-    certifications: true;
-    location: true;
-    availability: true;
-    resumeUrl: true;
-    profileViews: true;
-    workLocations: true;
-    openToRelocation: true;
-    yearsOfExperience: true;
-    whatImSeeking: true;
-    whyIEnjoyThisWork: true;
-    whatSetsApartMe: true;
-    idealEnvironment: true;
-    seekingOpportunities: true;
-    payRangeMin: true;
-    payRangeMax: true;
-    payType: true;
-    additionalPhotos: true;
-    mediaUrls: true;
-    openToWork: true;
-  }
-}>;
-
-type ProfileWithCandidate = User & {
-  candidateProfile: CandidateProfileWithAll | null;
-};
+import { prisma } from "@bell-registry/shared";
 
 export const dynamic = 'force-dynamic';
 
