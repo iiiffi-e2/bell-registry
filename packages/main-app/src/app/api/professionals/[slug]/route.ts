@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { Prisma, User } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma, Prisma } from "@bell-registry/shared";
+
+// Use Prisma generated User type
+type User = Prisma.UserGetPayload<{}>;
 
 type CandidateProfileWithAll = Prisma.CandidateProfileGetPayload<{
   select: {

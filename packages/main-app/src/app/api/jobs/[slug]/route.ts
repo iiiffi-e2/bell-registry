@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { Prisma } from "@prisma/client";
-import { JobStatus } from "@bell-registry/shared";
+import { prisma, Prisma, JobStatus } from "@bell-registry/shared";
 
 export async function PUT(
   request: Request,
