@@ -8,12 +8,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "prisma": {
-          "generate": true
-        }
-      }
+      "use": "@vercel/next"
     }
   ],
   "installCommand": "cd ../.. && npm install",
