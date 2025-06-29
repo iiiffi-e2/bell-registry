@@ -5,6 +5,15 @@ export enum UserRole {
   ADMIN = "ADMIN",
 }
 
+export enum JobStatus {
+  DRAFT = "DRAFT",
+  ACTIVE = "ACTIVE",
+  EXPIRED = "EXPIRED",
+  FILLED = "FILLED",
+  INTERVIEWING = "INTERVIEWING",
+  CLOSED = "CLOSED",
+}
+
 export const UserRoleValues = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
   EMPLOYER: UserRole.EMPLOYER,

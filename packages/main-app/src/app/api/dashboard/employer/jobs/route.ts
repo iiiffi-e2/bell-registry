@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { JobStatus } from "@prisma/client";
+import { JobStatus } from "@bell-registry/shared";
 import { isEmployerOrAgencyRole } from "@/lib/roles";
 
 export const dynamic = 'force-dynamic';

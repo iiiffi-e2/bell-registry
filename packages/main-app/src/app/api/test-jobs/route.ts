@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { JobStatus } from "@prisma/client";
+import { JobStatus } from "@bell-registry/shared";
 
 export async function GET() {
   try {

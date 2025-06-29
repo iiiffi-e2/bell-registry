@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@bell-registry/shared";
 
 export function isProfessionalRole(role: unknown): role is UserRole {
   return role === UserRole.PROFESSIONAL;
