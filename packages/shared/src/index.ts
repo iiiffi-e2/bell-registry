@@ -2,7 +2,7 @@
 export * from './types';
 
 // Export database client and types
-export { prisma, Prisma } from './lib/prisma';
+export { prisma, Prisma, PrismaClient } from './lib/prisma';
 
 // Export auth configurations
 export { authOptions } from './lib/auth';
