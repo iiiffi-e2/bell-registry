@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
         where: { id: user.id },
         data: {
           twoFactorBackupCodes: user.twoFactorBackupCodes.filter(
-            c => c !== code.toUpperCase()
+            (c: string) => c !== code.toUpperCase()
           ),
         },
       });
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         where: { id: user.id },
         data: {
           twoFactorBackupCodes: user.twoFactorBackupCodes.filter(
-            c => c !== code.toUpperCase()
+            (c: string) => c !== code.toUpperCase()
           ),
         },
       });
