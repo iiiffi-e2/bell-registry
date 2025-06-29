@@ -4,10 +4,8 @@ import { UserRole } from '@bell-registry/shared';
 import { fromPrismaUserRole } from '@/lib/prisma-types';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
-}
-const resend = new Resend(RESEND_API_KEY);
+// Allow build to pass without API key (needed for static generation)
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 

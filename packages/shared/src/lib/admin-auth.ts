@@ -129,9 +129,9 @@ export const adminAuthOptions: NextAuthOptions = {
           data: {
             adminId: token.userId as string,
             action: "ADMIN_LOGOUT",
-            details: {
+            details: JSON.stringify({
               logoutTime: new Date()
-            }
+            })
           }
         });
       }
@@ -159,7 +159,7 @@ export async function logAdminAction(
     data: {
       adminId,
       action,
-      details,
+      details: JSON.stringify(details),
       ipAddress,
       userAgent
     }

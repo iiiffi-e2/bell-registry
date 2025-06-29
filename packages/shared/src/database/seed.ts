@@ -516,11 +516,7 @@ async function main() {
         description,
         location,
         requirements: jobReqs,
-        salary: {
-          min: minSalary,
-          max: maxSalary,
-          currency: 'USD'
-        },
+        salary: `$${minSalary.toLocaleString()} - $${maxSalary.toLocaleString()}`,
         status: JobStatus.ACTIVE,
         featured: Math.random() < 0.2,
       },
@@ -530,11 +526,7 @@ async function main() {
         description,
         location,
         requirements: jobReqs,
-        salary: {
-          min: minSalary,
-          max: maxSalary,
-          currency: 'USD'
-        },
+        salary: `$${minSalary.toLocaleString()} - $${maxSalary.toLocaleString()}`,
         status: JobStatus.ACTIVE,
         featured: Math.random() < 0.2,
         employerId: testEmployer.id,

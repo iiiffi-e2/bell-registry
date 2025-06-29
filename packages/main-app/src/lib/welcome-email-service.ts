@@ -2,10 +2,8 @@ import { Resend } from 'resend';
 import { UserRole } from '@bell-registry/shared';
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
-}
-const resend = new Resend(RESEND_API_KEY);
+// Allow build to pass without API key (needed for static generation)
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
@@ -20,6 +18,10 @@ interface WelcomeEmailData {
 }
 
 export async function sendWelcomeEmail(userData: WelcomeEmailData) {
+  if (!resend) {
+    throw new Error('RESEND_API_KEY is not configured');
+  }
+  
   // Use app URL for images and sign-in links
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const signInUrl = `${appUrl}/login`;
