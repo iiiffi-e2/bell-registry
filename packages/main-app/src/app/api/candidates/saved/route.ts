@@ -52,7 +52,7 @@ export async function GET() {
     });
 
     // Format the response to match the expected structure with anonymization
-    const candidates = savedCandidates.map((saved) => ({
+    const candidates = savedCandidates.map((saved: any) => ({
       id: saved.candidate.candidateProfile?.id || saved.candidate.id,
       bio: saved.candidate.candidateProfile?.bio,
       title: saved.candidate.candidateProfile?.title,
