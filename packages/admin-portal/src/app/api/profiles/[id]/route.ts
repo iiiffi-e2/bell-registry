@@ -120,60 +120,86 @@ export async function GET(
       reports = [];
     }
 
-    // Transform the data
+    // Transform the data to match frontend expectations
     const profileData = {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      role: user.role,
-      phoneNumber: user.phoneNumber,
-      image: getImageUrl(user.image),
-      profileSlug: user.profileSlug,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastLoginAt: user.lastLoginAt,
-      emailVerified: user.emailVerified,
-      isDemo: user.isDemo || false,
-      isSuspended: user.isSuspended || false,
-      isBanned: user.isBanned || false,
-      suspensionReason: user.suspensionReason,
-      suspensionNote: user.suspensionNote,
-      suspendedAt: user.suspendedAt,
-      bannedAt: user.bannedAt,
-      twoFactorEnabled: user.twoFactorEnabled,
-      
-      // Profile data
-      candidateProfile: user.candidateProfile ? {
-        ...user.candidateProfile,
-        photoUrl: getImageUrl(user.candidateProfile.photoUrl),
-        resumeUrl: getImageUrl(user.candidateProfile.resumeUrl),
-        headshot: getImageUrl(user.candidateProfile.headshot),
-        additionalPhotos: user.candidateProfile.additionalPhotos?.map((url: string) => getImageUrl(url)).filter(Boolean) || [],
-        mediaUrls: user.candidateProfile.mediaUrls?.map((url: string) => getImageUrl(url)).filter(Boolean) || []
-      } : null,
-      
-      employerProfile: user.employerProfile ? {
-        ...user.employerProfile,
-        logoUrl: getImageUrl(user.employerProfile.logoUrl)
-      } : null,
-      
-      // Activity data
-      stats: {
-        jobsPosted: user.postedJobs?.length || 0,
-        applicationsSubmitted: user.applications?.length || 0,
-        messagesSent: user.sentMessages?.length || 0,
-        profileViews: user.candidateProfile?.profileViews || 0,
-        reportsReceived: reports.length
+      id: user.candidateProfile?.id || user.id,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phoneNumber: user.phoneNumber,
+        createdAt: user.createdAt,
+        lastLoginAt: user.lastLoginAt,
+        image: getImageUrl(user.image),
+        profileSlug: user.profileSlug,
       },
       
-      // Recent activity
-      recentJobs: user.postedJobs || [],
-      recentApplications: user.applications || [],
-      recentProfileViews: user.profileViewEvents || [],
+      // Profile data from candidateProfile (or defaults)
+      bio: user.candidateProfile?.bio || null,
+      preferredRole: user.candidateProfile?.preferredRole || null,
+      location: user.candidateProfile?.location || null,
+      profileViews: user.candidateProfile?.profileViews || 0,
+      openToWork: user.candidateProfile?.openToWork || false,
+      skills: user.candidateProfile?.skills || [],
+      experience: user.candidateProfile?.experience || [],
+      certifications: user.candidateProfile?.certifications || [],
+      workLocations: user.candidateProfile?.workLocations || [],
+      seekingOpportunities: user.candidateProfile?.seekingOpportunities || [],
+      payRangeMin: user.candidateProfile?.payRangeMin || null,
+      payRangeMax: user.candidateProfile?.payRangeMax || null,
+      payType: user.candidateProfile?.payType || null,
+      yearsOfExperience: user.candidateProfile?.yearsOfExperience || null,
+      createdAt: user.candidateProfile?.createdAt || user.createdAt,
+      updatedAt: user.candidateProfile?.updatedAt || user.updatedAt,
       
-      // Reports
-      reports: reports
+      // Status and admin fields
+      status: user.candidateProfile?.status || 'PENDING',
+      reportCount: reports.length,
+      reports: reports,
+      
+      // Additional admin data
+      adminData: {
+        role: user.role,
+        emailVerified: user.emailVerified,
+        isDemo: user.isDemo || false,
+        isSuspended: user.isSuspended || false,
+        isBanned: user.isBanned || false,
+        suspensionReason: user.suspensionReason,
+        suspensionNote: user.suspensionNote,
+        suspendedAt: user.suspendedAt,
+        bannedAt: user.bannedAt,
+        twoFactorEnabled: user.twoFactorEnabled,
+        
+        // Profile data
+        candidateProfile: user.candidateProfile ? {
+          ...user.candidateProfile,
+          photoUrl: getImageUrl(user.candidateProfile.photoUrl),
+          resumeUrl: getImageUrl(user.candidateProfile.resumeUrl),
+          headshot: getImageUrl(user.candidateProfile.headshot),
+          additionalPhotos: user.candidateProfile.additionalPhotos?.map((url: string) => getImageUrl(url)).filter(Boolean) || [],
+          mediaUrls: user.candidateProfile.mediaUrls?.map((url: string) => getImageUrl(url)).filter(Boolean) || []
+        } : null,
+        
+        employerProfile: user.employerProfile ? {
+          ...user.employerProfile,
+          logoUrl: getImageUrl(user.employerProfile.logoUrl)
+        } : null,
+        
+        // Activity data
+        stats: {
+          jobsPosted: user.postedJobs?.length || 0,
+          applicationsSubmitted: user.applications?.length || 0,
+          messagesSent: user.sentMessages?.length || 0,
+          profileViews: user.candidateProfile?.profileViews || 0,
+          reportsReceived: reports.length
+        },
+        
+        // Recent activity
+        recentJobs: user.postedJobs || [],
+        recentApplications: user.applications || [],
+        recentProfileViews: user.profileViewEvents || []
+      }
     };
 
     // Log this admin action
