@@ -7,7 +7,7 @@
     "build": "npm run build:shared && npm run db:generate && next build",
     "build:shared": "cd ../shared && npm run build",
     "db:generate": "cd ../shared && npm run db:generate",
-    "postinstall": "npm run db:generate",
+    "postinstall": "cd ../shared && npm run db:generate",
     "verify-prisma": "node scripts/verify-prisma.js",
     "start": "next start",
     "lint": "next lint",
