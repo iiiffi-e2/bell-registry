@@ -153,8 +153,14 @@ export async function GET(
       createdAt: user.candidateProfile?.createdAt || user.createdAt,
       updatedAt: user.candidateProfile?.updatedAt || user.updatedAt,
       
-      // Status and admin fields
-      status: user.candidateProfile?.status || 'PENDING',
+      // Status and admin fields (prioritize account restrictions over profile status)
+      status: (() => {
+        // Account-level restrictions take priority
+        if (user.isBanned) return 'BANNED';
+        if (user.isSuspended) return 'SUSPENDED';
+        // Otherwise use profile status
+        return user.candidateProfile?.status || 'PENDING';
+      })(),
       reportCount: reports.length,
       reports: reports,
       
