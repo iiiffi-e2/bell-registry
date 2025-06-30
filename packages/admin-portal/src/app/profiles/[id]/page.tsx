@@ -106,7 +106,7 @@ export default function ProfileDetailPage({
     }
   };
 
-  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban') => {
+  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'unsuspend' | 'flag' | 'ban' | 'unban') => {
     if (!profile) return;
     
     setActionLoading(true);
@@ -254,34 +254,65 @@ export default function ProfileDetailPage({
               </div>
             </div>
             <div className="mt-6 flex space-x-3 md:mt-0 md:ml-4">
-              <button
-                onClick={() => handleAction('approve')}
-                disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
-              >
-                <CheckCircleIcon className="h-4 w-4 mr-2" />
-                Approve
-              </button>
-              <button
-                onClick={() => handleAction('suspend')}
-                disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
-              >
-                <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
-                Suspend
-              </button>
-              <button
-                onClick={() => handleAction('ban')}
-                disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
-              >
-                <XMarkIcon className="h-4 w-4 mr-2" />
-                Ban
-              </button>
+              {/* Show Approve button for non-approved profiles */}
+              {profile.status !== 'APPROVED' && (
+                <button
+                  onClick={() => handleAction('approve')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                >
+                  <CheckCircleIcon className="h-4 w-4 mr-2" />
+                  Approve
+                </button>
+              )}
+
+              {/* Dynamic Suspend/Unsuspend button */}
+              {profile.status === 'SUSPENDED' ? (
+                <button
+                  onClick={() => handleAction('unsuspend')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                >
+                  <CheckCircleIcon className="h-4 w-4 mr-2" />
+                  Unsuspend
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleAction('suspend')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
+                >
+                  <ExclamationTriangleIcon className="h-4 w-4 mr-2" />
+                  Suspend
+                </button>
+              )}
+
+              {/* Dynamic Ban/Unban button */}
+              {profile.status === 'BANNED' ? (
+                <button
+                  onClick={() => handleAction('unban')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                >
+                  <CheckCircleIcon className="h-4 w-4 mr-2" />
+                  Unban
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleAction('ban')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-2" />
+                  Ban
+                </button>
+              )}
+
+              {/* Flag button (always available) */}
               <button
                 onClick={() => handleAction('flag')}
                 disabled={actionLoading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50"
               >
                 <FlagIcon className="h-4 w-4 mr-2" />
                 Flag
