@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get profiles with user data
-    const profiles = await prisma.candidateProfile.findMany({
+    const profiles = await (prisma as any).candidateProfile.findMany({
       where: whereClause,
       include: {
         user: {
@@ -104,6 +104,8 @@ export async function GET(request: NextRequest) {
             createdAt: true,
             image: true,
             profileSlug: true,
+            isSuspended: true,
+            isBanned: true,
           }
         }
       },
@@ -112,7 +114,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Transform data with actual status and report count
-    const transformedProfiles = await Promise.all(profiles.map(async (profile) => {
+    const transformedProfiles = await Promise.all(profiles.map(async (profile: any) => {
       // Get actual report count for this user
       let reportCount = 0;
              try {
@@ -125,6 +127,14 @@ export async function GET(request: NextRequest) {
          // If profileReport table doesn't exist yet, default to 0
          reportCount = 0;
        }
+
+      // Determine display status (prioritize account restrictions over profile status)
+      let displayStatus = profile.status || 'PENDING';
+      if (profile.user.isBanned) {
+        displayStatus = 'BANNED';
+      } else if (profile.user.isSuspended) {
+        displayStatus = 'SUSPENDED';
+      }
 
       return {
         id: profile.id,
@@ -142,7 +152,7 @@ export async function GET(request: NextRequest) {
         profileViews: profile.profileViews,
         openToWork: profile.openToWork,
         createdAt: profile.createdAt,
-        status: (profile as any).status || 'PENDING', // Use actual status from database with fallback
+        status: displayStatus, // Use computed display status
         reportCount: reportCount, // Use actual report count
       };
     }));
