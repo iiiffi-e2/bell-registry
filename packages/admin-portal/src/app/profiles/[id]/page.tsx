@@ -53,6 +53,11 @@ interface ProfileDetail {
   status?: string;
   reportCount?: number;
   reports?: any[];
+  // Additional "about me" fields
+  idealEnvironment?: string | null;
+  whatImSeeking?: string | null;
+  whatSetsApartMe?: string | null;
+  whyIEnjoyThisWork?: string | null;
 }
 
 export default function ProfileDetailPage({
@@ -367,6 +372,38 @@ export default function ProfileDetailPage({
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-gray-500 mb-2">Bio</h3>
                   <p className="text-gray-900">{profile.bio}</p>
+                </div>
+              )}
+
+              {/* What I'm Seeking */}
+              {profile.whatImSeeking && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">What I'm Seeking</h3>
+                  <p className="text-gray-900">{profile.whatImSeeking}</p>
+                </div>
+              )}
+
+              {/* What Sets Me Apart */}
+              {profile.whatSetsApartMe && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">What Sets Me Apart</h3>
+                  <p className="text-gray-900">{profile.whatSetsApartMe}</p>
+                </div>
+              )}
+
+              {/* Why I Enjoy This Work */}
+              {profile.whyIEnjoyThisWork && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Why I Enjoy This Work</h3>
+                  <p className="text-gray-900">{profile.whyIEnjoyThisWork}</p>
+                </div>
+              )}
+
+              {/* Ideal Environment */}
+              {profile.idealEnvironment && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Ideal Work Environment</h3>
+                  <p className="text-gray-900">{profile.idealEnvironment}</p>
                 </div>
               )}
 

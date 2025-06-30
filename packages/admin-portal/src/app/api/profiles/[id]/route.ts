@@ -153,6 +153,12 @@ export async function GET(
       createdAt: user.candidateProfile?.createdAt || user.createdAt,
       updatedAt: user.candidateProfile?.updatedAt || user.updatedAt,
       
+      // Additional "about me" fields
+      idealEnvironment: user.candidateProfile?.idealEnvironment || null,
+      whatImSeeking: user.candidateProfile?.whatImSeeking || null,
+      whatSetsApartMe: user.candidateProfile?.whatSetsApartMe || null,
+      whyIEnjoyThisWork: user.candidateProfile?.whyIEnjoyThisWork || null,
+      
       // Status and admin fields (prioritize account restrictions over profile status)
       status: (() => {
         // Account-level restrictions take priority
