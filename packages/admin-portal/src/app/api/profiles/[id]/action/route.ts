@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { prisma, adminAuthOptions, logAdminAction } from "@bell-registry/shared";
+import { prisma, adminAuthOptions, logAdminAction, sendSuspensionNotification, sendBanNotification, sendUnsuspensionNotification } from "@bell-registry/shared";
 import { UserRole } from "@bell-registry/shared";
 
 export async function POST(
@@ -78,6 +78,28 @@ export async function POST(
             suspendedBy: session.user.id
           }
         });
+        
+        // Send suspension notification email
+        try {
+          const userAny = user as any;
+          await sendSuspensionNotification({
+            userEmail: user.email,
+            userName: `${userAny.firstName || ''} ${userAny.lastName || ''}`.trim() || 'User',
+            userRole: user.role || 'UNKNOWN',
+            suspensionReason: reason,
+            suspensionNote: note,
+            suspendedByAdmin: {
+              name: `${(session.user as any).firstName || ''} ${(session.user as any).lastName || ''}`.trim() || 'Admin',
+              email: session.user.email || ''
+            },
+            suspendedAt: new Date()
+          });
+          console.log('[ADMIN_ACTION] Suspension notification sent to:', user.email);
+        } catch (emailError) {
+          console.error('[ADMIN_ACTION] Failed to send suspension notification:', emailError);
+          // Don't fail the whole action if email fails
+        }
+        
         actionType = "SUSPEND_USER";
         message = "User suspended successfully";
         break;
@@ -93,6 +115,26 @@ export async function POST(
             suspendedBy: null
           }
         });
+        
+        // Send unsuspension notification email
+        try {
+          const userAny = user as any;
+          await sendUnsuspensionNotification({
+            userEmail: user.email,
+            userName: `${userAny.firstName || ''} ${userAny.lastName || ''}`.trim() || 'User',
+            userRole: user.role || 'UNKNOWN',
+            unsuspendedByAdmin: {
+              name: `${(session.user as any).firstName || ''} ${(session.user as any).lastName || ''}`.trim() || 'Admin',
+              email: session.user.email || ''
+            },
+            unsuspendedAt: new Date()
+          });
+          console.log('[ADMIN_ACTION] Unsuspension notification sent to:', user.email);
+        } catch (emailError) {
+          console.error('[ADMIN_ACTION] Failed to send unsuspension notification:', emailError);
+          // Don't fail the whole action if email fails
+        }
+        
         actionType = "UNSUSPEND_USER";
         message = "User unsuspended successfully";
         break;
@@ -106,6 +148,26 @@ export async function POST(
             bannedBy: session.user.id
           }
         });
+        
+        // Send ban notification email
+        try {
+          const userAny = user as any;
+          await sendBanNotification({
+            userEmail: user.email,
+            userName: `${userAny.firstName || ''} ${userAny.lastName || ''}`.trim() || 'User',
+            userRole: user.role || 'UNKNOWN',
+            bannedByAdmin: {
+              name: `${(session.user as any).firstName || ''} ${(session.user as any).lastName || ''}`.trim() || 'Admin',
+              email: session.user.email || ''
+            },
+            bannedAt: new Date()
+          });
+          console.log('[ADMIN_ACTION] Ban notification sent to:', user.email);
+        } catch (emailError) {
+          console.error('[ADMIN_ACTION] Failed to send ban notification:', emailError);
+          // Don't fail the whole action if email fails
+        }
+        
         actionType = "BAN_USER";
         message = "User banned successfully";
         break;
