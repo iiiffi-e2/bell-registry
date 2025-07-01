@@ -23,7 +23,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '9')
     const skip = (page - 1) * limit
 
-    const where: Prisma.CandidateProfileWhereInput = {
+    const where = {
+      // Only show approved profiles in public listings
+      status: 'APPROVED',
       // Basic profile completion requirements
       NOT: {
         OR: [

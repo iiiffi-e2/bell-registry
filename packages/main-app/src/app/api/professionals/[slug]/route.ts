@@ -30,6 +30,15 @@ export async function GET(
       return new NextResponse("Profile not found", { status: 404 });
     }
 
+    // Check if profile is approved or if user is viewing their own profile
+    const isOwner = session?.user?.id === profile.id;
+    const profileStatus = (profile.candidateProfile as any).status;
+    
+    if (profileStatus !== 'APPROVED' && !isOwner) {
+      console.log("[PROFILE_GET] Profile not approved and not own profile");
+      return new NextResponse("Profile not found", { status: 404 });
+    }
+
     console.log("[PROFILE_GET] Profile found for user ID:", profile.id);
 
     // Increment profile views

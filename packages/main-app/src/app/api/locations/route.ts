@@ -3,8 +3,8 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET() {
   try {
-    // Get unique locations from candidate profiles
-    const locations = await prisma.candidateProfile.findMany({
+    // Get unique locations from approved candidate profiles only
+    const locations = await (prisma.candidateProfile as any).findMany({
       select: {
         location: true,
       },
@@ -12,6 +12,8 @@ export async function GET() {
         location: {
           not: null,
         },
+        // Only include locations from approved profiles
+        status: 'APPROVED',
       },
       distinct: ['location'],
     })

@@ -121,6 +121,7 @@ model User {
   suspendedUsers            User[]               @relation("SuspendedByAdmin")
   bannedByAdmin             User?                @relation("BannedByAdmin", fields: [bannedBy], references: [id])
   bannedUsers               User[]               @relation("BannedByAdmin")
+  systemSettings            SystemSettings[]     @relation("SystemSettingsAdmin")
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -437,6 +438,20 @@ model AdminAuditLog {
   @@index([adminId])
   @@index([createdAt])
   @@index([targetType])
+}
+
+model SystemSettings {
+  id                    String   @id @default(cuid())
+  settingKey            String   @unique
+  settingValue          String
+  description           String?
+  updatedBy             String
+  updatedAt             DateTime @updatedAt
+  createdAt             DateTime @default(now())
+  admin                 User     @relation("SystemSettingsAdmin", fields: [updatedBy], references: [id])
+
+  @@index([settingKey])
+  @@index([updatedAt])
 }
 
 enum UserRole {

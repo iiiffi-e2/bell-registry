@@ -5,6 +5,7 @@ import { UserRole } from "@/types";
 import bcrypt from "bcryptjs";
 import { generateProfileSlug } from "@/lib/utils";
 import { sendWelcomeEmail } from "@/lib/welcome-email-service";
+import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -51,12 +52,14 @@ export async function POST(req: Request) {
 
     // Create the appropriate profile based on user role
     if (body.role === "PROFESSIONAL") {
+      const approvalFields = getProfileApprovalFields();
       await prisma.candidateProfile.create({
         data: {
           userId: user.id,
           skills: [],
           certifications: [],
           experience: [],
+          ...approvalFields,
         },
       });
     } else if (body.role === "EMPLOYER" || body.role === "AGENCY") {

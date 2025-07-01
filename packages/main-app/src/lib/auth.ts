@@ -8,6 +8,7 @@ import { fromPrismaUserRole, toPrismaUserRole } from "./prisma-types";
 import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "./welcome-email-service";
 import { verifyTwoFactorSession } from "@/lib/2fa-session";
+import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
@@ -211,12 +212,14 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (role === UserRole.PROFESSIONAL) {
+            const approvalFields = getProfileApprovalFields();
             await prisma.candidateProfile.create({
               data: {
                 userId: newUser.id,
                 skills: [],
                 certifications: [],
                 experience: [],
+                ...approvalFields,
               }
             });
           } else if (role === UserRole.EMPLOYER || role === UserRole.AGENCY) {
