@@ -267,25 +267,26 @@ export default function AdminDashboard() {
                 View Analytics
               </button>
             </div>
-            {process.env.NODE_ENV === 'development' && (
-              <div className='mt-4 pt-4 border-t border-gray-200'>
-                <h3 className='text-sm font-medium text-gray-900 mb-2'>Development Tools</h3>
-                <div className="space-y-2">
+            {/* Admin Tools - Always Show System Settings */}
+            <div className='mt-4 pt-4 border-t border-gray-200'>
+              <h3 className='text-sm font-medium text-gray-900 mb-2'>Admin Tools</h3>
+              <div className="space-y-2">
+                <button 
+                  onClick={() => router.push('/settings')}
+                  className='inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md shadow-sm text-blue-800 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                >
+                  System Settings
+                </button>
+                {process.env.NODE_ENV === 'development' && (
                   <button 
                     onClick={() => router.push('/test-notifications')}
                     className='inline-flex items-center px-4 py-2 border border-yellow-300 text-sm font-medium rounded-md shadow-sm text-yellow-800 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500'
                   >
                     Test Email Notifications
                   </button>
-                  <button 
-                    onClick={() => router.push('/settings')}
-                    className='inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md shadow-sm text-blue-800 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                  >
-                    System Settings
-                  </button>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
 
