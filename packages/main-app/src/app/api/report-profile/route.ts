@@ -4,12 +4,19 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Resend } from 'resend';
 
-// Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
+// Lazy initialization of Resend client
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(RESEND_API_KEY);
+  }
+  return resend;
 }
-const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
@@ -54,7 +61,7 @@ export async function POST(request: NextRequest) {
     const adminEmail = process.env.ADMIN_EMAIL;
     console.log('[REPORT_PROFILE] Environment check:', {
       hasAdminEmail: !!adminEmail,
-      hasResendKey: !!RESEND_API_KEY,
+      hasResendKey: !!process.env.RESEND_API_KEY,
       nodeEnv: isDevelopment ? 'development' : 'production'
     });
 
@@ -173,7 +180,7 @@ export async function POST(request: NextRequest) {
     const toEmail = isDevelopment ? 'delivered@resend.dev' : adminEmail;
     
     console.log('[REPORT_PROFILE] Attempting to send email...');
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: `Profile Report: ${profileName} - ${reason}`,

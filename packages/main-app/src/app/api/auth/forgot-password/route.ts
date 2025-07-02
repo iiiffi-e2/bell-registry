@@ -3,12 +3,19 @@ import { prisma } from "@/lib/prisma";
 import { randomBytes } from "crypto";
 import { Resend } from 'resend';
 
-// Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
+// Lazy initialization of Resend client
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(RESEND_API_KEY);
+  }
+  return resend;
 }
-const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -51,7 +58,7 @@ export async function POST(request: Request) {
     // In development, use Resend's test email address
     const toEmail = isDevelopment ? 'delivered@resend.dev' : email;
     
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: 'Reset Your Password - The Bell Registry',
@@ -75,7 +82,7 @@ export async function POST(request: Request) {
           originalEmail: email,
           testEmail: toEmail,
           isDevelopment,
-          hasResendKey: !!RESEND_API_KEY,
+          hasResendKey: !!process.env.RESEND_API_KEY,
           emailResponse
         }
       });

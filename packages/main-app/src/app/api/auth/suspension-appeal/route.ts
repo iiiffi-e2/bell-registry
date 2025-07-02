@@ -3,12 +3,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { Resend } from 'resend';
 
-// Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
+// Lazy initialization of Resend client
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(RESEND_API_KEY);
+  }
+  return resend;
 }
-const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
@@ -138,7 +145,7 @@ export async function POST(request: NextRequest) {
       isDevelopment,
     });
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: `[Suspension Appeal] ${appealReasonLabel} from ${userName}`,
@@ -198,7 +205,7 @@ export async function POST(request: NextRequest) {
     `;
 
     // Send confirmation email to user
-    const userEmailResponse = await resend.emails.send({
+    const userEmailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: userEmail,
       subject: 'Your suspension appeal has been received - The Bell Registry',

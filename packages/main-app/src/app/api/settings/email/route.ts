@@ -5,12 +5,19 @@ import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import { Resend } from 'resend';
 
-// Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
+// Lazy initialization of Resend client
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(RESEND_API_KEY);
+  }
+  return resend;
 }
-const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -92,10 +99,10 @@ export async function PUT(request: NextRequest) {
         from: FROM_EMAIL,
         to: toEmail,
         isDevelopment,
-        hasResendKey: !!RESEND_API_KEY
+        hasResendKey: !!process.env.RESEND_API_KEY
       });
       
-      const emailResponse = await resend.emails.send({
+      const emailResponse = await getResendClient().emails.send({
         from: FROM_EMAIL,
         to: toEmail,
         subject: 'Confirm your new email address',
@@ -120,7 +127,7 @@ export async function PUT(request: NextRequest) {
             originalEmail: newEmail,
             testEmail: toEmail,
             isDevelopment,
-            hasResendKey: !!RESEND_API_KEY,
+            hasResendKey: !!process.env.RESEND_API_KEY,
             emailResponse
           }
         });
