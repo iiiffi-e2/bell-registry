@@ -1,11 +1,18 @@
 import { Resend } from 'resend';
 
-// Initialize Resend
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
-if (!RESEND_API_KEY) {
-  throw new Error('RESEND_API_KEY is not configured');
+// Lazy initialization of Resend client
+let resend: Resend | null = null;
+
+function getResendClient(): Resend {
+  if (!resend) {
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+    resend = new Resend(RESEND_API_KEY);
+  }
+  return resend;
 }
-const resend = new Resend(RESEND_API_KEY);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
@@ -146,7 +153,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
     
     console.log('[SUSPENSION_NOTIFICATION] Sending suspension email to:', data.userEmail);
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: 'Your account has been suspended - The Bell Registry',
@@ -260,7 +267,7 @@ export async function sendBanNotification(data: BanNotificationData) {
     
     console.log('[BAN_NOTIFICATION] Sending ban email to:', data.userEmail);
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: 'Your account has been banned - The Bell Registry',
@@ -378,7 +385,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
     
     console.log('[UNSUSPENSION_NOTIFICATION] Sending unsuspension email to:', data.userEmail);
 
-    const emailResponse = await resend.emails.send({
+    const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
       subject: 'Your account has been restored - The Bell Registry',
