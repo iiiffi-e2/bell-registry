@@ -15,6 +15,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/
 import { Checkbox } from "@/components/ui/checkbox";
 import { Form } from "@/components/ui/form";
 import { SkillsCombobox } from "@/components/ui/skills-combobox";
+import { validateNameNotInText } from "@/lib/utils";
 
 const PROFESSIONAL_ROLES = [
   "Head Gardener",
@@ -267,6 +268,53 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
   const currentBio = form.watch("bio");
 
+  // Custom validation function for name checking
+  const validateNameFields = (data: ProfileFormData) => {
+    const errors: Record<string, { message: string }> = {};
+
+    // Validate bio
+    if (data.bio) {
+      const bioValidation = validateNameNotInText(data.bio, data.firstName, data.lastName);
+      if (!bioValidation.isValid) {
+        errors.bio = { message: bioValidation.errorMessage || "Invalid bio content" };
+      }
+    }
+
+    // Validate whatImSeeking
+    if (data.whatImSeeking) {
+      const seekingValidation = validateNameNotInText(data.whatImSeeking, data.firstName, data.lastName);
+      if (!seekingValidation.isValid) {
+        errors.whatImSeeking = { message: seekingValidation.errorMessage || "Invalid content" };
+      }
+    }
+
+    // Validate whyIEnjoyThisWork
+    if (data.whyIEnjoyThisWork) {
+      const enjoyValidation = validateNameNotInText(data.whyIEnjoyThisWork, data.firstName, data.lastName);
+      if (!enjoyValidation.isValid) {
+        errors.whyIEnjoyThisWork = { message: enjoyValidation.errorMessage || "Invalid content" };
+      }
+    }
+
+    // Validate whatSetsApartMe
+    if (data.whatSetsApartMe) {
+      const setsApartValidation = validateNameNotInText(data.whatSetsApartMe, data.firstName, data.lastName);
+      if (!setsApartValidation.isValid) {
+        errors.whatSetsApartMe = { message: setsApartValidation.errorMessage || "Invalid content" };
+      }
+    }
+
+    // Validate idealEnvironment
+    if (data.idealEnvironment) {
+      const environmentValidation = validateNameNotInText(data.idealEnvironment, data.firstName, data.lastName);
+      if (!environmentValidation.isValid) {
+        errors.idealEnvironment = { message: environmentValidation.errorMessage || "Invalid content" };
+      }
+    }
+
+    return errors;
+  };
+
   const handleImproveWithAI = async () => {
     try {
       setIsImprovingBio(true);
@@ -362,6 +410,18 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     try {
+      // Run custom validation
+      const nameErrors = validateNameFields(data);
+      
+      if (Object.keys(nameErrors).length > 0) {
+        // Set the errors on the form
+        Object.entries(nameErrors).forEach(([field, error]) => {
+          form.setError(field as keyof ProfileFormData, error);
+        });
+        setIsLoading(false);
+        return;
+      }
+
       await onSubmit({
         ...data,
         additionalPhotos: uploadedPhotos,

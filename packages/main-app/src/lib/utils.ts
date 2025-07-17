@@ -108,3 +108,94 @@ export function splitTextIntoParagraphs(text: string | null): string[] {
   
   return paragraphs;
 }
+
+export function validateNameNotInText(text: string, firstName: string, lastName: string): { isValid: boolean; errorMessage?: string } {
+  if (!text || !firstName || !lastName) {
+    return { isValid: true };
+  }
+
+  const normalizedText = text.toLowerCase().trim();
+  const normalizedFirstName = firstName.toLowerCase().trim();
+  const normalizedLastName = lastName.toLowerCase().trim();
+  const normalizedFullName = `${normalizedFirstName} ${normalizedLastName}`;
+
+  // Check for first name only
+  if (normalizedText.includes(normalizedFirstName)) {
+    return {
+      isValid: false,
+      errorMessage: `Please don't include your first name "${firstName}" in this field.`
+    };
+  }
+
+  // Check for last name only
+  if (normalizedText.includes(normalizedLastName)) {
+    return {
+      isValid: false,
+      errorMessage: `Please don't include your last name "${lastName}" in this field.`
+    };
+  }
+
+  // Check for full name
+  if (normalizedText.includes(normalizedFullName)) {
+    return {
+      isValid: false,
+      errorMessage: `Please don't include your full name "${firstName} ${lastName}" in this field.`
+    };
+  }
+
+  return { isValid: true };
+}
+
+// Test function to verify validation works (can be removed in production)
+export function testNameValidation() {
+  const testCases = [
+    {
+      text: "My name is John and I love cooking",
+      firstName: "John",
+      lastName: "Doe",
+      expected: false,
+      description: "Should detect first name"
+    },
+    {
+      text: "I am a professional Doe with 10 years experience",
+      firstName: "John",
+      lastName: "Doe",
+      expected: false,
+      description: "Should detect last name"
+    },
+    {
+      text: "John Doe is a great chef",
+      firstName: "John",
+      lastName: "Doe",
+      expected: false,
+      description: "Should detect full name"
+    },
+    {
+      text: "I am a professional chef with 10 years experience",
+      firstName: "John",
+      lastName: "Doe",
+      expected: true,
+      description: "Should pass validation"
+    },
+    {
+      text: "My colleague Johnny is great",
+      firstName: "John",
+      lastName: "Doe",
+      expected: true,
+      description: "Should not detect partial matches"
+    }
+  ];
+
+  console.log("Testing name validation function:");
+  testCases.forEach((testCase, index) => {
+    const result = validateNameNotInText(testCase.text, testCase.firstName, testCase.lastName);
+    const passed = result.isValid === testCase.expected;
+    console.log(`Test ${index + 1}: ${passed ? "✅ PASS" : "❌ FAIL"} - ${testCase.description}`);
+    if (!passed) {
+      console.log(`  Expected: ${testCase.expected}, Got: ${result.isValid}`);
+      if (result.errorMessage) {
+        console.log(`  Error: ${result.errorMessage}`);
+      }
+    }
+  });
+}
