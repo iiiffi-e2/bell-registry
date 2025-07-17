@@ -46,6 +46,123 @@ interface ProfileFilters {
   sortBy: 'newest' | 'oldest' | 'mostViewed' | 'mostReported';
 }
 
+// Individual Suspension Modal Component
+function IndividualSuspensionModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  userName, 
+  isLoading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: (reason: string, note: string) => void; 
+  userName: string; 
+  isLoading: boolean; 
+}) {
+  const [reason, setReason] = useState('');
+  const [note, setNote] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (reason.trim()) {
+      onConfirm(reason.trim(), note.trim());
+    }
+  };
+
+  const handleClose = () => {
+    setReason('');
+    setNote('');
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              Suspend User Account
+            </h3>
+            <button
+              onClick={handleClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+          
+          <p className="text-sm text-gray-600 mb-4">
+            You are about to suspend the account for <strong>{userName}</strong>. 
+            This will restrict their access to the platform.
+          </p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
+                Suspension Reason *
+              </label>
+              <select
+                id="reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                required
+              >
+                <option value="">Select a reason</option>
+                <option value="Inappropriate content">Inappropriate content</option>
+                <option value="Spam or harassment">Spam or harassment</option>
+                <option value="Fake profile or impersonation">Fake profile or impersonation</option>
+                <option value="Violation of terms of service">Violation of terms of service</option>
+                <option value="Suspicious activity">Suspicious activity</option>
+                <option value="Multiple reports">Multiple reports</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="mb-6">
+              <label htmlFor="note" className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Note (Optional)
+              </label>
+              <textarea
+                id="note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={3}
+                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                placeholder="Provide additional context or instructions for the user..."
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                This note will be included in the suspension email sent to the user.
+              </p>
+            </div>
+
+            <div className="flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
+                disabled={isLoading || !reason.trim()}
+              >
+                {isLoading ? 'Suspending...' : 'Suspend Account'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Bulk Suspension Modal Component
 function BulkSuspensionModal({ 
   isOpen, 
@@ -173,6 +290,8 @@ export default function ProfileManagementPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showBulkSuspensionModal, setShowBulkSuspensionModal] = useState(false);
+  const [showIndividualSuspensionModal, setShowIndividualSuspensionModal] = useState(false);
+  const [selectedProfileForSuspension, setSelectedProfileForSuspension] = useState<Profile | null>(null);
   
   const [filters, setFilters] = useState<ProfileFilters>({
     status: 'all',
@@ -265,12 +384,29 @@ export default function ProfileManagementPage() {
     setShowBulkSuspensionModal(false);
   };
 
-  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban') => {
+  const handleIndividualSuspendClick = (profile: Profile) => {
+    setSelectedProfileForSuspension(profile);
+    setShowIndividualSuspensionModal(true);
+  };
+
+  const handleIndividualSuspendConfirm = (reason: string, note: string) => {
+    if (selectedProfileForSuspension) {
+      handleProfileAction(selectedProfileForSuspension.user.id, 'suspend', reason, note);
+      setShowIndividualSuspensionModal(false);
+      setSelectedProfileForSuspension(null);
+    }
+  };
+
+  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
     try {
       const response = await fetch(`/api/profiles/${profileId}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action })
+        body: JSON.stringify({ 
+          action,
+          reason: reason || undefined,
+          note: note || undefined
+        })
       });
       
       if (!response.ok) {
@@ -615,7 +751,7 @@ export default function ProfileManagementPage() {
                             <CheckCircleIcon className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => handleProfileAction(profile.user.id, 'suspend')}
+                            onClick={() => handleIndividualSuspendClick(profile)}
                             className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded"
                             title="Suspend"
                           >
@@ -659,6 +795,17 @@ export default function ProfileManagementPage() {
         onConfirm={handleBulkSuspendConfirm}
         selectedCount={selectedProfiles.length}
         isLoading={bulkActionLoading}
+      />
+
+      <IndividualSuspensionModal
+        isOpen={showIndividualSuspensionModal}
+        onClose={() => {
+          setShowIndividualSuspensionModal(false);
+          setSelectedProfileForSuspension(null);
+        }}
+        onConfirm={handleIndividualSuspendConfirm}
+        userName={selectedProfileForSuspension ? `${selectedProfileForSuspension.user.firstName} ${selectedProfileForSuspension.user.lastName}` : ''}
+        isLoading={false}
       />
     </div>
   );
