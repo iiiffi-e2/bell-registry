@@ -29,18 +29,18 @@ export default function TestNameValidationPage() {
           <div className="mt-6 p-4 bg-gray-100 rounded-md">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Test Cases:</h2>
             <ul className="text-sm text-gray-700 space-y-1">
-              <li>• "My name is John and I love cooking" (should fail - contains first name)</li>
-              <li>• "I am a professional Doe with 10 years experience" (should fail - contains last name)</li>
-              <li>• "John Doe is a great chef" (should fail - contains full name)</li>
-              <li>• "I am a professional chef with 10 years experience" (should pass)</li>
-              <li>• "My colleague Johnny is great" (should pass - partial match)</li>
+              <li>• &ldquo;My name is John and I love cooking&rdquo; (should fail - contains first name)</li>
+              <li>• &ldquo;I am a professional Doe with 10 years experience&rdquo; (should fail - contains last name)</li>
+              <li>• &ldquo;John Doe is a great chef&rdquo; (should fail - contains full name)</li>
+              <li>• &ldquo;I am a professional chef with 10 years experience&rdquo; (should pass)</li>
+              <li>• &ldquo;My colleague Johnny is great&rdquo; (should pass - partial match)</li>
             </ul>
           </div>
 
           <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
             <h2 className="text-lg font-semibold text-yellow-800 mb-2">How it works:</h2>
             <p className="text-sm text-yellow-700">
-              The validation function checks if a user's first name, last name, or full name appears in text fields like bio, "What I'm Seeking", "Why I Enjoy This Work", "What Sets Me Apart", and "Ideal Environment". 
+              The validation function checks if a user&apos;s first name, last name, or full name appears in text fields like bio, &ldquo;What I&apos;m Seeking&rdquo;, &ldquo;Why I Enjoy This Work&rdquo;, &ldquo;What Sets Me Apart&rdquo;, and &ldquo;Ideal Environment&rdquo;. 
               It uses case-insensitive matching and provides specific error messages telling users exactly what needs to be removed.
             </p>
           </div>
