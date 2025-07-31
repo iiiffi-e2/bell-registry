@@ -6,6 +6,7 @@ import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon
 import { getTimeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { ApplyJobModal } from "@/components/modals/apply-job-modal";
+import { PublicNavigation } from "@/components/PublicNavigation";
 
 interface JobDetails {
   id: string;
@@ -190,7 +191,9 @@ export default function PublicJobDetailsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <>
+      <PublicNavigation />
+      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -376,6 +379,7 @@ export default function PublicJobDetailsPage() {
           jobTitle={job.title}
         />
       )}
-    </div>
+      </div>
+    </>
   );
 } 
