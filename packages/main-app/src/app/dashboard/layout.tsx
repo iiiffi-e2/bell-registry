@@ -67,7 +67,7 @@ const employerNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
   { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { 
-    name: "Candidates", 
+    name: "Professionals", 
     href: "#", 
     icon: UsersIcon,
     submenu: [
@@ -85,7 +85,7 @@ const employerNavigation: NavigationItem[] = [
 const agencyNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/agency", icon: HomeIcon },
   { name: "Job Listings", href: "/dashboard/agency/jobs", icon: BriefcaseIcon },
-  { name: "Candidates", href: "/dashboard/agency/candidates", icon: UsersIcon },
+  { name: "Professionals", href: "/dashboard/agency/candidates", icon: UsersIcon },
   { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },

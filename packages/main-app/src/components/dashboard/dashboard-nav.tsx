@@ -73,7 +73,7 @@ const employerRoutes = [
     color: "text-violet-500",
   },
   {
-    label: "Candidates",
+    label: "Professionals",
     icon: Users,
     href: "#",
     color: "text-blue-500",
@@ -128,7 +128,7 @@ const agencyRoutes = [
     color: "text-violet-500",
   },
   {
-    label: "Candidates",
+    label: "Professionals",
     icon: Users,
     href: "/dashboard/agency/candidates",
     color: "text-blue-500",
