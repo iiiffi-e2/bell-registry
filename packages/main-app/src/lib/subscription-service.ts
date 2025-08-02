@@ -229,7 +229,10 @@ export async function getEmployerSubscription(employerId: string) {
   const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
   const subscriptionStartDate = (employer as any).subscriptionStartDate || employer.createdAt;
   const subscriptionEndDate = (employer as any).subscriptionEndDate || null;
-  const jobPostLimit = (employer as any).jobPostLimit || 5;
+  
+  // Get job limit from plan configuration instead of database field
+  const plan = SUBSCRIPTION_PLANS[subscriptionType as keyof typeof SUBSCRIPTION_PLANS];
+  const jobPostLimit = plan.jobLimit;
   
   // Calculate actual jobs posted in current subscription period
   const actualJobsPostedCount = await getActiveJobsCount(employerId, subscriptionStartDate);

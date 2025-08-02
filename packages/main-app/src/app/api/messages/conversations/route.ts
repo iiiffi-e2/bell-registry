@@ -10,11 +10,22 @@ export const dynamic = 'force-dynamic'
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id: userId, role } = session.user
+    const { role, id: userId } = session.user
+
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    const isEmployerOrAgency = role === 'EMPLOYER' || role === 'AGENCY'
+    if (isEmployerOrAgency && userId) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+    }
 
     const conversations = await prisma.conversation.findMany({
       where: {
@@ -127,6 +138,11 @@ export async function GET(request: NextRequest) {
           (role === 'EMPLOYER' || role === 'AGENCY') && conversation.clientId === userId
 
         if (isEmployerViewingProfessional) {
+          // If employer has network access, show full professional info
+          if (hasNetworkAccess) {
+            return conversation
+          }
+
           // Check if there's an existing job application between them
           const hasApplication = await prisma.jobApplication.findFirst({
             where: {

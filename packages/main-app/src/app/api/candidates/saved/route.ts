@@ -26,6 +26,16 @@ export async function GET() {
     const employerId = session.user.id;
     const isEmployerOrAgency = session.user.role === 'EMPLOYER' || session.user.role === 'AGENCY';
 
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    if (isEmployerOrAgency && session?.user?.id) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+    }
+
     // Fetch saved candidates with their profile information
     const savedCandidates = await prisma.savedCandidate.findMany({
       where: {
@@ -69,15 +79,15 @@ export async function GET() {
       job: saved.job,
       user: {
         id: saved.candidate.id,
-        // Apply anonymization for employers/agencies
-        firstName: isEmployerOrAgency ? (saved.candidate.firstName?.[0] || '') : saved.candidate.firstName,
-        lastName: isEmployerOrAgency ? (saved.candidate.lastName?.[0] || '') : saved.candidate.lastName,
-        image: isEmployerOrAgency ? null : saved.candidate.image,
+        // Apply anonymization based on network access
+        firstName: (isEmployerOrAgency && !hasNetworkAccess) ? (saved.candidate.firstName?.[0] || '') : saved.candidate.firstName,
+        lastName: (isEmployerOrAgency && !hasNetworkAccess) ? (saved.candidate.lastName?.[0] || '') : saved.candidate.lastName,
+        image: (isEmployerOrAgency && !hasNetworkAccess) ? null : saved.candidate.image,
         role: saved.candidate.role,
         profileSlug: saved.candidate.profileSlug,
-        email: isEmployerOrAgency ? '' : saved.candidate.email,
-        phoneNumber: isEmployerOrAgency ? null : saved.candidate.phoneNumber,
-        isAnonymous: isEmployerOrAgency ? true : (saved.candidate.isAnonymous || false),
+        email: (isEmployerOrAgency && !hasNetworkAccess) ? '' : saved.candidate.email,
+        phoneNumber: (isEmployerOrAgency && !hasNetworkAccess) ? null : saved.candidate.phoneNumber,
+        isAnonymous: (isEmployerOrAgency && !hasNetworkAccess) ? true : (saved.candidate.isAnonymous || false),
       },
     }));
 

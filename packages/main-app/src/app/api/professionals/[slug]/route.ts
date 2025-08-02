@@ -13,6 +13,16 @@ export async function GET(
     const session = await getServerSession(authOptions);
     const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY";
 
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    if (isEmployerOrAgency && session?.user?.id) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+    }
+
     console.log("[PROFILE_GET] Looking for profile with slug:", params.slug);
 
     // Find the profile using the profileSlug field
@@ -56,10 +66,11 @@ export async function GET(
 
     // Determine if we should anonymize the profile
     // Anonymize if:
-    // 1. Viewer is an employer/agency, OR
-    // 2. Viewer is a professional viewing someone else's profile (not their own)
+    // 1. Viewer is a professional viewing someone else's profile (not their own), OR
+    // 2. Viewer is an employer/agency without network access
     const isViewingOwnProfile = session?.user?.id === profile.id;
-    const shouldAnonymize = isEmployerOrAgency || (session?.user?.role === "PROFESSIONAL" && !isViewingOwnProfile);
+    const shouldAnonymize = (session?.user?.role === "PROFESSIONAL" && !isViewingOwnProfile) || 
+                           (isEmployerOrAgency && !hasNetworkAccess);
 
     // Format the response data
     const responseData = {

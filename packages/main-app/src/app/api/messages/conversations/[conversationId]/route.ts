@@ -13,12 +13,23 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id: userId } = session.user
+    const { role, id: userId } = session.user
     const { conversationId } = params
+
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    const isEmployerOrAgency = role === 'EMPLOYER' || role === 'AGENCY'
+    if (isEmployerOrAgency && userId) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+    }
 
     // Verify user has access to this conversation
     const conversation = await prisma.conversation.findUnique({
@@ -125,11 +136,15 @@ export async function GET(
     })
 
     // For employers/agencies viewing professionals, check if names should be revealed
-    const { role } = session.user
     const isEmployerViewingProfessional = 
       (role === 'EMPLOYER' || role === 'AGENCY') && conversation.clientId === userId
 
     if (isEmployerViewingProfessional) {
+      // If employer has network access, show full professional info
+      if (hasNetworkAccess) {
+        return NextResponse.json(enhancedConversation)
+      }
+
       // Check if there's an existing job application between them
       const hasApplication = await prisma.jobApplication.findFirst({
         where: {

@@ -11,6 +11,16 @@ export async function GET(request: Request) {
     const session = await getServerSession(authOptions)
     const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY"
 
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    if (isEmployerOrAgency && session?.user?.id) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+    }
+
     const { searchParams } = new URL(request.url)
     const location = searchParams.get('location')
     const roleType = searchParams.get('roleType') as UserRole | null
@@ -82,9 +92,9 @@ export async function GET(request: Request) {
       prisma.candidateProfile.count({ where }),
     ])
 
-    // Anonymize data for employers and agencies
+    // Anonymize data for employers and agencies without network access
     const anonymizedCandidates = candidates.map(candidate => {
-      if (isEmployerOrAgency) {
+      if (isEmployerOrAgency && !hasNetworkAccess) {
         return {
           ...candidate,
           user: {

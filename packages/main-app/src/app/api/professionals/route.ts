@@ -13,6 +13,23 @@ export async function GET(request: Request) {
     const session = await getServerSession(authOptions)
     const isEmployerOrAgency = session?.user?.role === "EMPLOYER" || session?.user?.role === "AGENCY"
 
+    // Check if employer has network access
+    let hasNetworkAccess = false
+    if (isEmployerOrAgency && session?.user?.id) {
+      const employerProfile = await prisma.employerProfile.findUnique({
+        where: { userId: session.user.id },
+        select: { hasNetworkAccess: true }
+      })
+      hasNetworkAccess = employerProfile?.hasNetworkAccess || false
+      
+      console.log('Network access check:', {
+        userId: session.user.id,
+        isEmployerOrAgency,
+        hasNetworkAccess,
+        employerProfile
+      })
+    }
+
     const { searchParams } = new URL(request.url)
     const location = searchParams.get('location')
     const roleType = searchParams.get('roleType') as UserRole | null
@@ -134,10 +151,26 @@ export async function GET(request: Request) {
 
     console.log('Found professionals count:', professionals.length)
 
-    // Anonymize data for employers and agencies, and professionals viewing other professionals
-    const shouldAnonymizeForAll = isEmployerOrAgency || session?.user?.role === "PROFESSIONAL";
+    // Anonymize data based on user role and network access
+    let shouldAnonymize = false
+    
+    if (session?.user?.role === "PROFESSIONAL") {
+      // Professionals viewing other professionals should see anonymized profiles
+      shouldAnonymize = true
+    } else if (isEmployerOrAgency) {
+      // Employers/agencies without network access should see anonymized profiles
+      shouldAnonymize = !hasNetworkAccess
+    }
+    
+    console.log('Anonymization decision:', {
+      userRole: session?.user?.role,
+      isEmployerOrAgency,
+      hasNetworkAccess,
+      shouldAnonymize
+    })
+    
     const anonymizedProfessionals = professionals.map(professional => {
-      if (shouldAnonymizeForAll) {
+      if (shouldAnonymize) {
         return {
           ...professional,
           user: {
