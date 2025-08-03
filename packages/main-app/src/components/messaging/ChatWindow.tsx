@@ -149,7 +149,7 @@ export function ChatWindow({ conversationId, onBackToList }: ChatWindowProps) {
 
   const handleViewProfile = () => {
     if (conversationData?.professional?.id) {
-      router.push(`/dashboard/employer/candidates/${conversationData.professional.id}`)
+              router.push(`/dashboard/view-profile/${conversationData.professional.id}`)
     }
   }
 

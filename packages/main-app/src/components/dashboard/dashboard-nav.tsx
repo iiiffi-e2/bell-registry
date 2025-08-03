@@ -82,10 +82,10 @@ const employerRoutes = [
         label: "Browse All",
         href: "/browse-professionals",
       },
-      {
-        label: "View Saved",
-        href: "/dashboard/employer/saved-candidates",
-      },
+             {
+         label: "View Saved",
+         href: "/dashboard/employer/saved-professionals",
+       },
     ],
   },
   {
@@ -130,7 +130,7 @@ const agencyRoutes = [
   {
     label: "Professionals",
     icon: Users,
-    href: "/dashboard/agency/candidates",
+    href: "/dashboard/agency/professionals",
     color: "text-blue-500",
   },
   {

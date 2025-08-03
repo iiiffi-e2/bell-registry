@@ -75,12 +75,12 @@ export function SaveCandidateModal({
 
   const fetchExistingSaveData = async () => {
     try {
-      const response = await fetch(`/api/candidates/${candidateId}/bookmark`)
+      const response = await fetch(`/api/dashboard/professionals/bookmark/${candidateId}`)
       if (response.ok) {
         const data = await response.json()
-        if (data.savedCandidate) {
-          setNote(data.savedCandidate.note || '')
-          setSelectedJobId(data.savedCandidate.jobId || 'none')
+        if (data.savedProfessional) {
+          setNote(data.savedProfessional.note || '')
+          setSelectedJobId(data.savedProfessional.jobId || 'none')
         }
       }
     } catch (error) {
@@ -93,7 +93,7 @@ export function SaveCandidateModal({
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/candidates/${candidateId}/bookmark`, {
+      const response = await fetch(`/api/dashboard/professionals/bookmark/${candidateId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,10 +112,10 @@ export function SaveCandidateModal({
         setNote('')
         setSelectedJobId('none')
       } else {
-        console.error('Failed to save candidate')
+        console.error('Failed to save professional')
       }
     } catch (error) {
-      console.error('Error saving candidate:', error)
+      console.error('Error saving professional:', error)
     } finally {
       setIsLoading(false)
     }
@@ -126,7 +126,7 @@ export function SaveCandidateModal({
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/candidates/${candidateId}/bookmark`, {
+      const response = await fetch(`/api/dashboard/professionals/bookmark/${candidateId}`, {
         method: 'DELETE',
       })
 
@@ -137,10 +137,10 @@ export function SaveCandidateModal({
         setNote('')
         setSelectedJobId('none')
       } else {
-        console.error('Failed to remove saved candidate')
+        console.error('Failed to remove saved professional')
       }
     } catch (error) {
-      console.error('Error removing saved candidate:', error)
+      console.error('Error removing saved professional:', error)
     } finally {
       setIsLoading(false)
     }
@@ -156,14 +156,14 @@ export function SaveCandidateModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <BookmarkIcon className="h-5 w-5" />
-            {initialSaved ? 'Update Saved Candidate' : 'Save Candidate'}
+            {initialSaved ? 'Update Saved Professional' : 'Save Professional'}
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-600 mb-4">
-              {initialSaved ? 'Update details for' : 'Save'} <span className="font-medium">{candidateName}</span> to your saved candidates list.
+              {initialSaved ? 'Update details for' : 'Save'} <span className="font-medium">{candidateName}</span> to your saved professionals list.
             </p>
           </div>
 

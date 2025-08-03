@@ -24,7 +24,7 @@ export function SaveCandidateButton({
   const [isLoading, setIsLoading] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Check if current user is an employer/agency
+  // Check if current user is an employer/agency who can save professionals
   const canSaveCandidate = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY'
 
   // Fetch save status when component mounts
@@ -36,7 +36,7 @@ export function SaveCandidateButton({
 
   const fetchSaveStatus = async () => {
     try {
-      const response = await fetch(`/api/candidates/${candidateId}/bookmark`)
+      const response = await fetch(`/api/dashboard/professionals/bookmark/${candidateId}`)
       if (response.ok) {
         const { saved } = await response.json()
         setIsSaved(saved)
@@ -59,7 +59,7 @@ export function SaveCandidateButton({
     setIsModalOpen(false)
   }
 
-  // Don't render if user can't save candidates
+  // Don't render if user can't save professionals
   if (!canSaveCandidate) {
     return null
   }
@@ -74,14 +74,14 @@ export function SaveCandidateButton({
             ? 'text-blue-700 bg-blue-50 border-blue-300 hover:bg-blue-100' 
             : 'text-gray-700 bg-white hover:bg-gray-50'
         } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
-        title={isSaved ? 'Update saved candidate' : 'Save candidate'}
+        title={isSaved ? 'Update saved professional' : 'Save professional'}
       >
         {isSaved ? (
           <BookmarkSolidIcon className="h-5 w-5 mr-2" />
         ) : (
           <BookmarkIcon className="h-5 w-5 mr-2" />
         )}
-        {isSaved ? 'Saved' : 'Save Candidate'}
+        {isSaved ? 'Saved' : 'Save Professional'}
       </button>
 
       <SaveCandidateModal

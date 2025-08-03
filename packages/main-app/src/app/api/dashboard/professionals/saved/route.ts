@@ -18,7 +18,7 @@ export async function GET() {
     // Check if user is an employer or agency
     if (session.user.role !== 'EMPLOYER' && session.user.role !== 'AGENCY') {
       return NextResponse.json(
-        { error: 'Only employers and agencies can view saved candidates' },
+        { error: 'Only employers and agencies can view saved professionals' },
         { status: 403 }
       );
     }
@@ -36,8 +36,8 @@ export async function GET() {
       hasNetworkAccess = employerProfile?.hasNetworkAccess || false
     }
 
-    // Fetch saved candidates with their profile information
-    const savedCandidates = await prisma.savedCandidate.findMany({
+    // Fetch saved professionals with their profile information
+    const savedProfessionals = await prisma.savedCandidate.findMany({
       where: {
         employerId,
       },
@@ -62,7 +62,7 @@ export async function GET() {
     });
 
     // Format the response to match the expected structure with anonymization
-    const candidates = savedCandidates.map((saved: any) => ({
+    const professionals = savedProfessionals.map((saved: any) => ({
       id: saved.candidate.candidateProfile?.id || saved.candidate.id,
       bio: saved.candidate.candidateProfile?.bio,
       title: saved.candidate.candidateProfile?.title,
@@ -91,11 +91,11 @@ export async function GET() {
       },
     }));
 
-    return NextResponse.json({ candidates });
+    return NextResponse.json({ professionals });
   } catch (error) {
-    console.error('Error fetching saved candidates:', error);
+    console.error('Error fetching saved professionals:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch saved candidates' },
+      { error: 'Failed to fetch saved professionals' },
       { status: 500 }
     );
   }

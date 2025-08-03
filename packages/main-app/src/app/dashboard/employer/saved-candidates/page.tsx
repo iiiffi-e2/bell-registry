@@ -70,11 +70,11 @@ export default function SavedCandidatesPage() {
   const fetchSavedCandidates = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/candidates/saved');
+              const response = await fetch('/api/professionals/saved');
       if (!response.ok) throw new Error('Failed to fetch saved candidates');
       
       const data = await response.json();
-      setCandidates(data.candidates);
+              setCandidates(data.professionals);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch saved candidates');
@@ -195,7 +195,7 @@ export default function SavedCandidatesPage() {
                 <div className="p-6">
                   <div className="flex justify-between items-start">
                     <Link
-                      href={`/dashboard/employer/candidates/${candidate.user.id}`}
+                      href={`/dashboard/employer/professionals/${candidate.user.id}`}
                       className="flex-1"
                     >
                       <div className="flex items-center space-x-4">

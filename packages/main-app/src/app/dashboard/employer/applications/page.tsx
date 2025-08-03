@@ -347,7 +347,7 @@ export default function EmployerApplicationsPage() {
                           </a>
                         )}
                         <Link
-                          href={`/dashboard/employer/candidates/${application.candidate.id}`}
+                          href={`/dashboard/view-profile/${application.candidate.id}`}
                           className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
                         >
                           <UserCircleIcon className="mr-1 h-4 w-4" />
