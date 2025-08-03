@@ -29,7 +29,7 @@ export default function EmployerProfilePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Company Profile</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Employer Profile</h1>
         <EmployerProfileForm onSubmit={handleSubmit} />
       </div>
     </div>

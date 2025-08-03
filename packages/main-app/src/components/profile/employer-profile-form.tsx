@@ -105,7 +105,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
-                  Your company profile has been successfully updated!
+                  Your employer profile has been successfully updated!
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -128,7 +128,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
 
         <div className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Company Profile</h3>
+            <h3 className="text-lg font-medium leading-6 text-gray-900">Employer Profile</h3>
             <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
               {/* Company Logo Upload */}
               <div>
