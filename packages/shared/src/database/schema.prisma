@@ -116,12 +116,12 @@ model User {
   savedByEmployers          SavedCandidate[]     @relation("SavedByEmployers")
   savedJobs                 SavedJob[]
   sessions                  Session[]
+  systemSettings            SystemSettings[]     @relation("SystemSettingsAdmin")
   trustedDevices            TrustedDevice[]
-  suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
-  suspendedUsers            User[]               @relation("SuspendedByAdmin")
   bannedByAdmin             User?                @relation("BannedByAdmin", fields: [bannedBy], references: [id])
   bannedUsers               User[]               @relation("BannedByAdmin")
-  systemSettings            SystemSettings[]     @relation("SystemSettingsAdmin")
+  suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
+  suspendedUsers            User[]               @relation("SuspendedByAdmin")
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -187,6 +187,7 @@ model EmployerProfile {
   logoUrl               String?
   location              String?
   subscriptionPlan      String?
+  publicSlug            String?          @unique
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   hasNetworkAccess      Boolean          @default(false)
@@ -199,6 +200,8 @@ model EmployerProfile {
   subscriptionType      SubscriptionType @default(TRIAL)
   billingHistory        BillingHistory[]
   user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([publicSlug])
 }
 
 model BillingHistory {
@@ -441,14 +444,14 @@ model AdminAuditLog {
 }
 
 model SystemSettings {
-  id                    String   @id @default(cuid())
-  settingKey            String   @unique
-  settingValue          String
-  description           String?
-  updatedBy             String
-  updatedAt             DateTime @updatedAt
-  createdAt             DateTime @default(now())
-  admin                 User     @relation("SystemSettingsAdmin", fields: [updatedBy], references: [id])
+  id           String   @id @default(cuid())
+  settingKey   String   @unique
+  settingValue String
+  description  String?
+  updatedBy    String
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  admin        User     @relation("SystemSettingsAdmin", fields: [updatedBy], references: [id])
 
   @@index([settingKey])
   @@index([updatedAt])

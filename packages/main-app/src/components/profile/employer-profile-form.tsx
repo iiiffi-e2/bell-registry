@@ -19,6 +19,7 @@ const employerProfileSchema = z.object({
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   logoUrl: z.string().optional(),
   location: z.string().optional(),
+  publicSlug: z.string().optional(),
 });
 
 type EmployerProfileFormData = z.infer<typeof employerProfileSchema>;
@@ -30,6 +31,7 @@ interface EmployerProfileFormProps {
 export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [baseUrl, setBaseUrl] = useState("");
   const { data: session } = useSession();
 
   const form = useForm<EmployerProfileFormData>({
@@ -40,8 +42,16 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       website: "",
       logoUrl: "",
       location: "",
+      publicSlug: "",
     },
   });
+
+  useEffect(() => {
+    // Set base URL on client side only
+    if (typeof window !== "undefined") {
+      setBaseUrl(window.location.origin);
+    }
+  }, []);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -59,6 +69,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
             website: data.employerProfile.website || "",
             logoUrl: data.employerProfile.logoUrl || "",
             location: data.employerProfile.location || "",
+            publicSlug: data.employerProfile.publicSlug || "",
           });
         }
       } catch (error) {
@@ -215,6 +226,57 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                   )}
                 />
               </div>
+
+              {/* Public Slug */}
+              <div>
+                <FormField
+                  control={form.control}
+                  name="publicSlug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Custom Job Page URL</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field} 
+                          placeholder="your-company-name" 
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This will create a custom URL for your job listings: /employers/[your-slug]/jobs
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Custom Link Display */}
+              {form.watch("publicSlug") && (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+                  <h4 className="text-sm font-medium text-blue-900 mb-2">Your Custom Job Page</h4>
+                  <p className="text-sm text-blue-700 mb-2">
+                    Share this link to show all your job openings:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <code className="bg-white px-2 py-1 rounded text-sm font-mono text-blue-800 border">
+                      {baseUrl ? `${baseUrl}/employers/${form.watch("publicSlug")}/jobs` : "Loading..."}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (baseUrl) {
+                          navigator.clipboard.writeText(`${baseUrl}/employers/${form.watch("publicSlug")}/jobs`);
+                          toast.success("Link copied to clipboard!");
+                        }
+                      }}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      disabled={!baseUrl}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

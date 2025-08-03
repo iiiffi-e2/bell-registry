@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon, BookmarkIcon } from "@heroicons/react/24/outline";
 import { getTimeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
@@ -34,6 +35,7 @@ interface JobDetails {
       description: string;
       website: string;
       location: string;
+      publicSlug: string;
     };
   };
   isBookmarked: boolean;
@@ -337,6 +339,14 @@ export default function PublicJobDetailsPage() {
                   >
                     Visit Company Website
                   </a>
+                )}
+                {job.employer.employerProfile.publicSlug && (
+                  <Link
+                    href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    View All Jobs
+                  </Link>
                 )}
               </div>
             </div>

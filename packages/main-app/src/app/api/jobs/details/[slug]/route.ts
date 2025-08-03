@@ -29,6 +29,7 @@ export async function GET(
                 website: true,
                 logoUrl: true,
                 location: true,
+                publicSlug: true,
               },
             },
           },

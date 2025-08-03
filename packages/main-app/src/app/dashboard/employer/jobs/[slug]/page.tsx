@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   MapPinIcon,
   CurrencyDollarIcon,
@@ -53,6 +54,7 @@ interface JobDetails {
       website?: string;
       logoUrl?: string;
       location?: string;
+      publicSlug?: string;
     };
   };
   applications?: any[];
@@ -266,6 +268,14 @@ export default function JobDetailsPage() {
                 >
                   Visit Company Website
                 </a>
+              )}
+              {job.employer.employerProfile.publicSlug && (
+                <Link
+                  href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
+                  View All Jobs
+                </Link>
               )}
             </div>
           </div>

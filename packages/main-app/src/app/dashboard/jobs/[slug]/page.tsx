@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import { BuildingOfficeIcon, MapPinIcon, BriefcaseIcon, UserGroupIcon, ClockIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import { BookmarkIcon } from "@heroicons/react/24/outline";
@@ -35,6 +36,7 @@ interface JobDetails {
       description: string;
       website: string;
       location: string;
+      publicSlug: string;
     };
   };
   isBookmarked: boolean;
@@ -353,6 +355,18 @@ export default function DashboardJobDetailsPage() {
                 <div>
                   <div className="text-sm font-medium text-gray-500 mb-2">Description</div>
                   <div className="text-gray-700 text-sm">{job.employer.employerProfile.description}</div>
+                </div>
+              )}
+              
+              {job.employer.employerProfile.publicSlug && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500">All Jobs</div>
+                  <Link
+                    href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    View All Jobs
+                  </Link>
                 </div>
               )}
             </div>

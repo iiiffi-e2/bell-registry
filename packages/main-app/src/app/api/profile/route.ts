@@ -56,6 +56,7 @@ export async function PUT(req: Request) {
           website: body.website,
           logoUrl: body.logoUrl,
           location: body.location,
+          publicSlug: body.publicSlug,
         },
       });
 
