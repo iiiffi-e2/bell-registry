@@ -62,6 +62,7 @@ interface ProfilePictureWithBadgeProps {
   size?: "sm" | "md" | "lg" | "xl";
   isAnonymous?: boolean;
   className?: string;
+  hideBadge?: boolean;
 }
 
 interface ProfilePictureWithBadgeProfileProps {
@@ -77,6 +78,7 @@ interface ProfilePictureWithBadgeProfileProps {
   };
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  hideBadge?: boolean;
 }
 
 // Overloaded function signatures
@@ -119,15 +121,17 @@ export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | Pr
   let isAnonymous: boolean;
   let size: "sm" | "md" | "lg" | "xl";
   let className: string;
+  let hideBadge: boolean;
 
   if (isProfileProps) {
-    const { profile, size: propSize = "lg", className: propClassName = "" } = props as ProfilePictureWithBadgeProfileProps;
+    const { profile, size: propSize = "lg", className: propClassName = "", hideBadge: propHideBadge = false } = props as ProfilePictureWithBadgeProfileProps;
     imageUrl = profile.user.image;
     displayName = getDisplayNameFromProfile(profile);
     isOpenToWork = profile.openToWork;
     isAnonymous = profile.user.isAnonymous;
     size = propSize;
     className = propClassName;
+    hideBadge = propHideBadge;
   } else {
     const {
       imageUrl: propImageUrl,
@@ -135,7 +139,8 @@ export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | Pr
       isOpenToWork: propIsOpenToWork,
       size: propSize = "lg",
       isAnonymous: propIsAnonymous = false,
-      className: propClassName = ""
+      className: propClassName = "",
+      hideBadge: propHideBadge = false
     } = props as ProfilePictureWithBadgeProps;
     imageUrl = propImageUrl;
     displayName = propDisplayName;
@@ -143,6 +148,7 @@ export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | Pr
     isAnonymous = propIsAnonymous;
     size = propSize;
     className = propClassName;
+    hideBadge = propHideBadge;
   }
   const sizeClasses = {
     sm: "h-8 w-8",
@@ -171,7 +177,7 @@ export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | Pr
         </div>
       )}
       
-      {isOpenToWork && (
+      {isOpenToWork && !hideBadge && (
         <OpenToWorkBadge 
           variant="overlay" 
           size="sm"

@@ -240,14 +240,22 @@ export default function ProfessionalProfilePage({
           
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-4">
-                <ProfilePictureWithBadge
-                  profile={profile}
-                  size="lg"
-                  className="h-20 w-20"
-                />
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
+              <div className="flex items-start space-x-6">
+                <div className="flex-shrink-0">
+                  <ProfilePictureWithBadge
+                    profile={profile}
+                    size="lg"
+                    className="h-20 w-20"
+                    hideBadge={true}
+                  />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold text-gray-900">{displayName}</h1>
+                    {profile.openToWork && (
+                      <OpenToWorkBadge variant="inline" size="md" />
+                    )}
+                  </div>
                   {profile.title && (
                     <p className="text-lg text-gray-600 mt-1">{profile.title}</p>
                   )}

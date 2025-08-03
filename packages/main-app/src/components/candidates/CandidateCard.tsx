@@ -175,6 +175,7 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
                 isOpenToWork={candidate.openToWork || false}
                 isAnonymous={candidate.user.isAnonymous || false}
                 size="md"
+                hideBadge={true}
               />
             </div>
 
