@@ -187,7 +187,6 @@ model EmployerProfile {
   logoUrl               String?
   location              String?
   subscriptionPlan      String?
-  publicSlug            String?          @unique
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   hasNetworkAccess      Boolean          @default(false)
@@ -198,6 +197,7 @@ model EmployerProfile {
   subscriptionEndDate   DateTime?
   subscriptionStartDate DateTime         @default(now())
   subscriptionType      SubscriptionType @default(TRIAL)
+  publicSlug            String?          @unique
   billingHistory        BillingHistory[]
   user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
