@@ -64,14 +64,86 @@ interface ProfilePictureWithBadgeProps {
   className?: string;
 }
 
-export function ProfilePictureWithBadge({
-  imageUrl,
-  displayName,
-  isOpenToWork,
-  size = "lg",
-  isAnonymous = false,
-  className = ""
-}: ProfilePictureWithBadgeProps) {
+interface ProfilePictureWithBadgeProfileProps {
+  profile: {
+    openToWork: boolean;
+    user: {
+      image: string | null;
+      firstName: string | null;
+      lastName: string | null;
+      isAnonymous: boolean;
+      customInitials?: string | null;
+    };
+  };
+  size?: "sm" | "md" | "lg" | "xl";
+  className?: string;
+}
+
+// Overloaded function signatures
+export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps): JSX.Element;
+export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProfileProps): JSX.Element;
+export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | ProfilePictureWithBadgeProfileProps) {
+  // Helper function to get display name from profile
+  const getDisplayNameFromProfile = (profile: any) => {
+    const firstName = profile.user.firstName || '';
+    const lastName = profile.user.lastName || '';
+    
+    if (profile.user.isAnonymous) {
+      // Use custom initials if provided, otherwise use name initials
+      if (profile.user.customInitials && profile.user.customInitials.length >= 2) {
+        const initials = profile.user.customInitials.toUpperCase();
+        if (initials.length === 2) {
+          return `${initials[0]}. ${initials[1]}.`;
+        }
+      }
+      
+      // Fall back to name initials
+      if (firstName && lastName) {
+        return `${firstName[0]}. ${lastName[0]}.`;
+      } else if (firstName) {
+        return `${firstName[0]}. Anonymous`;
+      } else {
+        return 'Anonymous Professional';
+      }
+    }
+    
+    return `${firstName} ${lastName}`.trim();
+  };
+
+  // Determine if this is a profile object or individual props
+  const isProfileProps = 'profile' in props;
+  
+  let imageUrl: string | null;
+  let displayName: string;
+  let isOpenToWork: boolean;
+  let isAnonymous: boolean;
+  let size: "sm" | "md" | "lg" | "xl";
+  let className: string;
+
+  if (isProfileProps) {
+    const { profile, size: propSize = "lg", className: propClassName = "" } = props as ProfilePictureWithBadgeProfileProps;
+    imageUrl = profile.user.image;
+    displayName = getDisplayNameFromProfile(profile);
+    isOpenToWork = profile.openToWork;
+    isAnonymous = profile.user.isAnonymous;
+    size = propSize;
+    className = propClassName;
+  } else {
+    const {
+      imageUrl: propImageUrl,
+      displayName: propDisplayName,
+      isOpenToWork: propIsOpenToWork,
+      size: propSize = "lg",
+      isAnonymous: propIsAnonymous = false,
+      className: propClassName = ""
+    } = props as ProfilePictureWithBadgeProps;
+    imageUrl = propImageUrl;
+    displayName = propDisplayName;
+    isOpenToWork = propIsOpenToWork;
+    isAnonymous = propIsAnonymous;
+    size = propSize;
+    className = propClassName;
+  }
   const sizeClasses = {
     sm: "h-8 w-8",
     md: "h-16 w-16", 
