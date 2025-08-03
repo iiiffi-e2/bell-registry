@@ -364,7 +364,7 @@ export default function ProfessionalProfilePage({
             {/* Additional Info */}
             {profile.whatImSeeking && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">What I'm Seeking</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">What I&apos;m Seeking</h3>
                 <FormattedText text={profile.whatImSeeking} />
               </div>
             )}
