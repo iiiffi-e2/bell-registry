@@ -44,6 +44,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     available: boolean | null;
     suggestions: string[];
   }>({ checking: false, available: null, suggestions: [] });
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
   const { data: session } = useSession();
 
   const form = useForm<EmployerProfileFormData>({
@@ -399,12 +400,35 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                         if (baseUrl) {
                           navigator.clipboard.writeText(`${baseUrl}/employers/${form.watch("publicSlug")}/jobs`);
                           toast.success("Link copied to clipboard!");
+                          setCopyStatus('copied');
+                          // Reset copy status after 2 seconds
+                          setTimeout(() => {
+                            setCopyStatus('idle');
+                          }, 2000);
                         }
                       }}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      className={`text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
+                        copyStatus === 'copied' 
+                          ? 'text-green-600 hover:text-green-700' 
+                          : 'text-blue-600 hover:text-blue-700'
+                      }`}
                       disabled={!baseUrl}
                     >
-                      Copy
+                      {copyStatus === 'copied' ? (
+                        <>
+                          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          Copy
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>
