@@ -19,7 +19,14 @@ const employerProfileSchema = z.object({
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   logoUrl: z.string().optional(),
   location: z.string().optional(),
-  publicSlug: z.string().optional(),
+  publicSlug: z.string()
+    .optional()
+    .refine((val) => !val || /^[a-zA-Z0-9-]*$/.test(val), {
+      message: "Only letters, numbers, and dashes are allowed",
+    })
+    .refine((val) => !val || (val.length >= 3 && val.length <= 50), {
+      message: "Must be between 3 and 50 characters",
+    }),
 });
 
 type EmployerProfileFormData = z.infer<typeof employerProfileSchema>;
@@ -237,12 +244,22 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                       <FormLabel>Custom Job Page URL</FormLabel>
                       <FormControl>
                         <Input 
-                          {...field} 
+                          {...field}
                           placeholder="your-company-name" 
+                          onChange={(e) => {
+                            // Filter out invalid characters and convert to lowercase
+                            const filteredValue = e.target.value
+                              .toLowerCase()
+                              .replace(/[^a-z0-9-]/g, '')
+                              .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+                              .replace(/-{2,}/g, '-'); // Replace multiple dashes with single dash
+                            field.onChange(filteredValue);
+                          }}
+                          maxLength={50}
                         />
                       </FormControl>
                       <FormDescription>
-                        This will create a custom URL for your job listings: /employers/[your-slug]/jobs
+                        Only letters, numbers, and dashes allowed (3-50 characters). This creates: /employers/[your-slug]/jobs
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
