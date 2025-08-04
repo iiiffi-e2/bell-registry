@@ -12,8 +12,10 @@ import { Button } from "@/components/ui/button";
 import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { toast } from "sonner";
+import { UserRole } from "@/types";
 
-const employerProfileSchema = z.object({
+// Create different schemas for agencies and employers
+const agencyProfileSchema = z.object({
   companyName: z.string().min(1, "Company name is required"),
   description: z.string().optional(),
   website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
@@ -29,10 +31,28 @@ const employerProfileSchema = z.object({
     }),
 });
 
+const employerProfileSchema = z.object({
+  companyName: z.string().optional(), // Optional for employers
+  description: z.string().optional(),
+  website: z.string().optional(), // Optional for employers
+  logoUrl: z.string().optional(),
+  location: z.string().optional(),
+  publicSlug: z.string()
+    .optional()
+    .refine((val) => !val || /^[a-zA-Z0-9-]*$/.test(val), {
+      message: "Only letters, numbers, and dashes are allowed",
+    })
+    .refine((val) => !val || (val.length >= 3 && val.length <= 50), {
+      message: "Must be between 3 and 50 characters",
+    }),
+});
+
+type AgencyProfileFormData = z.infer<typeof agencyProfileSchema>;
 type EmployerProfileFormData = z.infer<typeof employerProfileSchema>;
+type ProfileFormData = AgencyProfileFormData | EmployerProfileFormData;
 
 interface EmployerProfileFormProps {
-  onSubmit: (data: EmployerProfileFormData) => Promise<void>;
+  onSubmit: (data: ProfileFormData) => Promise<void>;
 }
 
 export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
@@ -47,8 +67,15 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
   const { data: session } = useSession();
 
-  const form = useForm<EmployerProfileFormData>({
-    resolver: zodResolver(employerProfileSchema),
+  // Determine if user is an agency or employer
+  const isAgency = session?.user?.role === UserRole.AGENCY;
+  const isEmployer = session?.user?.role === UserRole.EMPLOYER;
+
+  // Use appropriate schema based on user role
+  const schema = isAgency ? agencyProfileSchema : employerProfileSchema;
+
+  const form = useForm<ProfileFormData>({
+    resolver: zodResolver(schema),
     defaultValues: {
       companyName: "",
       description: "",
@@ -139,7 +166,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     return () => clearTimeout(timeoutId);
   }, [form.watch("publicSlug"), checkSlugAvailability]);
 
-  const handleSubmit = async (data: EmployerProfileFormData) => {
+  const handleSubmit = async (data: ProfileFormData) => {
     // Check if slug is available before submitting
     if (data.publicSlug && slugAvailability.available === false) {
       toast.error("Please choose an available URL before saving");
@@ -188,7 +215,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
-                  Your employer profile has been successfully updated!
+                  Your {isAgency ? "agency" : "employer"} profile has been successfully updated!
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -211,46 +238,52 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
 
         <div className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900">Employer Profile</h3>
+            <h3 className="text-lg font-medium leading-6 text-gray-900">
+              {isAgency ? "Agency Profile" : "Employer Profile"}
+            </h3>
             <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
-              {/* Company Logo Upload */}
-              <div>
-                <ProfilePictureUpload
-                  currentImage={form.watch("logoUrl") as string}
-                  onUpload={(url) => form.setValue("logoUrl", url)}
-                />
-              </div>
+              {/* Company Logo Upload - Only for Agencies */}
+              {isAgency && (
+                <div>
+                  <ProfilePictureUpload
+                    currentImage={form.watch("logoUrl") as string}
+                    onUpload={(url) => form.setValue("logoUrl", url)}
+                  />
+                </div>
+              )}
 
-              {/* Employer Name */}
-              <div>
-                <FormField
-                  control={form.control}
-                  name="companyName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Enter company name" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* Company Name - Only for Agencies */}
+              {isAgency && (
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="companyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Enter company name" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
-              {/* Company Description */}
+              {/* Company Description / About Us */}
               <div>
                 <FormField
                   control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Description</FormLabel>
+                      <FormLabel>{isAgency ? "Company Description" : "About Us"}</FormLabel>
                       <FormControl>
                         <Textarea
                           {...field}
                           rows={4}
-                          placeholder="Tell us about your company..."
+                          placeholder={isAgency ? "Tell us about your company..." : "Tell us about yourself..."}
                         />
                       </FormControl>
                       <FormMessage />
@@ -259,22 +292,24 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                 />
               </div>
 
-              {/* Website */}
-              <div>
-                <FormField
-                  control={form.control}
-                  name="website"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Company Website</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="https://www.example.com" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              {/* Website - Only for Agencies */}
+              {isAgency && (
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="website"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Company Website</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="https://www.example.com" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              )}
 
               {/* Location */}
               <div>
@@ -283,13 +318,13 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                   name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Company Location</FormLabel>
+                      <FormLabel>{isAgency ? "Company Location" : "Location"}</FormLabel>
                       <FormControl>
                         <GoogleMapsLoader>
                           <LocationAutocomplete
                             value={field.value || ""}
                             onChange={field.onChange}
-                            placeholder="Enter company location..."
+                            placeholder={isAgency ? "Enter company location..." : "Enter your location..."}
                           />
                         </GoogleMapsLoader>
                       </FormControl>
@@ -310,7 +345,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                       <FormControl>
                         <Input 
                           {...field}
-                          placeholder="your-company-name" 
+                          placeholder={isAgency ? "your-company-name" : "your-name"} 
                           onChange={(e) => {
                             // Filter out invalid characters and convert to lowercase
                             const filteredValue = e.target.value

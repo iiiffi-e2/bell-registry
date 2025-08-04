@@ -101,7 +101,7 @@ const employerRoutes = [
     color: "text-purple-500",
   },
   {
-    label: "Company Profile",
+    label: "Employer Profile",
     icon: Building,
     href: "/dashboard/employer/profile",
     color: "text-orange-500",

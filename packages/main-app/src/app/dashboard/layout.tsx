@@ -79,7 +79,7 @@ const employerNavigation: NavigationItem[] = [
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
-  { name: "Company Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
+  { name: "Employer Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
 ];
 
 const agencyNavigation: NavigationItem[] = [
