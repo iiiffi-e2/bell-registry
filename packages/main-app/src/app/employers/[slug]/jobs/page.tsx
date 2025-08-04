@@ -184,7 +184,7 @@ export default function EmployerJobsPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Employer Not Found</h1>
-            <p className="text-gray-600 mb-4">The employer you're looking for doesn't exist.</p>
+            <p className="text-gray-600 mb-4">The employer you&apos;re looking for doesn&apos;t exist.</p>
             <Link
               href="/jobs"
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
