@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ProfilePictureUpload } from "./profile-picture-upload";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { Form } from "@/components/ui/form";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
@@ -39,6 +39,11 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [baseUrl, setBaseUrl] = useState("");
+  const [slugAvailability, setSlugAvailability] = useState<{
+    checking: boolean;
+    available: boolean | null;
+    suggestions: string[];
+  }>({ checking: false, available: null, suggestions: [] });
   const { data: session } = useSession();
 
   const form = useForm<EmployerProfileFormData>({
@@ -90,7 +95,56 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     }
   }, [session, form]);
 
+  // Debounced slug availability check
+  const checkSlugAvailability = useCallback(
+    async (slug: string) => {
+      if (!slug || slug.length < 3) {
+        setSlugAvailability({ checking: false, available: null, suggestions: [] });
+        return;
+      }
+
+      setSlugAvailability(prev => ({ ...prev, checking: true }));
+
+      try {
+        const response = await fetch(`/api/employers/check-slug?slug=${encodeURIComponent(slug)}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSlugAvailability({
+            checking: false,
+            available: data.available,
+            suggestions: data.suggestions || []
+          });
+        }
+      } catch (error) {
+        console.error("Error checking slug availability:", error);
+        setSlugAvailability({ checking: false, available: null, suggestions: [] });
+      }
+    },
+    []
+  );
+
+  // Debounce the slug checking
+  useEffect(() => {
+    const currentSlug = form.watch("publicSlug");
+    if (!currentSlug) {
+      setSlugAvailability({ checking: false, available: null, suggestions: [] });
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      checkSlugAvailability(currentSlug);
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [form.watch("publicSlug"), checkSlugAvailability]);
+
   const handleSubmit = async (data: EmployerProfileFormData) => {
+    // Check if slug is available before submitting
+    if (data.publicSlug && slugAvailability.available === false) {
+      toast.error("Please choose an available URL before saving");
+      return;
+    }
+
     setIsLoading(true);
     setShowSuccessMessage(false);
     try {
@@ -101,9 +155,19 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       setTimeout(() => {
         setShowSuccessMessage(false);
       }, 20000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      toast.error("Failed to update profile");
+      
+      // Handle specific database constraint errors
+      if (error?.message?.includes('publicSlug') || error?.message?.includes('unique')) {
+        toast.error("This URL is already taken. Please choose a different one.");
+        // Re-check availability after error
+        if (data.publicSlug) {
+          checkSlugAvailability(data.publicSlug);
+        }
+      } else {
+        toast.error("Failed to update profile");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -261,6 +325,57 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
                       <FormDescription>
                         Only letters, numbers, and dashes allowed (3-50 characters). This creates: /employers/[your-slug]/jobs
                       </FormDescription>
+                      
+                      {/* Slug Availability Status */}
+                      {field.value && field.value.length >= 3 && (
+                        <div className="mt-2">
+                          {slugAvailability.checking && (
+                            <p className="text-sm text-gray-500 flex items-center gap-2">
+                              <span className="animate-spin rounded-full h-3 w-3 border-b-2 border-gray-600"></span>
+                              Checking availability...
+                            </p>
+                          )}
+                          
+                          {!slugAvailability.checking && slugAvailability.available === true && (
+                            <p className="text-sm text-green-600 flex items-center gap-2">
+                              <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                              Available! This URL is ready to use.
+                            </p>
+                          )}
+                          
+                          {!slugAvailability.checking && slugAvailability.available === false && (
+                            <div className="space-y-2">
+                              <p className="text-sm text-red-600 flex items-center gap-2">
+                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                                This URL is already taken
+                              </p>
+                              
+                              {slugAvailability.suggestions.length > 0 && (
+                                <div className="bg-gray-50 rounded-md p-3">
+                                  <p className="text-sm font-medium text-gray-700 mb-2">Try these alternatives:</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {slugAvailability.suggestions.map((suggestion) => (
+                                      <button
+                                        key={suggestion}
+                                        type="button"
+                                        onClick={() => field.onChange(suggestion)}
+                                        className="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                                      >
+                                        {suggestion}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
                       <FormMessage />
                     </FormItem>
                   )}
@@ -302,10 +417,17 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={
+              isLoading || 
+              (form.watch("publicSlug") && slugAvailability.available === false) ||
+              slugAvailability.checking
+            }
             className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Saving..." : 
+             slugAvailability.checking ? "Checking..." :
+             (form.watch("publicSlug") && slugAvailability.available === false) ? "URL Unavailable" :
+             "Save Changes"}
           </Button>
         </div>
       </form>
