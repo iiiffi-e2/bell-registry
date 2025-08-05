@@ -62,17 +62,17 @@ const jobFormSchema = z.object({
   location: z.string().min(1, "Location is required"),
   requirements: z.array(z.object({
     value: z.string()
-  })).min(1, "At least one requirement is required"),
-  salaryMin: z.string().min(1, "Minimum salary is required"),
-  salaryMax: z.string().min(1, "Maximum salary is required"),
+  })).optional().default([]),
+  salaryMin: z.string().optional().default(""),
+  salaryMax: z.string().optional().default(""),
   jobType: z.enum(JOB_TYPES, {
     required_error: "Job type is required",
-  }),
+  }).optional().default("Permanent" as JobType),
   employmentType: z.enum(EMPLOYMENT_TYPES, {
     required_error: "Employment type is required",
-  }),
-  featured: z.boolean(),
-  expiresAt: z.string().min(1, "Expiry date is required"),
+  }).optional().default("Full-time" as EmploymentType),
+  featured: z.boolean().optional().default(false),
+  expiresAt: z.string().optional().default(""),
 });
 
 type JobFormValues = z.infer<typeof jobFormSchema>;
@@ -499,7 +499,7 @@ export default function PostJobPage() {
                   name="jobType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Job Type</FormLabel>
+                      <FormLabel>Job Type (Optional)</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -526,7 +526,7 @@ export default function PostJobPage() {
                   name="employmentType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Employment Type</FormLabel>
+                      <FormLabel>Employment Type (Optional)</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -551,7 +551,7 @@ export default function PostJobPage() {
                   name="expiresAt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expiry Date</FormLabel>
+                      <FormLabel>Expiry Date (Optional)</FormLabel>
                       <FormControl>
                         <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
                       </FormControl>
@@ -563,7 +563,12 @@ export default function PostJobPage() {
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <FormLabel>Requirements</FormLabel>
+                  <div>
+                    <FormLabel>Requirements (Optional)</FormLabel>
+                    <FormDescription className="text-sm text-gray-500">
+                      Add any specific requirements for this position
+                    </FormDescription>
+                  </div>
                   <Button
                     type="button"
                     variant="outline"
@@ -616,7 +621,7 @@ export default function PostJobPage() {
                   name="salaryMin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Minimum Salary (USD)</FormLabel>
+                      <FormLabel>Minimum Salary (USD) (Optional)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g. 50000" {...field} />
                       </FormControl>
@@ -630,7 +635,7 @@ export default function PostJobPage() {
                   name="salaryMax"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Maximum Salary (USD)</FormLabel>
+                      <FormLabel>Maximum Salary (USD) (Optional)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="e.g. 100000" {...field} />
                       </FormControl>
@@ -640,6 +645,7 @@ export default function PostJobPage() {
                 />
               </div>
 
+              {/* Featured Job section hidden - future enhancement
               <FormField
                 control={form.control}
                 name="featured"
@@ -661,6 +667,7 @@ export default function PostJobPage() {
                   </FormItem>
                 )}
               />
+              */}
             </fieldset>
 
             <div className="flex justify-end space-x-4">
