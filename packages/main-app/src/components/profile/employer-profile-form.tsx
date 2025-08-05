@@ -201,9 +201,13 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     // Prepare data for submission
     const submitData = { ...data };
     
-    // For employers, don't send empty companyName since it's not needed
-    if (isEmployer && !submitData.companyName) {
-      delete submitData.companyName;
+    // For employers, handle companyName properly
+    if (isEmployer) {
+      if (!submitData.companyName || submitData.companyName.trim() === "") {
+        delete submitData.companyName;
+      } else {
+        submitData.companyName = submitData.companyName.trim();
+      }
     }
 
     setIsLoading(true);

@@ -49,32 +49,45 @@ export async function PUT(req: Request) {
     if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
       // Prepare data based on user role
       const profileData: any = {
-        description: body.description,
-        website: body.website,
-        logoUrl: body.logoUrl,
-        location: body.location,
-        publicSlug: body.publicSlug,
+        description: body.description || null,
+        website: body.website || null,
+        logoUrl: body.logoUrl || null,
+        location: body.location || null,
+        publicSlug: body.publicSlug || null,
       };
 
-      // Only include companyName for agencies (it's required in the schema)
+      // Handle companyName based on user role
       if (session.user.role === "AGENCY") {
-        profileData.companyName = body.companyName;
+        // For agencies, companyName is required
+        if (!body.companyName || body.companyName.trim() === "") {
+          return new NextResponse("Company name is required for agencies", { status: 400 });
+        }
+        profileData.companyName = body.companyName.trim();
       } else {
-        // For employers, set a default company name if not provided
-        profileData.companyName = body.companyName || "Individual Employer";
+        // For employers, set a default company name
+        profileData.companyName = (body.companyName && body.companyName.trim() !== "") 
+          ? body.companyName.trim() 
+          : "Individual Employer";
       }
 
       // Use upsert to create or update the profile
-      const updatedProfile = await prisma.employerProfile.upsert({
-        where: { userId: session.user.id },
-        update: profileData,
-        create: {
-          userId: session.user.id,
-          ...profileData,
-        },
-      });
+      try {
+        const updatedProfile = await prisma.employerProfile.upsert({
+          where: { userId: session.user.id },
+          update: profileData,
+          create: {
+            userId: session.user.id,
+            ...profileData,
+          },
+        });
 
-      return NextResponse.json(updatedProfile);
+        return NextResponse.json(updatedProfile);
+      } catch (error) {
+        console.error("[PROFILE_PUT] Database error:", error);
+        console.error("[PROFILE_PUT] Profile data:", profileData);
+        console.error("[PROFILE_PUT] User role:", session.user.role);
+        throw error;
+      }
     } else {
       // Update both user and candidate profile in a transaction
       const result = await prisma.$transaction(async (tx) => {
