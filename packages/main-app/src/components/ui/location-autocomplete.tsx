@@ -6,6 +6,7 @@ interface LocationAutocompleteProps {
   onChange: (value: string) => void;
   error?: string;
   placeholder?: string;
+  allowCustomInput?: boolean;
 }
 
 declare global {
@@ -25,7 +26,8 @@ export function LocationAutocomplete({
   value = '',
   onChange,
   error,
-  placeholder = "Enter city and state..."
+  placeholder = "Enter city and state...",
+  allowCustomInput = true
 }: LocationAutocompleteProps) {
   const [inputValue, setInputValue] = useState(value);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -107,6 +109,17 @@ export function LocationAutocomplete({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    
+    // If custom input is not allowed, only allow typing for search purposes
+    // but don't update the actual value until a selection is made
+    if (!allowCustomInput) {
+      setInputValue(newValue);
+      setShowDropdown(true);
+      setActiveIndex(-1);
+      // Don't call onChange here - only call it when a selection is made
+      return;
+    }
+    
     setInputValue(newValue);
     setShowDropdown(true);
     setActiveIndex(-1);
@@ -115,7 +128,13 @@ export function LocationAutocomplete({
 
   // Hide dropdown on blur
   const handleBlur = () => {
-    setTimeout(() => setShowDropdown(false), 100);
+    setTimeout(() => {
+      setShowDropdown(false);
+      // If custom input is not allowed and no valid selection was made, clear the input
+      if (!allowCustomInput && !value) {
+        setInputValue('');
+      }
+    }, 100);
   };
 
   return (
@@ -124,7 +143,7 @@ export function LocationAutocomplete({
         <input
           ref={inputRef}
           type="text"
-          value={inputValue}
+          value={allowCustomInput ? inputValue : (value || inputValue)}
           onChange={handleInputChange}
           onFocus={() => setShowDropdown(true)}
           onBlur={handleBlur}

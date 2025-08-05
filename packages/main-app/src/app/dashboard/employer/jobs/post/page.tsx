@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { WysiwygEditor } from "@/components/ui/wysiwyg-editor";
+import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
+import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
@@ -487,7 +489,14 @@ export default function PostJobPage() {
                     <FormItem>
                       <FormLabel>Location</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. New York, NY" {...field} />
+                        <GoogleMapsLoader>
+                          <LocationAutocomplete
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            placeholder="Search for a city..."
+                            allowCustomInput={false}
+                          />
+                        </GoogleMapsLoader>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
