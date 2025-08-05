@@ -15,6 +15,7 @@ interface JobDetails {
   title: string;
   professionalRole: string;
   description: string;
+  exceptionalOpportunity?: string;
   location: string;
   requirements: string[];
   salary: {
@@ -292,6 +293,19 @@ export default function PublicJobDetailsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            {/* Exceptional Opportunity */}
+            {job.exceptionalOpportunity && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center">
+                  <span className="mr-2">✨</span>
+                  What makes this an exceptional opportunity
+                </h3>
+                <p className="text-blue-800 leading-relaxed">
+                  {job.exceptionalOpportunity}
+                </p>
+              </div>
+            )}
+
             {/* Job Description */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Description</h3>
@@ -299,56 +313,60 @@ export default function PublicJobDetailsPage() {
             </div>
 
             {/* Requirements */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Requirements</h3>
-              <ul className="list-disc list-inside space-y-2">
-                {job.requirements.map((requirement, index) => (
-                  <li key={index} className="text-gray-700">{requirement}</li>
-                ))}
-              </ul>
-            </div>
+            {job.requirements && job.requirements.length > 0 && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Requirements</h3>
+                <ul className="list-disc list-inside space-y-2">
+                  {job.requirements.map((requirement, index) => (
+                    <li key={index} className="text-gray-700">{requirement}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6">
-            {/* Company Info */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {job.employer.employerProfile.companyName}
-                  </p>
-                  {job.employer.employerProfile.location && (
-                    <p className="text-sm text-gray-600">
-                      {job.employer.employerProfile.location}
+            {/* Employer Info */}
+            {(job.employer.employerProfile.description || job.employer.employerProfile.website || job.employer.employerProfile.publicSlug) && (
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Employer</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {job.employer.employerProfile.companyName}
+                    </p>
+                    {job.employer.employerProfile.location && (
+                      <p className="text-sm text-gray-600">
+                        {job.employer.employerProfile.location}
+                      </p>
+                    )}
+                  </div>
+                  {job.employer.employerProfile.description && (
+                    <p className="text-sm text-gray-700">
+                      {job.employer.employerProfile.description}
                     </p>
                   )}
+                  {job.employer.employerProfile.website && (
+                    <a
+                      href={job.employer.employerProfile.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-500"
+                    >
+                      Visit Company Website
+                    </a>
+                  )}
+                  {job.employer.employerProfile.publicSlug && (
+                    <Link
+                      href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                      className="text-sm text-blue-600 hover:text-blue-500"
+                    >
+                      View All Jobs
+                    </Link>
+                  )}
                 </div>
-                {job.employer.employerProfile.description && (
-                  <p className="text-sm text-gray-700">
-                    {job.employer.employerProfile.description}
-                  </p>
-                )}
-                {job.employer.employerProfile.website && (
-                  <a
-                    href={job.employer.employerProfile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-blue-600 hover:text-blue-500"
-                  >
-                    Visit Company Website
-                  </a>
-                )}
-                {job.employer.employerProfile.publicSlug && (
-                  <Link
-                    href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
-                    className="text-sm text-blue-600 hover:text-blue-500"
-                  >
-                    View All Jobs
-                  </Link>
-                )}
               </div>
-            </div>
+            )}
 
             {/* Job Details */}
             <div className="bg-white rounded-lg shadow p-6">

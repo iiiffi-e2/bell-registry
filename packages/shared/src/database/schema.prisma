@@ -228,6 +228,7 @@ model Job {
   employerId       String
   title            String
   description      String
+  exceptionalOpportunity String?
   location         String
   salary           Json?
   requirements     String[]

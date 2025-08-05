@@ -116,6 +116,7 @@ const jobFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   professionalRole: z.string().min(1, "Professional role is required"),
   description: z.string().min(1, "Description is required"),
+  exceptionalOpportunity: z.string().optional().default(""),
   location: z.string().min(1, "Location is required"),
   requirements: z.array(z.object({
     value: z.string()
@@ -152,6 +153,7 @@ export default function EditJobPage() {
       title: "",
       professionalRole: "",
       description: "",
+      exceptionalOpportunity: "",
       location: "",
       requirements: [{ value: "" }],
       salaryMin: "",
@@ -197,6 +199,7 @@ export default function EditJobPage() {
           title: job.title,
           professionalRole: job.professionalRole,
           description: job.description,
+          exceptionalOpportunity: job.exceptionalOpportunity || "",
           location: job.location,
           requirements: (job.requirements || []).map((req: string) => ({ value: req })),
           salaryMin: job.salary.min.toString(),
@@ -426,6 +429,27 @@ export default function EditJobPage() {
                           minHeight="200px"
                         />
                       </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="exceptionalOpportunity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>What makes this an exceptional opportunity?</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Highlight what makes this position special - unique benefits, growth opportunities, company culture, etc."
+                      className="min-h-[120px]"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    This will appear as a highlight above the full job description to attract top candidates
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

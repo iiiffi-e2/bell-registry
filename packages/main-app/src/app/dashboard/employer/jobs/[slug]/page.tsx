@@ -32,6 +32,7 @@ interface JobDetails {
   title: string;
   professionalRole: string;
   description: string;
+  exceptionalOpportunity?: string;
   location: string;
   requirements: string[];
   salary: {
@@ -217,6 +218,19 @@ export default function JobDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Exceptional Opportunity */}
+          {job.exceptionalOpportunity && (
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
+              <h2 className="text-xl font-semibold text-blue-900 mb-3 flex items-center">
+                <span className="mr-2">✨</span>
+                What makes this an exceptional opportunity
+              </h2>
+              <p className="text-blue-800 leading-relaxed">
+                {job.exceptionalOpportunity}
+              </p>
+            </div>
+          )}
+
           {/* Description */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">Job Description</h2>
@@ -224,60 +238,64 @@ export default function JobDetailsPage() {
           </div>
 
           {/* Requirements */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements</h2>
-            <ul className="space-y-2">
-              {job.requirements.map((requirement, index) => (
-                <li key={index} className="flex items-start">
-                  <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{requirement}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {job.requirements && job.requirements.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Requirements</h2>
+              <ul className="space-y-2">
+                {job.requirements.map((requirement, index) => (
+                  <li key={index} className="flex items-start">
+                    <CheckIcon className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-700">{requirement}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Company Info */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Company</h3>
-            <div className="space-y-3">
-              <div>
-                <p className="font-medium text-gray-900">
-                  {job.employer.employerProfile.companyName}
-                </p>
-                {job.employer.employerProfile.location && (
-                  <p className="text-sm text-gray-600">
-                    {job.employer.employerProfile.location}
+          {/* Employer Info */}
+          {(job.employer.employerProfile.description || job.employer.employerProfile.website || job.employer.employerProfile.publicSlug) && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Employer</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-medium text-gray-900">
+                    {job.employer.employerProfile.companyName}
+                  </p>
+                  {job.employer.employerProfile.location && (
+                    <p className="text-sm text-gray-600">
+                      {job.employer.employerProfile.location}
+                    </p>
+                  )}
+                </div>
+                {job.employer.employerProfile.description && (
+                  <p className="text-sm text-gray-700">
+                    {job.employer.employerProfile.description}
                   </p>
                 )}
+                {job.employer.employerProfile.website && (
+                  <a
+                    href={job.employer.employerProfile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    Visit Company Website
+                  </a>
+                )}
+                {job.employer.employerProfile.publicSlug && (
+                  <Link
+                    href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    View All Jobs
+                  </Link>
+                )}
               </div>
-              {job.employer.employerProfile.description && (
-                <p className="text-sm text-gray-700">
-                  {job.employer.employerProfile.description}
-                </p>
-              )}
-              {job.employer.employerProfile.website && (
-                <a
-                  href={job.employer.employerProfile.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Visit Company Website
-                </a>
-              )}
-              {job.employer.employerProfile.publicSlug && (
-                <Link
-                  href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  View All Jobs
-                </Link>
-              )}
             </div>
-          </div>
+          )}
 
           {/* Job Details */}
           <div className="bg-white rounded-lg shadow p-6">

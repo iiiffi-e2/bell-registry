@@ -48,6 +48,7 @@ export async function PUT(
       title: data.title,
       professionalRole: data.professionalRole,
       description: data.description,
+      exceptionalOpportunity: data.exceptionalOpportunity,
       location: data.location,
       requirements: data.requirements,
       salary: data.salary,

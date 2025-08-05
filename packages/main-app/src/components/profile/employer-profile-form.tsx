@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { ProfilePictureUpload } from "./profile-picture-upload";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { Form } from "@/components/ui/form";
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
@@ -58,6 +58,7 @@ interface EmployerProfileFormProps {
 export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [baseUrl, setBaseUrl] = useState("");
   const [slugAvailability, setSlugAvailability] = useState<{
     checking: boolean;
@@ -66,6 +67,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
   }>({ checking: false, available: null, suggestions: [] });
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied'>('idle');
   const { data: session } = useSession();
+  const formInitializedRef = useRef(false);
 
   // Determine if user is an agency or employer
   const isAgency = session?.user?.role === UserRole.AGENCY;
@@ -73,6 +75,16 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
 
   // Use appropriate schema based on user role
   const schema = isAgency ? agencyProfileSchema : employerProfileSchema;
+
+  // Check if profile is filled out
+  const isProfileFilledOut = () => {
+    const values = form.getValues();
+    if (isAgency) {
+      return !!(values.companyName && (values.description || values.website || values.location || values.publicSlug));
+    } else {
+      return !!(values.description || values.location || values.publicSlug);
+    }
+  };
 
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
@@ -84,6 +96,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       location: "",
       publicSlug: "",
     },
+    mode: "onChange", // Enable real-time validation
   });
 
   useEffect(() => {
@@ -93,8 +106,12 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     }
   }, []);
 
+
+
   useEffect(() => {
     const loadProfile = async () => {
+      if (formInitializedRef.current) return; // Prevent reloading if already initialized
+      
       try {
         const response = await fetch("/api/profile");
         if (!response.ok) {
@@ -111,6 +128,14 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
             location: data.employerProfile.location || "",
             publicSlug: data.employerProfile.publicSlug || "",
           });
+          formInitializedRef.current = true;
+          
+          // Set edit mode based on whether profile is filled out
+          const hasData = isAgency 
+            ? !!(data.employerProfile.companyName && (data.employerProfile.description || data.employerProfile.website || data.employerProfile.location || data.employerProfile.publicSlug))
+            : !!(data.employerProfile.description || data.employerProfile.location || data.employerProfile.publicSlug);
+          
+          setIsEditMode(!hasData); // Start in edit mode if profile is empty
         }
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -118,10 +143,10 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       }
     };
 
-    if (session?.user) {
+    if (session?.user && !formInitializedRef.current) {
       loadProfile();
     }
-  }, [session, form]);
+  }, [session, isAgency]); // Added isAgency to dependencies
 
   // Debounced slug availability check
   const checkSlugAvailability = useCallback(
@@ -179,6 +204,8 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       await onSubmit(data);
       toast.success("Profile updated successfully");
       setShowSuccessMessage(true);
+      setIsEditMode(false); // Exit edit mode after successful save
+      formInitializedRef.current = false; // Reset to allow reloading latest data
       // Hide success message after 20 seconds
       setTimeout(() => {
         setShowSuccessMessage(false);
@@ -201,47 +228,177 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
     }
   };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-        {/* Success Message */}
-        {showSuccessMessage && (
-          <div className="rounded-md bg-green-50 p-4 border border-green-200">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
-                  Your {isAgency ? "agency" : "employer"} profile has been successfully updated!
-                </p>
-              </div>
-              <div className="ml-auto pl-3">
-                <div className="-mx-1.5 -my-1.5">
-                  <button
-                    type="button"
-                    onClick={() => setShowSuccessMessage(false)}
-                    className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
-                  >
-                    <span className="sr-only">Dismiss</span>
-                    <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="bg-white shadow sm:rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
+  // Render read-only view
+  const renderReadOnlyView = () => {
+    const values = form.getValues();
+    
+    return (
+      <div className="bg-white shadow sm:rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-medium leading-6 text-gray-900">
               {isAgency ? "Agency Profile" : "Employer Profile"}
             </h3>
-            <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
+            <Button
+              onClick={() => setIsEditMode(true)}
+              variant="outline"
+              size="sm"
+            >
+              Edit Profile
+            </Button>
+          </div>
+          
+          <div className="space-y-6">
+            {/* Company Logo - Only for Agencies */}
+            {isAgency && values.logoUrl && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-2">Company Logo</h4>
+                <img 
+                  src={values.logoUrl} 
+                  alt="Company logo" 
+                  className="h-20 w-20 rounded-lg object-cover"
+                />
+              </div>
+            )}
+
+            {/* Company Name - Only for Agencies */}
+            {isAgency && values.companyName && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Company Name</h4>
+                <p className="text-base text-gray-900">{values.companyName}</p>
+              </div>
+            )}
+
+            {/* Description / About Us */}
+            {values.description && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">
+                  {isAgency ? "Company Description" : "About Us"}
+                </h4>
+                <p className="text-base text-gray-900 whitespace-pre-wrap">{values.description}</p>
+              </div>
+            )}
+
+            {/* Website - Only for Agencies */}
+            {isAgency && values.website && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Company Website</h4>
+                <a 
+                  href={values.website} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  {values.website}
+                </a>
+              </div>
+            )}
+
+            {/* Location */}
+            {values.location && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">
+                  {isAgency ? "Company Location" : "Location"}
+                </h4>
+                <p className="text-base text-gray-900">{values.location}</p>
+              </div>
+            )}
+
+            {/* Custom Job Page URL */}
+            {values.publicSlug && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500 mb-1">Custom Job Page URL</h4>
+                <div className="flex items-center gap-2">
+                  <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono text-gray-800">
+                    {baseUrl ? `${baseUrl}/employers/${values.publicSlug}/jobs` : "Loading..."}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (baseUrl) {
+                        navigator.clipboard.writeText(`${baseUrl}/employers/${values.publicSlug}/jobs`);
+                        toast.success("Link copied to clipboard!");
+                      }
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
+                    Copy
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Empty state */}
+            {!values.description && !values.location && !values.publicSlug && 
+             (!isAgency || (!values.companyName && !values.website)) && (
+              <div className="text-center py-8">
+                <p className="text-gray-500 mb-4">No profile information has been added yet.</p>
+                <Button onClick={() => setIsEditMode(true)}>
+                  Add Profile Information
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Success Message */}
+      {showSuccessMessage && (
+        <div className="rounded-md bg-green-50 p-4 border border-green-200">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-green-800">
+                Your {isAgency ? "agency" : "employer"} profile has been successfully updated!
+              </p>
+            </div>
+            <div className="ml-auto pl-3">
+              <div className="-mx-1.5 -my-1.5">
+                <button
+                  type="button"
+                  onClick={() => setShowSuccessMessage(false)}
+                  className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Render read-only view or edit form */}
+      {!isEditMode ? (
+        renderReadOnlyView()
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+            <div className="bg-white shadow sm:rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    {isAgency ? "Agency Profile" : "Employer Profile"}
+                  </h3>
+                  <Button
+                    onClick={() => setIsEditMode(false)}
+                    variant="outline"
+                    size="sm"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4">
               {/* Company Logo Upload - Only for Agencies */}
               {isAgency && (
                 <div>
@@ -492,5 +649,7 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
         </div>
       </form>
     </Form>
+      )}
+    </div>
   );
 } 
