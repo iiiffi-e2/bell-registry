@@ -47,16 +47,30 @@ export async function PUT(req: Request) {
     const body = await req.json();
 
     if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
-      // Update employer profile
-      const updatedProfile = await prisma.employerProfile.update({
+      // Prepare data based on user role
+      const profileData: any = {
+        description: body.description,
+        website: body.website,
+        logoUrl: body.logoUrl,
+        location: body.location,
+        publicSlug: body.publicSlug,
+      };
+
+      // Only include companyName for agencies (it's required in the schema)
+      if (session.user.role === "AGENCY") {
+        profileData.companyName = body.companyName;
+      } else {
+        // For employers, set a default company name if not provided
+        profileData.companyName = body.companyName || "Individual Employer";
+      }
+
+      // Use upsert to create or update the profile
+      const updatedProfile = await prisma.employerProfile.upsert({
         where: { userId: session.user.id },
-        data: {
-          companyName: body.companyName,
-          description: body.description,
-          website: body.website,
-          logoUrl: body.logoUrl,
-          location: body.location,
-          publicSlug: body.publicSlug,
+        update: profileData,
+        create: {
+          userId: session.user.id,
+          ...profileData,
         },
       });
 

@@ -198,10 +198,18 @@ export function EmployerProfileForm({ onSubmit }: EmployerProfileFormProps) {
       return;
     }
 
+    // Prepare data for submission
+    const submitData = { ...data };
+    
+    // For employers, don't send empty companyName since it's not needed
+    if (isEmployer && !submitData.companyName) {
+      delete submitData.companyName;
+    }
+
     setIsLoading(true);
     setShowSuccessMessage(false);
     try {
-      await onSubmit(data);
+      await onSubmit(submitData);
       toast.success("Profile updated successfully");
       setShowSuccessMessage(true);
       setIsEditMode(false); // Exit edit mode after successful save
