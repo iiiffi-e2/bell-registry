@@ -110,29 +110,25 @@ export function LocationAutocomplete({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     
-    // If custom input is not allowed, only allow typing for search purposes
-    // but don't update the actual value until a selection is made
-    if (!allowCustomInput) {
-      setInputValue(newValue);
-      setShowDropdown(true);
-      setActiveIndex(-1);
-      // Don't call onChange here - only call it when a selection is made
-      return;
-    }
-    
+    // Always allow typing for search purposes
     setInputValue(newValue);
     setShowDropdown(true);
     setActiveIndex(-1);
-    onChange(newValue);
+    
+    // If custom input is allowed, update the value immediately
+    if (allowCustomInput) {
+      onChange(newValue);
+    }
+    // If custom input is not allowed, don't update the value until a selection is made
   };
 
   // Hide dropdown on blur
   const handleBlur = () => {
     setTimeout(() => {
       setShowDropdown(false);
-      // If custom input is not allowed and no valid selection was made, clear the input
-      if (!allowCustomInput && !value) {
-        setInputValue('');
+      // If custom input is not allowed and the input doesn't match the selected value, reset to the selected value
+      if (!allowCustomInput && value && inputValue !== value) {
+        setInputValue(value);
       }
     }, 100);
   };
@@ -143,7 +139,7 @@ export function LocationAutocomplete({
         <input
           ref={inputRef}
           type="text"
-          value={allowCustomInput ? inputValue : (value || inputValue)}
+          value={inputValue}
           onChange={handleInputChange}
           onFocus={() => setShowDropdown(true)}
           onBlur={handleBlur}
