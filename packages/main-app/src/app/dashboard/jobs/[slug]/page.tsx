@@ -10,6 +10,7 @@ import { getTimeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { ApplyJobModal } from "@/components/modals/apply-job-modal";
 import { Button } from "@/components/ui/button";
+import { FormattedJobDescription } from "@/components/ui/rich-text-editor";
 
 interface JobDetails {
   id: string;
@@ -298,9 +299,7 @@ export default function DashboardJobDetailsPage() {
           {/* Description */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Job Description</h2>
-            <div className="prose prose-sm max-w-none text-gray-700">
-              <div dangerouslySetInnerHTML={{ __html: job.description }} />
-            </div>
+            <FormattedJobDescription text={job.description} />
           </div>
 
           {/* Requirements */}

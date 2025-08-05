@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { WysiwygEditor } from "@/components/ui/wysiwyg-editor";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import * as z from "zod";
@@ -465,13 +466,14 @@ export default function PostJobPage() {
                         Improve with AI
                       </button>
                     </div>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe the role and responsibilities..."
-                        className="min-h-[200px] resize-y"
-                        {...field}
-                      />
-                    </FormControl>
+                                            <FormControl>
+                          <WysiwygEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Describe the role and responsibilities..."
+                            minHeight="200px"
+                          />
+                        </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

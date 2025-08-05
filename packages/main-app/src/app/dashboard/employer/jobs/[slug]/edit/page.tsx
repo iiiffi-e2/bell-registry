@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { WysiwygEditor } from "@/components/ui/wysiwyg-editor";
 import {
   Select,
   SelectContent,
@@ -415,13 +416,14 @@ export default function EditJobPage() {
                       Improve with AI
                     </button>
                   </div>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the role and responsibilities..."
-                      className="min-h-[200px] resize-y"
-                      {...field}
-                    />
-                  </FormControl>
+                                        <FormControl>
+                        <WysiwygEditor
+                          value={field.value}
+                          onChange={field.onChange}
+                          placeholder="Describe the role and responsibilities..."
+                          minHeight="200px"
+                        />
+                      </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

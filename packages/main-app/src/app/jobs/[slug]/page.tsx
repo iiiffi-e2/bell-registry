@@ -8,6 +8,7 @@ import { getTimeAgo } from "@/lib/utils";
 import { useSession } from "next-auth/react";
 import { ApplyJobModal } from "@/components/modals/apply-job-modal";
 import { PublicNavigation } from "@/components/PublicNavigation";
+import { FormattedJobDescription } from "@/components/ui/rich-text-editor";
 
 interface JobDetails {
   id: string;
@@ -294,9 +295,7 @@ export default function PublicJobDetailsPage() {
             {/* Job Description */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Job Description</h3>
-              <div className="prose max-w-none">
-                <p className="whitespace-pre-wrap">{job.description}</p>
-              </div>
+              <FormattedJobDescription text={job.description} />
             </div>
 
             {/* Requirements */}
