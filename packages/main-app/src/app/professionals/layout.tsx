@@ -161,7 +161,11 @@ export default function ProfessionalsLayout({
                             <Menu.Item>
                               {({ active }) => (
                                 <Link
-                                  href="/dashboard/profile"
+                                  href={
+                                    session?.user?.role === ROLES.PROFESSIONAL 
+                                      ? "/dashboard/profile" 
+                                      : "/dashboard/employer/profile"
+                                  }
                                   className={`${
                                     active ? "bg-gray-100" : ""
                                   } block px-4 py-2 text-sm text-gray-700`}
@@ -275,7 +279,11 @@ export default function ProfessionalsLayout({
                   <div className="mt-3 space-y-1">
                     <Disclosure.Button
                       as={Link}
-                      href="/dashboard/profile"
+                      href={
+                        session?.user?.role === ROLES.PROFESSIONAL 
+                          ? "/dashboard/profile" 
+                          : "/dashboard/employer/profile"
+                      }
                       className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                     >
                       Your Profile

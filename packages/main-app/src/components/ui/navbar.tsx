@@ -99,7 +99,11 @@ export function Navbar() {
                     <Menu.Item>
                       {({ active }) => (
                         <Link
-                          href={profile?.user?.profileSlug ? `/professionals/${profile.user.profileSlug}` : "/dashboard/profile"}
+                          href={
+                            session?.user?.role === UserRole.PROFESSIONAL
+                              ? (profile?.user?.profileSlug ? `/professionals/${profile.user.profileSlug}` : "/dashboard/profile")
+                              : "/dashboard/employer/profile"
+                          }
                           className={`${
                             active ? "bg-gray-100" : ""
                           } block px-4 py-2 text-sm text-gray-700`}
