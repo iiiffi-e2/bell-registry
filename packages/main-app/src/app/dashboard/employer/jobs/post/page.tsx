@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -168,6 +168,7 @@ export default function PostJobPage() {
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const subscriptionCheckedRef = useRef(false);
 
   // Add this alert to verify we're on the correct page
   useEffect(() => {
@@ -199,14 +200,21 @@ export default function PostJobPage() {
         setCustomTitle("");
       }
     }
-  }, [selectedRole, customTitle, form]);
+  }, [selectedRole, customTitle]);
 
-  // Check subscription status on page load
+  // Check subscription status on page load - only once
+  // Using ref to prevent unnecessary API calls when switching tabs
   useEffect(() => {
-    if (session?.user?.id) {
+    if (session?.user?.id && !subscriptionCheckedRef.current) {
+      subscriptionCheckedRef.current = true;
       checkSubscriptionStatus();
     }
-  }, [session]);
+    
+    // Cleanup function to reset ref when component unmounts
+    return () => {
+      subscriptionCheckedRef.current = false;
+    };
+  }, [session?.user?.id]);
 
   const checkSubscriptionStatus = async () => {
     try {
