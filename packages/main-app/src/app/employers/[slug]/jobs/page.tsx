@@ -14,7 +14,7 @@ import {
   ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import { PublicNavigation } from "@/components/PublicNavigation";
-import { truncateWords } from "@/lib/utils";
+import { stripHtmlAndTruncate } from "@/lib/utils";
 
 interface Job {
   id: string;
@@ -293,7 +293,7 @@ export default function EmployerJobsPage() {
                           </div>
 
                           <p className="text-gray-700 text-sm leading-relaxed">
-                            {truncateWords(job.description, 30)}
+                            {stripHtmlAndTruncate(job.description, 30)}
                           </p>
                         </div>
                         

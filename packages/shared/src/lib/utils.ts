@@ -97,6 +97,23 @@ export function truncateWords(text: string, wordLimit: number): string {
   return words.slice(0, wordLimit).join(' ') + '...';
 }
 
+export function stripHtml(html: string): string {
+  if (!html) return '';
+  // Remove HTML tags while preserving line breaks and spacing
+  return html
+    .replace(/<br\s*\/?>/gi, ' ') // Replace <br> tags with spaces
+    .replace(/<\/p>/gi, ' ') // Replace </p> tags with spaces
+    .replace(/<[^>]*>/g, '') // Remove all other HTML tags
+    .replace(/\s+/g, ' ') // Normalize multiple spaces to single spaces
+    .trim();
+}
+
+export function stripHtmlAndTruncate(html: string, wordLimit: number): string {
+  if (!html) return '';
+  const plainText = stripHtml(html);
+  return truncateWords(plainText, wordLimit);
+}
+
 export function splitTextIntoParagraphs(text: string | null): string[] {
   if (!text) return [];
   

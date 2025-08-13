@@ -1,13 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import {
   MapPinIcon,
   CurrencyDollarIcon,
   BuildingOfficeIcon,
 } from "@heroicons/react/24/outline";
-import { BookmarkIcon } from "@heroicons/react/24/solid";
+import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
+import { stripHtmlAndTruncate } from "@/lib/utils";
 
 interface Job {
   id: string;
@@ -121,7 +123,7 @@ export default function SavedJobsPage() {
           </div>
         ) : jobs.length === 0 ? (
           <div className="text-center py-12">
-            <BookmarkIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <BookmarkSolidIcon className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No saved jobs</h3>
             <p className="mt-1 text-sm text-gray-500">
                               Start saving jobs you&apos;re interested in by clicking the bookmark icon.
@@ -169,10 +171,10 @@ export default function SavedJobsPage() {
                       }}
                       className="rounded-full p-1 text-blue-600 hover:text-blue-500"
                     >
-                      <BookmarkIcon className="h-6 w-6" />
+                      <BookmarkSolidIcon className="h-6 w-6" />
                     </button>
                   </div>
-                  <p className="mt-4 text-sm text-gray-500 line-clamp-3">{job.description}</p>
+                  <p className="mt-4 text-sm text-gray-500 line-clamp-3">{stripHtmlAndTruncate(job.description, 150)}</p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {job.requirements.map((req, index) => (
                       <span

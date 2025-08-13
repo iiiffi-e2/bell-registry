@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/button";
 import { FilterProvider, useFilters } from "@/contexts/FilterContext";
 import { FilterModal } from "@/components/FilterModal";
-import { truncateWords } from "@/lib/utils";
+import { stripHtmlAndTruncate } from "@/lib/utils";
 import AIJobSearch from "@/components/ai-job-search";
 
 interface Job {
@@ -323,7 +323,7 @@ function JobSearchPageContent() {
           <BookmarkIcon className="h-6 w-6" />
         </button>
       </div>
-      <p className="mt-4 text-sm text-gray-500 line-clamp-3">{truncateWords(job.description, 60)}</p>
+      <p className="mt-4 text-sm text-gray-500 line-clamp-3">{stripHtmlAndTruncate(job.description, 60)}</p>
       
       <div className="flex flex-wrap gap-2">
         {job.requirements.slice(0, 3).map((req, index) => (
@@ -397,7 +397,7 @@ function JobSearchPageContent() {
           </div>
           
           <p className="text-sm text-gray-500">
-            {truncateWords(job.description, 60)}
+            {stripHtmlAndTruncate(job.description, 60)}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {job.requirements.map((req, index) => (
