@@ -326,7 +326,7 @@ export async function POST(request: Request) {
         jobType: data.jobType,
         employmentType: data.employmentType,
         featured: data.featured,
-        expiresAt: new Date(data.expiresAt),
+        expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
         urlSlug,
         employerId: session.user.id,
         status: JobStatus.ACTIVE,

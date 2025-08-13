@@ -591,7 +591,7 @@ export default function PostJobPage() {
                   name="expiresAt"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expiry Date (Optional)</FormLabel>
+                      <FormLabel>Ideal Hire Date (Optional)</FormLabel>
                       <FormControl>
                         <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
                       </FormControl>

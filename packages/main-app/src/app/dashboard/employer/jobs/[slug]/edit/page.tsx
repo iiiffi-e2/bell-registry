@@ -193,23 +193,29 @@ export default function EditJobPage() {
         const job = data.job;
 
         // Format the date to YYYY-MM-DD for the input
-        const expiryDate = new Date(job.expiresAt).toISOString().split('T')[0];
+        const expiryDate = job.expiresAt 
+          ? new Date(job.expiresAt).toISOString().split('T')[0]
+          : "";
 
-        form.reset({
+        const formData = {
           title: job.title,
           professionalRole: job.professionalRole,
           description: job.description,
           exceptionalOpportunity: job.exceptionalOpportunity || "",
           location: job.location,
-          requirements: (job.requirements || []).map((req: string) => ({ value: req })),
-          salaryMin: job.salary.min.toString(),
-          salaryMax: job.salary.max.toString(),
+          requirements: (job.requirements || []).length > 0 
+            ? (job.requirements || []).map((req: string) => ({ value: req }))
+            : [{ value: "" }],
+          salaryMin: job.salary?.min?.toString() || "",
+          salaryMax: job.salary?.max?.toString() || "",
           jobType: job.jobType as JobType,
           employmentType: job.employmentType as EmploymentType,
           status: job.status as JobStatus,
           featured: job.featured,
           expiresAt: expiryDate,
-        });
+        };
+
+        form.reset(formData);
       } catch (error) {
         console.error("Error fetching job details:", error);
         toast.error("Failed to load job details");
@@ -219,7 +225,7 @@ export default function EditJobPage() {
     }
 
     fetchJobDetails();
-  }, [params?.slug, form]);
+  }, [params?.slug]);
 
   async function onSubmit(data: JobFormValues) {
     if (!params?.slug) {
@@ -353,7 +359,7 @@ export default function EditJobPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Professional Role</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a professional role" />
@@ -381,7 +387,7 @@ export default function EditJobPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select job status" />
@@ -462,7 +468,7 @@ export default function EditJobPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Employment Type (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select employment type" />
@@ -487,7 +493,7 @@ export default function EditJobPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Job Type (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select job type" />
@@ -615,7 +621,7 @@ export default function EditJobPage() {
               name="expiresAt"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Expiry Date (Optional)</FormLabel>
+                  <FormLabel>Ideal Hire Date (Optional)</FormLabel>
                   <FormControl>
                     <Input type="date" min={new Date().toISOString().split('T')[0]} {...field} />
                   </FormControl>

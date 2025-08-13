@@ -56,7 +56,7 @@ export async function PUT(
       employmentType: data.employmentType,
       status: data.status as JobStatus,
       featured: data.featured,
-      expiresAt: new Date(data.expiresAt),
+      expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
     };
 
     const job = await prisma.job.update({

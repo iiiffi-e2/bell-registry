@@ -386,7 +386,7 @@ export default function PublicJobDetailsPage() {
                 </div>
                 {job.expiresAt && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Expires:</span>
+                    <span className="text-gray-600">Ideal Hire Date:</span>
                     <span className="font-medium">{formatDate(job.expiresAt)}</span>
                   </div>
                 )}

@@ -78,7 +78,7 @@ function generateJobImprovementSuggestions(job: JobWithoutApplications): string[
   if (job.expiresAt) {
     const daysUntilExpiry = Math.ceil((job.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     if (daysUntilExpiry < 7) {
-      suggestions.push("Consider extending your job posting expiry date to give more time for applications");
+      suggestions.push("Consider extending your job posting ideal hire date to give more time for applications");
     }
   }
   

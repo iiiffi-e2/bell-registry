@@ -403,10 +403,12 @@ export default function DashboardJobDetailsPage() {
                 <div className="text-sm font-medium text-gray-500">Posted</div>
                 <div className="text-gray-900">{formatDate(job.createdAt)}</div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-gray-500">Expires</div>
-                <div className="text-gray-900">{formatDate(job.expiresAt)}</div>
-              </div>
+              {job.expiresAt && (
+                <div>
+                  <div className="text-sm font-medium text-gray-500">Ideal Hire Date</div>
+                  <div className="text-gray-900">{formatDate(job.expiresAt)}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
