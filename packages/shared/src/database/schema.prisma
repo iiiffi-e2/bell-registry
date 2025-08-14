@@ -224,38 +224,40 @@ model BillingHistory {
 }
 
 model Job {
-  id               String           @id @default(cuid())
-  employerId       String
-  title            String
-  description      String
+  id                     String           @id @default(cuid())
+  employerId             String
+  title                  String
+  description            String
+  location               String
+  salary                 Json?
+  requirements           String[]
+  status                 JobStatus        @default(ACTIVE)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  expiresAt              DateTime?
+  featured               Boolean          @default(false)
+  employmentType         String?
+  jobType                String?
+  isDemo                 Boolean          @default(false)
+  urlSlug                String           @unique
+  professionalRole       String
+  adminStatus            JobAdminStatus   @default(PENDING)
+  approvedAt             DateTime?
+  approvedBy             String?
+  rejectedAt             DateTime?
+  rejectedBy             String?
+  rejectionReason        String?
   exceptionalOpportunity String?
-  location         String
-  salary           Json?
-  requirements     String[]
-  status           JobStatus        @default(ACTIVE)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  expiresAt        DateTime?
-  featured         Boolean          @default(false)
-  employmentType   String?
-  jobType          String?
-  isDemo           Boolean          @default(false)
-  urlSlug          String           @unique
-  professionalRole String
-  adminStatus      JobAdminStatus   @default(PENDING)
-  approvedAt       DateTime?
-  approvedBy       String?
-  rejectedAt       DateTime?
-  rejectedBy       String?
-  rejectionReason  String?
-  approver         User?            @relation("JobApprover", fields: [approvedBy], references: [id])
-  employer         User             @relation(fields: [employerId], references: [id])
-  rejecter         User?            @relation("JobRejecter", fields: [rejectedBy], references: [id])
-  applications     JobApplication[]
-  matches          JobMatch[]
-  viewEvents       JobViewEvent[]
-  savedCandidates  SavedCandidate[]
-  savedBy          SavedJob[]
+  approver               User?            @relation("JobApprover", fields: [approvedBy], references: [id])
+  employer               User             @relation(fields: [employerId], references: [id])
+  rejecter               User?            @relation("JobRejecter", fields: [rejectedBy], references: [id])
+  applications           JobApplication[]
+  matches                JobMatch[]
+  viewEvents             JobViewEvent[]
+  savedCandidates        SavedCandidate[]
+  savedBy                SavedJob[]
+
+  @@index([exceptionalOpportunity])
 }
 
 model JobApplication {

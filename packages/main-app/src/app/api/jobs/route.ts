@@ -27,88 +27,242 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
+    // Check if pg_trgm extension is available before attempting fuzzy search
+    let pgTrgmAvailable = false;
+    if (searchQuery) {
+      try {
+        await prisma.$queryRaw`SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm' LIMIT 1`;
+        pgTrgmAvailable = true;
+      } catch (error) {
+        console.warn('pg_trgm extension not available, will use fallback search:', error);
+        pgTrgmAvailable = false;
+      }
+    }
+
     // Fuzzy search with trigram similarity if searchQuery is present
     if (searchQuery) {
-      // Parse for 'in' to boost role/location matches
-      let roleQuery = searchQuery
-      let locationQuery: string | null = null
-      if (searchQuery.toLowerCase().includes(' in ')) {
-        const [role, loc] = searchQuery.split(/ in /i)
-        roleQuery = role.trim()
-        locationQuery = loc.trim()
+      if (pgTrgmAvailable) {
+        try {
+          // Parse for 'in' to boost role/location matches
+          let roleQuery = searchQuery
+          let locationQuery: string | null = null
+          if (searchQuery.toLowerCase().includes(' in ')) {
+            const [role, loc] = searchQuery.split(/ in /i)
+            roleQuery = role.trim()
+            locationQuery = loc.trim()
+          }
+          
+          // Build SQL for fuzzy search
+          let whereClauses = [
+            'title % $1',
+            'description % $1',
+            'location % $1'
+          ]
+          let rankExpr = 'GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1))'
+          let params = [roleQuery, limit, skip]
+          let boostClause = ''
+          if (locationQuery) {
+            // Boost jobs that also match the location
+            whereClauses.push('location % $4')
+            rankExpr = `GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1)) + 0.5 * similarity(location, $4)`
+            params = [roleQuery, limit, skip, locationQuery]
+          }
+          const query = `
+            SELECT *,
+              ${rankExpr} AS rank
+            FROM "Job"
+            WHERE (${whereClauses.join(' OR ')})
+            AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
+            AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
+            ORDER BY rank DESC
+            LIMIT $2 OFFSET $3
+          `
+          let jobs = await prisma.$queryRawUnsafe(query, ...params) as any[];
+          
+          // Apply additional filters to fuzzy search results
+          if (professionalRole) {
+            const professionalRoles = professionalRole.split(',');
+            jobs = jobs.filter((job: any) => 
+              professionalRoles.some(role => 
+                job.professionalRole && job.professionalRole.includes(role)
+              )
+            );
+          }
+          if (jobType) {
+            const jobTypes = jobType.split(',');
+            jobs = jobs.filter((job: any) => jobTypes.includes(job.jobType));
+          }
+          if (employmentType) {
+            const employmentTypes = employmentType.split(',');
+            jobs = jobs.filter((job: any) => employmentTypes.includes(job.employmentType));
+          }
+          
+          // Fetch employer and employerProfile for each job
+          jobs = await Promise.all(jobs.map(async (job: any) => {
+            const employer = await prisma.user.findUnique({
+              where: { id: job.employerId },
+              select: {
+                firstName: true,
+                lastName: true,
+                employerProfile: {
+                  select: { companyName: true }
+                }
+              }
+            });
+            // Handle null professionalRole by using title as fallback
+            if (!job.professionalRole) {
+              job.professionalRole = job.title.split(' - ')[0];
+            }
+            return { ...job, employer };
+          }));
+          // Count
+          const countQuery = `
+            SELECT COUNT(*) FROM "Job"
+            WHERE (${whereClauses.join(' OR ')})
+            AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
+            AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
+          `
+          const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1)) as { count: string }[]
+          const total = parseInt(countResult[0].count, 10)
+          return NextResponse.json({
+            jobs,
+            featured: false,
+            pagination: {
+              total,
+              pages: Math.ceil(total / limit),
+              page,
+              limit
+            }
+          })
+        } catch (error) {
+          console.warn('Fuzzy search failed, falling back to simple search:', error);
+          // Continue to fallback search below
+        }
       }
-      // Build SQL for fuzzy search
-      let whereClauses = [
-        'title % $1',
-        'description % $1',
-        'location % $1'
-      ]
-      let rankExpr = 'GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1))'
-      let params = [roleQuery, limit, skip]
-      let boostClause = ''
-      if (locationQuery) {
-        // Boost jobs that also match the location
-        whereClauses.push('location % $4')
-        rankExpr = `GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1)) + 0.5 * similarity(location, $4)`
-        params = [roleQuery, limit, skip, locationQuery]
-      }
-      const query = `
-        SELECT *,
-          ${rankExpr} AS rank
-        FROM "Job"
-        WHERE (${whereClauses.join(' OR ')})
-        AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
-        AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
-        ORDER BY rank DESC
-        LIMIT $2 OFFSET $3
-      `
-      let jobs = await prisma.$queryRawUnsafe(query, ...params) as any[];
       
-      // Apply additional filters to fuzzy search results
+      // Fallback to simple ILIKE search if pg_trgm extension is not available or fuzzy search failed
+      console.log('Using fallback search for query:', searchQuery);
+      const fallbackWhere: Prisma.JobWhereInput = {
+        status: {
+          notIn: ['CLOSED' as JobStatus, 'EXPIRED' as JobStatus, 'FILLED' as JobStatus]
+        },
+        AND: [
+          {
+            OR: [
+              {
+                expiresAt: {
+                  gt: new Date()
+                }
+              },
+              {
+                expiresAt: null
+              }
+            ]
+          },
+          {
+            OR: [
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: Prisma.QueryMode.insensitive
+                }
+              },
+              {
+                description: {
+                  contains: searchQuery,
+                  mode: Prisma.QueryMode.insensitive
+                }
+              },
+              {
+                location: {
+                  contains: searchQuery,
+                  mode: Prisma.QueryMode.insensitive
+                }
+              },
+              {
+                professionalRole: {
+                  contains: searchQuery,
+                  mode: Prisma.QueryMode.insensitive
+                }
+              }
+            ]
+          }
+        ]
+      };
+      
+      // Apply additional filters to fallback search results
       if (professionalRole) {
         const professionalRoles = professionalRole.split(',');
-        jobs = jobs.filter((job: any) => 
-          professionalRoles.some(role => 
-            job.professionalRole && job.professionalRole.includes(role)
-          )
-        );
+        (fallbackWhere.AND as Prisma.JobWhereInput[]).push({
+          professionalRole: {
+            in: professionalRoles
+          }
+        });
       }
       if (jobType) {
         const jobTypes = jobType.split(',');
-        jobs = jobs.filter((job: any) => jobTypes.includes(job.jobType));
+        (fallbackWhere.AND as Prisma.JobWhereInput[]).push({
+          jobType: {
+            in: jobTypes
+          }
+        });
       }
       if (employmentType) {
         const employmentTypes = employmentType.split(',');
-        jobs = jobs.filter((job: any) => employmentTypes.includes(job.employmentType));
-      }
-      
-      // Fetch employer and employerProfile for each job
-      jobs = await Promise.all(jobs.map(async (job: any) => {
-        const employer = await prisma.user.findUnique({
-          where: { id: job.employerId },
-          select: {
-            firstName: true,
-            lastName: true,
-            employerProfile: {
-              select: { companyName: true }
-            }
+        (fallbackWhere.AND as Prisma.JobWhereInput[]).push({
+          employmentType: {
+            in: employmentTypes
           }
         });
-        // Handle null professionalRole by using title as fallback
-        if (!job.professionalRole) {
-          job.professionalRole = job.title.split(' - ')[0];
+      }
+      if (location) {
+        const locations = location.split(',').reduce((acc: any[], loc, i, arr) => {
+          if (i % 2 === 1) {
+            const cityPart = arr[i - 1].trim();
+            const statePart = loc.trim();
+            acc.push({
+              location: {
+                equals: `${cityPart}, ${statePart}`,
+                mode: Prisma.QueryMode.insensitive
+              }
+            });
+          }
+          return acc;
+        }, []);
+        if (locations.length > 0) {
+          (fallbackWhere.AND as Prisma.JobWhereInput[]).push({ OR: locations });
         }
-        return { ...job, employer };
-      }));
-      // Count
-      const countQuery = `
-        SELECT COUNT(*) FROM "Job"
-        WHERE (${whereClauses.join(' OR ')})
-        AND status NOT IN ('CLOSED', 'EXPIRED', 'FILLED')
-        AND ("expiresAt" > NOW() OR "expiresAt" IS NULL)
-      `
-      const countResult = await prisma.$queryRawUnsafe(countQuery, ...params.slice(0, locationQuery ? 4 : 1)) as { count: string }[]
-      const total = parseInt(countResult[0].count, 10)
+      }
+      if (salaryMin || salaryMax) {
+        (fallbackWhere.AND as Prisma.JobWhereInput[]).push({
+          salary: {
+            path: ['min'],
+            gte: salaryMin ? parseInt(salaryMin) : undefined,
+            lte: salaryMax ? parseInt(salaryMax) : undefined,
+          }
+        });
+      }
+      
+      const jobs = await prisma.job.findMany({
+        where: fallbackWhere,
+        take: limit,
+        skip,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          employer: {
+            select: {
+              firstName: true,
+              lastName: true,
+              employerProfile: {
+                select: { companyName: true }
+              }
+            }
+          }
+        }
+      });
+      
+      const total = await prisma.job.count({ where: fallbackWhere });
+      
       return NextResponse.json({
         jobs,
         featured: false,
@@ -118,7 +272,7 @@ export async function GET(request: Request) {
           page,
           limit
         }
-      })
+      });
     }
 
     const baseWhere: Prisma.JobWhereInput = {
