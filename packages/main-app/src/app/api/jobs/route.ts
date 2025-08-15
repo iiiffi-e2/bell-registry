@@ -27,12 +27,18 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     const skip = (page - 1) * limit
 
+    // Debug logging
+    console.log('API Request - searchQuery:', searchQuery);
+    console.log('API Request - pg_trgm check starting...');
+
     // Check if pg_trgm extension is available before attempting fuzzy search
     let pgTrgmAvailable = false;
     if (searchQuery) {
       try {
+        console.log('Checking pg_trgm extension...');
         await prisma.$queryRaw`SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm' LIMIT 1`;
         pgTrgmAvailable = true;
+        console.log('pg_trgm extension is available');
       } catch (error) {
         console.warn('pg_trgm extension not available, will use fallback search:', error);
         pgTrgmAvailable = false;
@@ -41,8 +47,10 @@ export async function GET(request: Request) {
 
     // Fuzzy search with trigram similarity if searchQuery is present
     if (searchQuery) {
+      console.log('Search query present, pg_trgm available:', pgTrgmAvailable);
       if (pgTrgmAvailable) {
         try {
+          console.log('Starting fuzzy search with query:', searchQuery);
           // Parse for 'in' to boost role/location matches
           let roleQuery = searchQuery
           let locationQuery: string | null = null
@@ -52,18 +60,18 @@ export async function GET(request: Request) {
             locationQuery = loc.trim()
           }
           
-          // Build SQL for fuzzy search
+          // Build SQL for fuzzy search with similarity threshold
           let whereClauses = [
-            'title % $1',
-            'description % $1',
-            'location % $1'
+            'similarity(title, $1) > 0.1',
+            'similarity(description, $1) > 0.1',
+            'similarity(location, $1) > 0.1'
           ]
           let rankExpr = 'GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1))'
           let params = [roleQuery, limit, skip]
           let boostClause = ''
           if (locationQuery) {
             // Boost jobs that also match the location
-            whereClauses.push('location % $4')
+            whereClauses.push('similarity(location, $4) > 0.1')
             rankExpr = `GREATEST(similarity(title, $1), similarity(description, $1), similarity(location, $1)) + 0.5 * similarity(location, $4)`
             params = [roleQuery, limit, skip, locationQuery]
           }
@@ -77,7 +85,10 @@ export async function GET(request: Request) {
             ORDER BY rank DESC
             LIMIT $2 OFFSET $3
           `
+          console.log('Fuzzy search SQL query:', query);
+          console.log('Fuzzy search parameters:', params);
           let jobs = await prisma.$queryRawUnsafe(query, ...params) as any[];
+          console.log('Fuzzy search results count:', jobs.length);
           
           // Apply additional filters to fuzzy search results
           if (professionalRole) {
@@ -190,6 +201,8 @@ export async function GET(request: Request) {
         ]
       };
       
+      console.log('Fallback search where clause:', JSON.stringify(fallbackWhere, null, 2));
+      
       // Apply additional filters to fallback search results
       if (professionalRole) {
         const professionalRoles = professionalRole.split(',');
@@ -261,7 +274,9 @@ export async function GET(request: Request) {
         }
       });
       
+      console.log('Fallback search results count:', jobs.length);
       const total = await prisma.job.count({ where: fallbackWhere });
+      console.log('Fallback search total count:', total);
       
       return NextResponse.json({
         jobs,
