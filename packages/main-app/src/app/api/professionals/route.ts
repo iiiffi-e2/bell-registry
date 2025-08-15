@@ -40,6 +40,11 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '9')
     const skip = (page - 1) * limit
 
+    // Debug logging for search
+    console.log('Professionals API - searchQuery:', searchQuery);
+    console.log('Professionals API - location:', location);
+    console.log('Professionals API - roleType:', roleType);
+
     const where = {
       // Only show approved profiles in public listings
       status: 'APPROVED',
@@ -79,6 +84,24 @@ export async function GET(request: Request) {
               },
               {
                 bio: {
+                  contains: searchQuery,
+                  mode: 'insensitive' as Prisma.QueryMode,
+                },
+              },
+              {
+                title: {
+                  contains: searchQuery,
+                  mode: 'insensitive' as Prisma.QueryMode,
+                },
+              },
+              {
+                preferredRole: {
+                  contains: searchQuery,
+                  mode: 'insensitive' as Prisma.QueryMode,
+                },
+              },
+              {
+                location: {
                   contains: searchQuery,
                   mode: 'insensitive' as Prisma.QueryMode,
                 },

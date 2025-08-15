@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { UserRole } from '@bell-registry/shared'
 import { type CandidateFilters } from '@/types/candidate'
 import { type SortOption } from '@/types/sort'
@@ -26,11 +26,14 @@ export function CandidateFilterClient({
   onFiltersChange,
 }: CandidateFilterClientProps) {
   const searchParams = useSearchParams()
+  
+  // Use local state for search query to make it more responsive
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
 
   const currentFilters: CandidateFilters = {
     location: searchParams.get('location') || undefined,
     roleType: searchParams.get('roleType') as UserRole | undefined,
-    searchQuery: searchParams.get('search') || undefined,
+    searchQuery: searchQuery || undefined,
     sortBy: (searchParams.get('sort') as SortOption) || 'recent',
     openToWork: searchParams.get('openToWork') === 'true' || undefined,
   }
@@ -42,6 +45,23 @@ export function CandidateFilterClient({
     [onFiltersChange]
   )
 
+  // Debounced search effect
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onFiltersChange({
+        ...currentFilters,
+        searchQuery: searchQuery || undefined,
+      })
+    }, 300) // 300ms delay
+
+    return () => clearTimeout(timer)
+  }, [searchQuery, onFiltersChange])
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+  }
+
   return (
     <div className="flex flex-col sm:flex-row gap-4">
       <div className="flex-1">
@@ -49,13 +69,8 @@ export function CandidateFilterClient({
           type="text"
           placeholder="Search professionals..."
           className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6"
-          value={currentFilters.searchQuery || ''}
-          onChange={(e) =>
-            handleFiltersChange({
-              ...currentFilters,
-              searchQuery: e.target.value || undefined,
-            })
-          }
+          value={searchQuery}
+          onChange={handleSearchChange}
         />
       </div>
       <div className="flex gap-4">
