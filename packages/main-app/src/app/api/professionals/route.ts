@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma, UserRole } from '@bell-registry/shared'
-import { SortOption } from '@/types/candidate'
+import { type SortOption } from '@/types/sort'
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
@@ -33,6 +33,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const location = searchParams.get('location')
     const roleType = searchParams.get('roleType') as UserRole | null
+    const roles = searchParams.get('roles')?.split(',').filter(Boolean) || []
     const searchQuery = searchParams.get('search')
     const openToWork = searchParams.get('openToWork') === 'true'
     const sortBy = searchParams.get('sort') as SortOption || 'recent'
@@ -41,8 +42,8 @@ export async function GET(request: Request) {
     const skip = (page - 1) * limit
 
     const where = {
-      // Only show approved profiles in public listings
-      status: 'APPROVED' as const,
+      // Show both approved and pending profiles for now (pending profiles need approval)
+      status: { in: ['APPROVED', 'PENDING'] as any },
       // Basic profile completion requirements
       NOT: {
         OR: [
@@ -55,6 +56,7 @@ export async function GET(request: Request) {
       // Filter conditions
       ...(location ? { location } : {}),
       ...(roleType ? { user: { role: roleType } } : {}),
+      ...(roles.length > 0 ? { preferredRole: { in: roles } } : {}),
       ...(openToWork ? { openToWork: true } : {}),
       ...(searchQuery
         ? {
@@ -149,6 +151,7 @@ export async function GET(request: Request) {
           skills: true,
           openToWork: true,
           employmentType: true,
+          status: true,
           user: {
             select: {
               id: true,

@@ -1,5 +1,3 @@
-import { UserRole } from '@bell-registry/shared'
-
 export interface CandidateProfile {
   id: string
   userId: string
@@ -14,14 +12,10 @@ export interface CandidateProfile {
   updatedAt: Date
 }
 
-export type SortOption = 'recent' | 'experience' | 'certifications' | 'views' | 'relevance'
-
 export interface CandidateFilters {
-  location?: string
-  roleType?: UserRole
   searchQuery?: string
-  sortBy?: SortOption
   openToWork?: boolean
+  roles?: string[]
 }
 
 export interface CandidateSearchParams extends CandidateFilters {

@@ -6,7 +6,6 @@ import { useSession } from "next-auth/react";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateFilterClient } from "@/components/candidates/CandidateFilterClient";
 import { type CandidateFilters } from "@/types/candidate";
-import { UserRole } from "@bell-registry/shared";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 interface PaginationData {
@@ -40,21 +39,8 @@ export default function BrowseProfessionalsPage() {
     page: 1,
     limit: 9
   });
-  const [locations, setLocations] = useState<string[]>([]);
-  const [roleTypes, setRoleTypes] = useState<UserRole[]>([]);
-
   // Determine if we should use dashboard routes
   const shouldUseDashboardRoutes = session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY' || session?.user?.role === 'PROFESSIONAL';
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/locations").then(res => res.json()),
-      fetch("/api/role-types").then(res => res.json())
-    ]).then(([locationsData, roleTypesData]) => {
-      setLocations(locationsData);
-      setRoleTypes(roleTypesData.filter((role: string) => role !== "ADMIN"));
-    });
-  }, []);
 
   useEffect(() => {
     fetchProfessionals(1);
@@ -64,9 +50,8 @@ export default function BrowseProfessionalsPage() {
     try {
       setLoading(true);
       const searchParams = new URLSearchParams();
-      if (filters.location) searchParams.append("location", filters.location);
-      if (filters.roleType) searchParams.append("roleType", filters.roleType);
       if (filters.searchQuery) searchParams.append("search", filters.searchQuery);
+      if (filters.roles && filters.roles.length > 0) searchParams.append("roles", filters.roles.join(','));
       if (filters.openToWork) searchParams.append("openToWork", "true");
       searchParams.append("page", page.toString());
       searchParams.append("limit", "9");
@@ -100,8 +85,6 @@ export default function BrowseProfessionalsPage() {
         <div className="mt-8">
           <Suspense fallback={<div className="animate-pulse h-12 bg-gray-200 rounded w-full mb-8"></div>}>
             <CandidateFilterClient
-              locations={locations}
-              roleTypes={roleTypes}
               onFiltersChange={setFilters}
             />
           </Suspense>
