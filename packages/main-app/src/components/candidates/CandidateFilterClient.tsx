@@ -78,68 +78,62 @@ export function CandidateFilterClient({
   const [isRolesOpen, setIsRolesOpen] = useState(false)
   const [roleSearch, setRoleSearch] = useState('')
 
-  // Use selectedRoles directly for checkbox state to avoid recreation issues
-  const currentFilters: CandidateFilters = {
-    searchQuery: searchQuery || undefined,
-    openToWork: searchParams.get('openToWork') === 'true' || undefined,
-    roles: selectedRoles,
-  }
-  
-  // Filter roles based on search
-  const filteredRoles = PROFESSIONAL_ROLES.filter(role =>
-    role.toLowerCase().includes(roleSearch.toLowerCase())
-  )
+     // Filter roles based on search
+   const filteredRoles = PROFESSIONAL_ROLES.filter(role =>
+     role.toLowerCase().includes(roleSearch.toLowerCase())
+   )
 
-  const handleFiltersChange = useCallback(
-    (newFilters: CandidateFilters) => {
-      // Update local state for selected roles
-      if (newFilters.roles !== undefined) {
-        setSelectedRoles(newFilters.roles || [])
-      }
-      
-      // Update URL parameters
-      const params = new URLSearchParams(searchParams)
-      if (newFilters.searchQuery) {
-        params.set('search', newFilters.searchQuery)
-      } else {
-        params.delete('search')
-      }
-      if (newFilters.roles && newFilters.roles.length > 0) {
-        params.set('roles', newFilters.roles.join(','))
-      } else {
-        params.delete('roles')
-      }
-      if (newFilters.openToWork) {
-        params.set('openToWork', 'true')
-      } else {
-        params.delete('openToWork')
-      }
-      
-      // Update the URL
-      router.push(`?${params.toString()}`)
-      
-      onFiltersChange(newFilters)
-    },
-    [onFiltersChange, router, searchParams]
-  )
+   const handleFiltersChange = useCallback(
+     (newFilters: CandidateFilters) => {
+       // Update local state for selected roles
+       if (newFilters.roles !== undefined) {
+         setSelectedRoles(newFilters.roles || [])
+       }
+       
+       // Update URL parameters
+       const params = new URLSearchParams(searchParams)
+       if (newFilters.searchQuery) {
+         params.set('search', newFilters.searchQuery)
+       } else {
+         params.delete('search')
+       }
+       if (newFilters.roles && newFilters.roles.length > 0) {
+         params.set('roles', newFilters.roles.join(','))
+       } else {
+         params.delete('roles')
+       }
+       if (newFilters.openToWork) {
+         params.set('openToWork', 'true')
+       } else {
+         params.delete('openToWork')
+       }
+       
+       // Update the URL
+       router.push(`?${params.toString()}`)
+       
+       onFiltersChange(newFilters)
+     },
+     [onFiltersChange, router, searchParams]
+   )
 
-  // Sync selectedRoles with URL params when they change
-  useEffect(() => {
-    const urlRoles = searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
-    setSelectedRoles(urlRoles)
-  }, [searchParams])
+   // Sync selectedRoles with URL params when they change
+   useEffect(() => {
+     const urlRoles = searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
+     setSelectedRoles(urlRoles)
+   }, [searchParams])
 
-     // Debounced search effect
+   // Debounced search effect
    useEffect(() => {
      const timer = setTimeout(() => {
        onFiltersChange({
-         ...currentFilters,
          searchQuery: searchQuery || undefined,
+         openToWork: searchParams.get('openToWork') === 'true' || undefined,
+         roles: selectedRoles,
        })
      }, 300) // 300ms delay
 
      return () => clearTimeout(timer)
-   }, [searchQuery, onFiltersChange, currentFilters])
+   }, [searchQuery, onFiltersChange, searchParams, selectedRoles])
   
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -193,12 +187,12 @@ export function CandidateFilterClient({
               onClick={() => setIsRolesOpen(!isRolesOpen)}
               className="inline-flex items-center justify-between w-56 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
             >
-              <span className="truncate">
-                {currentFilters.roles && currentFilters.roles.length > 0
-                  ? `${currentFilters.roles.length} role${currentFilters.roles.length === 1 ? '' : 's'} selected`
-                  : 'Select professional roles'
-                }
-              </span>
+                             <span className="truncate">
+                 {selectedRoles && selectedRoles.length > 0
+                   ? `${selectedRoles.length} role${selectedRoles.length === 1 ? '' : 's'} selected`
+                   : 'Select professional roles'
+                 }
+               </span>
               <svg className="ml-2 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
               </svg>
@@ -279,14 +273,15 @@ export function CandidateFilterClient({
 
                  {/* Status Filter */}
          <div className="relative">
-           <select
-             value={currentFilters.openToWork ? 'true' : ''}
-             onChange={(e) =>
-               handleFiltersChange({
-                 ...currentFilters,
-                 openToWork: e.target.value === 'true' ? true : undefined,
-               })
-             }
+                    <select
+           value={searchParams.get('openToWork') === 'true' ? 'true' : ''}
+           onChange={(e) =>
+             handleFiltersChange({
+               searchQuery: searchQuery || undefined,
+               openToWork: e.target.value === 'true' ? true : undefined,
+               roles: selectedRoles,
+             })
+           }
              className="appearance-none inline-flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
            >
              <option value="">All Professionals</option>
@@ -298,12 +293,12 @@ export function CandidateFilterClient({
          </div>
       </div>
 
-      {/* Selected Roles Tags */}
-      {currentFilters.roles && currentFilters.roles.length > 0 && (
+             {/* Selected Roles Tags */}
+       {selectedRoles && selectedRoles.length > 0 && (
         <div className="mt-3 pt-3 border-t border-gray-200">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-gray-600">Selected roles:</span>
-            {currentFilters.roles.map((role) => (
+                         {selectedRoles.map((role) => (
               <span
                 key={role}
                 className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-800 rounded-full font-medium"
