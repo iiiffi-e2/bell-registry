@@ -40,14 +40,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '9')
     const skip = (page - 1) * limit
 
-    // Debug logging for search
-    console.log('Professionals API - searchQuery:', searchQuery);
-    console.log('Professionals API - location:', location);
-    console.log('Professionals API - roleType:', roleType);
-
     const where = {
       // Only show approved profiles in public listings
-      status: 'APPROVED',
+      status: 'APPROVED' as const,
       // Basic profile completion requirements
       NOT: {
         OR: [
