@@ -65,7 +65,7 @@ export function CandidateFilterClient({
 }: CandidateFilterClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  
+
   // Use local state for search query to make it more responsive
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   
@@ -83,49 +83,50 @@ export function CandidateFilterClient({
      role.toLowerCase().includes(roleSearch.toLowerCase())
    )
 
-   const handleFiltersChange = useCallback(
-     (newFilters: CandidateFilters) => {
-       // Update local state for selected roles
-       if (newFilters.roles !== undefined) {
-         setSelectedRoles(newFilters.roles || [])
-       }
-       
-       // Update URL parameters
+   // Function to update URL without triggering search
+   const updateURL = useCallback(
+     (filters: CandidateFilters) => {
        const params = new URLSearchParams(searchParams)
-       if (newFilters.searchQuery) {
-         params.set('search', newFilters.searchQuery)
+       if (filters.searchQuery) {
+         params.set('search', filters.searchQuery)
        } else {
          params.delete('search')
        }
-       if (newFilters.roles && newFilters.roles.length > 0) {
-         params.set('roles', newFilters.roles.join(','))
+       if (filters.roles && filters.roles.length > 0) {
+         params.set('roles', filters.roles.join(','))
        } else {
          params.delete('roles')
        }
-       if (newFilters.openToWork) {
+       if (filters.openToWork) {
          params.set('openToWork', 'true')
        } else {
          params.delete('openToWork')
        }
        
-       // Update the URL
-       router.push(`?${params.toString()}`)
-       
-       onFiltersChange(newFilters)
+       router.replace(`?${params.toString()}`, { scroll: false })
      },
-     [onFiltersChange, router, searchParams]
+     [router, searchParams]
    )
 
-   // Sync selectedRoles with URL params when they change
+   // Function to trigger actual search
+   const triggerSearch = useCallback(
+     (filters: CandidateFilters) => {
+       updateURL(filters)
+       onFiltersChange(filters)
+     },
+     [onFiltersChange, updateURL]
+   )
+
+   // Sync selectedRoles with URL params when they change (only on mount or external URL changes)
    useEffect(() => {
      const urlRoles = searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
      setSelectedRoles(urlRoles)
    }, [searchParams])
 
-   // Debounced search effect
+   // Debounced search effect - only for search query changes
    useEffect(() => {
      const timer = setTimeout(() => {
-       onFiltersChange({
+       triggerSearch({
          searchQuery: searchQuery || undefined,
          openToWork: searchParams.get('openToWork') === 'true' || undefined,
          roles: selectedRoles,
@@ -133,7 +134,7 @@ export function CandidateFilterClient({
      }, 300) // 300ms delay
 
      return () => clearTimeout(timer)
-   }, [searchQuery, onFiltersChange, searchParams, selectedRoles])
+   }, [searchQuery, triggerSearch, searchParams, selectedRoles])
   
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -213,13 +214,15 @@ export function CandidateFilterClient({
                      />
                                            <button
                         type="button"
-                        onClick={() => {
-                          handleFiltersChange({ 
-                            searchQuery: searchQuery || undefined,
-                            openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                            roles: undefined
-                          })
-                        }}
+                                               onClick={() => {
+                         // Clear roles locally and update URL
+                         setSelectedRoles([])
+                         updateURL({
+                           searchQuery: searchQuery || undefined,
+                           openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                           roles: undefined
+                         })
+                       }}
                         className="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1 hover:bg-red-50 rounded whitespace-nowrap"
                       >
                         Clear all
@@ -239,21 +242,19 @@ export function CandidateFilterClient({
                            type="checkbox"
                            checked={selectedRoles.includes(role)}
                           onChange={(e) => {
-                            if (e.target.checked) {
-                              const newRoles = [...selectedRoles, role]
-                              handleFiltersChange({ 
-                                searchQuery: searchQuery || undefined,
-                                openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                                roles: newRoles
-                              })
-                            } else {
-                              const newRoles = selectedRoles.filter(r => r !== role)
-                              handleFiltersChange({
-                                searchQuery: searchQuery || undefined,
-                                openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                                roles: newRoles.length > 0 ? newRoles : undefined,
-                              })
-                            }
+                            const newRoles = e.target.checked
+                              ? [...selectedRoles, role]
+                              : selectedRoles.filter(r => r !== role)
+                            
+                            // Update local state immediately (no search triggered)
+                            setSelectedRoles(newRoles)
+                            
+                            // Update URL without triggering search
+                            updateURL({
+                              searchQuery: searchQuery || undefined,
+                              openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                              roles: newRoles.length > 0 ? newRoles : undefined,
+                            })
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
                         />
@@ -273,20 +274,23 @@ export function CandidateFilterClient({
 
                  {/* Status Filter */}
          <div className="relative">
-                    <select
+        <select
            value={searchParams.get('openToWork') === 'true' ? 'true' : ''}
-           onChange={(e) =>
-             handleFiltersChange({
+           onChange={(e) => {
+             const openToWork = e.target.value === 'true' ? true : undefined
+             
+             // Trigger search immediately for status changes
+             triggerSearch({
                searchQuery: searchQuery || undefined,
-               openToWork: e.target.value === 'true' ? true : undefined,
+               openToWork: openToWork,
                roles: selectedRoles,
              })
-           }
+           }}
              className="appearance-none inline-flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-           >
-             <option value="">All Professionals</option>
-             <option value="true">Open to Work</option>
-           </select>
+        >
+          <option value="">All Professionals</option>
+          <option value="true">Open to Work</option>
+        </select>
            <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
            </svg>
@@ -307,7 +311,12 @@ export function CandidateFilterClient({
                 <button
                   onClick={() => {
                     const newRoles = selectedRoles.filter(r => r !== role)
-                    handleFiltersChange({
+                    
+                    // Update local state immediately (no search triggered)
+                    setSelectedRoles(newRoles)
+                    
+                    // Update URL without triggering search
+                    updateURL({
                       searchQuery: searchQuery || undefined,
                       openToWork: searchParams.get('openToWork') === 'true' || undefined,
                       roles: newRoles.length > 0 ? newRoles : undefined,
@@ -321,16 +330,20 @@ export function CandidateFilterClient({
               </span>
             ))}
             <button
-              onClick={() => handleFiltersChange({ 
-                searchQuery: searchQuery || undefined,
-                openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                roles: undefined
-              })}
+              onClick={() => {
+                // Clear roles locally and update URL
+                setSelectedRoles([])
+                updateURL({
+                  searchQuery: searchQuery || undefined,
+                  openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                  roles: undefined
+                })
+              }}
               className="text-xs text-red-600 hover:text-red-800 font-medium underline"
             >
               Clear all
             </button>
-          </div>
+      </div>
         </div>
       )}
     </div>
