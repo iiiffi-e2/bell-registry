@@ -129,17 +129,17 @@ export function CandidateFilterClient({
     setSelectedRoles(urlRoles)
   }, [searchParams])
 
-  // Debounced search effect
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onFiltersChange({
-        ...currentFilters,
-        searchQuery: searchQuery || undefined,
-      })
-    }, 300) // 300ms delay
+     // Debounced search effect
+   useEffect(() => {
+     const timer = setTimeout(() => {
+       onFiltersChange({
+         ...currentFilters,
+         searchQuery: searchQuery || undefined,
+       })
+     }, 300) // 300ms delay
 
-    return () => clearTimeout(timer)
-  }, [searchQuery, onFiltersChange])
+     return () => clearTimeout(timer)
+   }, [searchQuery, onFiltersChange, currentFilters])
   
   // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
@@ -267,9 +267,9 @@ export function CandidateFilterClient({
                       </label>
                     ))
                   ) : (
-                    <div className="px-3 py-2 text-sm text-gray-500">
-                      No roles found matching "{roleSearch}"
-                    </div>
+                                         <div className="px-3 py-2 text-sm text-gray-500">
+                       No roles found matching &ldquo;{roleSearch}&rdquo;
+                     </div>
                   )}
                 </div>
               </div>
