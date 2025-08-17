@@ -59,6 +59,27 @@ export default function EmployerJobsPage() {
     );
   }
 
+  useEffect(() => {
+    // Only fetch jobs if user is authorized
+    if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
+      async function fetchJobs() {
+        try {
+          const response = await fetch("/api/dashboard/employer/jobs");
+          if (response.ok) {
+            const data = await response.json();
+            setJobs(data.jobs || []);
+          }
+        } catch (error) {
+          console.error("Error fetching jobs:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      fetchJobs();
+    }
+  }, [session.user.role]);
+
   // Redirect unauthorized users
   if (session.user.role === "PROFESSIONAL") {
     router.push("/dashboard");
@@ -69,24 +90,6 @@ export default function EmployerJobsPage() {
     router.push("/dashboard");
     return null;
   }
-
-  useEffect(() => {
-    async function fetchJobs() {
-      try {
-        const response = await fetch("/api/dashboard/employer/jobs");
-        if (response.ok) {
-          const data = await response.json();
-          setJobs(data.jobs || []);
-        }
-      } catch (error) {
-        console.error("Error fetching jobs:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchJobs();
-  }, []);
 
   if (loading) {
     return (
