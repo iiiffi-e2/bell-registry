@@ -435,16 +435,27 @@ export default function CandidateProfilePage({
                   </div>
                 )}
 
-                {/* Salary Range */}
+                {/* Pay Range */}
                 {(profile.payRangeMin || profile.payRangeMax) && (
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Salary Expectations</h4>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
                     <p className="text-gray-900">
-                      {profile.payRangeMin && profile.payRangeMax
-                        ? `$${profile.payRangeMin.toLocaleString()} - $${profile.payRangeMax.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`
-                        : profile.payRangeMin
-                        ? `$${profile.payRangeMin.toLocaleString()}+${profile.payType === 'Hourly' ? '/hr' : ''}`
-                        : `Up to $${profile.payRangeMax!.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`}
+                      {profile.payRangeMin && profile.payRangeMax ? (
+                        <>
+                          ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
+                        </>
+                      ) : profile.payRangeMin ? (
+                        <>
+                          From ${profile.payRangeMin.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
+                        </>
+                      ) : (
+                        <>
+                          Up to ${profile.payRangeMax?.toLocaleString()}
+                          {profile.payRangeMax && profile.payType === 'Hourly' && '/hr'}
+                        </>
+                      )}
                     </p>
                   </div>
                 )}
@@ -452,13 +463,15 @@ export default function CandidateProfilePage({
                 {/* Seeking Opportunities */}
                 {profile.seekingOpportunities.length > 0 && (
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Seeking</h4>
-                    <div className="space-y-1">
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Seeking Opportunities</h4>
+                    <div className="flex flex-wrap gap-2">
                       {profile.seekingOpportunities.map((opportunity, index) => (
-                        <div key={index} className="text-sm text-gray-900 flex items-center">
-                          <CheckCircleIcon className="h-4 w-4 mr-2 text-green-500" />
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                        >
                           {opportunity}
-                        </div>
+                        </span>
                       ))}
                     </div>
                   </div>

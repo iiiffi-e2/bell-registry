@@ -267,15 +267,14 @@ export default function PublicProfilePage({
                     {profile.experience.map((exp, index) => (
                       <div key={index} className="border-l-4 border-gray-200 pl-4">
                         <p className="text-sm font-medium text-gray-900">
-                          <BriefcaseIcon className="h-4 w-4 inline mr-1" />
                           {exp.title} at {exp.employer}
                         </p>
                         <p className="text-sm text-gray-500">
                           {exp.startDate} - {exp.endDate || "Present"}
                         </p>
-                        <div className="mt-1">
-                          <FormattedText text={exp.description} className="text-sm text-gray-500" />
-                        </div>
+                        <p className="mt-1 text-sm text-gray-500">
+                          {exp.description}
+                        </p>
                       </div>
                     ))}
                   </div>
@@ -411,19 +410,30 @@ export default function PublicProfilePage({
               {/* Pay Range */}
               {(profile.payRangeMin || profile.payRangeMax) && (
                 <div className="bg-gray-50 p-4 rounded-lg">
-                  <h4 className="text-sm font-medium text-gray-500 mb-2">Salary Expectations</h4>
+                  <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
                   <p className="text-gray-900">
-                    {profile.payRangeMin && profile.payRangeMax
-                      ? `$${profile.payRangeMin.toLocaleString()} - $${profile.payRangeMax.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`
-                      : profile.payRangeMin
-                      ? `$${profile.payRangeMin.toLocaleString()}+${profile.payType === 'Hourly' ? '/hr' : ''}`
-                      : `Up to $${profile.payRangeMax!.toLocaleString()}${profile.payType === 'Hourly' ? '/hr' : ''}`}
+                    {profile.payRangeMin && profile.payRangeMax ? (
+                      <>
+                        ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
+                        {profile.payType === 'Hourly' && '/hr'}
+                      </>
+                    ) : profile.payRangeMin ? (
+                      <>
+                        From ${profile.payRangeMin.toLocaleString()}
+                        {profile.payType === 'Hourly' && '/hr'}
+                      </>
+                    ) : (
+                      <>
+                        Up to ${profile.payRangeMax?.toLocaleString()}
+                        {profile.payType === 'Hourly' && '/hr'}
+                      </>
+                    )}
                   </p>
                 </div>
               )}
 
               {/* Resume */}
-              {!profile.user.isAnonymous && profile.resumeUrl && (
+              {profile.resumeUrl && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="text-sm font-medium text-gray-500 mb-2">Resume</h4>
                   <a
@@ -439,14 +449,14 @@ export default function PublicProfilePage({
               )}
 
               {/* Photo Gallery */}
-              {!profile.user.isAnonymous && profile.additionalPhotos.length > 0 && (
+              {profile.additionalPhotos.length > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <PhotoGallery photos={profile.additionalPhotos} />
                 </div>
               )}
 
               {/* Media Files */}
-              {!profile.user.isAnonymous && profile.mediaUrls.length > 0 && (
+              {profile.mediaUrls.length > 0 && (
                 <MediaViewer mediaUrls={profile.mediaUrls} />
               )}
             </div>

@@ -457,36 +457,33 @@ export default function CandidateProfilePage({
                   </div>
                 )}
 
-                {/* Salary Expectations */}
+                {/* Pay Range */}
                 {(profile.payRangeMin || profile.payRangeMax) && (
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Salary Expectations</h4>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
                     <p className="text-gray-900">
-                      {(() => {
-                        const formatter = new Intl.NumberFormat("en-US", {
-                          style: "currency",
-                          currency: "USD",
-                          maximumFractionDigits: 0,
-                        });
-                        
-                        if (profile.payRangeMin && profile.payRangeMax) {
-                          return `${formatter.format(profile.payRangeMin)} - ${formatter.format(profile.payRangeMax)}`;
-                        } else if (profile.payRangeMin) {
-                          return `${formatter.format(profile.payRangeMin)}+`;
-                        } else if (profile.payRangeMax) {
-                          return `Up to ${formatter.format(profile.payRangeMax)}`;
-                        }
-                        return null;
-                      })()}
-                      {profile.payType && profile.payType !== 'Salary' && (
-                        <span className="text-sm text-gray-500 ml-1">({profile.payType})</span>
+                      {profile.payRangeMin && profile.payRangeMax ? (
+                        <>
+                          ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
+                        </>
+                      ) : profile.payRangeMin ? (
+                        <>
+                          From ${profile.payRangeMin.toLocaleString()}
+                          {profile.payType === 'Hourly' && '/hr'}
+                        </>
+                      ) : (
+                        <>
+                          Up to ${profile.payRangeMax?.toLocaleString()}
+                          {profile.payRangeMax && profile.payType === 'Hourly' && '/hr'}
+                        </>
                       )}
                     </p>
                   </div>
                 )}
 
-                {/* Resume - Hidden for anonymous profiles */}
-                {!profile.user.isAnonymous && profile.resumeUrl && (
+                {/* Resume */}
+                {profile.resumeUrl && (
                   <div className="bg-gray-50 p-4 rounded-lg">
                     <h4 className="text-sm font-medium text-gray-500 mb-2">Resume</h4>
                     <a
