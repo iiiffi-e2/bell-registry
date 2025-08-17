@@ -202,7 +202,7 @@ export default function SavedCandidatesPage() {
                         <ProfilePictureWithBadge
                           imageUrl={candidate.user.image}
                           displayName={getDisplayName(candidate)}
-                          isOpenToWork={candidate.openToWork}
+                          isOpenToWork={false}
                           isAnonymous={candidate.user.isAnonymous}
                           size="md"
                         />

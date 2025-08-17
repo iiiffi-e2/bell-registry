@@ -218,15 +218,14 @@ export default function ProfessionalProfilePage({
               <div className="lg:col-span-2">
                 {/* Profile Header */}
                 <div className="flex items-center mb-6">
-                  <div className="flex-shrink-0">
-                    <ProfilePictureWithBadge
-                      imageUrl={profile.user.image}
-                      displayName={displayName}
-                      isOpenToWork={profile.openToWork}
-                      isAnonymous={profile.user.isAnonymous}
-                      size="lg"
-                    />
-                  </div>
+                                     <div className="flex-shrink-0">
+                     <ProfilePictureWithBadge
+                       imageUrl={profile.user.image}
+                       displayName={displayName}
+                       isAnonymous={profile.user.isAnonymous}
+                       size="lg"
+                     />
+                   </div>
                   <div className="ml-6">
                     <div className="flex items-center gap-3">
                       <h1 className="text-2xl font-bold text-gray-900">

@@ -216,13 +216,13 @@ export default function CandidateProfilePage({
                 {/* Profile Header */}
                 <div className="flex items-center mb-6">
                   <div className="flex-shrink-0">
-                    <ProfilePictureWithBadge
-                      imageUrl={profile.user.image}
-                      displayName={getDisplayName(profile)}
-                      isOpenToWork={profile.openToWork}
-                      isAnonymous={profile.user.isAnonymous}
-                      size="lg"
-                    />
+                                       <ProfilePictureWithBadge
+                     imageUrl={profile.user.image}
+                     displayName={getDisplayName(profile)}
+                     isOpenToWork={false}
+                     isAnonymous={profile.user.isAnonymous}
+                     size="lg"
+                   />
                   </div>
                   <div className="ml-6">
                     <div className="flex items-center gap-3">

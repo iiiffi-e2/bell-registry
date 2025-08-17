@@ -195,13 +195,13 @@ export default function ProfilePage() {
                 {/* Profile Header */}
                 <div className="flex items-center mb-6">
                   <div className="flex-shrink-0">
-                    <ProfilePictureWithBadge
-                      imageUrl={profile.user.image}
-                      displayName={`${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()}
-                      isOpenToWork={profile.openToWork}
-                      isAnonymous={false}
-                      size="lg"
-                    />
+                                       <ProfilePictureWithBadge
+                     imageUrl={profile.user.image}
+                     displayName={`${profile.user.firstName || ''} ${profile.user.lastName || ''}`.trim()}
+                     isOpenToWork={false}
+                     isAnonymous={false}
+                     size="lg"
+                   />
                   </div>
                   <div className="ml-6">
                     <div className="flex items-center gap-3">

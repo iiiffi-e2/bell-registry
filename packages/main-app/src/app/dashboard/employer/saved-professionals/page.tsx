@@ -198,6 +198,7 @@ export default function SavedProfessionalsPage() {
                           profile={professional}
                           size="md"
                           className="h-12 w-12"
+                          hideBadge={true}
                         />
                         <div className="flex-1">
                           <div className="flex items-center gap-2">

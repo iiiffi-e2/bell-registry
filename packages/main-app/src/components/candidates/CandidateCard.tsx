@@ -172,7 +172,7 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
               <ProfilePictureWithBadge
                 imageUrl={candidate.user.image}
                 displayName={displayName}
-                isOpenToWork={candidate.openToWork || false}
+                isOpenToWork={false}
                 isAnonymous={candidate.user.isAnonymous || false}
                 size="md"
                 hideBadge={true}
