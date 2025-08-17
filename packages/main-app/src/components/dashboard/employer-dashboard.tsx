@@ -12,10 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Eye, Users, Bookmark, Briefcase, Plus, ArrowRight, Pencil } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { stripHtmlAndTruncate } from "@/lib/utils";
 import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
+import { EmployerOnly } from "@/components/auth/role-guard";
 
 interface Job {
   id: number;
@@ -39,7 +39,6 @@ interface Stats {
 }
 
 export function EmployerDashboard() {
-  const { data: session } = useSession();
   const [stats, setStats] = useState<Stats>({
     activeJobs: 0,
     totalApplications: 0,
@@ -97,16 +96,17 @@ export function EmployerDashboard() {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {session?.user?.name?.split(' ')[0] || 'Employer'}
-        </h1>
-        <p className="mt-2 text-gray-600">
-          Manage your job listings and view candidate applications
-        </p>
-      </div>
+    <EmployerOnly>
+      <div className="space-y-8">
+        {/* Welcome Section */}
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Welcome back, Employer
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Manage your job listings and view candidate applications
+          </p>
+        </div>
 
       {/* Subscription Alert */}
       <SubscriptionAlert />
@@ -286,5 +286,6 @@ export function EmployerDashboard() {
         </div>
       </Card>
     </div>
+    </EmployerOnly>
   );
 } 

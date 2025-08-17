@@ -159,7 +159,7 @@ interface SubscriptionStatus {
 
 export default function PostJobPage() {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
   const [customTitle, setCustomTitle] = useState<string>("");
@@ -169,6 +169,23 @@ export default function PostJobPage() {
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const subscriptionCheckedRef = useRef(false);
+
+  // Role-based access control
+  useEffect(() => {
+    if (status === "authenticated" && session?.user?.role) {
+      // Redirect professionals away from employer screens
+      if (session.user.role === "PROFESSIONAL") {
+        router.push("/dashboard");
+        return;
+      }
+      
+      // Only allow employers and agencies
+      if (session.user.role !== "EMPLOYER" && session.user.role !== "AGENCY") {
+        router.push("/dashboard");
+        return;
+      }
+    }
+  }, [session, status, router]);
 
   // Add this alert to verify we're on the correct page
   useEffect(() => {
@@ -338,6 +355,26 @@ export default function PostJobPage() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // Show loading state while checking authentication and role
+  if (status === "loading" || !session?.user?.role) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect unauthorized users
+  if (session.user.role === "PROFESSIONAL") {
+    router.push("/dashboard");
+    return null;
+  }
+
+  if (session.user.role !== "EMPLOYER" && session.user.role !== "AGENCY") {
+    router.push("/dashboard");
+    return null;
   }
 
   // Show loading state while checking subscription

@@ -57,9 +57,18 @@ export default function SavedCandidatesPage() {
 
   useEffect(() => {
     // Check if user is authorized
-    if (session && session.user?.role !== 'EMPLOYER' && session.user?.role !== 'AGENCY') {
-      router.push('/dashboard');
-      return;
+    if (session && session.user?.role) {
+      // Redirect professionals away from employer screens
+      if (session.user.role === 'PROFESSIONAL') {
+        router.push('/dashboard');
+        return;
+      }
+      
+      // Only allow employers and agencies
+      if (session.user.role !== 'EMPLOYER' && session.user.role !== 'AGENCY') {
+        router.push('/dashboard');
+        return;
+      }
     }
 
     if (session) {

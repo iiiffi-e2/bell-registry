@@ -54,13 +54,45 @@ export default function EmployerApplicationsPage() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    if (session?.user?.role !== "EMPLOYER") {
-      router.push("/dashboard");
-      return;
+    if (session?.user?.role) {
+      // Redirect professionals away from employer screens
+      if (session.user.role === "PROFESSIONAL") {
+        router.push("/dashboard");
+        return;
+      }
+      
+      // Only allow employers and agencies
+      if (session.user.role !== "EMPLOYER" && session.user.role !== "AGENCY") {
+        router.push("/dashboard");
+        return;
+      }
     }
-    fetchApplications();
-    fetchJobs();
+    
+    if (session) {
+      fetchApplications();
+      fetchJobs();
+    }
   }, [session, router]);
+
+  // Show loading state while checking authentication and role
+  if (!session?.user?.role) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect unauthorized users
+  if (session.user.role === "PROFESSIONAL") {
+    router.push("/dashboard");
+    return null;
+  }
+
+  if (session.user.role !== "EMPLOYER" && session.user.role !== "AGENCY") {
+    router.push("/dashboard");
+    return null;
+  }
 
   const fetchApplications = async () => {
     try {

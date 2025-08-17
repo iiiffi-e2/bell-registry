@@ -147,6 +147,12 @@ export default function CandidateProfilePage({
       return;
     }
 
+    // Redirect professionals away from employer screens
+    if (session.user.role === "PROFESSIONAL") {
+      router.push("/dashboard");
+      return;
+    }
+
     if (session.user.role !== "EMPLOYER" && session.user.role !== "AGENCY") {
       router.push("/dashboard");
       return;
