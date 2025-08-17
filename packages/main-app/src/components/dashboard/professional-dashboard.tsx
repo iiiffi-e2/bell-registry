@@ -157,13 +157,6 @@ export function ProfessionalDashboard() {
       change: `${applicationStats.pending} pending`,
       changeType: "positive",
     },
-    {
-      name: "Interviews Scheduled",
-      stat: applicationStats.interview.toString(),
-      icon: CalendarIcon,
-      change: applicationStats.interview > 0 ? "Active" : "None scheduled",
-      changeType: applicationStats.interview > 0 ? "positive" : "neutral",
-    },
   ];
 
   const getStatusColor = (status: string) => {
@@ -422,23 +415,7 @@ export function ProfessionalDashboard() {
           <AIJobMatches />
 
           {/* Widgets Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Upcoming Interviews */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Upcoming Interviews</h3>
-              </div>
-              <div className="flex-1 flex items-center justify-center py-8">
-                <div className="text-center">
-                  <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <h4 className="mt-2 text-sm font-medium text-gray-900">No interviews scheduled</h4>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Interviews will appear here when employers schedule them.
-                  </p>
-                </div>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Recommended Jobs */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
               <div className="p-6">
