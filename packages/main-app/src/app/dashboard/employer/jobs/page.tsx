@@ -33,7 +33,7 @@ export default function EmployerJobsPage() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Role-based access control
+  // Role-based access control and job fetching - ALL hooks must be at the top
   useEffect(() => {
     if (status === "authenticated" && session?.user?.role) {
       // Redirect professionals away from employer screens
@@ -47,6 +47,25 @@ export default function EmployerJobsPage() {
         router.push("/dashboard");
         return;
       }
+
+      // Only fetch jobs if user is authorized
+      if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
+        async function fetchJobs() {
+          try {
+            const response = await fetch("/api/dashboard/employer/jobs");
+            if (response.ok) {
+              const data = await response.json();
+              setJobs(data.jobs || []);
+            }
+          } catch (error) {
+            console.error("Error fetching jobs:", error);
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        fetchJobs();
+      }
     }
   }, [session, status, router]);
 
@@ -58,27 +77,6 @@ export default function EmployerJobsPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    // Only fetch jobs if user is authorized
-    if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
-      async function fetchJobs() {
-        try {
-          const response = await fetch("/api/dashboard/employer/jobs");
-          if (response.ok) {
-            const data = await response.json();
-            setJobs(data.jobs || []);
-          }
-        } catch (error) {
-          console.error("Error fetching jobs:", error);
-        } finally {
-          setLoading(false);
-        }
-      }
-
-      fetchJobs();
-    }
-  }, [session.user.role]);
 
   // Redirect unauthorized users
   if (session.user.role === "PROFESSIONAL") {
