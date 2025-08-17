@@ -55,7 +55,7 @@ export function OpenToWorkToggle({ isOpenToWork, onToggle, isLoading }: OpenToWo
             onClick={handleToggle}
             disabled={isLoading || isUpdating}
             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-              isOpenToWork ? 'bg-green-600' : 'bg-gray-200'
+                                    isOpenToWork ? 'bg-green-600' : 'bg-slate-300'
             }`}
           >
             <span className="sr-only">Toggle open to work status</span>

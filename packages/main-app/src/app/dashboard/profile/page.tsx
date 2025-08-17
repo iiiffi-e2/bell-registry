@@ -142,7 +142,7 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="md:flex md:items-center md:justify-between mb-8">
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+            <h2 className="text-2xl font-bold leading-7 text-slate-900 sm:text-3xl sm:truncate">
               My Profile
             </h2>
             {profile?.user.profileSlug && (
@@ -160,9 +160,9 @@ export default function ProfilePage() {
           <div className="mt-4 flex md:mt-0 md:ml-4">
             <button
               onClick={() => router.push("/dashboard/profile/edit")}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <PencilSquareIcon className="h-5 w-5 mr-2 text-gray-500" />
+              <PencilSquareIcon className="h-5 w-5 mr-2 text-slate-500" />
               Edit Profile
             </button>
           </div>

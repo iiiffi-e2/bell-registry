@@ -150,15 +150,15 @@ export default function DashboardLayout({
 
   return (
     <SuspensionCheck>
-      <div className="flex min-h-screen bg-gray-50">
+      <div className="flex min-h-screen bg-slate-50">
         {/* Sidebar */}
         <div className={
-          `fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out
+          `fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-slate-800 border-r border-slate-700 transition-transform duration-200 ease-in-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0`
         }>
           {/* Header - Fixed at top */}
-          <div className="flex h-16 items-center px-6 pt-4 border-b border-gray-100 flex-shrink-0">
+          <div className="flex h-16 items-center px-6 pt-4 border-b border-slate-700 flex-shrink-0">
             <Link href="/dashboard" className="hidden lg:block max-w-[175px]">
               <Image
                 src="/images/brand/logo-full.png"
@@ -176,7 +176,7 @@ export default function DashboardLayout({
             <nav className="px-4 py-6 space-y-2">
               {status === "loading" ? (
                 <div className="flex items-center justify-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
                 </div>
               ) : (
                 navigation.map((item) => (
@@ -187,11 +187,11 @@ export default function DashboardLayout({
                           type="button"
                           onClick={() => setOpenSubmenu(openSubmenu === item.name ? null : item.name)}
                           className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
-                            ${pathname?.startsWith(item.href) ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                            ${pathname?.startsWith(item.href) ? 'bg-slate-700 text-blue-300' : 'text-slate-300 hover:bg-slate-700 hover:text-blue-300'}
                           `}
                         >
                           <div className="flex items-center">
-                            <item.icon className={`h-5 w-5 mr-3 ${pathname?.startsWith(item.href) ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                            <item.icon className={`h-5 w-5 mr-3 ${pathname?.startsWith(item.href) ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'}`} />
                             {item.name}
                           </div>
                           <ChevronDown
@@ -207,7 +207,7 @@ export default function DashboardLayout({
                                 key={subItem.name}
                                 href={subItem.href}
                                 className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                                  ${pathname === subItem.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                                  ${pathname === subItem.href ? 'bg-slate-700 text-blue-300' : 'text-slate-300 hover:bg-slate-700 hover:text-blue-300'}
                                 `}
                                 onClick={() => setSidebarOpen(false)}
                               >
@@ -221,12 +221,12 @@ export default function DashboardLayout({
                       <Link
                         href={item.href}
                         className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
-                          ${pathname === item.href ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'}
+                          ${pathname === item.href ? 'bg-slate-700 text-blue-300' : 'text-slate-300 hover:bg-slate-700 hover:text-blue-300'}
                         `}
                         onClick={() => setSidebarOpen(false)}
                       >
                         <div className="flex items-center">
-                          <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-600' : 'text-gray-400 group-hover:text-blue-600'}`} />
+                          <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'}`} />
                           {item.name}
                         </div>
                         {item.name === 'Messages' && <MessagesMenuBadge />}
@@ -239,7 +239,7 @@ export default function DashboardLayout({
           </div>
           
           {/* Fixed Bottom Section - Feedback and Sign Out */}
-          <div className="px-4 py-6 space-y-2 border-t border-gray-100 flex-shrink-0">
+          <div className="px-4 py-6 space-y-2 border-t border-slate-700 flex-shrink-0">
             {secondaryNav.map((item) => (
               item.action ? (
                 <button
@@ -247,14 +247,14 @@ export default function DashboardLayout({
                   onClick={item.action}
                   className={`flex w-full items-center px-3 py-2 rounded-lg text-base font-medium transition-colors ${
                     item.name === 'Sign Out' 
-                      ? 'text-gray-700 hover:bg-gray-100 hover:text-red-600' 
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-blue-600'
+                      ? 'text-slate-300 hover:bg-slate-700 hover:text-red-400' 
+                      : 'text-slate-300 hover:bg-slate-700 hover:text-blue-300'
                   }`}
                 >
                   <item.icon className={`h-5 w-5 mr-3 ${
                     item.name === 'Sign Out' 
-                      ? 'text-gray-400 group-hover:text-red-600' 
-                      : 'text-gray-400 group-hover:text-blue-600'
+                      ? 'text-slate-400 group-hover:text-red-400' 
+                      : 'text-slate-400 group-hover:text-blue-400'
                   }`} />
                   {item.name}
                 </button>
@@ -262,10 +262,10 @@ export default function DashboardLayout({
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors"
+                  className="flex items-center px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-700 hover:text-blue-300 transition-colors"
                   onClick={() => setSidebarOpen(false)}
                 >
-                  <item.icon className="h-5 w-5 mr-3 text-gray-400 group-hover:text-blue-600" />
+                  <item.icon className="h-5 w-5 mr-3 text-slate-400 group-hover:text-blue-400" />
                   {item.name}
                 </Link>
               )
@@ -278,7 +278,7 @@ export default function DashboardLayout({
         )}
         {/* Hamburger button */}
         <button
-          className="fixed top-4 left-4 z-50 p-2 rounded-md text-gray-500 bg-white shadow lg:hidden"
+          className="fixed top-4 left-4 z-50 p-2 rounded-md text-slate-600 bg-white shadow-lg lg:hidden"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Open sidebar"
         >
@@ -287,9 +287,9 @@ export default function DashboardLayout({
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
           {/* Top bar */}
-          <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-gray-100">
+          <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-200 shadow-sm">
             <div className="flex items-center">
-              <h1 className="hidden md:block text-2xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="hidden md:block text-2xl font-bold text-slate-900">Dashboard</h1>
               <Link href="/dashboard" className="block lg:hidden max-w-[140px] ml-8">
                 <Image
                   src="/images/brand/logo-full.png"
@@ -310,7 +310,7 @@ export default function DashboardLayout({
             <div className="flex items-center space-x-4">
               <button
                 type="button"
-                className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="rounded-full bg-white p-1 text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" aria-hidden="true" />
@@ -318,7 +318,7 @@ export default function DashboardLayout({
               {/* Profile dropdown */}
               <Menu as="div" className="relative ml-3">
                 <div>
-                  <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                  <Menu.Button className="flex rounded-full bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm">
                     <span className="sr-only">Open user menu</span>
                     {imageUrl ? (
                       <Image
@@ -329,7 +329,7 @@ export default function DashboardLayout({
                         height={32}
                       />
                     ) : (
-                      <UserCircleIcon className="h-8 w-8 text-gray-400" />
+                      <UserCircleIcon className="h-8 w-8 text-slate-400" />
                     )}
                   </Menu.Button>
                 </div>
@@ -342,7 +342,7 @@ export default function DashboardLayout({
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none border border-slate-200">
                                                 <Menu.Item>
                               {({ active }) => (
                                 <Link
@@ -351,7 +351,7 @@ export default function DashboardLayout({
                                       ? "/dashboard/profile" 
                                       : "/dashboard/employer/profile"
                                   }
-                                  className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                                  className={`${active ? "bg-slate-50" : ""} block px-4 py-2 text-sm text-slate-700`}
                                 >
                                   Your Profile
                                 </Link>
@@ -361,7 +361,7 @@ export default function DashboardLayout({
                       {({ active }) => (
                         <Link
                           href="/dashboard/settings"
-                          className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
+                          className={`${active ? "bg-slate-50" : ""} block px-4 py-2 text-sm text-slate-700`}
                         >
                           Settings
                         </Link>
@@ -371,7 +371,7 @@ export default function DashboardLayout({
                       {({ active }) => (
                         <button
                           onClick={() => signOut({ callbackUrl: "/login" })}
-                          className={`${active ? "bg-gray-100" : ""} block w-full px-4 py-2 text-left text-sm text-gray-700`}
+                          className={`${active ? "bg-slate-50" : ""} block w-full px-4 py-2 text-left text-sm text-slate-700`}
                         >
                           Sign out
                         </button>
@@ -383,7 +383,7 @@ export default function DashboardLayout({
             </div>
           </div>
           {/* Main content area */}
-          <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+          <main className="flex-1 p-6 bg-slate-50 min-h-screen">
             {/* Survey Banner */}
             {surveyStatus.shouldShowBanner && !isSurveyLoading && (
               <SurveyBanner 

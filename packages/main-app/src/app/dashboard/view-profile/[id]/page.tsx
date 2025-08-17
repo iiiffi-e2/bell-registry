@@ -162,8 +162,8 @@ export default function ProfessionalProfilePage({
       <div className="py-6">
         <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Error</h3>
-            <p className="text-gray-500 mb-4">{error}</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">Error</h3>
+            <p className="text-slate-600 mb-4">{error}</p>
             <button
               onClick={handleBack}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
@@ -181,10 +181,10 @@ export default function ProfessionalProfilePage({
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-gray-600 text-lg font-medium mb-2">Professional not found</div>
+          <div className="text-slate-600 text-lg font-medium mb-2">Professional not found</div>
           <button
             onClick={handleBack}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
             Go Back
@@ -203,7 +203,7 @@ export default function ProfessionalProfilePage({
         <div className="mb-6">
           <button
             onClick={handleBack}
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700"
           >
             <ArrowLeftIcon className="mr-1 h-4 w-4" />
             Back
@@ -211,7 +211,7 @@ export default function ProfessionalProfilePage({
         </div>
 
         {/* Profile Content */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white shadow-lg rounded-lg border border-slate-200">
           <div className="px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Main Content Column */}
@@ -222,27 +222,28 @@ export default function ProfessionalProfilePage({
                      <ProfilePictureWithBadge
                        imageUrl={profile.user.image}
                        displayName={displayName}
+                       isOpenToWork={profile.openToWork}
                        isAnonymous={profile.user.isAnonymous}
                        size="lg"
                      />
                    </div>
                   <div className="ml-6">
                     <div className="flex items-center gap-3">
-                      <h1 className="text-2xl font-bold text-gray-900">
+                      <h1 className="text-2xl font-bold text-slate-900">
                         {displayName}
                       </h1>
                       {profile.openToWork && (
                         <OpenToWorkBadge variant="inline" size="sm" />
                       )}
                     </div>
-                    <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
+                    <p className="mt-1 text-lg text-slate-600">{profile.title || profile.preferredRole || 'Professional'}</p>
                   </div>
                 </div>
 
                 {/* Bio */}
                 {profile.bio && (
-                  <div className="mb-8 bg-gray-50 rounded-lg p-6 border-l-4 border-blue-200">
-                    <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                  <div className="mb-8 bg-slate-50 rounded-lg p-6 border-l-4 border-blue-300">
+                    <h4 className="text-lg font-medium text-slate-900 mb-3 flex items-center">
                       <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Bio</span>
                       Professional Bio
                     </h4>
@@ -254,8 +255,8 @@ export default function ProfessionalProfilePage({
                 {(profile.whatImSeeking || profile.whyIEnjoyThisWork || profile.whatSetsApartMe || profile.idealEnvironment) && (
                   <div className="space-y-6">
                     {profile.whatImSeeking && (
-                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-purple-200">
-                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                      <div className="bg-slate-50 rounded-lg p-6 border-l-4 border-purple-300">
+                        <h4 className="text-lg font-medium text-slate-900 mb-3 flex items-center">
                           <span className="bg-purple-100 text-purple-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Goals</span>
                           What I&apos;m Seeking
                         </h4>
@@ -264,8 +265,8 @@ export default function ProfessionalProfilePage({
                     )}
 
                     {profile.whyIEnjoyThisWork && (
-                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-green-200">
-                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                      <div className="bg-slate-50 rounded-lg p-6 border-l-4 border-green-300">
+                        <h4 className="text-lg font-medium text-slate-900 mb-3 flex items-center">
                           <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Passion</span>
                           Why I Enjoy This Work
                         </h4>
@@ -274,8 +275,8 @@ export default function ProfessionalProfilePage({
                     )}
 
                     {profile.whatSetsApartMe && (
-                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-amber-200">
-                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                      <div className="bg-slate-50 rounded-lg p-6 border-l-4 border-amber-300">
+                        <h4 className="text-lg font-medium text-slate-900 mb-3 flex items-center">
                           <span className="bg-amber-100 text-amber-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Strengths</span>
                           What Sets Me Apart
                         </h4>
@@ -284,8 +285,8 @@ export default function ProfessionalProfilePage({
                     )}
 
                     {profile.idealEnvironment && (
-                      <div className="bg-gray-50 rounded-lg p-6 border-l-4 border-indigo-200">
-                        <h4 className="text-lg font-medium text-gray-900 mb-3 flex items-center">
+                      <div className="bg-slate-50 rounded-lg p-6 border-l-4 border-indigo-300">
+                        <h4 className="text-lg font-medium text-slate-900 mb-3 flex items-center">
                           <span className="bg-indigo-100 text-indigo-800 text-sm font-medium px-2.5 py-1 rounded-full mr-3">Culture</span>
                           Ideal Environment
                         </h4>
@@ -298,17 +299,17 @@ export default function ProfessionalProfilePage({
                 {/* Experience */}
                 {profile.experience.length > 0 && (
                   <div className="mt-8">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Experience</h4>
+                    <h4 className="text-lg font-medium text-slate-900 mb-4">Experience</h4>
                     <div className="space-y-4">
                       {profile.experience.map((exp, index) => (
-                        <div key={index} className="border-l-4 border-gray-200 pl-4">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div key={index} className="border-l-4 border-slate-300 pl-4">
+                          <p className="text-sm font-medium text-slate-900">
                             {exp.title} at {exp.employer}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-slate-600">
                             {exp.startDate} - {exp.endDate || "Present"}
                           </p>
-                          <p className="mt-1 text-sm text-gray-500">
+                          <p className="mt-1 text-sm text-slate-600">
                             {exp.description}
                           </p>
                         </div>
@@ -322,11 +323,11 @@ export default function ProfessionalProfilePage({
                 {/* Certifications */}
                 {profile.certifications.length > 0 && (
                   <div className="mt-8">
-                    <h4 className="text-lg font-medium text-gray-900 mb-4">Certifications</h4>
+                    <h4 className="text-lg font-medium text-slate-900 mb-4">Certifications</h4>
                     <div className="space-y-2">
                       {profile.certifications.map((cert, index) => (
-                        <div key={index} className="flex items-center text-sm text-gray-700">
-                          <AcademicCapIcon className="h-5 w-5 mr-2 text-gray-400" />
+                        <div key={index} className="flex items-center text-sm text-slate-700">
+                          <AcademicCapIcon className="h-5 w-5 mr-2 text-slate-500" />
                           {cert}
                         </div>
                       ))}
@@ -337,7 +338,7 @@ export default function ProfessionalProfilePage({
 
               {/* Sidebar Column */}
               <div className="lg:col-span-1 space-y-6">
-                <div className="text-right text-sm text-gray-500 mb-4">
+                <div className="text-right text-sm text-slate-500 mb-4">
                   <div className="flex items-center justify-end mb-1">
                     <EyeIcon className="h-4 w-4 mr-1" />
                     {profile.profileViews} profile views
@@ -364,10 +365,10 @@ export default function ProfessionalProfilePage({
 
                 {/* Location */}
                 {profile.location && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Current Location</h4>
-                    <p className="text-gray-900 flex items-center">
-                      <MapPinIcon className="h-5 w-5 mr-2 text-gray-400" />
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Current Location</h4>
+                    <p className="text-slate-900 flex items-center">
+                      <MapPinIcon className="h-5 w-5 mr-2 text-slate-500" />
                       {profile.location}
                     </p>
                   </div>
@@ -375,11 +376,11 @@ export default function ProfessionalProfilePage({
 
                 {/* Location Preferences */}
                 {(profile.workLocations?.length > 0 || profile.openToRelocation) && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Location Preferences</h4>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Location Preferences</h4>
                     {profile.workLocations?.length > 0 && (
                       <div className="mb-2">
-                        <p className="text-sm text-gray-900">{profile.workLocations.join(", ")}</p>
+                        <p className="text-sm text-slate-900">{profile.workLocations.join(", ")}</p>
                       </div>
                     )}
                     {profile.openToRelocation && (
@@ -393,18 +394,18 @@ export default function ProfessionalProfilePage({
 
                 {/* Years of Experience */}
                 {profile.yearsOfExperience !== null && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Years of Experience</h4>
-                    <p className="text-gray-900">{profile.yearsOfExperience} years</p>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Years of Experience</h4>
+                    <p className="text-slate-900">{profile.yearsOfExperience} years</p>
                   </div>
                 )}
 
                 {/* Employment Type */}
                 {profile.employmentType && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Employment Type Preference</h4>
-                    <p className="text-gray-900 flex items-center">
-                      <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-400" />
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Employment Type Preference</h4>
+                    <p className="text-slate-900 flex items-center">
+                      <BriefcaseIcon className="h-5 w-5 mr-2 text-slate-500" />
                       {profile.employmentType}
                     </p>
                   </div>
@@ -412,9 +413,9 @@ export default function ProfessionalProfilePage({
 
                 {/* Availability */}
                 {profile.availability && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">When are you available to start?</h4>
-                    <p className="text-gray-900">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">When are you available to start?</h4>
+                    <p className="text-slate-900">
                       {(() => {
                         const [year, month, day] = profile.availability.split('T')[0].split('-');
                         return `${month}/${day}/${year.slice(2)}`;
@@ -425,8 +426,8 @@ export default function ProfessionalProfilePage({
 
                 {/* Seeking Opportunities */}
                 {profile.seekingOpportunities?.length > 0 && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Seeking Opportunities</h4>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Seeking Opportunities</h4>
                     <div className="flex flex-wrap gap-2">
                       {profile.seekingOpportunities.map((opportunity, index) => (
                         <span
@@ -442,8 +443,8 @@ export default function ProfessionalProfilePage({
 
                 {/* Skills */}
                 {profile.skills.length > 0 && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Skills & Tags</h4>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Skills & Tags</h4>
                     <div className="flex flex-wrap gap-2">
                       {profile.skills.map((skill, index) => (
                         <span
@@ -459,9 +460,9 @@ export default function ProfessionalProfilePage({
 
                 {/* Pay Range */}
                 {(profile.payRangeMin || profile.payRangeMax) && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Pay Range</h4>
-                    <p className="text-gray-900">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Pay Range</h4>
+                    <p className="text-slate-900">
                       {profile.payRangeMin && profile.payRangeMax ? (
                         <>
                           ${profile.payRangeMin.toLocaleString()} - ${profile.payRangeMax.toLocaleString()}
@@ -484,15 +485,15 @@ export default function ProfessionalProfilePage({
 
                 {/* Resume */}
                 {profile.resumeUrl && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Resume</h4>
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h4 className="text-sm font-medium text-slate-600 mb-2">Resume</h4>
                     <a
                       href={profile.resumeUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                      className="inline-flex items-center px-4 py-2 border border-slate-300 rounded-md shadow-sm text-sm font-medium text-slate-700 bg-white hover:bg-slate-50"
                     >
-                      <BriefcaseIcon className="h-5 w-5 mr-2 text-gray-500" />
+                      <BriefcaseIcon className="h-5 w-5 mr-2 text-slate-500" />
                       View Resume
                     </a>
                   </div>
@@ -500,7 +501,7 @@ export default function ProfessionalProfilePage({
 
                 {/* Photo Gallery */}
                 {profile.additionalPhotos.length > 0 && (
-                  <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <PhotoGallery photos={profile.additionalPhotos} />
                   </div>
                 )}

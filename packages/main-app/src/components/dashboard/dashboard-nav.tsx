@@ -258,7 +258,7 @@ export function DashboardNav() {
                   <button
                     type="button"
                     onClick={() => toggleSubmenu(route.href)}
-                    className="w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    className="w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   >
                     <div className="flex items-center">
                       <route.icon
@@ -283,8 +283,8 @@ export function DashboardNav() {
                           className={cn(
                             "block px-2 py-2 text-sm font-medium rounded-md",
                             pathname === subItem.href
-                              ? "bg-gray-100 text-gray-900"
-                              : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                              ? "bg-slate-100 text-slate-900"
+                              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                           )}
                         >
                           {subItem.label}
@@ -299,8 +299,8 @@ export function DashboardNav() {
                   className={cn(
                     "flex items-center px-2 py-2 text-sm font-medium rounded-md",
                     pathname === route.href
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-slate-100 text-slate-900"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   )}
                 >
                   <route.icon
@@ -316,13 +316,13 @@ export function DashboardNav() {
       </div>
       
       {/* Fixed Bottom Section - Feedback and Sign Out */}
-      <div className="px-2 py-4 space-y-1 border-t border-gray-200 flex-shrink-0">
+      <div className="px-2 py-4 space-y-1 border-t border-slate-200 flex-shrink-0">
         <button
           onClick={() => {
             // You'll need to implement feedback modal logic here
             console.log('Feedback clicked');
           }}
-          className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+          className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-50 hover:text-slate-900"
         >
           <span className="mr-3 h-6 w-6 flex items-center justify-center">
             💬
@@ -335,7 +335,7 @@ export function DashboardNav() {
               signOut({ callbackUrl: '/login' });
             });
           }}
-          className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-gray-50 hover:text-red-600"
+          className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-slate-600 hover:bg-slate-50 hover:text-red-600"
         >
           <span className="mr-3 h-6 w-6 flex items-center justify-center">
             🚪
