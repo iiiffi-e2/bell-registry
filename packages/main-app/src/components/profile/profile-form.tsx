@@ -589,7 +589,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
                     <div>
                       <label htmlFor="availability" className="block text-sm font-medium text-gray-700">
-                        Availability Date
+                        When are you available to start?
                       </label>
                       <div className="mt-1">
                         <input

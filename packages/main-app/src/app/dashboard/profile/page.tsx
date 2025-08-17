@@ -351,7 +351,7 @@ export default function ProfilePage() {
                 {/* Availability */}
                 {profile.availability && (
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Available From</h4>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">When are you available to start?</h4>
                     <p className="text-gray-900">
                       {(() => {
                         const [year, month, day] = (profile.availability as string).split('T')[0].split('-');

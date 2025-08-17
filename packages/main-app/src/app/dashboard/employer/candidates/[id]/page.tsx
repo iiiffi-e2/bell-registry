@@ -427,7 +427,7 @@ export default function CandidateProfilePage({
                 {/* Availability */}
                 {profile.availability && (
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-gray-500 mb-2">Available From</h4>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">When are you available to start?</h4>
                     <p className="text-gray-900">
                       <CalendarIcon className="h-5 w-5 mr-2 text-gray-400 inline" />
                       {new Date(profile.availability).toLocaleDateString()}
