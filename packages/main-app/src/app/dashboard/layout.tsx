@@ -158,7 +158,7 @@ export default function DashboardLayout({
           lg:translate-x-0`
         }>
           {/* Header - Fixed at top */}
-          <div className="flex h-16 items-center px-6 pt-4 border-b border-slate-700 flex-shrink-0">
+          <div className="flex h-16 items-center px-6 pt-4 flex-shrink-0">
             <Link href="/dashboard" className="hidden lg:block max-w-[175px]">
               <Image
                 src="/images/brand/logo-full.png"
