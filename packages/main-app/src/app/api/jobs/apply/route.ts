@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { storageProvider } from '@/lib/storage';
 import { v4 as uuidv4 } from 'uuid';
+import { sendJobApplicationNotificationEmail } from '@/lib/job-application-email-service';
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,10 +50,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if job exists
+    // Check if job exists and get employer info
     const job = await prisma.job.findUnique({
       where: { id: jobId },
-      select: { id: true, status: true }
+      select: { 
+        id: true, 
+        status: true,
+        title: true,
+        location: true,
+        employer: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            employerProfile: {
+              select: {
+                companyName: true
+              }
+            }
+          }
+        }
+      }
     });
 
     if (!job) {
@@ -105,6 +124,42 @@ export async function POST(req: NextRequest) {
         status: 'PENDING'
       }
     });
+
+    // Send email notification to employer
+    try {
+      // Fetch candidate profile to get name information
+      const candidateProfile = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { firstName: true, lastName: true, email: true }
+      });
+
+      const candidateName = candidateProfile ? 
+        `${candidateProfile.firstName || ''} ${candidateProfile.lastName || ''}`.trim() || 'Professional' : 
+        'Professional';
+      
+      const employerName = `${job.employer.firstName || ''} ${job.employer.lastName || ''}`.trim() || 'Employer';
+      const companyName = job.employer.employerProfile?.companyName || 'Company';
+
+      await sendJobApplicationNotificationEmail({
+        employerEmail: job.employer.email,
+        employerName,
+        companyName,
+        jobTitle: job.title,
+        jobLocation: job.location,
+        candidateName,
+        candidateEmail: candidateProfile?.email || session.user.email!,
+        applicationId: application.id,
+        resumeUrl,
+        coverLetterUrl: coverLetterUrl || undefined,
+        message: message || undefined,
+        applicationDate: new Date()
+      });
+
+      console.log('[JOB_APPLICATION] Email notification sent successfully to employer:', job.employer.email);
+    } catch (emailError) {
+      // Log email error but don't fail the application submission
+      console.error('[JOB_APPLICATION] Failed to send email notification:', emailError);
+    }
 
     return NextResponse.json({ 
       success: true, 
