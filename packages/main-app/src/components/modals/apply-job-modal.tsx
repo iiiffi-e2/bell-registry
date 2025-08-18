@@ -157,8 +157,7 @@ export function ApplyJobModal({ isOpen, onClose, onSuccess, jobId, jobTitle }: A
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          Your application for {jobTitle} has been successfully submitted. 
-                          The employer will review your application and get back to you soon.
+                          Your application for {jobTitle} has been successfully submitted and sent to the employer for review. Please keep an eye on your dashboard for status updates.
                         </p>
                       </div>
                     </div>
