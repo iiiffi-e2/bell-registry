@@ -30,7 +30,6 @@ import { useProfile } from "@/providers/profile-provider";
 import React from "react";
 import { NotificationBadge } from "@/components/messaging/NotificationBadge";
 import { MessagesMenuBadge } from "@/components/messaging/MessagesMenuBadge";
-import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
 import { FeedbackModal } from "@/components/modals/feedback-modal";
 import { SurveyBanner } from "@/components/survey/survey-banner";
 import { useSurvey } from "@/hooks/use-survey";
@@ -304,7 +303,7 @@ export default function DashboardLayout({
             
             {/* Subscription Status for Employers/Agencies */}
             <div className="flex-1 max-w-md mx-4">
-              <SubscriptionAlert compact hideWhenHealthy />
+              {/* Subscription alert removed - no longer showing in header */}
             </div>
 
             <div className="flex items-center space-x-4">
