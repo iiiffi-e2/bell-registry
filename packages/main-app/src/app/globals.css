@@ -102,4 +102,53 @@
 
 .ProseMirror em {
   font-style: italic;
+}
+
+/* Table Responsiveness Utilities */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  .mobile-table {
+    font-size: 0.875rem;
+  }
+  
+  .mobile-table th,
+  .mobile-table td {
+    padding: 0.5rem 0.25rem;
+  }
+}
+
+/* Prevent horizontal overflow */
+.overflow-hidden-mobile {
+  overflow-x: hidden;
+}
+
+@media (min-width: 640px) {
+  .overflow-hidden-mobile {
+    overflow-x: visible;
+  }
 } 

@@ -157,12 +157,12 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
 
   if (compact) {
     return (
-      <div className={`flex items-center justify-between p-3 rounded-lg border ${
+      <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-lg border ${
         alertType === 'error' ? 'bg-red-50 border-red-200' :
         alertType === 'warning' ? 'bg-yellow-50 border-yellow-200' :
         'bg-blue-50 border-blue-200'
       }`}>
-        <div className="flex items-center">
+        <div className="flex items-center mb-3 sm:mb-0">
           <IconComponent className={`h-4 w-4 mr-2 ${
             alertType === 'error' ? 'text-red-600' :
             alertType === 'warning' ? 'text-yellow-600' :
@@ -178,8 +178,8 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
           </span>
         </div>
         {showUpgradeButton && (
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/dashboard/subscription">
+          <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+            <Link href="/dashboard/subscription" className="flex items-center justify-center">
               <CreditCard className="h-3 w-3 mr-1" />
               Upgrade
             </Link>
@@ -196,14 +196,14 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
       'border-l-blue-500 bg-blue-50'
     }`}>
       <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start">
-            <IconComponent className={`h-5 w-5 mr-3 mt-0.5 ${
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div className="flex items-start flex-1 min-w-0">
+            <IconComponent className={`h-5 w-5 mr-3 mt-0.5 flex-shrink-0 ${
               alertType === 'error' ? 'text-red-600' :
               alertType === 'warning' ? 'text-yellow-600' :
               'text-blue-600'
             }`} />
-            <div>
+            <div className="min-w-0 flex-1">
               <h3 className={`font-medium ${
                 alertType === 'error' ? 'text-red-800' :
                 alertType === 'warning' ? 'text-yellow-800' :
@@ -256,8 +256,8 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
           </div>
 
           {showUpgradeButton && (
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/dashboard/subscription" className="flex items-center">
+            <Button variant="outline" size="sm" asChild className="w-full lg:w-auto flex-shrink-0">
+              <Link href="/dashboard/subscription" className="flex items-center justify-center">
                 <CreditCard className="h-4 w-4 mr-2" />
                 {alertType === 'error' ? 'Upgrade Now' : 'View Plans'}
               </Link>
