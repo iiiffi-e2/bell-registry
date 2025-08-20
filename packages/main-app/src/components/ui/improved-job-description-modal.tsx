@@ -13,6 +13,29 @@ interface ImprovedJobDescriptionModalProps {
   isLoading: boolean;
 }
 
+// Helper function to strip HTML tags and decode HTML entities
+const stripHtmlTags = (html: string): string => {
+  if (typeof html !== 'string') return '';
+  
+  // Remove HTML tags
+  const withoutTags = html.replace(/<[^>]*>/g, '');
+  
+  // Decode common HTML entities
+  const decoded = withoutTags
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+  
+  // Clean up extra whitespace and normalize line breaks
+  return decoded
+    .replace(/\s+/g, ' ')
+    .replace(/\n\s*\n/g, '\n')
+    .trim();
+};
+
 export default function ImprovedJobDescriptionModal({
   isOpen,
   onClose,
@@ -21,6 +44,9 @@ export default function ImprovedJobDescriptionModal({
   onAccept,
   isLoading,
 }: ImprovedJobDescriptionModalProps) {
+  // Clean the original description by stripping HTML tags
+  const cleanOriginalDescription = stripHtmlTags(originalDescription);
+
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -66,7 +92,7 @@ export default function ImprovedJobDescriptionModal({
                         <div className="space-y-4">
                           <div>
                             <h4 className="text-sm font-medium text-gray-700">Original Description</h4>
-                            <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap text-left">{originalDescription}</p>
+                            <p className="mt-1 text-sm text-gray-500 whitespace-pre-wrap text-left">{cleanOriginalDescription}</p>
                           </div>
                           <div>
                             <h4 className="text-sm font-medium text-gray-700">Improved Description</h4>
