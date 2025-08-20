@@ -73,6 +73,13 @@ export function WysiwygEditor({
     }
   }, [editor]);
 
+  // Sync editor content when value prop changes externally
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [editor, value]);
+
   // Don't render until component is mounted on client
   if (!isMounted || !editor) {
     return (
