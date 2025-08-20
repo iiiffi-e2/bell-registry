@@ -76,9 +76,31 @@ export function WysiwygEditor({
   // Sync editor content when value prop changes externally
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value);
+      // Convert plain text to HTML if it's not already HTML
+      const htmlContent = convertTextToHtml(value);
+      // Clear the editor first, then insert the new content
+      editor.commands.clearContent();
+      editor.commands.insertContent(htmlContent);
     }
   }, [editor, value]);
+
+  // Helper function to convert plain text to HTML while preserving formatting
+  const convertTextToHtml = (text: string): string => {
+    if (!text) return '';
+    
+    // Check if the text already contains HTML tags
+    if (/<[^>]*>/.test(text)) {
+      return text; // Already HTML, return as-is
+    }
+    
+    // Convert plain text to HTML with proper paragraph breaks
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .map(line => `<p>${line}</p>`)
+      .join('');
+  };
 
   // Don't render until component is mounted on client
   if (!isMounted || !editor) {
