@@ -27,6 +27,8 @@ interface Profile {
     createdAt: string;
     image: string | null;
     profileSlug: string | null;
+    membershipAccess: string | null;
+    referralProfessionalName: string | null;
   };
   preferredRole: string | null;
   location: string | null;
@@ -724,6 +726,12 @@ export default function ProfileManagementPage() {
                             {profile.location && (
                               <p className="text-sm text-gray-500">• {profile.location}</p>
                             )}
+                            {/* Membership Access */}
+                            <p className="text-sm text-gray-500">
+                              • {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Bell Registry Referral'}
+                              {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Professional Referral'}
+                              {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
+                            </p>
                             <p className="text-sm text-gray-500 flex items-center">
                               <EyeIcon className="h-4 w-4 mr-1" />
                               {profile.profileViews} views

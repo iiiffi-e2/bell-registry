@@ -33,6 +33,8 @@ interface ProfileDetail {
     lastLoginAt: string | null;
     image: string | null;
     profileSlug: string | null;
+    membershipAccess: string | null;
+    referralProfessionalName: string | null;
   };
   bio: string | null;
   preferredRole: string | null;
@@ -629,6 +631,23 @@ export default function ProfileDetailPage({
                     </a>
                   </div>
                 )}
+                {/* Membership Access Information */}
+                <div className="flex items-center">
+                  <UserGroupIcon className="h-5 w-5 text-gray-400 mr-3" />
+                  <div>
+                    <span className="text-sm text-gray-500">Membership Access</span>
+                    <div className="text-sm text-gray-900">
+                      {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Referred by Bell Registry'}
+                      {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Referred by Professional'}
+                      {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
+                    </div>
+                    {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && profile.user.referralProfessionalName && (
+                      <div className="text-xs text-gray-600 mt-1">
+                        Referred by: {profile.user.referralProfessionalName}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 

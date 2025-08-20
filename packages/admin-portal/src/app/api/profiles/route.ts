@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
             profileSlug: true,
             isSuspended: true,
             isBanned: true,
+            membershipAccess: true,
+            referralProfessionalName: true,
           }
         }
       },
@@ -146,6 +148,8 @@ export async function GET(request: NextRequest) {
           createdAt: profile.user.createdAt,
           image: getImageUrl(profile.user.image), // Transform image URL
           profileSlug: profile.user.profileSlug,
+          membershipAccess: profile.user.membershipAccess,
+          referralProfessionalName: profile.user.referralProfessionalName,
         },
         preferredRole: profile.preferredRole,
         location: profile.location,

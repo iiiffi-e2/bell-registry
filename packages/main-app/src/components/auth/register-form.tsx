@@ -34,9 +34,19 @@ const stepTwoSchema = z.object({
     ),
   confirmPassword: z.string(),
   role: z.enum(ROLES).optional(),
+  membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT"]),
+  referralProfessionalName: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
       message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  if (data.membershipAccess === "PROFESSIONAL_REFERRAL") {
+    return data.referralProfessionalName && data.referralProfessionalName.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "Please provide the name of the professional who referred you",
+  path: ["referralProfessionalName"],
 });
 
 type StepOneData = z.infer<typeof stepOneSchema>;
@@ -64,6 +74,7 @@ export function RegisterForm() {
     resolver: zodResolver(stepTwoSchema),
     defaultValues: {
       role: isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "PROFESSIONAL",
+      membershipAccess: "NEW_APPLICANT",
     },
   });
 
@@ -123,6 +134,8 @@ export function RegisterForm() {
           firstName: data.firstName,
           lastName: data.lastName,
           password: data.password,
+          membershipAccess: data.membershipAccess,
+          referralProfessionalName: data.referralProfessionalName,
         }),
       });
 
@@ -142,6 +155,17 @@ export function RegisterForm() {
 
   const handleGoogleSignIn = () => {
     setIsLoading(true);
+    
+    // Store form data temporarily for OAuth completion
+    const formData = {
+      role: stepTwoForm.watch("role"),
+      membershipAccess: stepTwoForm.watch("membershipAccess"),
+      referralProfessionalName: stepTwoForm.watch("referralProfessionalName"),
+    };
+    
+    // Store in sessionStorage (will be cleared after OAuth completion)
+    sessionStorage.setItem("pendingOAuthData", JSON.stringify(formData));
+    
     signIn("google", { 
       callbackUrl: "/dashboard",
       role: stepTwoForm.watch("role")
@@ -365,6 +389,51 @@ export function RegisterForm() {
           </p>
         )}
       </div>
+
+      {/* Membership Access - Only show for professionals */}
+      {(!isEmployerRoute && !isAgencyRoute) && (
+        <>
+          <div>
+            <label htmlFor="membershipAccess" className="block text-sm font-medium text-gray-700">
+              Membership Access
+            </label>
+            <select
+              {...stepTwoForm.register("membershipAccess")}
+              id="membershipAccess"
+              className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+            >
+              <option value="NEW_APPLICANT">I am a new applicant</option>
+              <option value="BELL_REGISTRY_REFERRAL">I was referred by Bell Registry</option>
+              <option value="PROFESSIONAL_REFERRAL">I was referred by a Professional</option>
+            </select>
+            {stepTwoForm.formState.errors.membershipAccess && (
+              <p className="mt-1 text-sm text-red-600">
+                {stepTwoForm.formState.errors.membershipAccess.message}
+              </p>
+            )}
+          </div>
+
+          {stepTwoForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (
+            <div>
+              <label htmlFor="referralProfessionalName" className="block text-sm font-medium text-gray-700">
+                Professional Referral Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                {...stepTwoForm.register("referralProfessionalName")}
+                type="text"
+                id="referralProfessionalName"
+                className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+                placeholder="Enter the name of the professional who referred you"
+              />
+              {stepTwoForm.formState.errors.referralProfessionalName && (
+                <p className="mt-1 text-sm text-red-600">
+                  {stepTwoForm.formState.errors.referralProfessionalName.message}
+                </p>
+              )}
+            </div>
+          )}
+        </>
+      )}
 
       {error && (
         <div className="rounded-md bg-red-50 p-4">

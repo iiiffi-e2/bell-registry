@@ -190,6 +190,8 @@ export const authOptions: NextAuthOptions = {
           const defaultRole = UserRole.PROFESSIONAL;
           const role = account.role ? toPrismaRole(account.role.toString()) : defaultRole;
 
+          // Create user with default membership access values
+          // These will be updated later if OAuth data is available
           const newUser = await prisma.user.create({
             data: {
               email: user.email!,
@@ -198,6 +200,8 @@ export const authOptions: NextAuthOptions = {
               lastName: user.name?.split(" ").slice(1).join(" ") || "",
               image: user.image,
               lastLoginAt: new Date(),
+              membershipAccess: "NEW_APPLICANT", // Default value
+              referralProfessionalName: null,
               accounts: {
                 create: {
                   type: account.type,

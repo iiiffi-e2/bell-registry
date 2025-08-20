@@ -133,6 +133,8 @@ export async function GET(
         lastLoginAt: user.lastLoginAt,
         image: getImageUrl(user.image),
         profileSlug: user.profileSlug,
+        membershipAccess: user.membershipAccess,
+        referralProfessionalName: user.referralProfessionalName,
       },
       
       // Profile data from candidateProfile (or defaults)

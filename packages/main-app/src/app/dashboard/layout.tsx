@@ -34,6 +34,7 @@ import { FeedbackModal } from "@/components/modals/feedback-modal";
 import { SurveyBanner } from "@/components/survey/survey-banner";
 import { useSurvey } from "@/hooks/use-survey";
 import SuspensionCheck from "@/components/auth/suspension-check";
+import OAuthCompletion from "@/components/auth/oauth-completion";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -383,6 +384,9 @@ export default function DashboardLayout({
           </div>
           {/* Main content area */}
           <main className="flex-1 p-6 bg-slate-50 min-h-screen">
+            {/* OAuth Completion - handles post-OAuth registration completion */}
+            <OAuthCompletion />
+            
             {/* Survey Banner */}
             {surveyStatus.shouldShowBanner && !isSurveyLoading && (
               <SurveyBanner 

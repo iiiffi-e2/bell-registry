@@ -13,6 +13,8 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   role: z.enum(["PROFESSIONAL", "EMPLOYER", "AGENCY", "ADMIN"]),
+  membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT"]).optional(),
+  referralProfessionalName: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -47,6 +49,8 @@ export async function POST(req: Request) {
         lastName: body.lastName,
         role: body.role,
         profileSlug,
+        membershipAccess: body.membershipAccess || "NEW_APPLICANT",
+        referralProfessionalName: body.referralProfessionalName,
       },
     });
 

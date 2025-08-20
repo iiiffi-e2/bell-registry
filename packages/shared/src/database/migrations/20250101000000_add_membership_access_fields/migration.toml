@@ -1,0 +1,11 @@
+# Migration: 20250101000000_add_membership_access_fields
+# Description: Add membership access fields to User table for tracking how professionals gained access to the platform
+
+[metadata]
+name = "add_membership_access_fields"
+description = "Add membership access tracking fields to User table"
+version = "1.0.0"
+created_at = "2025-01-01T00:00:00Z"
+
+[database]
+provider = "postgresql" 

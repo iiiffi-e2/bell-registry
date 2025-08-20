@@ -91,6 +91,8 @@ model User {
   suspendedBy               String?
   bannedAt                  DateTime?            @db.Timestamptz(6)
   bannedBy                  String?
+  membershipAccess         MembershipAccessType @default(NEW_APPLICANT)
+  referralProfessionalName String?
   accounts                  Account[]
   adminAuditLogs            AdminAuditLog[]      @relation("AdminAuditLogs")
   approvedProfiles          CandidateProfile[]   @relation("ProfileApprover")
@@ -458,6 +460,12 @@ model SystemSettings {
 
   @@index([settingKey])
   @@index([updatedAt])
+}
+
+enum MembershipAccessType {
+  BELL_REGISTRY_REFERRAL
+  PROFESSIONAL_REFERRAL
+  NEW_APPLICANT
 }
 
 enum UserRole {
