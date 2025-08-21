@@ -13,12 +13,25 @@ import { Label } from "@/components/ui/label";
 const ROLES = ["PROFESSIONAL", "EMPLOYER", "AGENCY"] as const;
 type Role = typeof ROLES[number];
 
-// Step 1: Email and Terms
+// Step 1: Email, Membership Access, and Terms
 const stepOneSchema = z.object({
   email: z.string().email("Invalid email address"),
+  membershipAccess: z.string().refine((val) => {
+    return val === "BELL_REGISTRY_REFERRAL" || val === "PROFESSIONAL_REFERRAL" || val === "NEW_APPLICANT";
+  }, "Please select your membership access type"),
+  referralProfessionalName: z.string().optional(),
   terms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
+}).refine((data) => {
+  // If referred by professional, referral name is required
+  if (data.membershipAccess === "PROFESSIONAL_REFERRAL") {
+    return data.referralProfessionalName && data.referralProfessionalName.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "Please provide the name of the professional who referred you",
+  path: ["referralProfessionalName"],
 });
 
 // Step 2: Personal Details, Password, and Role (if employer route)
@@ -34,23 +47,16 @@ const stepTwoSchema = z.object({
     ),
   confirmPassword: z.string(),
   role: z.enum(ROLES).optional(),
-  membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT"]),
-  referralProfessionalName: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
       message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
-}).refine((data) => {
-  if (data.membershipAccess === "PROFESSIONAL_REFERRAL") {
-    return data.referralProfessionalName && data.referralProfessionalName.trim().length > 0;
-  }
-  return true;
-}, {
-  message: "Please provide the name of the professional who referred you",
-  path: ["referralProfessionalName"],
 });
 
 type StepOneData = z.infer<typeof stepOneSchema>;
 type StepTwoData = z.infer<typeof stepTwoSchema>;
+
+// Type for membership access values
+type MembershipAccessType = "BELL_REGISTRY_REFERRAL" | "PROFESSIONAL_REFERRAL" | "NEW_APPLICANT";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -66,6 +72,7 @@ export function RegisterForm() {
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
     defaultValues: {
+      membershipAccess: "",
       terms: false,
     },
   });
@@ -74,7 +81,6 @@ export function RegisterForm() {
     resolver: zodResolver(stepTwoSchema),
     defaultValues: {
       role: isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "PROFESSIONAL",
-      membershipAccess: "NEW_APPLICANT",
     },
   });
 
@@ -82,6 +88,14 @@ export function RegisterForm() {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Validate membership access fields for professionals
+      if (!isEmployerRoute && !isAgencyRoute) {
+        if (data.membershipAccess === "PROFESSIONAL_REFERRAL" && (!data.referralProfessionalName || data.referralProfessionalName.trim().length === 0)) {
+          setError("Please provide the name of the professional who referred you");
+          return;
+        }
+      }
 
       // Check if email exists
       const response = await fetch("/api/auth/check-email", {
@@ -97,7 +111,7 @@ export function RegisterForm() {
           setError(
             <div>
               An account with this email already exists.{" "}
-              <Link href="/login" className="text-blue-600 hover:text-blue-500 underline">
+              <Link href="/login" className="text-blue-500 hover:text-blue-400 underline">
                 Click here to log in
               </Link>
             </div>
@@ -134,8 +148,8 @@ export function RegisterForm() {
           firstName: data.firstName,
           lastName: data.lastName,
           password: data.password,
-          membershipAccess: data.membershipAccess,
-          referralProfessionalName: data.referralProfessionalName,
+          membershipAccess: stepOneData.membershipAccess,
+          referralProfessionalName: stepOneData.referralProfessionalName,
         }),
       });
 
@@ -159,8 +173,8 @@ export function RegisterForm() {
     // Store form data temporarily for OAuth completion
     const formData = {
       role: stepTwoForm.watch("role"),
-      membershipAccess: stepTwoForm.watch("membershipAccess"),
-      referralProfessionalName: stepTwoForm.watch("referralProfessionalName"),
+      membershipAccess: stepOneForm.watch("membershipAccess"),
+      referralProfessionalName: stepOneForm.watch("referralProfessionalName"),
     };
     
     // Store in sessionStorage (will be cleared after OAuth completion)
@@ -170,6 +184,32 @@ export function RegisterForm() {
       callbackUrl: "/dashboard",
       role: stepTwoForm.watch("role")
     });
+  };
+
+  // Check if Google OAuth button should be disabled
+  const isGoogleOAuthDisabled = () => {
+    const email = stepOneForm.watch("email");
+    const membershipAccess = stepOneForm.watch("membershipAccess");
+    const referralProfessionalName = stepOneForm.watch("referralProfessionalName");
+    const terms = stepOneForm.watch("terms");
+
+    // Email is required
+    if (!email || email.trim().length === 0) return true;
+
+    // Terms must be accepted
+    if (!terms) return true;
+
+    // For professionals, membership access is required
+    if (!isEmployerRoute && !isAgencyRoute) {
+      if (!membershipAccess || membershipAccess === "") return true;
+      
+      // If referred by professional, referral name is required
+      if (membershipAccess === "PROFESSIONAL_REFERRAL" && (!referralProfessionalName || referralProfessionalName.trim().length === 0)) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   if (currentStep === 1) {
@@ -190,6 +230,52 @@ export function RegisterForm() {
             )}
           </div>
         </div>
+
+        {/* Membership Access - Only show for professionals */}
+        {(!isEmployerRoute && !isAgencyRoute) && (
+          <>
+            <div>
+              <label htmlFor="membershipAccess" className="block text-sm font-medium text-gray-700">
+                Membership Access <span className="text-red-500">*</span>
+              </label>
+              <select
+                {...stepOneForm.register("membershipAccess")}
+                id="membershipAccess"
+                className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+              >
+                <option value="">Select membership access type</option>
+                <option value="NEW_APPLICANT">I am a new applicant</option>
+                <option value="BELL_REGISTRY_REFERRAL">I was referred by Bell Registry</option>
+                <option value="PROFESSIONAL_REFERRAL">I was referred by a Professional</option>
+              </select>
+              {stepOneForm.formState.errors.membershipAccess && (
+                <p className="mt-1 text-sm text-red-600">
+                  {stepOneForm.formState.errors.membershipAccess.message}
+                </p>
+              )}
+            </div>
+
+            {stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (
+              <div>
+                <label htmlFor="referralProfessionalName" className="block text-sm font-medium text-gray-700">
+                  Professional Referral Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  {...stepOneForm.register("referralProfessionalName")}
+                  type="text"
+                  id="referralProfessionalName"
+                  className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+                  placeholder="Enter the name of the professional who referred you"
+                />
+                {stepOneForm.formState.errors.referralProfessionalName && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {stepOneForm.formState.errors.referralProfessionalName.message}
+                  </p>
+                )}
+              </div>
+            )}
+          </>
+        )}
 
         <div className="flex items-center">
           <input
@@ -243,12 +329,22 @@ export function RegisterForm() {
           </div>
         </div>
 
+        {/* Google OAuth Section */}
         <div>
+          <div className="mb-3 text-center">
+            <p className="text-sm text-gray-600">
+              Complete the fields above to enable Google OAuth sign-up
+            </p>
+          </div>
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            disabled={isLoading || isGoogleOAuthDisabled()}
+            className={`w-full flex justify-center py-3 px-4 border rounded-md shadow-sm text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+              isGoogleOAuthDisabled() 
+                ? 'border-gray-200 text-gray-400 bg-gray-50 cursor-not-allowed' 
+                : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+            }`}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -270,6 +366,16 @@ export function RegisterForm() {
             </svg>
             Sign up with Google
           </button>
+          
+          {/* Help text explaining why Google OAuth is disabled */}
+          {isGoogleOAuthDisabled() && (
+            <p className="mt-2 text-xs text-gray-500 text-center">
+              {!stepOneForm.watch("email") && "Please enter your email address"}
+              {stepOneForm.watch("email") && !stepOneForm.watch("terms") && "Please accept the terms and conditions"}
+              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && (!stepOneForm.watch("membershipAccess") || stepOneForm.watch("membershipAccess") === "") && "Please select your membership access type"}
+              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (!stepOneForm.watch("referralProfessionalName") || stepOneForm.watch("referralProfessionalName").trim().length === 0) && "Please provide the professional referral name"}
+            </p>
+          )}
         </div>
 
         <div className="text-center">
@@ -390,50 +496,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      {/* Membership Access - Only show for professionals */}
-      {(!isEmployerRoute && !isAgencyRoute) && (
-        <>
-          <div>
-            <label htmlFor="membershipAccess" className="block text-sm font-medium text-gray-700">
-              Membership Access
-            </label>
-            <select
-              {...stepTwoForm.register("membershipAccess")}
-              id="membershipAccess"
-              className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-            >
-              <option value="NEW_APPLICANT">I am a new applicant</option>
-              <option value="BELL_REGISTRY_REFERRAL">I was referred by Bell Registry</option>
-              <option value="PROFESSIONAL_REFERRAL">I was referred by a Professional</option>
-            </select>
-            {stepTwoForm.formState.errors.membershipAccess && (
-              <p className="mt-1 text-sm text-red-600">
-                {stepTwoForm.formState.errors.membershipAccess.message}
-              </p>
-            )}
-          </div>
 
-          {stepTwoForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (
-            <div>
-              <label htmlFor="referralProfessionalName" className="block text-sm font-medium text-gray-700">
-                Professional Referral Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                {...stepTwoForm.register("referralProfessionalName")}
-                type="text"
-                id="referralProfessionalName"
-                className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
-                placeholder="Enter the name of the professional who referred you"
-              />
-              {stepTwoForm.formState.errors.referralProfessionalName && (
-                <p className="mt-1 text-sm text-red-600">
-                  {stepTwoForm.formState.errors.referralProfessionalName.message}
-                </p>
-              )}
-            </div>
-          )}
-        </>
-      )}
 
       {error && (
         <div className="rounded-md bg-red-50 p-4">

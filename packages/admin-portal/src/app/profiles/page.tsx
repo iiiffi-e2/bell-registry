@@ -717,6 +717,24 @@ export default function ProfileManagementPage() {
                                 Open to Work
                               </span>
                             )}
+                            {/* Membership Access */}
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                              profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' 
+                                ? 'bg-purple-100 text-purple-800' 
+                                : profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL'
+                                ? 'bg-orange-100 text-orange-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Bell Registry Referral'}
+                              {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Professional Referral'}
+                              {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
+                            </span>
+                            {/* Referral Professional Name (if applicable) */}
+                            {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && profile.user.referralProfessionalName && (
+                              <span className="text-xs text-gray-600">
+                                by {profile.user.referralProfessionalName}
+                              </span>
+                            )}
                           </div>
                           <div className="flex items-center space-x-4 mt-1">
                             <p className="text-sm text-gray-500">{profile.user.email}</p>
@@ -726,12 +744,7 @@ export default function ProfileManagementPage() {
                             {profile.location && (
                               <p className="text-sm text-gray-500">• {profile.location}</p>
                             )}
-                            {/* Membership Access */}
-                            <p className="text-sm text-gray-500">
-                              • {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Bell Registry Referral'}
-                              {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Professional Referral'}
-                              {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
-                            </p>
+
                             <p className="text-sm text-gray-500 flex items-center">
                               <EyeIcon className="h-4 w-4 mr-1" />
                               {profile.profileViews} views

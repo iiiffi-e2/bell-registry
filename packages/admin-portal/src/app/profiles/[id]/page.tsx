@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { 
   ArrowLeftIcon,
   UserIcon,
+  UserGroupIcon,
   EnvelopeIcon,
   MapPinIcon,
   CalendarIcon,
@@ -396,7 +397,26 @@ export default function ProfileDetailPage({
                         Open to Work
                       </span>
                     )}
+                    {/* Membership Access Pill */}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL'
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      <UserGroupIcon className="h-4 w-4 mr-1" />
+                      {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Bell Registry Referral'}
+                      {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Professional Referral'}
+                      {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
+                    </span>
                   </div>
+                  {/* Referral Professional Name (if applicable) */}
+                  {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && profile.user.referralProfessionalName && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      Referred by: <span className="font-medium">{profile.user.referralProfessionalName}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -631,23 +651,7 @@ export default function ProfileDetailPage({
                     </a>
                   </div>
                 )}
-                {/* Membership Access Information */}
-                <div className="flex items-center">
-                  <UserGroupIcon className="h-5 w-5 text-gray-400 mr-3" />
-                  <div>
-                    <span className="text-sm text-gray-500">Membership Access</span>
-                    <div className="text-sm text-gray-900">
-                      {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Referred by Bell Registry'}
-                      {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Referred by Professional'}
-                      {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
-                    </div>
-                    {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && profile.user.referralProfessionalName && (
-                      <div className="text-xs text-gray-600 mt-1">
-                        Referred by: {profile.user.referralProfessionalName}
-                      </div>
-                    )}
-                  </div>
-                </div>
+
               </div>
             </div>
 

@@ -17,23 +17,55 @@ We implemented a two-phase approach to handle this:
 When a user clicks "Sign up with Google" in the registration form:
 
 1. **Form Data Collection**: The `handleGoogleSignIn` function collects the current form data:
-   - `role`
-   - `membershipAccess` 
-   - `referralProfessionalName`
+   - `role` (from Step 2 form)
+   - `membershipAccess` (from Step 1 form)
+   - `referralProfessionalName` (from Step 1 form)
 
-2. **Temporary Storage**: This data is stored in `sessionStorage` as `pendingOAuthData`
+2. **Validation Requirements**: Users must complete all required fields before Google OAuth is enabled:
+   - Email address (required)
+   - Terms and conditions (must be accepted)
+   - Membership access type (required for professionals)
+   - Professional referral name (required if "Professional Referral" is selected)
 
-3. **OAuth Redirect**: The user is redirected to Google OAuth with the stored data
+3. **Temporary Storage**: This data is stored in `sessionStorage` as `pendingOAuthData`
+
+4. **OAuth Redirect**: The user is redirected to Google OAuth with the stored data
 
 ```typescript
+// Check if Google OAuth button should be disabled
+const isGoogleOAuthDisabled = () => {
+  const email = stepOneForm.watch("email");
+  const membershipAccess = stepOneForm.watch("membershipAccess");
+  const referralProfessionalName = stepOneForm.watch("referralProfessionalName");
+  const terms = stepOneForm.watch("terms");
+
+  // Email is required
+  if (!email || email.trim().length === 0) return true;
+
+  // Terms must be accepted
+  if (!terms) return true;
+
+  // For professionals, membership access is required
+  if (!isEmployerRoute && !isAgencyRoute) {
+    if (!membershipAccess) return true;
+    
+    // If referred by professional, referral name is required
+    if (membershipAccess === "PROFESSIONAL_REFERRAL" && (!referralProfessionalName || referralProfessionalName.trim().length === 0)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 const handleGoogleSignIn = () => {
   setIsLoading(true);
   
   // Store form data temporarily for OAuth completion
   const formData = {
     role: stepTwoForm.watch("role"),
-    membershipAccess: stepTwoForm.watch("membershipAccess"),
-    referralProfessionalName: stepTwoForm.watch("referralProfessionalName"),
+    membershipAccess: stepOneForm.watch("membershipAccess"),
+    referralProfessionalName: stepOneForm.watch("referralProfessionalName"),
   };
   
   // Store in sessionStorage (will be cleared after OAuth completion)
@@ -96,13 +128,14 @@ After successful OAuth authentication:
 
 ### New User Registration via Google OAuth
 
-1. User fills out registration form (including membership access)
-2. User clicks "Sign up with Google"
-3. Form data is stored temporarily
-4. User is redirected to Google OAuth
-5. After successful authentication, user is redirected to dashboard
-6. OAuth completion component automatically updates their profile
-7. User sees their dashboard with complete profile
+1. User fills out Step 1 (email, membership access, terms)
+2. **Google OAuth button is disabled until all required fields are completed**
+3. User clicks "Sign up with Google" (only enabled when validation passes)
+4. Form data is stored temporarily
+5. User is redirected to Google OAuth
+6. After successful authentication, user is redirected to dashboard
+7. OAuth completion component automatically updates their profile
+8. User sees their dashboard with complete profile
 
 ### Existing User Login via Google OAuth
 
@@ -134,6 +167,19 @@ After successful OAuth authentication:
 3. **Admin Visibility**: Admins can see how all professionals gained access to the platform
 4. **Fallback Handling**: Graceful handling of both new registrations and existing user logins
 5. **Clean Architecture**: Separation of concerns between OAuth and profile completion
+6. **Enforced Validation**: Users cannot bypass required fields when using Google OAuth
+7. **Clear User Feedback**: Visual indicators show exactly what needs to be completed
+
+## Validation Requirements
+
+Before users can use Google OAuth, they must complete:
+
+- **Email Address**: Valid email format required
+- **Terms & Conditions**: Must be accepted
+- **Membership Access**: Must select a type (for professionals)
+- **Professional Referral Name**: Required if "Professional Referral" is selected
+
+The Google OAuth button is visually disabled and shows helpful text explaining what needs to be completed.
 
 ## Testing Scenarios
 
