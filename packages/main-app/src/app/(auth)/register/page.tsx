@@ -23,7 +23,7 @@ export default function RegisterPage() {
         <Link href="/" className="block max-w-[175px]">
           <Image
             src="/images/brand/logo-full.png"
-            alt="The Bell Registry"
+            alt="Bell Registry"
             width={175}
             height={47}
             priority
@@ -43,13 +43,13 @@ export default function RegisterPage() {
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900">
                     {isEmployerOrAgency ? (
                       <>
-                        The Bell Registry —
+                        Bell Registry —
                         <br />
                         <span className="text-gray-500">free to get started</span>
                       </>
                     ) : (
                       <>
-                        Sign up for The Bell Registry —
+                        Sign up for Bell Registry —
                         <br />
                         <span className="text-gray-500">free forever</span>
                       </>

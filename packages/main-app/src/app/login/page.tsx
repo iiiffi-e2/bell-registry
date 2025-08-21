@@ -4,7 +4,7 @@ import { LoginFormWith2FA } from "@/components/auth/login-form-with-2fa";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "Login - The Bell Registry",
+  title: "Login - Bell Registry",
   description: "Login to your Bell Registry account",
 };
 
@@ -16,7 +16,7 @@ export default function LoginPage() {
         <Link href="/" className="block max-w-[175px]">
           <Image
             src="/images/brand/logo-full.png"
-            alt="The Bell Registry"
+            alt="Bell Registry"
             width={175}
             height={47}
             priority
