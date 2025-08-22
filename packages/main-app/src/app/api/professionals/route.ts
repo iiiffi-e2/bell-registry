@@ -200,6 +200,7 @@ export async function GET(request: Request) {
             lastName: professional.user.lastName?.[0] || '',
             image: null, // Hide profile image
             email: '', // Hide email
+            isAnonymous: true, // Mark as anonymous when anonymized
             customInitials: (professional.user as any).customInitials || null,
           }
         };

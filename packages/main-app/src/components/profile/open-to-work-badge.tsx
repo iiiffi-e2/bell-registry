@@ -90,12 +90,15 @@ export function ProfilePictureWithBadge(props: ProfilePictureWithBadgeProps | Pr
     const firstName = profile.user.firstName || '';
     const lastName = profile.user.lastName || '';
     
-    if (profile.user.isAnonymous) {
+    // Check if profile should be anonymized (either by flag or single character names)
+    if (profile.user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
       // Use custom initials if provided, otherwise use name initials
       if (profile.user.customInitials && profile.user.customInitials.length >= 2) {
         const initials = profile.user.customInitials.toUpperCase();
         if (initials.length === 2) {
           return `${initials[0]}. ${initials[1]}.`;
+        } else if (initials.length === 3) {
+          return `${initials[0]}. ${initials[1]}. ${initials[2]}.`;
         }
       }
       

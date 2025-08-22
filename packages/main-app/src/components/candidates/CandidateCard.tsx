@@ -60,13 +60,13 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
     return generateProfileUrl(candidate.user.profileSlug)
   }
 
-  // Handle anonymized names (single characters) vs full names
+  // Handle anonymized names based on isAnonymous flag or single character names
   const getDisplayName = () => {
     const firstName = candidate.user.firstName || '';
     const lastName = candidate.user.lastName || '';
     
-    // If names are single characters (anonymized), show as initials
-    if (firstName.length === 1 && lastName.length === 1) {
+    // Check if profile should be anonymized (either by flag or single character names)
+    if (candidate.user.isAnonymous || (firstName.length === 1 && lastName.length === 1)) {
       // Use custom initials if provided, otherwise use name initials
       if (candidate.user.customInitials && candidate.user.customInitials.length >= 2) {
         const initials = candidate.user.customInitials.toUpperCase();
