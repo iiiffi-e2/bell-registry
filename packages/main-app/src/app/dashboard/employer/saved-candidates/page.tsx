@@ -187,7 +187,7 @@ export default function SavedCandidatesPage() {
             <div className="mt-6">
               <button
                 type="button"
-                onClick={() => router.push('/browse-professionals')}
+                onClick={() => router.push('/dashboard/browse-professionals')}
                 className="inline-flex items-center rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
               >
                 Browse Professionals

@@ -45,9 +45,9 @@ export default function ProfessionalsLayout({
     },
     {
       name: "Browse Professionals",
-      href: "/browse-professionals",
+      href: "/dashboard/browse-professionals",
       icon: UserCircleIcon,
-      current: pathname === "/browse-professionals",
+      current: pathname === "/dashboard/browse-professionals",
     },
     ...(isProfessional
       ? [
@@ -81,9 +81,9 @@ export default function ProfessionalsLayout({
   ] : [
     {
       name: "Browse Professionals",
-      href: "/browse-professionals",
+      href: "/dashboard/browse-professionals",
       icon: UserCircleIcon,
-      current: pathname === "/browse-professionals",
+      current: pathname === "/dashboard/browse-professionals",
     },
   ];
 

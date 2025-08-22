@@ -80,7 +80,7 @@ const employerRoutes = [
     submenu: [
       {
         label: "Browse All",
-        href: "/browse-professionals",
+        href: "/dashboard/browse-professionals",
       },
              {
          label: "View Saved",

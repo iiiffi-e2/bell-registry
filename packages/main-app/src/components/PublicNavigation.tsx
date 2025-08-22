@@ -33,7 +33,7 @@ export function PublicNavigation() {
                   Browse Jobs
                 </Link>
                 <Link
-                  href="/browse-professionals"
+                  href="/dashboard/browse-professionals"
                   className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Find Professionals

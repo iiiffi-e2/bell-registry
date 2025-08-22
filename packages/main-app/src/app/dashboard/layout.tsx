@@ -55,7 +55,7 @@ type NavigationItem = {
 
 const professionalNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard", icon: HomeIcon },
-  { name: "Professionals", href: "/browse-professionals", icon: UserCircleIcon },
+  { name: "Professionals", href: "/dashboard/browse-professionals", icon: UserCircleIcon },
   { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
   { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
   { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
@@ -71,7 +71,7 @@ const employerNavigation: NavigationItem[] = [
     href: "#", 
     icon: UsersIcon,
     submenu: [
-      { name: "Browse All", href: "/browse-professionals" },
+      { name: "Browse All", href: "/dashboard/browse-professionals" },
       { name: "View Saved", href: "/dashboard/employer/saved-professionals" }
     ]
   },
