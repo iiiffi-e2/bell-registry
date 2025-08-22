@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { ProfessionalDashboard } from "@/components/dashboard/professional-dashboard";
 
@@ -15,26 +15,34 @@ const ROLES = {
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
+    // Only redirect if we're on the exact /dashboard route and user is authenticated
     if (status === "authenticated" && session?.user?.role) {
-      // Redirect based on role
-      switch (session.user.role) {
-        case ROLES.EMPLOYER:
-          router.push("/dashboard/employer");
-          break;
-        case ROLES.AGENCY:
-          router.push("/dashboard/agency");
-          break;
-        case ROLES.ADMIN:
-          router.push("/dashboard/admin");
-          break;
-        // For PROFESSIONAL role, stay on this page
-        default:
-          break;
+      // Only redirect if we're on the exact /dashboard route
+      if (pathname === "/dashboard") {
+        // Check if we're already on the correct role-specific route
+        const targetRoute = (() => {
+          switch (session.user.role) {
+            case ROLES.EMPLOYER:
+              return "/dashboard/employer";
+            case ROLES.AGENCY:
+              return "/dashboard/agency";
+            case ROLES.ADMIN:
+              return "/dashboard/admin";
+            default:
+              return null; // For PROFESSIONAL role, stay on this page
+          }
+        })();
+        
+        // Only redirect if we have a target route
+        if (targetRoute) {
+          router.push(targetRoute);
+        }
       }
     }
-  }, [session, status, router]);
+  }, [session, status, router, pathname]);
 
   // Show loading state while checking session
   if (status === "loading") {
@@ -63,16 +71,6 @@ export default function DashboardPage() {
   );
 }
 
-function EmployerDashboard() {
-  return (
-    <div className="py-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          Employer Dashboard
-        </h1>
-      </div>
-    </div>
-  );
-}
+
 
 
