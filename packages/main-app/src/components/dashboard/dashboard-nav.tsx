@@ -57,6 +57,12 @@ const professionalRoutes = [
     href: "/dashboard/settings",
     color: "text-gray-500",
   },
+  {
+    label: "Resource Center",
+    icon: FileText,
+    href: "#",
+    color: "text-indigo-500",
+  },
 ];
 
 const employerRoutes = [
@@ -112,6 +118,12 @@ const employerRoutes = [
     href: "/dashboard/employer/settings",
     color: "text-gray-500",
   },
+  {
+    label: "Resource Center",
+    icon: FileText,
+    href: "#",
+    color: "text-indigo-500",
+  },
 ];
 
 const agencyRoutes = [
@@ -157,6 +169,12 @@ const agencyRoutes = [
     href: "/dashboard/agency/settings",
     color: "text-gray-500",
   },
+  {
+    label: "Resource Center",
+    icon: FileText,
+    href: "#",
+    color: "text-indigo-500",
+  },
 ];
 
 const adminRoutes = [
@@ -183,6 +201,12 @@ const adminRoutes = [
     icon: Settings,
     href: "/dashboard/admin/settings",
     color: "text-gray-500",
+  },
+  {
+    label: "Resource Center",
+    icon: FileText,
+    href: "#",
+    color: "text-indigo-500",
   },
 ];
 
@@ -297,17 +321,28 @@ export function DashboardNav() {
                 <Link
                   href={route.href}
                   className={cn(
-                    "flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                    "flex flex-col px-2 py-2 text-sm font-medium rounded-md",
                     pathname === route.href
                       ? "bg-slate-100 text-slate-900"
                       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                   )}
                 >
-                  <route.icon
-                    className={cn("mr-3 h-6 w-6", route.color)}
-                    aria-hidden="true"
-                  />
-                  {route.label}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <route.icon
+                        className={cn("mr-3 h-6 w-6", route.color)}
+                        aria-hidden="true"
+                      />
+                      {route.label}
+                    </div>
+                  </div>
+                  {route.label === 'Resource Center' && (
+                    <div className="mt-1 ml-9">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Coming Soon
+                      </span>
+                    </div>
+                  )}
                 </Link>
               )}
             </div>

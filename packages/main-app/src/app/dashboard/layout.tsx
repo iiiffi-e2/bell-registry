@@ -61,6 +61,7 @@ const professionalNavigation: NavigationItem[] = [
   { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
+  { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];
 
 const employerNavigation: NavigationItem[] = [
@@ -80,6 +81,7 @@ const employerNavigation: NavigationItem[] = [
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
   { name: "Employer Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
+  { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];
 
 const agencyNavigation: NavigationItem[] = [
@@ -91,6 +93,7 @@ const agencyNavigation: NavigationItem[] = [
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
   { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
+  { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];
 
 const adminNavigation: NavigationItem[] = [
@@ -98,6 +101,7 @@ const adminNavigation: NavigationItem[] = [
   { name: "Users", href: "/dashboard/admin/users", icon: UsersIcon },
   { name: "Jobs", href: "/dashboard/admin/jobs", icon: BriefcaseIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
+  { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];
 
 export default function DashboardLayout({
@@ -220,16 +224,25 @@ export default function DashboardLayout({
                     ) : (
                       <Link
                         href={item.href}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-base font-medium transition-colors
+                        className={`flex flex-col px-3 py-2 rounded-lg text-base font-medium transition-colors
                           ${pathname === item.href ? 'bg-slate-700 text-blue-300' : 'text-slate-300 hover:bg-slate-700 hover:text-blue-300'}
                         `}
                         onClick={() => setSidebarOpen(false)}
                       >
-                        <div className="flex items-center">
-                          <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'}`} />
-                          {item.name}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <item.icon className={`h-5 w-5 mr-3 ${pathname === item.href ? 'text-blue-400' : 'text-slate-400 group-hover:text-blue-400'}`} />
+                            {item.name}
+                          </div>
+                          {item.name === 'Messages' && <MessagesMenuBadge />}
                         </div>
-                        {item.name === 'Messages' && <MessagesMenuBadge />}
+                        {item.name === 'Resource Center' && (
+                          <div className="mt-1 ml-8">
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                              Coming Soon
+                            </span>
+                          </div>
+                        )}
                       </Link>
                     )}
                   </div>

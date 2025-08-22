@@ -78,6 +78,12 @@ export default function ProfessionalsLayout({
       icon: ChatBubbleLeftRightIcon,
       current: pathname === "/dashboard/messages",
     },
+    {
+      name: "Resource Center",
+      href: "#",
+      icon: DocumentTextIcon,
+      current: false,
+    },
   ] : [
     {
       name: "Browse Professionals",
@@ -102,22 +108,30 @@ export default function ProfessionalsLayout({
                       </span>
                     </Link>
                   </div>
-                  <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
-                          item.current
-                            ? "border-b-2 border-blue-500 text-gray-900"
-                            : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                        }`}
-                      >
-                        <item.icon className="h-5 w-5 mr-1" />
-                        {item.name}
-                      </Link>
-                    ))}
-                  </div>
+                                     <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                     {navigation.map((item) => (
+                       <div key={item.name} className="inline-flex flex-col items-center">
+                         <Link
+                           href={item.href}
+                           className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${
+                             item.current
+                               ? "border-b-2 border-blue-500 text-gray-900"
+                               : "border-b-2 border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                           }`}
+                         >
+                           <item.icon className="h-5 w-5 mr-1" />
+                           {item.name}
+                         </Link>
+                         {item.name === 'Resource Center' && (
+                           <div className="mt-1">
+                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                               Coming Soon
+                             </span>
+                           </div>
+                         )}
+                       </div>
+                     ))}
+                   </div>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:items-center">
                   {session ? (
@@ -235,23 +249,32 @@ export default function ProfessionalsLayout({
 
             <Disclosure.Panel className="sm:hidden">
               <div className="space-y-1 pb-3 pt-2">
-                {navigation.map((item) => (
-                  <Disclosure.Button
-                    key={item.name}
-                    as={Link}
-                    href={item.href}
-                    className={`block py-2 pl-3 pr-4 text-base font-medium ${
-                      item.current
-                        ? "border-l-4 border-blue-500 bg-blue-50 text-blue-700"
-                        : "border-l-4 border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-                    }`}
-                  >
-                    <div className="flex items-center">
-                      <item.icon className="h-5 w-5 mr-2" />
-                      {item.name}
-                    </div>
-                  </Disclosure.Button>
-                ))}
+                                 {navigation.map((item) => (
+                   <Disclosure.Button
+                     key={item.name}
+                     as={Link}
+                     href={item.href}
+                     className={`block py-2 pl-3 pr-4 text-base font-medium ${
+                       item.current
+                         ? "border-l-4 border-blue-500 bg-blue-50 text-blue-700"
+                         : "border-l-4 border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
+                     }`}
+                   >
+                     <div className="flex flex-col">
+                       <div className="flex items-center">
+                         <item.icon className="h-5 w-5 mr-2" />
+                         {item.name}
+                       </div>
+                       {item.name === 'Resource Center' && (
+                         <div className="mt-1 ml-7">
+                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                             Coming Soon
+                           </span>
+                         </div>
+                       )}
+                     </div>
+                   </Disclosure.Button>
+                 ))}
               </div>
               {session ? (
                 <div className="border-t border-gray-200 pb-3 pt-4">
