@@ -20,7 +20,11 @@ export default function OAuthCompletion() {
     if (status === "loading") return;
 
     if (status === "authenticated" && session?.user) {
-      completeOAuthRegistration();
+      // Only run OAuth completion if there's actually pending OAuth data
+      const pendingDataStr = sessionStorage.getItem("pendingOAuthData");
+      if (pendingDataStr) {
+        completeOAuthRegistration();
+      }
     }
   }, [status, session]);
 

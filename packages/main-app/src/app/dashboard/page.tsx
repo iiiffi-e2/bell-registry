@@ -18,28 +18,28 @@ export default function DashboardPage() {
   const pathname = usePathname();
 
   useEffect(() => {
+    // Wait for session to fully load before making any redirect decisions
+    if (status === "loading") return;
+    
     // Only redirect if we're on the exact /dashboard route and user is authenticated
-    if (status === "authenticated" && session?.user?.role) {
-      // Only redirect if we're on the exact /dashboard route
-      if (pathname === "/dashboard") {
-        // Check if we're already on the correct role-specific route
-        const targetRoute = (() => {
-          switch (session.user.role) {
-            case ROLES.EMPLOYER:
-              return "/dashboard/employer";
-            case ROLES.AGENCY:
-              return "/dashboard/agency";
-            case ROLES.ADMIN:
-              return "/dashboard/admin";
-            default:
-              return null; // For PROFESSIONAL role, stay on this page
-          }
-        })();
-        
-        // Only redirect if we have a target route
-        if (targetRoute) {
-          router.push(targetRoute);
+    if (status === "authenticated" && session?.user?.role && pathname === "/dashboard") {
+      // Check if we're already on the correct role-specific route
+      const targetRoute = (() => {
+        switch (session.user.role) {
+          case ROLES.EMPLOYER:
+            return "/dashboard/employer";
+          case ROLES.AGENCY:
+            return "/dashboard/agency";
+          case ROLES.ADMIN:
+            return "/dashboard/admin";
+          default:
+            return null; // For PROFESSIONAL role, stay on this page
         }
+      })();
+      
+      // Only redirect if we have a target route
+      if (targetRoute) {
+        router.push(targetRoute);
       }
     }
   }, [session, status, router, pathname]);

@@ -44,7 +44,7 @@ interface Application {
 }
 
 export default function EmployerApplicationsPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +54,9 @@ export default function EmployerApplicationsPage() {
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    // Wait for session to be fully loaded before making redirect decisions
+    if (status === "loading") return;
+    
     if (session?.user?.role) {
       // Redirect professionals away from employer screens
       if (session.user.role === "PROFESSIONAL") {
@@ -66,16 +69,15 @@ export default function EmployerApplicationsPage() {
         router.push("/dashboard");
         return;
       }
-    }
-    
-    if (session) {
+      
+      // If we reach here, user has proper access, fetch data
       fetchApplications();
       fetchJobs();
     }
-  }, [session, router]);
+  }, [session, status, router]);
 
   // Show loading state while checking authentication and role
-  if (!session?.user?.role) {
+  if (status === "loading" || !session?.user?.role) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -83,7 +85,7 @@ export default function EmployerApplicationsPage() {
     );
   }
 
-  // Redirect unauthorized users
+  // Redirect unauthorized users (only after session is loaded)
   if (session.user.role === "PROFESSIONAL") {
     router.push("/dashboard");
     return null;

@@ -10,6 +10,9 @@ export default function CandidatesPage() {
 
   // Role-based access control
   useEffect(() => {
+    // Only make redirect decisions once session is fully loaded
+    if (status === "loading") return;
+    
     if (status === "authenticated" && session?.user?.role) {
       // Redirect professionals away from employer screens
       if (session.user.role === "PROFESSIONAL") {
