@@ -57,8 +57,6 @@ export function RegisterForm() {
   const roleParam = searchParams.get("role")?.toUpperCase();
   const isEmployerRoute = roleParam === "EMPLOYER";
   const isAgencyRoute = roleParam === "AGENCY";
-  
-  console.log("Route detection:", { roleParam, isEmployerRoute, isAgencyRoute });
 
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
@@ -80,9 +78,7 @@ export function RegisterForm() {
       setIsLoading(true);
       setError(null);
 
-      console.log("Step 1 submit data:", data);
-      console.log("isEmployerRoute:", isEmployerRoute);
-      console.log("isAgencyRoute:", isAgencyRoute);
+
 
       // Validate membership access fields for professionals only
       if (!isEmployerRoute && !isAgencyRoute) {
@@ -123,7 +119,6 @@ export function RegisterForm() {
       setStepOneData(data);
       setCurrentStep(2);
     } catch (error) {
-      console.error("Step 1 submit error:", error);
       if (!(error instanceof Error && error.message.includes("email already exists"))) {
         setError(error instanceof Error ? error.message : "An error occurred");
       }
@@ -313,13 +308,7 @@ export function RegisterForm() {
         )}
 
                  <button
-           onClick={() => {
-             console.log("Continue button clicked");
-             console.log("Form data:", stepOneForm.getValues());
-             console.log("Form errors:", stepOneForm.formState.errors);
-             console.log("Form is valid:", stepOneForm.formState.isValid);
-             stepOneForm.handleSubmit(onStepOneSubmit)();
-           }}
+           onClick={stepOneForm.handleSubmit(onStepOneSubmit)}
            disabled={isLoading}
            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
          >
