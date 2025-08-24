@@ -198,47 +198,73 @@ export default function ProfessionalProfilePage({
 
   return (
     <div className="py-6">
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
-        <div className="mb-6">
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-700"
-          >
-            <ArrowLeftIcon className="mr-1 h-4 w-4" />
-            Back
-          </button>
+      <div className="w-full px-4 sm:px-6 lg:px-8 relative">
+        {/* Floating Back Button */}
+        <button
+          onClick={handleBack}
+          className="fixed bottom-6 right-6 z-50 inline-flex items-center px-4 py-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-sm text-gray-600 hover:text-gray-800 hover:bg-white transition-all duration-200 hover:shadow-xl hover:scale-105"
+        >
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          <span>Back</span>
+        </button>
+
+        {/* Hero Profile Section */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-t-2xl shadow-lg">
+          <div className="px-6 py-8 sm:px-8 sm:py-12">
+            {/* Profile Header - Now the hero of the page */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+              <div className="flex-shrink-0">
+                <ProfilePictureWithBadge
+                  imageUrl={profile.user.image}
+                  displayName={displayName}
+                  isOpenToWork={false}
+                  isAnonymous={profile.user.isAnonymous}
+                  size="xl"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center sm:justify-start">
+                  <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                    {displayName}
+                  </h1>
+                  {profile.openToWork && (
+                    <OpenToWorkBadge variant="inline" size="sm" />
+                  )}
+                </div>
+                <p className="mt-2 text-xl text-gray-700 font-medium">
+                  {profile.title || profile.preferredRole || 'Professional'}
+                </p>
+                
+                {/* Quick stats */}
+                <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-600">
+                  {profile.location && (
+                    <div className="flex items-center gap-1">
+                      <MapPinIcon className="h-4 w-4" />
+                      <span>{profile.location}</span>
+                    </div>
+                  )}
+                  {profile.yearsOfExperience && (
+                    <div className="flex items-center gap-1">
+                      <BriefcaseIcon className="h-4 w-4" />
+                      <span>{profile.yearsOfExperience} years experience</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <EyeIcon className="h-4 w-4" />
+                    <span>{profile.profileViews} views</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Profile Content */}
-        <div className="bg-white shadow-lg rounded-lg border border-slate-200">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content Area */}
+        <div className="bg-white shadow-lg rounded-b-2xl border border-slate-200">
+          <div className="px-6 py-8 sm:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content Column */}
               <div className="lg:col-span-2">
-                                 {/* Profile Header */}
-                 <div className="flex items-center mb-6">
-                   <div className="flex-shrink-0">
-                     <ProfilePictureWithBadge
-                       imageUrl={profile.user.image}
-                       displayName={displayName}
-                       isOpenToWork={profile.openToWork}
-                       isAnonymous={profile.user.isAnonymous}
-                       size="lg"
-                     />
-                   </div>
-                   <div className="ml-6">
-                     <div className="flex items-center gap-3">
-                       <h1 className="text-2xl font-bold text-slate-900">
-                         {displayName}
-                       </h1>
-                       {profile.openToWork && (
-                         <OpenToWorkBadge variant="inline" size="sm" />
-                       )}
-                     </div>
-                     <p className="mt-1 text-lg text-slate-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-                   </div>
-                 </div>
 
                  {/* Anonymous Profile Notice - Only for employers/agencies with network access */}
                  {profile.user.isAnonymous && (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (

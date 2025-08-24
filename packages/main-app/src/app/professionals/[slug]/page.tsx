@@ -11,8 +11,7 @@ import {
   CalendarIcon,
   EyeIcon,
   ClockIcon,
-
-
+  ArrowLeftIcon,
   CheckCircleIcon,
   LinkIcon,
   ExclamationTriangleIcon,
@@ -24,7 +23,7 @@ import { MessageProfessionalButton } from "@/components/professionals/MessagePro
 import { ReportProfileModal } from "@/components/profile/ReportProfileModal";
 import { OpenToWorkBadge, ProfilePictureWithBadge } from "@/components/profile/open-to-work-badge";
 import { FormattedText } from "@/components/ui/formatted-text";
-import { notFound } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 
 interface Experience {
   title: string;
@@ -112,6 +111,7 @@ export default function PublicProfilePage({
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const { data: session } = useSession();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchProfile() {
@@ -171,37 +171,73 @@ export default function PublicProfilePage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      {/* Profile Content */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="max-w-5xl mx-auto relative">
+      {/* Floating Back Button */}
+      <button
+        onClick={() => router.back()}
+        className="fixed bottom-6 right-6 z-50 inline-flex items-center px-4 py-3 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-full shadow-lg text-sm text-gray-600 hover:text-gray-800 hover:bg-white transition-all duration-200 hover:shadow-xl hover:scale-105"
+      >
+        <ArrowLeftIcon className="h-5 w-5 mr-2" />
+        <span>Back</span>
+      </button>
+
+      {/* Hero Profile Section */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-t-2xl shadow-lg">
+        <div className="px-6 py-8 sm:px-8 sm:py-12">
+          {/* Profile Header - Now the hero of the page */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
+            <div className="flex-shrink-0">
+              <ProfilePictureWithBadge
+                imageUrl={profile.user.image}
+                displayName={getDisplayName(profile)}
+                isOpenToWork={false}
+                isAnonymous={profile.user.isAnonymous}
+                size="xl"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-center sm:justify-start">
+                <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
+                  {getDisplayName(profile)}
+                </h1>
+                {profile.openToWork && (
+                  <OpenToWorkBadge variant="inline" size="sm" />
+                )}
+              </div>
+              <p className="mt-2 text-xl text-gray-700 font-medium">
+                {profile.title || profile.preferredRole || 'Professional'}
+              </p>
+              
+              {/* Quick stats */}
+              <div className="mt-4 flex flex-wrap justify-center sm:justify-start gap-4 text-sm text-gray-600">
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPinIcon className="h-4 w-4" />
+                    <span>{profile.location}</span>
+                  </div>
+                )}
+                {profile.yearsOfExperience && (
+                  <div className="flex items-center gap-1">
+                    <BriefcaseIcon className="h-4 w-4" />
+                    <span>{profile.yearsOfExperience} years experience</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1">
+                  <EyeIcon className="h-4 w-4" />
+                  <span>{profile.profileViews} views</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="bg-white shadow-lg rounded-b-2xl">
+        <div className="px-6 py-8 sm:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content Column */}
             <div className="lg:col-span-2">
-                             {/* Profile Header */}
-               <div className="flex items-center mb-6">
-                 <div className="flex-shrink-0">
-                   <ProfilePictureWithBadge
-                     imageUrl={profile.user.image}
-                     displayName={getDisplayName(profile)}
-                     isOpenToWork={false}
-                     isAnonymous={profile.user.isAnonymous}
-                     size="lg"
-                   />
-                 </div>
-                 <div className="ml-6">
-                   <div className="flex items-center gap-3">
-                     <h1 className="text-2xl font-bold text-gray-900">
-                       {getDisplayName(profile)}
-                     </h1>
-                     {profile.openToWork && (
-                       <OpenToWorkBadge variant="inline" size="sm" />
-                     )}
-                   </div>
-                   <p className="mt-1 text-lg text-gray-600">{profile.title || profile.preferredRole || 'Professional'}</p>
-
-                 </div>
-               </div>
 
                {/* Anonymous Profile Notice - Only for employers/agencies with network access */}
                {profile.user.isAnonymous && (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
