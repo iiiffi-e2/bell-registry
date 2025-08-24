@@ -200,7 +200,7 @@ export const authOptions: NextAuthOptions = {
               lastName: user.name?.split(" ").slice(1).join(" ") || "",
               image: user.image,
               lastLoginAt: new Date(),
-              membershipAccess: "NEW_APPLICANT", // Default value
+              membershipAccess: "NEW_APPLICANT", // Default value for professionals
               referralProfessionalName: null,
               accounts: {
                 create: {

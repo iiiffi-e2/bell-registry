@@ -13,7 +13,7 @@ const registerSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   role: z.enum(["PROFESSIONAL", "EMPLOYER", "AGENCY", "ADMIN"]),
-  membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT"]).optional(),
+  membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT", "EMPLOYER", "AGENCY"]).optional(),
   referralProfessionalName: z.string().optional(),
 });
 

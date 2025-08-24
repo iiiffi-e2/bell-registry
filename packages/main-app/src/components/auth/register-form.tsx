@@ -16,22 +16,11 @@ type Role = typeof ROLES[number];
 // Step 1: Email, Membership Access, and Terms
 const stepOneSchema = z.object({
   email: z.string().email("Invalid email address"),
-  membershipAccess: z.string().refine((val) => {
-    return val === "BELL_REGISTRY_REFERRAL" || val === "PROFESSIONAL_REFERRAL" || val === "NEW_APPLICANT";
-  }, "Please select your membership access type"),
+  membershipAccess: z.string().optional(),
   referralProfessionalName: z.string().optional(),
   terms: z.boolean().refine((val) => val === true, {
     message: "You must accept the terms and conditions",
   }),
-}).refine((data) => {
-  // If referred by professional, referral name is required
-  if (data.membershipAccess === "PROFESSIONAL_REFERRAL") {
-    return data.referralProfessionalName && data.referralProfessionalName.trim().length > 0;
-  }
-  return true;
-}, {
-  message: "Please provide the name of the professional who referred you",
-  path: ["referralProfessionalName"],
 });
 
 // Step 2: Personal Details, Password, and Role (if employer route)
@@ -56,7 +45,7 @@ type StepOneData = z.infer<typeof stepOneSchema>;
 type StepTwoData = z.infer<typeof stepTwoSchema>;
 
 // Type for membership access values
-type MembershipAccessType = "BELL_REGISTRY_REFERRAL" | "PROFESSIONAL_REFERRAL" | "NEW_APPLICANT";
+type MembershipAccessType = "BELL_REGISTRY_REFERRAL" | "PROFESSIONAL_REFERRAL" | "NEW_APPLICANT" | "EMPLOYER" | "AGENCY";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -68,6 +57,8 @@ export function RegisterForm() {
   const roleParam = searchParams.get("role")?.toUpperCase();
   const isEmployerRoute = roleParam === "EMPLOYER";
   const isAgencyRoute = roleParam === "AGENCY";
+  
+  console.log("Route detection:", { roleParam, isEmployerRoute, isAgencyRoute });
 
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
@@ -89,8 +80,16 @@ export function RegisterForm() {
       setIsLoading(true);
       setError(null);
 
-      // Validate membership access fields for professionals
+      console.log("Step 1 submit data:", data);
+      console.log("isEmployerRoute:", isEmployerRoute);
+      console.log("isAgencyRoute:", isAgencyRoute);
+
+      // Validate membership access fields for professionals only
       if (!isEmployerRoute && !isAgencyRoute) {
+        if (!data.membershipAccess || data.membershipAccess === "") {
+          setError("Please select your membership access type");
+          return;
+        }
         if (data.membershipAccess === "PROFESSIONAL_REFERRAL" && (!data.referralProfessionalName || data.referralProfessionalName.trim().length === 0)) {
           setError("Please provide the name of the professional who referred you");
           return;
@@ -124,6 +123,7 @@ export function RegisterForm() {
       setStepOneData(data);
       setCurrentStep(2);
     } catch (error) {
+      console.error("Step 1 submit error:", error);
       if (!(error instanceof Error && error.message.includes("email already exists"))) {
         setError(error instanceof Error ? error.message : "An error occurred");
       }
@@ -148,8 +148,8 @@ export function RegisterForm() {
           firstName: data.firstName,
           lastName: data.lastName,
           password: data.password,
-          membershipAccess: stepOneData.membershipAccess,
-          referralProfessionalName: stepOneData.referralProfessionalName,
+          membershipAccess: stepOneData.membershipAccess || (isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "NEW_APPLICANT"),
+          referralProfessionalName: stepOneData.referralProfessionalName || null,
         }),
       });
 
@@ -173,8 +173,8 @@ export function RegisterForm() {
     // Store form data temporarily for OAuth completion
     const formData = {
       role: stepTwoForm.watch("role"),
-      membershipAccess: stepOneForm.watch("membershipAccess"),
-      referralProfessionalName: stepOneForm.watch("referralProfessionalName"),
+      membershipAccess: stepOneForm.watch("membershipAccess") || (isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "NEW_APPLICANT"),
+      referralProfessionalName: stepOneForm.watch("referralProfessionalName") || null,
     };
     
     // Store in sessionStorage (will be cleared after OAuth completion)
@@ -199,7 +199,7 @@ export function RegisterForm() {
     // Terms must be accepted
     if (!terms) return true;
 
-    // For professionals, membership access is required
+    // For professionals only, membership access is required
     if (!isEmployerRoute && !isAgencyRoute) {
       if (!membershipAccess || membershipAccess === "") return true;
       
@@ -312,13 +312,19 @@ export function RegisterForm() {
           </div>
         )}
 
-        <button
-          onClick={stepOneForm.handleSubmit(onStepOneSubmit)}
-          disabled={isLoading}
-          className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
-        >
-          {isLoading ? "Checking..." : "Continue"}
-        </button>
+                 <button
+           onClick={() => {
+             console.log("Continue button clicked");
+             console.log("Form data:", stepOneForm.getValues());
+             console.log("Form errors:", stepOneForm.formState.errors);
+             console.log("Form is valid:", stepOneForm.formState.isValid);
+             stepOneForm.handleSubmit(onStepOneSubmit)();
+           }}
+           disabled={isLoading}
+           className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+         >
+           {isLoading ? "Checking..." : "Continue"}
+         </button>
 
         <div className="relative">
           <div className="absolute inset-0 flex items-center">

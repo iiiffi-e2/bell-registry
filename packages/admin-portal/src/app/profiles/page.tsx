@@ -723,11 +723,17 @@ export default function ProfileManagementPage() {
                                 ? 'bg-purple-100 text-purple-800' 
                                 : profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL'
                                 ? 'bg-orange-100 text-orange-800'
-                                : 'bg-green-100 text-green-800'
+                                : profile.user.membershipAccess === 'NEW_APPLICANT'
+                                ? 'bg-green-100 text-green-800'
+                                : profile.user.membershipAccess === 'EMPLOYER'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-indigo-100 text-indigo-800'
                             }`}>
                               {profile.user.membershipAccess === 'BELL_REGISTRY_REFERRAL' && 'Bell Registry Referral'}
                               {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && 'Professional Referral'}
                               {profile.user.membershipAccess === 'NEW_APPLICANT' && 'New Applicant'}
+                              {profile.user.membershipAccess === 'EMPLOYER' && 'Employer'}
+                              {profile.user.membershipAccess === 'AGENCY' && 'Agency'}
                             </span>
                             {/* Referral Professional Name (if applicable) */}
                             {profile.user.membershipAccess === 'PROFESSIONAL_REFERRAL' && profile.user.referralProfessionalName && (

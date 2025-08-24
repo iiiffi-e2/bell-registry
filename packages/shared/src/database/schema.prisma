@@ -466,6 +466,8 @@ enum MembershipAccessType {
   BELL_REGISTRY_REFERRAL
   PROFESSIONAL_REFERRAL
   NEW_APPLICANT
+  EMPLOYER
+  AGENCY
 }
 
 enum UserRole {
