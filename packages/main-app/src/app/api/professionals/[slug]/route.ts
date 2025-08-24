@@ -110,6 +110,7 @@ export async function GET(
         email: shouldAnonymize ? '' : profile.email,
         phoneNumber: shouldAnonymize ? null : profile.phoneNumber,
         isAnonymous: shouldAnonymize ? true : (profile.isAnonymous || false),
+        preferredAnonymity: profile.isAnonymous || false, // Original anonymity preference
         customInitials: shouldAnonymize ? ((profile as any).customInitials || null) : ((profile as any).customInitials || null),
         dontContactMe: (profile as any).dontContactMe || false,
       }

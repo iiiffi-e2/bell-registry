@@ -18,6 +18,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { PhotoGallery } from "@/components/profile/photo-gallery";
 import { MediaViewer } from "@/components/profile/media-viewer";
+import { useNetworkAccess } from "@/hooks/use-network-access";
 import { SaveCandidateButton } from "@/components/candidates/SaveCandidateButton";
 import { MessageProfessionalButton } from "@/components/professionals/MessageProfessionalButton";
 import { ReportProfileModal } from "@/components/profile/ReportProfileModal";
@@ -69,6 +70,7 @@ interface PublicProfile {
     email: string;
     phoneNumber: string | null;
     isAnonymous: boolean;
+    preferredAnonymity?: boolean;
     customInitials?: string | null;
     dontContactMe?: boolean;
   };
@@ -112,6 +114,7 @@ export default function PublicProfilePage({
   const [profileLoaded, setProfileLoaded] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+  const { hasNetworkAccess } = useNetworkAccess();
 
   useEffect(() => {
     async function fetchProfile() {
@@ -239,8 +242,8 @@ export default function PublicProfilePage({
             {/* Main Content Column */}
             <div className="lg:col-span-2">
 
-               {/* Anonymous Profile Notice - Only for employers/agencies with network access */}
-               {profile.user.isAnonymous && (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
+               {/* Anonymous Profile Notice - Only for employers/agencies with network access viewing an anonymous professional */}
+               {profile.user.preferredAnonymity && hasNetworkAccess && (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
                  <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                    <div className="flex items-start">
                      <div className="flex-shrink-0">

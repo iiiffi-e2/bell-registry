@@ -201,11 +201,18 @@ export async function GET(request: Request) {
             image: null, // Hide profile image
             email: '', // Hide email
             isAnonymous: true, // Mark as anonymous when anonymized
+            preferredAnonymity: professional.user.isAnonymous || false, // Original anonymity preference
             customInitials: (professional.user as any).customInitials || null,
           }
         };
       }
-      return professional;
+      return {
+        ...professional,
+        user: {
+          ...professional.user,
+          preferredAnonymity: professional.user.isAnonymous || false, // Original anonymity preference
+        }
+      };
     });
 
     return NextResponse.json({

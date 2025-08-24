@@ -101,6 +101,7 @@ export async function GET(
         email: shouldAnonymize ? '' : professional.email, // Hide email if anonymized
         phoneNumber: shouldAnonymize ? null : professional.phoneNumber, // Hide phone number if anonymized
         isAnonymous: shouldAnonymize ? true : (professional.isAnonymous || false), // Mark as anonymous if anonymized
+        preferredAnonymity: professional.isAnonymous || false, // Original anonymity preference
         customInitials: (professional as any).customInitials || null,
         dontContactMe: (professional as any).dontContactMe || false,
       }

@@ -7,6 +7,7 @@ import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateFilterClient } from "@/components/candidates/CandidateFilterClient";
 import { type CandidateFilters } from "@/types/candidate";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useNetworkAccess } from "@/hooks/use-network-access";
 
 interface PaginationData {
   total: number;
@@ -29,6 +30,7 @@ function LoadingGrid() {
 
 export default function BrowseProfessionalsPage() {
   const { data: session } = useSession();
+  const { hasNetworkAccess } = useNetworkAccess();
   const [professionals, setProfessionals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,8 +101,9 @@ export default function BrowseProfessionalsPage() {
               </div>
             ) : (
               <>
-                {/* Anonymous Profiles Notice - Only for employers/agencies */}
-                {(session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
+                {/* Anonymous Profiles Notice - Only for employers/agencies with network access viewing anonymous professionals */}
+                {hasNetworkAccess && (session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && 
+                 professionals.some(p => p.user?.preferredAnonymity) && (
                   <div className="mt-8 mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start">
                       <div className="flex-shrink-0">
