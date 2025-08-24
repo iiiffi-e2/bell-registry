@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/providers/providers";
 import { Analytics } from "@vercel/analytics/next";
+import { ScrollRestoration } from "@/components/scroll-restoration";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,6 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
+          <ScrollRestoration />
           {children}
         </Providers>
         <Analytics />
