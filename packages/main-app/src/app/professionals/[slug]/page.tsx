@@ -112,7 +112,7 @@ export default function PublicProfilePage({
   const [loading, setLoading] = useState(true);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const { hasNetworkAccess } = useNetworkAccess();
 
@@ -140,7 +140,8 @@ export default function PublicProfilePage({
     }
   }, [params.slug, profileLoaded]);
 
-  if (loading) {
+  // Show loading state while checking session and profile
+  if (status === "loading" || loading) {
     return (
       <div className="max-w-5xl mx-auto">
         <div className="bg-white shadow rounded-lg animate-pulse">
@@ -163,6 +164,32 @@ export default function PublicProfilePage({
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect unauthenticated users (middleware should handle this, but double-check)
+  if (status === "unauthenticated") {
+    router.push('/login');
+    return null;
+  }
+
+  // Require authentication to view any professional profile
+  if (!session) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6 text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Authentication Required</h3>
+            <p className="text-gray-600 mb-4">You must be logged in to view professional profiles.</p>
+            <button
+              onClick={() => router.push('/login')}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            >
+              Sign In
+            </button>
           </div>
         </div>
       </div>

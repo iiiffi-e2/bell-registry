@@ -9,7 +9,6 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/',
     '/jobs',
-    '/candidates',
     '/auth/signin', 
     '/auth/signup',
     '/auth/error',
@@ -22,8 +21,7 @@ export async function middleware(request: NextRequest) {
 
   // Check if it's a public route (including dynamic job routes)
   const isPublicRoute = publicRoutes.some(route => pathname === route) || 
-                       pathname.startsWith('/jobs/') ||
-                       pathname.startsWith('/candidates/');
+                       pathname.startsWith('/jobs/');
 
   // Add dynamic header for API routes
   if (pathname.startsWith('/api/')) {
@@ -54,10 +52,14 @@ export const config = {
      * Match all protected routes:
      * - /dashboard/*
      * - /profile/*
+     * - /professionals/* (requires login)
+     * - /candidates/* (requires login)
      * - /api/* (except /api/auth/* and /api/socket)
      */
     '/dashboard/:path*',
     '/profile/:path*',
+    '/professionals/:path*',
+    '/candidates/:path*',
     '/api/((?!auth|socket).*)',
   ]
 } 

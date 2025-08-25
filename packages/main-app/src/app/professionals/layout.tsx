@@ -31,10 +31,37 @@ export default function ProfessionalsLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { profile } = useProfile();
   const imageUrl = profile?.user?.image || null;
   const isProfessional = session?.user?.role === ROLES.PROFESSIONAL;
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // Redirect unauthenticated users
+  if (status === "unauthenticated" || !session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">You must be logged in to view professional profiles.</p>
+          <Link
+            href="/login"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   const navigation = session ? [
     {
