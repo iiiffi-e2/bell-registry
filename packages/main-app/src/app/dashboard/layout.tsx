@@ -396,7 +396,7 @@ export default function DashboardLayout({
             </div>
           </div>
           {/* Main content area */}
-          <main className="flex-1 p-6 bg-slate-50 min-h-screen">
+          <main className="flex-1 p-4 sm:p-6 bg-slate-50 min-h-screen">
             {/* OAuth Completion - handles post-OAuth registration completion */}
             <OAuthCompletion />
             
