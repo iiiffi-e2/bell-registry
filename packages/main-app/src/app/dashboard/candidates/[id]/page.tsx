@@ -228,7 +228,11 @@ export default function CandidateProfilePage({
                     {getDisplayName(profile)}
                   </h1>
                   {profile.openToWork && (
-                    <OpenToWorkBadge variant="inline" size="sm" />
+                    <div className="flex justify-center sm:justify-start">
+                      <div className="max-w-fit">
+                        <OpenToWorkBadge variant="inline" size="sm" />
+                      </div>
+                    </div>
                   )}
                 </div>
                 <p className="mt-2 text-xl text-gray-700 font-medium">

@@ -204,7 +204,11 @@ export default function PublicProfilePage({
                   {getDisplayName(profile)}
                 </h1>
                 {profile.openToWork && (
-                  <OpenToWorkBadge variant="inline" size="sm" />
+                  <div className="flex justify-center sm:justify-start">
+                    <div className="max-w-fit">
+                      <OpenToWorkBadge variant="inline" size="sm" />
+                    </div>
+                  </div>
                 )}
               </div>
               <p className="mt-2 text-xl text-gray-700 font-medium">
@@ -235,8 +239,28 @@ export default function PublicProfilePage({
         </div>
       </div>
 
+      {/* Mobile Action Buttons - Right below hero on mobile only */}
+      {session && session.user.id !== profile.user.id && (
+        <div className="lg:hidden bg-white border-l border-r border-gray-200 px-6 py-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            {(session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
+              <>
+                <SaveCandidateButton 
+                  candidateId={profile.user.id} 
+                  className="flex-1"
+                />
+                <MessageProfessionalButton 
+                  professionalId={profile.user.id}
+                  className="flex-1"
+                />
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Main Content Area */}
-      <div className="bg-white shadow-lg rounded-b-2xl">
+      <div className="bg-white shadow-lg rounded-b-2xl lg:rounded-b-2xl border-l border-r border-b border-gray-200 lg:border-l-0 lg:border-r-0 lg:border-b-0">
         <div className="px-6 py-8 sm:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content Column */}
@@ -517,6 +541,50 @@ export default function PublicProfilePage({
                 <MediaViewer mediaUrls={profile.mediaUrls} />
               )}
             </div>
+
+            {/* Desktop Sidebar - Action Buttons and Quick Info */}
+            {session && session.user.id !== profile.user.id && (
+              <div className="hidden lg:block lg:col-span-1">
+                <div className="sticky top-6 space-y-6">
+                  {/* Action Buttons */}
+                  {(session?.user?.role === 'EMPLOYER' || session?.user?.role === 'AGENCY') && (
+                    <div className="space-y-3">
+                      <SaveCandidateButton 
+                        candidateId={profile.user.id} 
+                        className="w-full"
+                      />
+                      <MessageProfessionalButton 
+                        professionalId={profile.user.id}
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+
+                  {/* Quick Contact Info */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="text-sm font-medium text-gray-900 mb-3">Quick Info</h4>
+                    <div className="space-y-2 text-sm text-gray-600">
+                      {profile.location && (
+                        <div className="flex items-center">
+                          <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
+                          {profile.location}
+                        </div>
+                      )}
+                      {profile.yearsOfExperience && (
+                        <div className="flex items-center">
+                          <BriefcaseIcon className="h-4 w-4 mr-2 text-gray-400" />
+                          {profile.yearsOfExperience} years experience
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <EyeIcon className="h-4 w-4 mr-2 text-gray-400" />
+                        {profile.profileViews} profile views
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Report Profile Link - Subtle placement at the bottom */}
