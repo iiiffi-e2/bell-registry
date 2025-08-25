@@ -263,6 +263,22 @@ export default function CandidateProfilePage({
           </div>
         </div>
 
+        {/* Mobile Action Buttons - Right below blue header on mobile only */}
+        {canSaveCandidate && session.user.id !== profile.user.id && (
+          <div className="lg:hidden bg-white border-l border-r border-gray-200 px-6 py-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <SaveCandidateButton 
+                candidateId={profile.user.id} 
+                className="flex-1"
+              />
+              <MessageProfessionalButton 
+                professionalId={profile.user.id}
+                className="flex-1"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Main Content Area */}
         <div className="bg-white shadow-lg rounded-b-2xl">
           <div className="px-6 py-8 sm:px-8">

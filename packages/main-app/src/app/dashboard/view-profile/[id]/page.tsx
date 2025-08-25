@@ -262,11 +262,27 @@ export default function ProfessionalProfilePage({
                   </div>
                 </div>
               </div>
-            </div>
+                      </div>
+        </div>
+      </div>
+
+      {/* Mobile Action Buttons - Right below blue header on mobile only */}
+      {session && (session.user?.role === 'EMPLOYER' || session.user?.role === 'AGENCY') && session.user.id !== profile.user.id && (
+        <div className="lg:hidden bg-white border-l border-r border-gray-200 px-6 py-4">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <SaveCandidateButton 
+              candidateId={profile.user.id} 
+              className="flex-1"
+            />
+            <MessageProfessionalButton 
+              professionalId={profile.user.id}
+              className="flex-1"
+            />
           </div>
         </div>
+      )}
 
-        {/* Main Content Area */}
+      {/* Main Content Area */}
         <div className="bg-white shadow-lg rounded-b-2xl border border-slate-200">
           <div className="px-6 py-8 sm:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
