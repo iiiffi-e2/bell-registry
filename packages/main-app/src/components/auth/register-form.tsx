@@ -279,14 +279,17 @@ export function RegisterForm() {
             {...stepOneForm.register("terms")}
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
-          <label htmlFor="terms" className="ml-2 block text-sm text-gray-600">
+          <label htmlFor="Terms of Service" className="ml-2 block text-sm text-gray-600">
             By signing up, I agree to BellRegistry&apos;s{" "}
-            <Link href="/terms" className="text-blue-600 hover:text-blue-500">
+            <Link href="https://bellregistry.com/terms-and-conditions" target="_blank" className="text-blue-600 hover:text-blue-500">
               Terms of Service
+            </Link>{", "}
+            <Link href="https://bellregistry.com/privacy-policy" target="_blank" className="text-blue-600 hover:text-blue-500">
+              Privacy Policy
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-blue-600 hover:text-blue-500">
-              Privacy Policy
+            <Link href="https://bellregistry.com/code-of-conduct" target="_blank" className="text-blue-600 hover:text-blue-500">
+              Code of Conduct
             </Link>
             .
           </label>
