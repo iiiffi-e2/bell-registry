@@ -26,12 +26,11 @@ export default function DashboardPage() {
       // Check if we're already on the correct role-specific route
       const targetRoute = (() => {
         switch (session.user.role) {
-          case ROLES.EMPLOYER:
-            return "/dashboard/employer";
-          case ROLES.AGENCY:
-            return "/dashboard/agency";
-          case ROLES.ADMIN:
-            return "/dashboard/admin";
+    case ROLES.EMPLOYER:
+    case ROLES.AGENCY:
+      return "/dashboard/employer";
+    case ROLES.ADMIN:
+      return "/dashboard/admin";
           default:
             return null; // For PROFESSIONAL role, stay on this page
         }

@@ -130,25 +130,35 @@ const agencyRoutes = [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
-    href: "/dashboard/agency",
+    href: "/dashboard/employer",
     color: "text-sky-500",
   },
   {
     label: "Job Listings",
     icon: Briefcase,
-    href: "/dashboard/agency/jobs",
+    href: "/dashboard/jobs",
     color: "text-violet-500",
   },
   {
     label: "Professionals",
     icon: Users,
-    href: "/dashboard/agency/professionals",
+    href: "#",
     color: "text-blue-500",
+    submenu: [
+      {
+        label: "Browse All",
+        href: "/dashboard/browse-professionals",
+      },
+             {
+         label: "View Saved",
+         href: "/dashboard/employer/saved-professionals",
+       },
+    ],
   },
   {
     label: "Applications",
     icon: FileText,
-    href: "/dashboard/agency/applications",
+    href: "/dashboard/employer/applications",
     color: "text-green-500",
   },
   {
@@ -160,13 +170,13 @@ const agencyRoutes = [
   {
     label: "Agency Profile",
     icon: Building,
-    href: "/dashboard/agency/profile",
+    href: "/dashboard/employer/profile",
     color: "text-orange-500",
   },
   {
     label: "Settings",
     icon: Settings,
-    href: "/dashboard/agency/settings",
+    href: "/dashboard/employer/settings",
     color: "text-gray-500",
   },
   {

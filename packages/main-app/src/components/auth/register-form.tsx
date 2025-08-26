@@ -36,9 +36,19 @@ const stepTwoSchema = z.object({
     ),
   confirmPassword: z.string(),
   role: z.enum(ROLES).optional(),
+  companyName: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
       message: "Passwords don&apos;t match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  // Require company name for agencies
+  if (data.role === "AGENCY" && (!data.companyName || data.companyName.trim().length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Company name is required for agencies",
+  path: ["companyName"],
 });
 
 type StepOneData = z.infer<typeof stepOneSchema>;
@@ -145,6 +155,7 @@ export function RegisterForm() {
           password: data.password,
           membershipAccess: stepOneData.membershipAccess || (isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "NEW_APPLICANT"),
           referralProfessionalName: stepOneData.referralProfessionalName || null,
+          companyName: data.companyName || null,
         }),
       });
 
@@ -170,6 +181,7 @@ export function RegisterForm() {
       role: stepTwoForm.watch("role"),
       membershipAccess: stepOneForm.watch("membershipAccess") || (isEmployerRoute ? "EMPLOYER" : isAgencyRoute ? "AGENCY" : "NEW_APPLICANT"),
       referralProfessionalName: stepOneForm.watch("referralProfessionalName") || null,
+      companyName: stepTwoForm.watch("companyName") || null,
     };
     
     // Store in sessionStorage (will be cleared after OAuth completion)
@@ -371,7 +383,7 @@ export function RegisterForm() {
               {!stepOneForm.watch("email") && "Please enter your email address"}
               {stepOneForm.watch("email") && !stepOneForm.watch("terms") && "Please accept the terms and conditions"}
               {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && (!stepOneForm.watch("membershipAccess") || stepOneForm.watch("membershipAccess") === "") && "Please select your membership access type"}
-              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (!stepOneForm.watch("referralProfessionalName") || stepOneForm.watch("referralProfessionalName").trim().length === 0) && "Please provide the professional referral name"}
+              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (!stepOneForm.watch("referralProfessionalName") || stepOneForm.watch("referralProfessionalName")?.trim().length === 0) && "Please provide the professional referral name"}
             </p>
           )}
         </div>
@@ -421,6 +433,27 @@ export function RegisterForm() {
               </Link>
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Company Name - Only for Agencies */}
+      {stepTwoForm.watch("role") === "AGENCY" && (
+        <div>
+          <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
+            Company Name
+          </label>
+          <input
+            {...stepTwoForm.register("companyName")}
+            type="text"
+            id="companyName"
+            className="mt-1 block w-full rounded-md border-0 py-3 px-4 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm"
+            placeholder="Enter your company name"
+          />
+          {stepTwoForm.formState.errors.companyName && (
+            <p className="mt-1 text-sm text-red-600">
+              {stepTwoForm.formState.errors.companyName.message}
+            </p>
+          )}
         </div>
       )}
 

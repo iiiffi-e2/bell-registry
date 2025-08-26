@@ -85,14 +85,22 @@ const employerNavigation: NavigationItem[] = [
 ];
 
 const agencyNavigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/dashboard/agency", icon: HomeIcon },
-  { name: "Job Listings", href: "/dashboard/agency/jobs", icon: BriefcaseIcon },
-  { name: "Professionals", href: "/dashboard/agency/professionals", icon: UsersIcon },
-  { name: "Applications", href: "/dashboard/agency/applications", icon: DocumentTextIcon },
+  { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
+  { name: "Job Listings", href: "/dashboard/employer/jobs", icon: BriefcaseIcon },
+  { 
+    name: "Professionals", 
+    href: "#", 
+    icon: UsersIcon,
+    submenu: [
+      { name: "Browse All", href: "/dashboard/browse-professionals" },
+      { name: "View Saved", href: "/dashboard/employer/saved-professionals" }
+    ]
+  },
+  { name: "Applications", href: "/dashboard/employer/applications", icon: DocumentTextIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
   { name: "Subscription", href: "/dashboard/subscription", icon: CreditCardIcon },
   { name: "Billing", href: "/dashboard/billing", icon: ReceiptPercentIcon },
-  { name: "Agency Profile", href: "/dashboard/agency/profile", icon: BuildingOfficeIcon },
+  { name: "Agency Profile", href: "/dashboard/employer/profile", icon: BuildingOfficeIcon },
   { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];
 

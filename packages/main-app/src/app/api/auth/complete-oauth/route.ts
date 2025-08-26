@@ -6,7 +6,8 @@ import { z } from "zod";
 
 const completeOAuthSchema = z.object({
   membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT", "EMPLOYER", "AGENCY"]),
-  referralProfessionalName: z.string().optional(),
+  referralProfessionalName: z.string().optional().nullable(),
+  companyName: z.string().optional().nullable(),
 });
 
 export async function POST(request: NextRequest) {
@@ -32,6 +33,16 @@ export async function POST(request: NextRequest) {
         referralProfessionalName: validatedData.referralProfessionalName,
       },
     });
+
+    // If company name is provided and user is an agency, update employer profile
+    if (validatedData.companyName && (updatedUser.role === "AGENCY" || updatedUser.role === "EMPLOYER")) {
+      await prisma.employerProfile.updateMany({
+        where: { userId: session.user.id },
+        data: {
+          companyName: validatedData.companyName,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

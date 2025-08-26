@@ -14,7 +14,8 @@ const registerSchema = z.object({
   password: z.string().min(8),
   role: z.enum(["PROFESSIONAL", "EMPLOYER", "AGENCY", "ADMIN"]),
   membershipAccess: z.enum(["BELL_REGISTRY_REFERRAL", "PROFESSIONAL_REFERRAL", "NEW_APPLICANT", "EMPLOYER", "AGENCY"]).optional(),
-  referralProfessionalName: z.string().optional(),
+  referralProfessionalName: z.string().optional().nullable(),
+  companyName: z.string().optional().nullable(),
 });
 
 export async function POST(req: Request) {
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
       await prisma.employerProfile.create({
         data: {
           userId: user.id,
-          companyName: "", // Will be set during onboarding
+          companyName: body.companyName || (body.role === "AGENCY" ? "" : ""), // Set company name for agencies, empty for employers
         },
       });
     }

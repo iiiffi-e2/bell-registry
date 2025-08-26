@@ -8,6 +8,7 @@ interface PendingOAuthData {
   role: string;
   membershipAccess: string;
   referralProfessionalName?: string;
+  companyName?: string;
 }
 
 export default function OAuthCompletion() {
@@ -58,6 +59,7 @@ export default function OAuthCompletion() {
         body: JSON.stringify({
           membershipAccess: pendingData.membershipAccess,
           referralProfessionalName: pendingData.referralProfessionalName,
+          companyName: pendingData.companyName,
         }),
       });
 
