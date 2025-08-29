@@ -270,12 +270,18 @@ export default function AdminDashboard() {
             {/* Admin Tools - Always Show System Settings */}
             <div className='mt-4 pt-4 border-t border-gray-200'>
               <h3 className='text-sm font-medium text-gray-900 mb-2'>Admin Tools</h3>
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button 
                   onClick={() => router.push('/settings')}
                   className='inline-flex items-center px-4 py-2 border border-blue-300 text-sm font-medium rounded-md shadow-sm text-blue-800 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                 >
                   System Settings
+                </button>
+                <button 
+                  onClick={() => router.push('/message-board')}
+                  className='inline-flex items-center px-4 py-2 border border-purple-300 text-sm font-medium rounded-md shadow-sm text-purple-800 bg-purple-50 hover:bg-purple-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
+                >
+                  Message Board
                 </button>
                 {process.env.NODE_ENV === 'development' && (
                   <button 
