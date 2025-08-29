@@ -11,10 +11,13 @@ import {
   Pin,
   Lock,
   Plus,
+  Search,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { CreateThreadModal } from "./create-thread-modal";
 
 interface Thread {
@@ -37,6 +40,10 @@ export function ThreadList() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<Thread[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     fetchThreads();
@@ -67,6 +74,47 @@ export function ThreadList() {
     // Navigate to the new thread
     router.push(`/dashboard/message-board/thread/${newThread.id}`);
   };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      return;
+    }
+
+    setIsSearching(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/message-board/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to search threads");
+      }
+      
+      const data = await response.json();
+      setSearchResults(data.threads);
+      setHasSearched(true);
+    } catch (error) {
+      console.error("Error searching threads:", error);
+      setError("Failed to search threads. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    setSearchResults([]);
+    setHasSearched(false);
+    setError(null);
+  };
+
+  const displayedThreads = hasSearched ? searchResults : threads;
 
   if (isLoading) {
     return (
@@ -106,29 +154,102 @@ export function ThreadList() {
         </Button>
       </div>
 
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                type="text"
+                placeholder="Search threads by title or content... (Press Enter to search)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleSearchKeyPress}
+                className="pl-10 pr-10"
+                disabled={isSearching}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <Button 
+              onClick={handleSearch}
+              disabled={isSearching || !searchQuery.trim()}
+              variant="outline"
+            >
+              {isSearching ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+            </Button>
+            {hasSearched && (
+              <Button 
+                onClick={clearSearch}
+                variant="outline"
+                className="text-gray-600"
+              >
+                Clear
+              </Button>
+            )}
+          </div>
+          
+          {hasSearched && (
+            <div className="mt-3 text-sm text-gray-600">
+              Found {searchResults.length} thread{searchResults.length !== 1 ? 's' : ''} matching "{searchQuery}"
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Threads List */}
-      {threads.length === 0 ? (
+      {displayedThreads.length === 0 ? (
         <Card>
           <CardContent className="text-center py-12">
             <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No threads yet
-            </h3>
-            <p className="text-gray-600 mb-4">
-              Be the first to start a discussion!
-            </p>
-            <Button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Thread
-            </Button>
+            {hasSearched ? (
+              <>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No threads found
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  No threads match your search for "{searchQuery}". Try different keywords or clear the search.
+                </p>
+                <Button 
+                  onClick={clearSearch}
+                  variant="outline"
+                >
+                  Clear Search
+                </Button>
+              </>
+            ) : (
+              <>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No threads yet
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  Be the first to start a discussion!
+                </p>
+                <Button 
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Thread
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {threads.map((thread) => (
+          {displayedThreads.map((thread) => (
             <Card key={thread.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between">
