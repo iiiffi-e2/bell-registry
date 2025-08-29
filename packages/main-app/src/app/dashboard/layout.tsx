@@ -60,6 +60,7 @@ const professionalNavigation: NavigationItem[] = [
   { name: "Job Alerts", href: "/dashboard/job-alerts", icon: BellIcon },
   { name: "Saved Jobs", href: "/dashboard/saved-jobs", icon: BookmarkIcon },
   { name: "Messages", href: "/dashboard/messages", icon: ChatBubbleLeftRightIcon },
+  { name: "Message Board", href: "/dashboard/message-board", icon: DocumentTextIcon },
   { name: "Profile", href: "/dashboard/profile", icon: UserCircleIcon },
   { name: "Resource Center", href: "#", icon: DocumentTextIcon },
 ];

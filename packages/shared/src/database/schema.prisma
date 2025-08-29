@@ -124,6 +124,8 @@ model User {
   bannedUsers               User[]               @relation("BannedByAdmin")
   suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
   suspendedUsers            User[]               @relation("SuspendedByAdmin")
+  messageBoardThreads       MessageBoardThread[] @relation("ThreadAuthor")
+  messageBoardReplies       MessageBoardReply[]  @relation("ReplyAuthor")
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -539,4 +541,36 @@ enum JobAdminStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+model MessageBoardThread {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  authorId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastReplyAt DateTime @default(now())
+  isLocked    Boolean  @default(false)
+  isPinned    Boolean  @default(false)
+  author      User     @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  replies     MessageBoardReply[]
+
+  @@index([createdAt])
+  @@index([lastReplyAt])
+  @@index([isPinned])
+}
+
+model MessageBoardReply {
+  id        String             @id @default(cuid())
+  content   String
+  authorId  String
+  threadId  String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  author    User               @relation("ReplyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  thread    MessageBoardThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@index([threadId])
+  @@index([createdAt])
 }

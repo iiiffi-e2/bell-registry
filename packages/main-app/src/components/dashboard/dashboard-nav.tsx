@@ -16,6 +16,7 @@ import {
   Building,
   ChevronDown,
   CreditCard,
+  MessageSquare,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -44,6 +45,12 @@ const professionalRoutes = [
     icon: Bookmark,
     href: "/dashboard/saved-jobs",
     color: "text-orange-700",
+  },
+  {
+    label: "Message Board",
+    icon: MessageSquare,
+    href: "/dashboard/message-board",
+    color: "text-purple-600",
   },
   {
     label: "Profile",
