@@ -26,6 +26,8 @@ interface Thread {
   replyCount: number;
   participantCount: number;
   isAuthor: boolean;
+  likeCount: number;
+  isLiked: boolean;
 }
 
 interface CreateThreadModalProps {

@@ -13,6 +13,7 @@ import {
   Plus,
   Search,
   X,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +33,8 @@ interface Thread {
   replyCount: number;
   participantCount: number;
   isAuthor: boolean;
+  likeCount: number;
+  isLiked: boolean;
 }
 
 export function ThreadList() {
@@ -288,6 +291,10 @@ export function ThreadList() {
                     <div className="flex items-center gap-1">
                       <MessageSquare className="h-4 w-4" />
                       <span>{thread.replyCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart className={`h-4 w-4 ${thread.likeCount > 0 ? 'text-red-500' : ''}`} />
+                      <span>{thread.likeCount}</span>
                     </div>
                   </div>
                 </div>

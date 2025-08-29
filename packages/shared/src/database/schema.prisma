@@ -123,9 +123,11 @@ model User {
   bannedByAdmin             User?                @relation("BannedByAdmin", fields: [bannedBy], references: [id])
   bannedUsers               User[]               @relation("BannedByAdmin")
   suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
-  suspendedUsers            User[]               @relation("SuspendedByAdmin")
-  messageBoardThreads       MessageBoardThread[] @relation("ThreadAuthor")
-  messageBoardReplies       MessageBoardReply[]  @relation("ReplyAuthor")
+  suspendedUsers            User[]                     @relation("SuspendedByAdmin")
+  messageBoardThreads       MessageBoardThread[]       @relation("ThreadAuthor")
+  messageBoardReplies       MessageBoardReply[]        @relation("ReplyAuthor")
+  messageBoardThreadLikes   MessageBoardThreadLike[]   @relation("ThreadLikes")
+  messageBoardReplyLikes    MessageBoardReplyLike[]    @relation("ReplyLikes")
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -544,17 +546,18 @@ enum JobAdminStatus {
 }
 
 model MessageBoardThread {
-  id          String   @id @default(cuid())
+  id          String                    @id @default(cuid())
   title       String
   content     String
   authorId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  lastReplyAt DateTime @default(now())
-  isLocked    Boolean  @default(false)
-  isPinned    Boolean  @default(false)
-  author      User     @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  lastReplyAt DateTime                  @default(now())
+  isLocked    Boolean                   @default(false)
+  isPinned    Boolean                   @default(false)
+  author      User                      @relation("ThreadAuthor", fields: [authorId], references: [id], onDelete: Cascade)
   replies     MessageBoardReply[]
+  likes       MessageBoardThreadLike[]
 
   @@index([createdAt])
   @@index([lastReplyAt])
@@ -562,15 +565,42 @@ model MessageBoardThread {
 }
 
 model MessageBoardReply {
-  id        String             @id @default(cuid())
+  id        String                   @id @default(cuid())
   content   String
   authorId  String
   threadId  String
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
-  author    User               @relation("ReplyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  thread    MessageBoardThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  createdAt DateTime                 @default(now())
+  updatedAt DateTime                 @updatedAt
+  author    User                     @relation("ReplyAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  thread    MessageBoardThread       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  likes     MessageBoardReplyLike[]
 
   @@index([threadId])
   @@index([createdAt])
+}
+
+model MessageBoardThreadLike {
+  id        String             @id @default(cuid())
+  threadId  String
+  userId    String
+  createdAt DateTime           @default(now())
+  thread    MessageBoardThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  user      User               @relation("ThreadLikes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, userId])
+  @@index([threadId])
+  @@index([userId])
+}
+
+model MessageBoardReplyLike {
+  id        String            @id @default(cuid())
+  replyId   String
+  userId    String
+  createdAt DateTime          @default(now())
+  reply     MessageBoardReply @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  user      User              @relation("ReplyLikes", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([replyId, userId])
+  @@index([replyId])
+  @@index([userId])
 }

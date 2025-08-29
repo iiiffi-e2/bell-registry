@@ -51,9 +51,15 @@ export async function GET(request: NextRequest) {
             }
           }
         },
+        likes: {
+          select: {
+            userId: true
+          }
+        },
         _count: {
           select: {
-            replies: true
+            replies: true,
+            likes: true
           }
         }
       },
@@ -98,6 +104,8 @@ export async function GET(request: NextRequest) {
         replyCount: thread._count.replies,
         participantCount: uniqueParticipants.size,
         isAuthor: thread.authorId === session.user.id,
+        likeCount: thread._count.likes,
+        isLiked: thread.likes.some(like => like.userId === session.user.id),
       };
     });
 
