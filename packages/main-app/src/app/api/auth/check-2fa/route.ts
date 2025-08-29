@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
       select: {
         id: true,
         twoFactorEnabled: true,

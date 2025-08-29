@@ -43,7 +43,7 @@ export const adminAuthOptions: NextAuthOptions = {
         // Find user by email
         const user = await prisma.user.findUnique({
           where: { 
-            email: credentials.email
+            email: credentials.email.toLowerCase()
           }
         });
 

@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     // Find user by email
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: email.toLowerCase() },
     });
 
     // If user doesn't exist, still return success to prevent email enumeration
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
     // Store reset token in database
     await prisma.user.update({
-      where: { email },
+      where: { email: email.toLowerCase() },
       data: {
         resetToken,
         resetTokenExpiry,

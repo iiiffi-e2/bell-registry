@@ -49,7 +49,7 @@ export function LoginForm() {
 
       const result = await signIn("credentials", {
         redirect: false,
-        email: data.email,
+        email: data.email.toLowerCase(),
         password: data.password,
       });
 

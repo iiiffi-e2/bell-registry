@@ -130,18 +130,19 @@ export function LoginFormWith2FA() {
       setSuccessMessage(null);
 
       // First, check if user has 2FA enabled
-      const { has2FA, phone } = await checkUserHas2FA(data.email);
+      const normalizedEmail = data.email.toLowerCase();
+      const { has2FA, phone } = await checkUserHas2FA(normalizedEmail);
 
       if (has2FA) {
         // Check if this device is trusted
-        const { isTrusted } = await checkTrustedDevice(data.email);
+        const { isTrusted } = await checkTrustedDevice(normalizedEmail);
         
         // Verify credentials without logging in
         const credentialCheck = await fetch('/api/auth/verify-credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: data.email,
+            email: normalizedEmail,
             password: data.password,
           }),
         });
@@ -157,7 +158,7 @@ export function LoginFormWith2FA() {
           // Complete login directly
           const result = await signIn("credentials", {
             redirect: false,
-            email: data.email,
+            email: normalizedEmail,
             password: data.password,
           });
 
@@ -171,9 +172,9 @@ export function LoginFormWith2FA() {
         }
 
         // Device not trusted, proceed with 2FA
-        const codeSent = await sendVerificationCode(data.email);
+        const codeSent = await sendVerificationCode(normalizedEmail);
         if (codeSent) {
-          setEmail(data.email);
+          setEmail(normalizedEmail);
           setMaskedPhone(phone || '***-***-****');
           setStep('2fa');
         }
@@ -181,7 +182,7 @@ export function LoginFormWith2FA() {
         // Normal login without 2FA
         const result = await signIn("credentials", {
           redirect: false,
-          email: data.email,
+          email: normalizedEmail,
           password: data.password,
         });
 

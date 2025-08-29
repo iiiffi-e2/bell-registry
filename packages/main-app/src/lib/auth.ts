@@ -84,7 +84,7 @@ export const authOptions: NextAuthOptions = {
         if (credentials.password === "__2FA_VERIFIED__") {
           const user = await prisma.user.findUnique({
             where: {
-              email: credentials.email
+              email: credentials.email.toLowerCase()
             }
           });
 
@@ -109,7 +109,7 @@ export const authOptions: NextAuthOptions = {
         // Normal credential verification
         const user = await prisma.user.findUnique({
           where: {
-            email: credentials.email
+            email: credentials.email.toLowerCase()
           }
         });
 
