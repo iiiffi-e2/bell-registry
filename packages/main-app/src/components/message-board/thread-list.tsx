@@ -202,7 +202,7 @@ export function ThreadList() {
           
           {hasSearched && (
             <div className="mt-3 text-sm text-gray-600">
-              Found {searchResults.length} thread{searchResults.length !== 1 ? 's' : ''} matching "{searchQuery}"
+              Found {searchResults.length} thread{searchResults.length !== 1 ? 's' : ''} matching &ldquo;{searchQuery}&rdquo;
             </div>
           )}
         </CardContent>
@@ -219,7 +219,7 @@ export function ThreadList() {
                   No threads found
                 </h3>
                 <p className="text-gray-600 mb-4">
-                  No threads match your search for "{searchQuery}". Try different keywords or clear the search.
+                  No threads match your search for &ldquo;{searchQuery}&rdquo;. Try different keywords or clear the search.
                 </p>
                 <Button 
                   onClick={clearSearch}
