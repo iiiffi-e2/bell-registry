@@ -245,7 +245,7 @@ export default function AdminThreadViewPage({ params }: AdminThreadViewProps) {
                 {thread.isLocked && (
                   <Lock className="h-5 w-5 text-red-600" />
                 )}
-                <h1 className="text-2xl font-bold text-gray-900 truncate">
+                <h1 className="text-2xl font-bold text-gray-900">
                   {thread.title}
                 </h1>
               </div>
