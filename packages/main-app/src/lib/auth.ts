@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 import { sendWelcomeEmail } from "./welcome-email-service";
 import { verifyTwoFactorSession } from "@/lib/2fa-session";
 import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
+import { initializeTrialSubscription } from "./subscription-service";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
@@ -233,6 +234,15 @@ export const authOptions: NextAuthOptions = {
                 companyName: "",
               }
             });
+
+            // Initialize trial subscription for new employers
+            try {
+              await initializeTrialSubscription(newUser.id);
+              console.log(`Trial subscription initialized for employer ${newUser.id}`);
+            } catch (trialError) {
+              console.error(`Failed to initialize trial subscription for employer ${newUser.id}:`, trialError);
+              // Don't fail the sign-in, just log the error
+            }
           }
 
           // Send welcome email to new Google OAuth user

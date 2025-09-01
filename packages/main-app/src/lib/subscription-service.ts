@@ -9,7 +9,8 @@ export enum SubscriptionType {
   SPOTLIGHT = 'SPOTLIGHT',
   BUNDLE = 'BUNDLE',
   UNLIMITED = 'UNLIMITED',
-  NETWORK = 'NETWORK'
+  NETWORK = 'NETWORK',
+  NETWORK_QUARTERLY = 'NETWORK_QUARTERLY'
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -24,35 +25,62 @@ export const SUBSCRIPTION_PLANS = {
     durationDays: 30,
     price: 0,
     stripeProductId: null,
+    isCredits: false,
   },
   SPOTLIGHT: {
     name: "Spotlight",
-    jobLimit: 1,
-    durationDays: 30,
+    jobLimit: null, // Credits-based, no limit
+    credits: 1, // Grants 1 job post credit
+    durationDays: null, // One-time purchase, no expiration
     price: 250,
     stripeProductId: process.env.STRIPE_SPOTLIGHT_PRODUCT_ID,
+    isCredits: true,
+    listingDurationDays: 45,
   },
   BUNDLE: {
     name: "Hiring Bundle",
-    jobLimit: 3,
-    durationDays: 30,
-    price: 650,
+    jobLimit: null, // Credits-based, no limit
+    credits: 4, // Grants 4 job post credits
+    durationDays: null, // One-time purchase, no expiration
+    price: 750,
     stripeProductId: process.env.STRIPE_BUNDLE_PRODUCT_ID,
+    isCredits: true,
+    listingDurationDays: 45,
   },
   UNLIMITED: {
-    name: "Unlimited",
-    jobLimit: null, // null means unlimited
-    durationDays: 60,
-    price: 1250,
+    name: "Unlimited (Annual)",
+    jobLimit: null, // Unlimited during active subscription
+    durationDays: 365, // Annual subscription
+    price: 1500,
     stripeProductId: process.env.STRIPE_UNLIMITED_PRODUCT_ID,
+    isCredits: false,
+    hasUnlimitedPosting: true,
+    listingDurationDays: 45,
+    autoRenew: true,
   },
   NETWORK: {
-    name: "Network",
-    jobLimit: 3,
-    durationDays: 90,
-    price: 5000,
+    name: "Network Access Membership (Annual)",
+    jobLimit: null, // Unlimited during active subscription
+    durationDays: 365, // Annual subscription
+    price: 17500,
     stripeProductId: process.env.STRIPE_NETWORK_PRODUCT_ID,
+    isCredits: false,
     hasNetworkAccess: true,
+    hasUnlimitedPosting: true,
+    listingDurationDays: 45,
+    autoRenew: true,
+  },
+  NETWORK_QUARTERLY: {
+    name: "Network Access Membership (Quarterly)",
+    jobLimit: null, // Unlimited during active subscription
+    durationDays: 90, // Quarterly subscription
+    price: 5000,
+    stripeProductId: process.env.STRIPE_NETWORK_QUARTERLY_PRODUCT_ID,
+    isCredits: false,
+    hasNetworkAccess: true,
+    hasUnlimitedPosting: true,
+    listingDurationDays: 45,
+    autoRenew: true,
   },
 } as const;
 
@@ -91,6 +119,63 @@ export async function hasActiveSubscription(employerId: string): Promise<boolean
 }
 
 /**
+ * Check if an employer has active unlimited posting entitlement
+ */
+export async function hasActiveUnlimitedPosting(employerId: string): Promise<boolean> {
+  try {
+    const employer = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+
+    if (!employer) {
+      return false;
+    }
+
+    const now = new Date();
+    
+    // Check if they have active Unlimited Annual subscription
+    const unlimitedPostingEndDate = (employer as any).unlimitedPostingEndDate;
+    if (unlimitedPostingEndDate && now <= unlimitedPostingEndDate) {
+      return true;
+    }
+
+    // Check if they have active Network Access subscription (which includes unlimited posting)
+    const networkAccessEndDate = (employer as any).networkAccessEndDate;
+    if (networkAccessEndDate && now <= networkAccessEndDate) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error checking unlimited posting status:", error);
+    return false;
+  }
+}
+
+/**
+ * Check if an employer has active Network Access permissions
+ */
+export async function hasActiveNetworkAccess(employerId: string): Promise<boolean> {
+  try {
+    const employer = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+
+    if (!employer) {
+      return false;
+    }
+
+    const now = new Date();
+    const networkAccessEndDate = (employer as any).networkAccessEndDate;
+    
+    return networkAccessEndDate && now <= networkAccessEndDate;
+  } catch (error) {
+    console.error("Error checking network access status:", error);
+    return false;
+  }
+}
+
+/**
  * Check if an employer can post a job
  */
 export async function canPostJob(employerId: string): Promise<boolean> {
@@ -103,26 +188,30 @@ export async function canPostJob(employerId: string): Promise<boolean> {
       return false;
     }
 
-    // First check if subscription is active
-    const hasActive = await hasActiveSubscription(employerId);
-    if (!hasActive) {
-      return false;
+    // Check if the organization has any active unlimited-posting entitlement
+    const hasUnlimitedPosting = await hasActiveUnlimitedPosting(employerId);
+    if (hasUnlimitedPosting) {
+      return true; // Can post without consuming credits
     }
 
-    // Check job posting limits
-    const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
-    const plan = SUBSCRIPTION_PLANS[subscriptionType as keyof typeof SUBSCRIPTION_PLANS];
-    
-    // Unlimited plans (UNLIMITED, NETWORK)
-    if (plan.jobLimit === null) {
+    // Check if they have credits available
+    const jobCredits = (employer as any).jobCredits || 0;
+    if (jobCredits > 0) {
       return true;
     }
 
-    // Count active (non-expired) jobs posted in the current subscription period
-    const subscriptionStartDate = (employer as any).subscriptionStartDate || employer.createdAt;
-    const activeJobsCount = await getActiveJobsCount(employerId, subscriptionStartDate);
-    
-    return activeJobsCount < plan.jobLimit;
+    // Check if they have an active trial subscription with remaining job limit
+    const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
+    if (subscriptionType === SubscriptionType.TRIAL) {
+      const hasActiveTrial = await hasActiveSubscription(employerId);
+      if (hasActiveTrial) {
+        const jobPostLimit = (employer as any).jobPostLimit || 5;
+        const jobsPostedCount = (employer as any).jobsPostedCount || 0;
+        return jobsPostedCount < jobPostLimit;
+      }
+    }
+
+    return false;
   } catch (error) {
     console.error("Error checking job posting eligibility:", error);
     return false;
@@ -200,20 +289,57 @@ async function getActiveJobsCount(employerId: string, subscriptionStartDate: Dat
 }
 
 /**
- * Increment job post count for an employer
+ * Handle job posting - consumes credits if no unlimited posting active
  */
-export async function incrementJobPostCount(employerId: string): Promise<void> {
+export async function handleJobPosting(employerId: string): Promise<void> {
   try {
-    // Use raw SQL for now to avoid type issues
+    const employer = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+
+    if (!employer) {
+      throw new Error("Employer profile not found");
+    }
+
+    const hasUnlimitedPosting = await hasActiveUnlimitedPosting(employerId);
+    const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
+    
+    if (!hasUnlimitedPosting) {
+      // Check if they have credits to consume
+      const jobCredits = (employer as any).jobCredits || 0;
+      if (jobCredits > 0) {
+        // Consume 1 credit
+        await prisma.$executeRaw`
+          UPDATE "EmployerProfile" 
+          SET "jobCredits" = "jobCredits" - 1 
+          WHERE "userId" = ${employerId} AND "jobCredits" > 0
+        `;
+      } else if (subscriptionType === SubscriptionType.TRIAL) {
+        // For trial users, we don't consume credits but we still track the job post count
+        // The trial limit is enforced by the canPostJob function
+      } else {
+        throw new Error("No credits available and no unlimited posting subscription");
+      }
+    }
+
+    // Always increment the job post count for tracking
     await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
       SET "jobsPostedCount" = "jobsPostedCount" + 1 
       WHERE "userId" = ${employerId}
     `;
   } catch (error) {
-    console.error("Error incrementing job post count:", error);
+    console.error("Error handling job posting:", error);
     throw error;
   }
+}
+
+/**
+ * Legacy function - kept for compatibility
+ * @deprecated Use handleJobPosting instead
+ */
+export async function incrementJobPostCount(employerId: string): Promise<void> {
+  return handleJobPosting(employerId);
 }
 
 /**
@@ -266,34 +392,61 @@ export async function updateEmployerSubscription(
 
   const plan = SUBSCRIPTION_PLANS[subscriptionType];
   const startDate = new Date();
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() + plan.durationDays);
 
   console.log('Plan details:', {
     planName: plan.name,
-    jobLimit: plan.jobLimit,
+    isCredits: plan.isCredits,
+    credits: (plan as any).credits,
+    hasUnlimitedPosting: (plan as any).hasUnlimitedPosting,
+    hasNetworkAccess: (plan as any).hasNetworkAccess,
     durationDays: plan.durationDays,
-    startDate,
-    endDate
+    startDate
   });
 
   try {
-    // Use raw SQL with proper enum casting for PostgreSQL
-    const result = await prisma.$executeRaw`
-      UPDATE "EmployerProfile" 
-      SET 
-        "subscriptionType" = ${subscriptionType}::"SubscriptionType",
-        "subscriptionStartDate" = ${startDate},
-        "subscriptionEndDate" = ${endDate},
-        "jobPostLimit" = ${plan.jobLimit},
-        "jobsPostedCount" = 0,
-        "stripeCustomerId" = ${stripeCustomerId || null},
-        "stripeSessionId" = ${stripeSessionId || null},
-        "hasNetworkAccess" = ${subscriptionType === SubscriptionType.NETWORK}
-      WHERE "userId" = ${employerId}
-    `;
-    
-    console.log('Database update result:', result);
+    if (plan.isCredits) {
+      // Handle credit-based purchases (Spotlight, Hiring Bundle)
+      const credits = (plan as any).credits || 0;
+      await prisma.$executeRaw`
+        UPDATE "EmployerProfile" 
+        SET 
+          "jobCredits" = "jobCredits" + ${credits},
+          "stripeCustomerId" = ${stripeCustomerId || null},
+          "stripeSessionId" = ${stripeSessionId || null}
+        WHERE "userId" = ${employerId}
+      `;
+    } else {
+      // Handle subscription-based purchases (Unlimited, Network Access)
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + (plan.durationDays || 0));
+
+      const hasUnlimitedPosting = (plan as any).hasUnlimitedPosting || false;
+      const hasNetworkAccess = (plan as any).hasNetworkAccess || false;
+      const autoRenew = (plan as any).autoRenew || false;
+
+      let renewalPeriod = null;
+      if (subscriptionType === SubscriptionType.NETWORK_QUARTERLY) {
+        renewalPeriod = 'QUARTERLY';
+      } else if (subscriptionType === SubscriptionType.NETWORK || subscriptionType === SubscriptionType.UNLIMITED) {
+        renewalPeriod = 'ANNUAL';
+      }
+
+      await prisma.$executeRaw`
+        UPDATE "EmployerProfile" 
+        SET 
+          "subscriptionType" = ${subscriptionType}::"SubscriptionType",
+          "subscriptionStartDate" = ${startDate},
+          "subscriptionEndDate" = ${endDate},
+          "unlimitedPostingEndDate" = ${hasUnlimitedPosting ? endDate : null},
+          "networkAccessEndDate" = ${hasNetworkAccess ? endDate : null},
+          "hasNetworkAccess" = ${hasNetworkAccess},
+          "autoRenew" = ${autoRenew},
+          "renewalPeriod" = ${renewalPeriod},
+          "stripeCustomerId" = ${stripeCustomerId || null},
+          "stripeSessionId" = ${stripeSessionId || null}
+        WHERE "userId" = ${employerId}
+      `;
+    }
     
     // Verify the update worked
     const updatedProfile = await prisma.employerProfile.findUnique({
@@ -302,9 +455,10 @@ export async function updateEmployerSubscription(
     
     console.log('Updated profile verification:', {
       subscriptionType: (updatedProfile as any)?.subscriptionType,
-      jobPostLimit: (updatedProfile as any)?.jobPostLimit,
-      startDate: (updatedProfile as any)?.subscriptionStartDate,
-      endDate: (updatedProfile as any)?.subscriptionEndDate
+      jobCredits: (updatedProfile as any)?.jobCredits,
+      unlimitedPostingEndDate: (updatedProfile as any)?.unlimitedPostingEndDate,
+      networkAccessEndDate: (updatedProfile as any)?.networkAccessEndDate,
+      autoRenew: (updatedProfile as any)?.autoRenew
     });
     
   } catch (error) {
@@ -361,15 +515,19 @@ export async function createCheckoutSession(
 function getPackageDescription(subscriptionType: SubscriptionType, plan: any): string {
   switch (subscriptionType) {
     case SubscriptionType.SPOTLIGHT:
-      return "1 job post for 30 days";
+      return "1 job post credit (45-day listings, no expiration)";
     case SubscriptionType.BUNDLE:
-      return "3 job posts for 30 days";
+      return "4 job post credits (45-day listings, no expiration)";
     case SubscriptionType.UNLIMITED:
-      return "Unlimited job posts for 60 days";
+      return "Unlimited job posting for 1 year (45-day listings, auto-renew)";
     case SubscriptionType.NETWORK:
-      return "90-day access to private candidate network + 3 job posts";
+      return "Annual Network Access: Unlimited posting + full profiles + direct messaging (auto-renew)";
+    case SubscriptionType.NETWORK_QUARTERLY:
+      return "Quarterly Network Access: Unlimited posting + full profiles + direct messaging (auto-renew)";
     default:
-      return `${plan.jobLimit === null ? "Unlimited" : plan.jobLimit} job posts for ${plan.durationDays} days`;
+      return plan.isCredits 
+        ? `${(plan as any).credits} job post credits (45-day listings, no expiration)`
+        : `${plan.jobLimit === null ? "Unlimited" : plan.jobLimit} job posts for ${plan.durationDays} days`;
   }
 }
 
@@ -477,6 +635,195 @@ export async function initializeTrialSubscription(employerId: string): Promise<v
       "jobsPostedCount" = 0
     WHERE "userId" = ${employerId}
   `;
+}
+
+/**
+ * Process subscription renewals for auto-renewing subscriptions
+ */
+export async function processSubscriptionRenewals(): Promise<{ renewedCount: number; failedCount: number }> {
+  try {
+    const now = new Date();
+    const threeDaysFromNow = new Date();
+    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+
+    // Find subscriptions that need renewal in the next 3 days
+    const subscriptionsToRenew = await prisma.employerProfile.findMany({
+      where: {
+        autoRenew: true,
+        OR: [
+          {
+            unlimitedPostingEndDate: {
+              gte: now,
+              lte: threeDaysFromNow,
+            },
+          },
+          {
+            networkAccessEndDate: {
+              gte: now,
+              lte: threeDaysFromNow,
+            },
+          },
+        ],
+      },
+      include: {
+        user: {
+          select: {
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+
+    let renewedCount = 0;
+    let failedCount = 0;
+
+    for (const employer of subscriptionsToRenew) {
+      try {
+        await renewSubscription(employer.userId);
+        renewedCount++;
+      } catch (error) {
+        console.error(`Failed to renew subscription for employer ${employer.userId}:`, error);
+        failedCount++;
+      }
+    }
+
+    return { renewedCount, failedCount };
+  } catch (error) {
+    console.error("Error processing subscription renewals:", error);
+    throw error;
+  }
+}
+
+/**
+ * Renew a subscription for a specific employer
+ */
+export async function renewSubscription(employerId: string): Promise<void> {
+  try {
+    const employer = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+
+    if (!employer || !employer.autoRenew) {
+      throw new Error("Employer not found or auto-renew not enabled");
+    }
+
+    const subscriptionType = (employer as any).subscriptionType;
+    const plan = SUBSCRIPTION_PLANS[subscriptionType as keyof typeof SUBSCRIPTION_PLANS];
+
+    if (!plan || plan.isCredits) {
+      throw new Error("Cannot renew credit-based plans");
+    }
+
+    const now = new Date();
+    const newEndDate = new Date();
+    newEndDate.setDate(newEndDate.getDate() + (plan.durationDays || 0));
+
+    // Update the subscription end dates
+    const hasUnlimitedPosting = (plan as any).hasUnlimitedPosting || false;
+    const hasNetworkAccess = (plan as any).hasNetworkAccess || false;
+
+    await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET 
+        "subscriptionEndDate" = ${newEndDate},
+        "unlimitedPostingEndDate" = ${hasUnlimitedPosting ? newEndDate : null},
+        "networkAccessEndDate" = ${hasNetworkAccess ? newEndDate : null}
+      WHERE "userId" = ${employerId}
+    `;
+
+    // Create billing record for the renewal
+    const description = `${plan.name} - Renewal`;
+    await createBillingRecord(
+      employer.id,
+      plan.price,
+      description,
+      subscriptionType as any,
+      null // No Stripe session for auto-renewal
+    );
+
+    console.log(`Successfully renewed subscription for employer ${employerId}`);
+  } catch (error) {
+    console.error(`Error renewing subscription for employer ${employerId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Cancel a subscription (prevents auto-renewal, benefits continue until end of term)
+ */
+export async function cancelSubscription(employerId: string): Promise<void> {
+  try {
+    await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET "autoRenew" = false
+      WHERE "userId" = ${employerId}
+    `;
+
+    console.log(`Cancelled auto-renewal for employer ${employerId}`);
+  } catch (error) {
+    console.error(`Error cancelling subscription for employer ${employerId}:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Get subscription status including renewal information
+ */
+export async function getSubscriptionStatus(employerId: string): Promise<{
+  hasUnlimitedPosting: boolean;
+  hasNetworkAccess: boolean;
+  jobCredits: number;
+  subscriptionType: string;
+  unlimitedPostingEndDate: Date | null;
+  networkAccessEndDate: Date | null;
+  autoRenew: boolean;
+  renewalPeriod: string | null;
+  daysUntilExpiry: number | null;
+}> {
+  try {
+    const employer = await prisma.employerProfile.findUnique({
+      where: { userId: employerId },
+    });
+
+    if (!employer) {
+      throw new Error("Employer not found");
+    }
+
+    const now = new Date();
+    const hasUnlimitedPosting = await hasActiveUnlimitedPosting(employerId);
+    const hasNetworkAccess = await hasActiveNetworkAccess(employerId);
+
+    const unlimitedPostingEndDate = (employer as any).unlimitedPostingEndDate;
+    const networkAccessEndDate = (employer as any).networkAccessEndDate;
+
+    // Calculate days until expiry (earliest of the two dates)
+    let daysUntilExpiry = null;
+    const earliestEndDate = [unlimitedPostingEndDate, networkAccessEndDate]
+      .filter(date => date && date > now)
+      .sort((a, b) => a.getTime() - b.getTime())[0];
+
+    if (earliestEndDate) {
+      const timeDiff = earliestEndDate.getTime() - now.getTime();
+      daysUntilExpiry = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    }
+
+    return {
+      hasUnlimitedPosting,
+      hasNetworkAccess,
+      jobCredits: (employer as any).jobCredits || 0,
+      subscriptionType: (employer as any).subscriptionType || 'TRIAL',
+      unlimitedPostingEndDate,
+      networkAccessEndDate,
+      autoRenew: (employer as any).autoRenew || false,
+      renewalPeriod: (employer as any).renewalPeriod || null,
+      daysUntilExpiry,
+    };
+  } catch (error) {
+    console.error("Error getting subscription status:", error);
+    throw error;
+  }
 }
 
 export { stripe }; 

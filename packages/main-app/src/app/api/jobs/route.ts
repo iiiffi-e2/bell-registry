@@ -467,6 +467,10 @@ export async function POST(request: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")}-${Math.random().toString(36).substr(2, 6)}`;
 
+    // Set listing close date to 45 days from now
+    const listingCloseDate = new Date();
+    listingCloseDate.setDate(listingCloseDate.getDate() + 45);
+
     const job = await prisma.job.create({
       data: {
         title: data.title,
@@ -480,13 +484,14 @@ export async function POST(request: Request) {
         employmentType: data.employmentType,
         featured: data.featured,
         expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
+        listingCloseDate: listingCloseDate,
         urlSlug,
         employerId: session.user.id,
         status: JobStatus.ACTIVE,
       },
     });
 
-    // Increment the job post count after successful creation
+    // Handle job posting (consumes credits if no unlimited posting active)
     await incrementJobPostCount(session.user.id);
 
     return NextResponse.json({ job }, { status: 201 });

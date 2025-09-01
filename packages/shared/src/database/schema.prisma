@@ -184,30 +184,38 @@ model CandidateProfile {
 }
 
 model EmployerProfile {
-  id                    String           @id @default(cuid())
-  userId                String           @unique
-  companyName           String
-  industry              String?
-  description           String?
-  website               String?
-  logoUrl               String?
-  location              String?
-  subscriptionPlan      String?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @updatedAt
-  hasNetworkAccess      Boolean          @default(false)
-  jobPostLimit          Int?             @default(5)
-  jobsPostedCount       Int              @default(0)
-  stripeCustomerId      String?
-  stripeSessionId       String?
-  subscriptionEndDate   DateTime?
-  subscriptionStartDate DateTime         @default(now())
-  subscriptionType      SubscriptionType @default(TRIAL)
-  publicSlug            String?          @unique
-  billingHistory        BillingHistory[]
-  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                      String           @id @default(cuid())
+  userId                  String           @unique
+  companyName             String
+  industry                String?
+  description             String?
+  website                 String?
+  logoUrl                 String?
+  location                String?
+  subscriptionPlan        String?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime         @updatedAt
+  hasNetworkAccess        Boolean          @default(false)
+  jobPostLimit            Int?             @default(5)
+  jobsPostedCount         Int              @default(0)
+  stripeCustomerId        String?
+  stripeSessionId         String?
+  subscriptionEndDate     DateTime?
+  subscriptionStartDate   DateTime         @default(now())
+  subscriptionType        SubscriptionType @default(TRIAL)
+  publicSlug              String?          @unique
+  jobCredits              Int              @default(0)
+  networkAccessEndDate    DateTime?
+  unlimitedPostingEndDate DateTime?
+  autoRenew               Boolean          @default(false)
+  renewalPeriod           String?
+  billingHistory          BillingHistory[]
+  user                    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([publicSlug])
+  @@index([jobCredits])
+  @@index([networkAccessEndDate])
+  @@index([unlimitedPostingEndDate])
 }
 
 model BillingHistory {
@@ -254,6 +262,7 @@ model Job {
   rejectedBy             String?
   rejectionReason        String?
   exceptionalOpportunity String?
+  listingCloseDate       DateTime?
   approver               User?            @relation("JobApprover", fields: [approvedBy], references: [id])
   employer               User             @relation(fields: [employerId], references: [id])
   rejecter               User?            @relation("JobRejecter", fields: [rejectedBy], references: [id])
@@ -264,6 +273,7 @@ model Job {
   savedBy                SavedJob[]
 
   @@index([exceptionalOpportunity])
+  @@index([listingCloseDate])
 }
 
 model JobApplication {
@@ -515,6 +525,7 @@ enum SubscriptionType {
   BUNDLE
   UNLIMITED
   NETWORK
+  NETWORK_QUARTERLY
 }
 
 enum BillingStatus {

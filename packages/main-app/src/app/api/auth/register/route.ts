@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import { generateProfileSlug } from "@/lib/utils";
 import { sendWelcomeEmail } from "@/lib/welcome-email-service";
 import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
+import { initializeTrialSubscription } from "@/lib/subscription-service";
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -74,6 +75,15 @@ export async function POST(req: Request) {
           companyName: body.companyName || (body.role === "AGENCY" ? "" : ""), // Set company name for agencies, empty for employers
         },
       });
+
+      // Initialize trial subscription for new employers
+      try {
+        await initializeTrialSubscription(user.id);
+        console.log(`Trial subscription initialized for employer ${user.id}`);
+      } catch (trialError) {
+        console.error(`Failed to initialize trial subscription for employer ${user.id}:`, trialError);
+        // Don't fail the registration, just log the error
+      }
     }
 
     // Send welcome email to the new user
