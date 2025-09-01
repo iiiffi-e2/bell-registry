@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { cancelSubscription } from "@/lib/subscription-service";
-import { isEmployerOrAgencyRole } from "@/lib/auth-helpers";
+import { isEmployerOrAgencyRole } from "@/lib/roles";
 
 export async function POST(request: NextRequest) {
   try {

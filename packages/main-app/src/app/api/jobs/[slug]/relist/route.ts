@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { canPostJob, handleJobPosting } from "@/lib/subscription-service";
-import { isEmployerOrAgencyRole } from "@/lib/auth-helpers";
+import { isEmployerOrAgencyRole } from "@/lib/roles";
 import { JobStatus } from "@prisma/client";
 
 export async function POST(
