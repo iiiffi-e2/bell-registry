@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans";
-import { CheckCircle, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { CheckCircle, Clock, AlertTriangle, Loader2, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface SubscriptionData {
   subscriptionType: string;
@@ -15,12 +17,14 @@ interface SubscriptionData {
   jobsPostedCount: number;
   hasNetworkAccess?: boolean;
   stripeCustomerId?: string;
+  autoRenew?: boolean;
 }
 
 export default function SubscriptionPage() {
   const { data: session } = useSession();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -39,6 +43,31 @@ export default function SubscriptionPage() {
       console.error('Error fetching subscription data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!window.confirm('Are you sure you want to cancel your subscription? Your benefits will continue until the end of your current billing period.')) {
+      return;
+    }
+
+    try {
+      setCancelling(true);
+      const response = await fetch('/api/subscription/cancel', {
+        method: 'POST',
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success('Subscription cancelled. Your benefits will continue until the end of your current billing period.');
+        await fetchSubscriptionData(); // Refresh subscription data
+      } else {
+        toast.error(data.error || 'Failed to cancel subscription');
+      }
+    } catch (error) {
+      toast.error('Failed to cancel subscription');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -68,6 +97,13 @@ export default function SubscriptionPage() {
   const getJobUsageProgress = () => {
     if (!subscription || subscription.jobPostLimit === null) return 100; // Unlimited
     return (subscription.jobsPostedCount / subscription.jobPostLimit) * 100;
+  };
+
+  const isAutoRenewingSubscription = () => {
+    if (!subscription) return false;
+    return subscription.subscriptionType === 'UNLIMITED' || 
+           subscription.subscriptionType === 'NETWORK' || 
+           subscription.subscriptionType === 'NETWORK_QUARTERLY';
   };
 
   if (loading) {
@@ -130,11 +166,34 @@ export default function SubscriptionPage() {
                   Your active subscription details and usage
                 </CardDescription>
               </div>
-              {status && !status.isExpired ? (
-                <CheckCircle className="h-6 w-6 text-green-500" />
-              ) : (
-                <AlertTriangle className="h-6 w-6 text-red-500" />
-              )}
+              <div className="flex items-center gap-3">
+                {isAutoRenewingSubscription() && status && !status.isExpired && subscription.autoRenew !== false && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelSubscription}
+                    disabled={cancelling}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    {cancelling ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Cancelling...
+                      </>
+                    ) : (
+                      <>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancel Subscription
+                      </>
+                    )}
+                  </Button>
+                )}
+                {status && !status.isExpired ? (
+                  <CheckCircle className="h-6 w-6 text-green-500" />
+                ) : (
+                  <AlertTriangle className="h-6 w-6 text-red-500" />
+                )}
+              </div>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -208,7 +267,18 @@ export default function SubscriptionPage() {
               </div>
             )}
 
-            {status && !status.isExpired && status.daysRemaining <= 7 && (
+            {isAutoRenewingSubscription() && subscription.autoRenew === false && status && !status.isExpired && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-center">
+                  <X className="h-5 w-5 text-orange-600 mr-2" />
+                  <p className="text-sm text-orange-800">
+                    Your subscription has been cancelled and will not renew. You can continue using your benefits until {status.endDate.toLocaleDateString()}.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {status && !status.isExpired && status.daysRemaining <= 7 && subscription.autoRenew !== false && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center">
                   <Clock className="h-5 w-5 text-yellow-600 mr-2" />
