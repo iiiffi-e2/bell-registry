@@ -124,6 +124,11 @@ interface SubscriptionPlansProps {
 export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: SubscriptionPlansProps) {
   const [networkPeriod, setNetworkPeriod] = useState<'quarterly' | 'annual'>('quarterly');
   const selectedNetworkPlan = networkPlans[networkPeriod];
+  
+  // Check if user has any Network Access plan (which includes unlimited posting)
+  const hasNetworkAccess = currentPlan === 'NETWORK' || currentPlan === 'NETWORK_QUARTERLY';
+  const hasAnnualNetwork = currentPlan === 'NETWORK';
+  const hasQuarterlyNetwork = currentPlan === 'NETWORK_QUARTERLY';
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8">
@@ -138,14 +143,37 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
         </div>
       )}
 
+      {/* Network Access Notice */}
+      {hasNetworkAccess && (
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-2 text-purple-800 mb-2">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">You have Network Access</span>
+          </div>
+          <p className="text-purple-700 text-sm">
+            Your Network Access membership already includes unlimited job posting, so you don't need to purchase additional credits or plans.{' '}
+            {hasQuarterlyNetwork && (
+              <span>You can upgrade to annual billing below to save $2,500.</span>
+            )}
+            {hasAnnualNetwork && (
+              <span>You have our best plan with annual savings!</span>
+            )}
+          </p>
+        </div>
+      )}
+
       {/* Main Plans Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {mainPlans.map((plan) => (
           <Card 
             key={plan.id} 
-            className={`relative flex flex-col ${plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''}`}
+            className={`relative flex flex-col ${
+              plan.popular ? 'ring-2 ring-blue-500 shadow-lg' : ''
+            } ${
+              hasNetworkAccess ? 'opacity-60' : ''
+            }`}
           >
-            {plan.popular && (
+            {plan.popular && !hasNetworkAccess && (
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                 <Badge className="bg-blue-500 text-white px-3 py-1">
                   Most Popular
@@ -194,11 +222,13 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
                   planName={plan.name}
                   price={plan.price}
                   className="w-full"
-                  variant={plan.popular ? "default" : "outline"}
-                  disabled={currentPlan === plan.id}
+                  variant={plan.popular && !hasNetworkAccess ? "default" : "outline"}
+                  disabled={currentPlan === plan.id || hasNetworkAccess}
                 >
                   {currentPlan === plan.id 
-                    ? "Current Plan" 
+                    ? "Current Plan"
+                    : hasNetworkAccess
+                    ? "Included in Network Access"
                     : `Choose ${plan.name}`
                   }
                 </PurchasePlanButton>
@@ -310,16 +340,32 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
             </div>
 
             <div className="max-w-md mx-auto">
+              {/* Show upgrade message for annual users trying to select quarterly */}
+              {hasAnnualNetwork && networkPeriod === 'quarterly' && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <p className="text-yellow-800 text-sm text-center">
+                    You can't downgrade from annual to quarterly billing. Your annual plan continues until you cancel.
+                  </p>
+                </div>
+              )}
+              
               <PurchasePlanButton
                 planType={selectedNetworkPlan.id}
                 planName={selectedNetworkPlan.name}
                 price={selectedNetworkPlan.price}
                 className="w-full text-lg py-4"
                 variant="default"
-                disabled={currentPlan === selectedNetworkPlan.id}
+                disabled={
+                  currentPlan === selectedNetworkPlan.id || 
+                  (hasAnnualNetwork && networkPeriod === 'quarterly')
+                }
               >
                 {currentPlan === selectedNetworkPlan.id 
                   ? "Current Plan" 
+                  : hasAnnualNetwork && networkPeriod === 'quarterly'
+                  ? "Downgrade Not Available"
+                  : hasQuarterlyNetwork && networkPeriod === 'annual'
+                  ? `Upgrade to Annual Billing`
                   : `Choose Network Access - ${selectedNetworkPlan.renewalType}`
                 }
               </PurchasePlanButton>
