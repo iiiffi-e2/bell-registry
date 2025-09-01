@@ -151,7 +151,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
             <span className="font-medium">You have Network Access</span>
           </div>
           <p className="text-purple-700 text-sm">
-            Your Network Access membership already includes unlimited job posting, so you don't need to purchase additional credits or plans.{' '}
+            Your Network Access membership already includes unlimited job posting, so you don&apos;t need to purchase additional credits or plans.{' '}
             {hasQuarterlyNetwork && (
               <span>You can upgrade to annual billing below to save $2,500.</span>
             )}
@@ -344,7 +344,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
               {hasAnnualNetwork && networkPeriod === 'quarterly' && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
                   <p className="text-yellow-800 text-sm text-center">
-                    You can't downgrade from annual to quarterly billing. Your annual plan continues until you cancel.
+                    You can&apos;t downgrade from annual to quarterly billing. Your annual plan continues until you cancel.
                   </p>
                 </div>
               )}
