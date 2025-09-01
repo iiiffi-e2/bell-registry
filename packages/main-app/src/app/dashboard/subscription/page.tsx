@@ -5,6 +5,14 @@ import { useSession } from "next-auth/react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans";
 import { CheckCircle, Clock, AlertTriangle, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +33,7 @@ export default function SubscriptionPage() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -46,11 +55,11 @@ export default function SubscriptionPage() {
     }
   };
 
-  const handleCancelSubscription = async () => {
-    if (!window.confirm('Are you sure you want to cancel your subscription? Your benefits will continue until the end of your current billing period.')) {
-      return;
-    }
+  const handleCancelClick = () => {
+    setShowCancelModal(true);
+  };
 
+  const handleCancelConfirm = async () => {
     try {
       setCancelling(true);
       const response = await fetch('/api/subscription/cancel', {
@@ -61,6 +70,7 @@ export default function SubscriptionPage() {
       if (data.success) {
         toast.success('Subscription cancelled. Your benefits will continue until the end of your current billing period.');
         await fetchSubscriptionData(); // Refresh subscription data
+        setShowCancelModal(false);
       } else {
         toast.error(data.error || 'Failed to cancel subscription');
       }
@@ -171,7 +181,7 @@ export default function SubscriptionPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleCancelSubscription}
+                    onClick={handleCancelClick}
                     disabled={cancelling}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                   >
@@ -297,6 +307,82 @@ export default function SubscriptionPage() {
           currentPlan={subscription.subscriptionType}
           showTrialInfo={subscription.subscriptionType === 'TRIAL'}
         />
+
+        {/* Cancel Subscription Modal */}
+        <Dialog open={showCancelModal} onOpenChange={setShowCancelModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                Cancel Subscription
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to cancel your subscription?
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-medium text-blue-900 mb-2">What happens when you cancel:</h4>
+                <ul className="text-sm text-blue-800 space-y-1">
+                  <li>• Your subscription will not auto-renew</li>
+                  <li>• You&apos;ll keep all benefits until your current period ends</li>
+                  {status && !status.isExpired && (
+                    <li className="font-medium">
+                      • Benefits continue until: {status.endDate.toLocaleDateString()} 
+                      ({status.daysRemaining} day{status.daysRemaining !== 1 ? 's' : ''} remaining)
+                    </li>
+                  )}
+                  <li>• You can resubscribe anytime</li>
+                </ul>
+              </div>
+
+              {subscription.subscriptionType === 'NETWORK' || subscription.subscriptionType === 'NETWORK_QUARTERLY' ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <h4 className="font-medium text-amber-900 mb-2">Network Access Benefits You&apos;ll Lose:</h4>
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    <li>• Full profile visibility</li>
+                    <li>• Direct candidate messaging</li>
+                    <li>• Access to vetted professionals</li>
+                    <li>• Unlimited job posting</li>
+                  </ul>
+                </div>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <h4 className="font-medium text-amber-900 mb-2">Unlimited Benefits You&apos;ll Lose:</h4>
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    <li>• Unlimited job posting</li>
+                    <li>• You&apos;ll need to purchase credits to post new jobs</li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCancelModal(false)}
+                disabled={cancelling}
+              >
+                Keep Subscription
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleCancelConfirm}
+                disabled={cancelling}
+              >
+                {cancelling ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Cancelling...
+                  </>
+                ) : (
+                  'Yes, Cancel Subscription'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
