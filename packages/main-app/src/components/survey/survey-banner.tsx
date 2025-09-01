@@ -16,7 +16,7 @@ export function SurveyBanner({ onDismissPermanently, onDismissTemporarily }: Sur
     setIsDismissing(true);
     try {
       // Open the survey in a new tab
-      window.open('https://forms.gle/TSnj8BgeBQLja6369', '_blank');
+      window.open('https://docs.google.com/forms/d/e/1FAIpQLSfi8WG5Xne8t-jqSI269rk7onph11UajjD0TUg77diGeCLxiQ/viewform', '_blank');
       // Mark as permanently dismissed when they click to take survey
       await onDismissPermanently();
     } catch (error) {

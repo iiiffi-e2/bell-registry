@@ -65,7 +65,7 @@ surveyDismissedAt DateTime? @db.Timestamptz(6)
 ## Configuration
 
 ### Google Form Integration
-- **Survey URL**: `https://forms.gle/TSnj8BgeBQLja6369`
+- **Survey URL**: `https://docs.google.com/forms/d/e/1FAIpQLSfi8WG5Xne8t-jqSI269rk7onph11UajjD0TUg77diGeCLxiQ/viewform`
 - **Target**: Opens in new tab (`_blank`)
 - **Auto-dismiss**: Automatically marks survey as dismissed when user clicks "Take Survey"
 
