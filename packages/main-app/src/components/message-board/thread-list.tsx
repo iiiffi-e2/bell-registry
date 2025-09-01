@@ -14,6 +14,8 @@ import {
   Search,
   X,
   Heart,
+  ArrowUpDown,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,15 +49,18 @@ export function ThreadList() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<Thread[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [sortBy, setSortBy] = useState<'recent' | 'replies' | 'likes'>('recent');
 
   useEffect(() => {
     fetchThreads();
-  }, []);
+  }, [sortBy]);
 
-  const fetchThreads = async () => {
+  const fetchThreads = async (sort?: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch("/api/message-board/threads");
+      const sortParam = sort || sortBy;
+      const url = `/api/message-board/threads${sortParam !== 'recent' ? `?sortBy=${sortParam}` : ''}`;
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error("Failed to fetch threads");
@@ -87,7 +92,8 @@ export function ThreadList() {
     setError(null);
 
     try {
-      const response = await fetch(`/api/message-board/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      const sortParam = sortBy !== 'recent' ? `&sortBy=${sortBy}` : '';
+      const response = await fetch(`/api/message-board/search?q=${encodeURIComponent(searchQuery.trim())}${sortParam}`);
       
       if (!response.ok) {
         throw new Error("Failed to search threads");
@@ -117,6 +123,17 @@ export function ThreadList() {
     setError(null);
   };
 
+  const handleSortChange = (newSort: 'recent' | 'replies' | 'likes') => {
+    setSortBy(newSort);
+    if (hasSearched) {
+      // Re-run search with new sorting
+      handleSearch();
+    } else {
+      // Re-fetch threads with new sorting
+      fetchThreads(newSort);
+    }
+  };
+
   const displayedThreads = hasSearched ? searchResults : threads;
 
   if (isLoading) {
@@ -131,7 +148,7 @@ export function ThreadList() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600 mb-4">{error}</p>
-        <Button onClick={fetchThreads} variant="outline">
+        <Button onClick={() => fetchThreads()} variant="outline">
           Try Again
         </Button>
       </div>
@@ -148,13 +165,28 @@ export function ThreadList() {
             Connect and discuss with fellow professionals
           </p>
         </div>
-        <Button 
-          onClick={() => setShowCreateModal(true)}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          New Thread
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* Sort Dropdown */}
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as 'recent' | 'replies' | 'likes')}
+              className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+            >
+              <option value="recent">Most Recent</option>
+              <option value="replies">Most Replies</option>
+              <option value="likes">Most Liked</option>
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
+          </div>
+          <Button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Thread
+          </Button>
+        </div>
       </div>
 
       {/* Search Bar */}

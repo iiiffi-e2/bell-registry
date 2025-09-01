@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const queryParam = searchParams.get('q');
+    const sortBy = searchParams.get('sortBy') || 'recent';
     
     if (!queryParam) {
       return NextResponse.json({ error: "Search query parameter 'q' is required" }, { status: 400 });
@@ -84,7 +85,13 @@ export async function GET(request: NextRequest) {
       },
       orderBy: [
         { isPinned: 'desc' },
-        { lastReplyAt: 'desc' }
+        ...(sortBy === 'replies' ? [
+          { replies: { _count: 'desc' } }
+        ] : sortBy === 'likes' ? [
+          { likes: { _count: 'desc' } }
+        ] : [
+          { lastReplyAt: 'desc' }
+        ])
       ]
     });
 

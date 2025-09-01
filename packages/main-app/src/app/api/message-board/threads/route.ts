@@ -24,6 +24,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Access denied. Only professionals can access the message board." }, { status: 403 });
     }
 
+    // Get sorting parameter
+    const { searchParams } = new URL(request.url);
+    const sortBy = searchParams.get('sortBy') || 'recent'; // recent, replies, likes
+
     const threads = await prisma.messageBoardThread.findMany({
       include: {
         author: {
@@ -65,7 +69,13 @@ export async function GET(request: NextRequest) {
       },
       orderBy: [
         { isPinned: 'desc' },
-        { lastReplyAt: 'desc' }
+        ...(sortBy === 'replies' ? [
+          { replies: { _count: 'desc' } }
+        ] : sortBy === 'likes' ? [
+          { likes: { _count: 'desc' } }
+        ] : [
+          { lastReplyAt: 'desc' }
+        ])
       ]
     });
 
