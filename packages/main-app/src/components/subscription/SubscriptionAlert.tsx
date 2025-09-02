@@ -168,7 +168,14 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
     }
   } else {
     // Agency-specific logic (trial + credits)
-    if (isExpired || !canPostJob) {
+    if (jobCredits === 5 && subscription.jobsPostedCount === 0) {
+      // Special welcome message for new agencies with full credits
+      alertType = 'info';
+      icon = CheckCircle;
+      title = 'Welcome! Thank you for joining as an agency!';
+      message = 'You have 5 free job posts to get started. These credits stack with any bundles you purchase.';
+      showUpgradeButton = false;
+    } else if (isExpired || !canPostJob) {
       alertType = 'error';
       icon = AlertTriangle;
       title = 'Action Required';
@@ -188,6 +195,10 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
         message = `You've used ${subscription.jobsPostedCount} of ${subscription.jobPostLimit} job posts.`;
       }
       showUpgradeButton = true;
+    } else if (jobCredits > 0) {
+      // Show remaining credits for agencies
+      title = 'Credits Available';
+      message = `You have ${jobCredits} job credit${jobCredits !== 1 ? 's' : ''} remaining from your welcome package.`;
     } else {
       // For healthy subscriptions, show clean format
       title = `Subscription Active - ${subscription.subscriptionType}`;
