@@ -35,10 +35,9 @@ const mainPlans: Plan[] = [
     icon: <Star className="h-6 w-6" />,
     isCredits: true,
     features: [
-      '1 job post credit',
+      '1 job post',
       '45-day listing duration',
-      'Credits never expire',
-      'Can purchase repeatedly',
+      'Job posts never expire',
       'Standard visibility'
     ]
   },
@@ -54,10 +53,9 @@ const mainPlans: Plan[] = [
     popular: true,
     isCredits: true,
     features: [
-      '4 job post credits',
+      '4 job posts',
       '45-day listing duration',
-      'Credits never expire',
-      'Can purchase repeatedly',
+      'Job posts never expire',
       'Standard visibility',
       'Save $250 vs individual posts'
     ]
@@ -198,7 +196,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
               <div className="text-center mb-4">
                 <div className="text-lg font-semibold">
                   {plan.isCredits 
-                    ? `${plan.credits} Job Credit${plan.credits !== 1 ? 's' : ''}` 
+                    ? `${plan.credits} Job Post${plan.credits !== 1 ? 's' : ''}` 
                     : 'Unlimited Job Posts'
                   }
                 </div>
