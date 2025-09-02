@@ -133,10 +133,10 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
       {showTrialInfo && currentPlan === 'TRIAL' && (
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Upgrade Your Account
+            Choose Your Plan
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Choose the plan that best fits your hiring needs. All plans include our premium job board placement and candidate management tools.
+            Select the plan that best fits your hiring needs. All plans include our premium job board placement and candidate management tools.
           </p>
         </div>
       )}

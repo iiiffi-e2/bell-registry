@@ -23,9 +23,11 @@ interface SubscriptionData {
   subscriptionEndDate: string | null;
   jobPostLimit: number | null;
   jobsPostedCount: number;
+  jobCredits: number;
   hasNetworkAccess?: boolean;
   stripeCustomerId?: string;
   autoRenew?: boolean;
+  userRole: string;
 }
 
 export default function SubscriptionPage() {
@@ -84,6 +86,13 @@ export default function SubscriptionPage() {
   const getSubscriptionStatus = () => {
     if (!subscription) return null;
 
+    // For the new credit-based system, we don't show trial expiration for employers
+    // Only agencies have meaningful trials
+    if (subscription.userRole === 'EMPLOYER') {
+      // Employers don't have trials, only credit-based or unlimited subscriptions
+      return null;
+    }
+
     const now = new Date();
     const startDate = new Date(subscription.subscriptionStartDate);
     const isTrialActive = subscription.subscriptionType === 'TRIAL';
@@ -91,7 +100,8 @@ export default function SubscriptionPage() {
     let endDate: Date;
     if (subscription.subscriptionEndDate) {
       endDate = new Date(subscription.subscriptionEndDate);
-    } else if (isTrialActive) {
+    } else if (isTrialActive && subscription.userRole === 'AGENCY') {
+      // Only agencies have meaningful trial periods
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 30); // 30-day trial
     } else {
@@ -167,7 +177,11 @@ export default function SubscriptionPage() {
                 <CardTitle className="flex items-center gap-2">
                   Current Subscription
                   {subscription.subscriptionType === 'TRIAL' ? (
-                    <Badge variant="secondary">Trial</Badge>
+                    subscription.userRole === 'EMPLOYER' ? (
+                      <Badge variant="outline">Credit-Based</Badge>
+                    ) : (
+                      <Badge variant="secondary">Trial</Badge>
+                    )
                   ) : (
                     <Badge variant="default">{subscription.subscriptionType}</Badge>
                   )}
@@ -215,36 +229,76 @@ export default function SubscriptionPage() {
                   <Clock className="h-5 w-5 text-gray-400 mr-2" />
                   <span className="font-medium">Status</span>
                 </div>
-                {status && (
-                  <div>
-                    <p className="text-lg font-semibold">
-                      {status.isExpired ? 'Expired' : 'Active'}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {status.isExpired 
-                        ? `Expired ${status.endDate.toLocaleDateString()}`
-                        : `${status.daysRemaining} days remaining`
-                      }
-                    </p>
-                  </div>
-                )}
+                <div>
+                  {subscription.userRole === 'EMPLOYER' ? (
+                    <div>
+                      <p className="text-lg font-semibold">
+                        {subscription.hasNetworkAccess ? 'Active' : subscription.jobCredits > 0 ? 'Ready to Post' : 'Getting Started'}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {subscription.hasNetworkAccess
+                          ? 'Unlimited posting active'
+                          : subscription.jobCredits > 0 
+                            ? `${subscription.jobCredits} credit${subscription.jobCredits !== 1 ? 's' : ''} available` 
+                            : 'Purchase credits to start posting jobs'
+                        }
+                      </p>
+                    </div>
+                  ) : status ? (
+                    <div>
+                      <p className="text-lg font-semibold">
+                        {status.isExpired ? 'Expired' : 'Active'}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {status.isExpired 
+                          ? `Expired ${status.endDate.toLocaleDateString()}`
+                          : `${status.daysRemaining} days remaining`
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-lg font-semibold">Active</p>
+                      <p className="text-sm text-gray-500">Credit-based access</p>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Job Usage */}
+              {/* Job Usage / Credits */}
               <div className="text-center p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-center justify-center mb-2">
                   <CheckCircle className="h-5 w-5 text-gray-400 mr-2" />
-                  <span className="font-medium">Job Posts</span>
+                  <span className="font-medium">
+                    {subscription.hasNetworkAccess ? 'Job Posts' : 'Credits'}
+                  </span>
                 </div>
-                <p className="text-lg font-semibold">
-                  {subscription.jobsPostedCount} / {subscription.jobPostLimit || '∞'}
-                </p>
-                <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                  <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                    style={{ width: `${Math.min(usageProgress, 100)}%` }}
-                  ></div>
-                </div>
+                {subscription.hasNetworkAccess ? (
+                  <div>
+                    <p className="text-lg font-semibold">Unlimited</p>
+                    <p className="text-sm text-gray-500">Network Access</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-lg font-semibold">
+                      {subscription.jobCredits} {subscription.jobCredits === 1 ? 'Credit' : 'Credits'}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {subscription.jobCredits > 0 
+                        ? 'Available to use' 
+                        : 'Purchase credits to post jobs'
+                      }
+                    </p>
+                    {subscription.jobCredits > 0 && (
+                      <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                          style={{ width: '100%' }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Special Features */}

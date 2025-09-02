@@ -331,11 +331,12 @@ export async function incrementJobPostCount(employerId: string): Promise<void> {
 }
 
 /**
- * Get employer subscription details
+ * Get employer subscription details - Updated for new credit-based system
  */
 export async function getEmployerSubscription(employerId: string) {
   const employer = await prisma.employerProfile.findUnique({
     where: { userId: employerId },
+    include: { user: true }
   });
   
   if (!employer) return null;
@@ -343,10 +344,21 @@ export async function getEmployerSubscription(employerId: string) {
   const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
   const subscriptionStartDate = (employer as any).subscriptionStartDate || employer.createdAt;
   const subscriptionEndDate = (employer as any).subscriptionEndDate || null;
+  const jobCredits = (employer as any).jobCredits || 0;
+  const userRole = employer.user.role;
   
-  // Get job limit from plan configuration instead of database field
-  const plan = SUBSCRIPTION_PLANS[subscriptionType as keyof typeof SUBSCRIPTION_PLANS];
-  const jobPostLimit = plan.jobLimit;
+  // For the new credit-based system, we use credits instead of job limits
+  // But we still return jobPostLimit for UI compatibility
+  let jobPostLimit = null;
+  
+  // Check for unlimited posting subscriptions
+  const hasUnlimitedPosting = await hasActiveUnlimitedPosting(employerId);
+  if (hasUnlimitedPosting) {
+    jobPostLimit = null; // Unlimited
+  } else {
+    // For credit-based system, the "limit" is the number of credits available
+    jobPostLimit = jobCredits;
+  }
   
   // Calculate actual jobs posted in current subscription period
   const actualJobsPostedCount = await getActiveJobsCount(employerId, subscriptionStartDate);
@@ -356,9 +368,12 @@ export async function getEmployerSubscription(employerId: string) {
     subscriptionStartDate,
     subscriptionEndDate,
     jobPostLimit,
-    jobsPostedCount: actualJobsPostedCount, // Use actual count instead of database field
+    jobsPostedCount: actualJobsPostedCount,
+    jobCredits, // Add job credits to the response
     hasNetworkAccess: (employer as any).hasNetworkAccess || false,
     stripeCustomerId: (employer as any).stripeCustomerId || null,
+    autoRenew: (employer as any).autoRenew || false,
+    userRole, // Add user role to help UI make decisions
   };
 }
 

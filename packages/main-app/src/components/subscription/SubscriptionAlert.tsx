@@ -66,6 +66,11 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
   const getSubscriptionStatus = () => {
     if (!subscription) return null;
 
+    // For employers, we don't show trial expiration - they use credit-based system
+    if (session?.user?.role === 'EMPLOYER') {
+      return null;
+    }
+
     const now = new Date();
     const startDate = new Date(subscription.subscriptionStartDate);
     const isTrialActive = subscription.subscriptionType === 'TRIAL';
@@ -73,7 +78,8 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
     let endDate: Date;
     if (subscription.subscriptionEndDate) {
       endDate = new Date(subscription.subscriptionEndDate);
-    } else if (isTrialActive) {
+    } else if (isTrialActive && session?.user?.role === 'AGENCY') {
+      // Only agencies have meaningful trial periods
       endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + 30); // 30-day trial
     } else {
@@ -114,43 +120,79 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
   const isNearLimit = subscription.jobPostLimit && subscription.jobsPostedCount >= subscription.jobPostLimit * 0.8;
   const isExpired = status?.isExpired;
   const isExpiringSoon = status && !status.isExpired && status.daysRemaining <= 7;
+  
+  // Get job credits for credit-based system
+  const jobCredits = (subscription as any)?.jobCredits || 0;
+  const userRole = session?.user?.role;
 
   // Hide if healthy and hideWhenHealthy is true
   if (hideWhenHealthy && canPostJob && !isExpiringSoon && !isNearLimit) {
     return null;
   }
 
-  // Determine alert type and content
+  // Determine alert type and content based on new business rules
   let alertType: 'error' | 'warning' | 'info' = 'info';
   let icon = CheckCircle;
   let title = 'Subscription Active';
   let message = '';
   let showUpgradeButton = false;
 
-  if (isExpired || !canPostJob) {
-    alertType = 'error';
-    icon = AlertTriangle;
-    title = 'Action Required';
-    message = isExpired 
-      ? 'Your subscription has expired. Upgrade to continue posting jobs.'
-      : "You've reached your job posting limit. Upgrade to post more jobs.";
-    showUpgradeButton = true;
-  } else if (isExpiringSoon || isNearLimit) {
-    alertType = 'warning';
-    icon = Clock;
-    title = 'Heads Up';
-    if (isExpiringSoon && isNearLimit) {
-      message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''} and you're near your job posting limit.`;
-    } else if (isExpiringSoon) {
-      message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''}.`;
+  if (userRole === 'EMPLOYER') {
+    // Employer-specific logic (credit-based)
+    if (!canPostJob && jobCredits === 0) {
+      // For new employers with 0 credits, show a welcoming info message instead of error
+      alertType = 'info';
+      icon = CheckCircle;
+      title = 'Welcome! Ready to start hiring?';
+      message = 'Purchase job credits to begin posting positions and connecting with top talent.';
+      showUpgradeButton = true;
+    } else if (!canPostJob) {
+      alertType = 'error';
+      icon = AlertTriangle;
+      title = 'Unable to Post Jobs';
+      message = 'Please check your subscription status or contact support.';
+      showUpgradeButton = true;
+    } else if (jobCredits <= 2 && jobCredits > 0) {
+      alertType = 'warning';
+      icon = Clock;
+      title = 'Low Credits';
+      message = `You have ${jobCredits} job credit${jobCredits !== 1 ? 's' : ''} remaining.`;
+      showUpgradeButton = true;
+    } else if (jobCredits > 0) {
+      title = 'Credits Available';
+      message = `${jobCredits} job credit${jobCredits !== 1 ? 's' : ''} available`;
     } else {
-      message = `You've used ${subscription.jobsPostedCount} of ${subscription.jobPostLimit} job posts.`;
+      // This should not happen for employers, but just in case
+      title = 'Ready to Start';
+      message = 'Purchase credits to begin posting jobs';
     }
-    showUpgradeButton = true;
   } else {
-    // For healthy subscriptions, show clean format
-    title = `Subscription Active - ${subscription.subscriptionType}`;
-    message = ''; // Remove usage from message since it's shown in progress bar
+    // Agency-specific logic (trial + credits)
+    if (isExpired || !canPostJob) {
+      alertType = 'error';
+      icon = AlertTriangle;
+      title = 'Action Required';
+      message = isExpired 
+        ? 'Your subscription has expired. Upgrade to continue posting jobs.'
+        : "You've reached your job posting limit. Upgrade to post more jobs.";
+      showUpgradeButton = true;
+    } else if (isExpiringSoon || isNearLimit) {
+      alertType = 'warning';
+      icon = Clock;
+      title = 'Heads Up';
+      if (isExpiringSoon && isNearLimit) {
+        message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''} and you're near your job posting limit.`;
+      } else if (isExpiringSoon) {
+        message = `Your subscription expires in ${status.daysRemaining} day${status.daysRemaining !== 1 ? 's' : ''}.`;
+      } else {
+        message = `You've used ${subscription.jobsPostedCount} of ${subscription.jobPostLimit} job posts.`;
+      }
+      showUpgradeButton = true;
+    } else {
+      // For healthy subscriptions, show clean format
+      title = `Subscription Active - ${subscription.subscriptionType}`;
+      message = ''; // Remove usage from message since it's shown in progress bar
+    }
   }
 
   const IconComponent = icon;
@@ -189,6 +231,8 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
     );
   }
 
+
+
   return (
     <Card className={`border-l-4 ${
       alertType === 'error' ? 'border-l-red-500 bg-red-50' :
@@ -221,8 +265,8 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
                 </p>
               )}
 
-              {/* Usage progress bar for non-error states */}
-              {!isExpired && subscription.jobPostLimit && (
+              {/* Usage progress bar for non-error states - only show for agencies or employers with credits */}
+              {!isExpired && subscription.jobPostLimit !== null && subscription.jobPostLimit > 0 && session?.user?.role === 'AGENCY' && (
                 <div className="mt-3">
                   <div className="flex items-center justify-between text-xs mb-1">
                     <span className={
