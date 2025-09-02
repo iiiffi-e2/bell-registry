@@ -19,6 +19,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import AIJobMatches from "@/components/ai-job-matches";
+import { useWelcomeMessage } from "@/hooks/useWelcomeMessage";
 
 const stats = [
   {
@@ -49,6 +50,7 @@ const quickActions = [
 export function ProfessionalDashboard() {
   const { data: session } = useSession();
   const { profile, loading: profileLoading } = useProfile();
+  const { welcomeMessage, loading: welcomeLoading } = useWelcomeMessage();
   const [profileViews, setProfileViews] = useState<number | null>(null);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [loadingProfileViews, setLoadingProfileViews] = useState(true);
@@ -203,12 +205,25 @@ export function ProfessionalDashboard() {
         <div className="flex flex-col gap-8 w-full">
           {/* Welcome Section */}
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              Welcome back, {session?.user?.name?.split(' ')[0] || 'Professional'}
-            </h1>
-            <p className="mt-2 text-slate-600">
-              Here&apos;s what&apos;s happening with your job search
-            </p>
+            {welcomeLoading ? (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  Welcome, {session?.user?.name?.split(' ')[0] || 'Professional'}
+                </h1>
+                <p className="mt-2 text-slate-600">
+                  Loading...
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-slate-900">
+                  {welcomeMessage?.title || `Welcome, ${session?.user?.name?.split(' ')[0] || 'Professional'}`}
+                </h1>
+                <p className="mt-2 text-slate-600">
+                  {welcomeMessage?.subtitle || "Here's what's happening with your job search"}
+                </p>
+              </>
+            )}
           </div>
 
           {/* Profile Completion Alert */}

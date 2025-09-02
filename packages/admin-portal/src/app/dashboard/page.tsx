@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { UserGroupIcon, BriefcaseIcon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { useWelcomeMessage } from '@/hooks/useWelcomeMessage';
 
 interface AdminStats {
   totalUsers: number;
@@ -19,6 +20,7 @@ interface AdminStats {
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { welcomeMessage, loading: welcomeLoading } = useWelcomeMessage();
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalProfessionals: 0,
@@ -154,7 +156,11 @@ export default function AdminDashboard() {
                     <dt className='sr-only'>Last updated</dt>
                     <dd className='mt-3 flex items-center text-sm text-gray-500 font-medium sm:mr-6 sm:mt-0'>
                       <ClockIcon className='flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400' />
-                      Welcome, {session?.user?.name || session?.user?.email}
+                      {welcomeLoading ? (
+                        `Welcome, ${session?.user?.name || session?.user?.email}`
+                      ) : (
+                        welcomeMessage?.title || `Welcome, ${session?.user?.name || session?.user?.email}`
+                      )}
                     </dd>
                   </dl>
                 </div>

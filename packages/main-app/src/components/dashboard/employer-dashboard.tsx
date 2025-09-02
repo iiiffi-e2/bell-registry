@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import { stripHtmlAndTruncate } from "@/lib/utils";
 import { SubscriptionAlert } from "@/components/subscription/SubscriptionAlert";
 import { EmployerOnly } from "@/components/auth/role-guard";
+import { useWelcomeMessage } from "@/hooks/useWelcomeMessage";
 
 interface Job {
   id: number;
@@ -39,6 +40,7 @@ interface Stats {
 }
 
 export function EmployerDashboard() {
+  const { welcomeMessage, loading: welcomeLoading } = useWelcomeMessage();
   const [stats, setStats] = useState<Stats>({
     activeJobs: 0,
     totalApplications: 0,
@@ -100,12 +102,25 @@ export function EmployerDashboard() {
       <div className="space-y-8">
         {/* Welcome Section */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, Employer
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Manage your job listings and view candidate applications
-          </p>
+          {welcomeLoading ? (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Welcome, Employer
+              </h1>
+              <p className="mt-2 text-gray-600">
+                Loading...
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {welcomeMessage?.title || "Welcome, Employer"}
+              </h1>
+              <p className="mt-2 text-gray-600">
+                {welcomeMessage?.subtitle || "Manage your job listings and view candidate applications"}
+              </p>
+            </>
+          )}
         </div>
 
       {/* Subscription Alert */}
