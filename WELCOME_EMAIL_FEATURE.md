@@ -51,7 +51,7 @@ The system uses Resend for email delivery with the following configuration:
 
 - **Development**: Emails sent to `delivered@resend.dev`
 - **Production**: Emails sent to actual user email addresses
-- **From Address**: `The Bell Registry <welcome@thebellregistry.com>`
+- **From Address**: `The Bell Registry <welcome@bellregistry.com>`
 
 ## Environment Variables Required
 

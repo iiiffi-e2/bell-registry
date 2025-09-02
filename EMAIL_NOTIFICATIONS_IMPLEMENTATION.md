@@ -115,7 +115,7 @@ http://localhost:3001/test-notifications
 
 **Email addresses used**:
 - **Development**: `onboarding@resend.dev` (test emails)
-- **Production**: `notifications@thebellregistry.com`
+- **Production**: `notifications@bellregistry.com`
 
 ## User Experience Flow
 
