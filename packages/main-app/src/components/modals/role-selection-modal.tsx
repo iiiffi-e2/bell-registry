@@ -38,7 +38,7 @@ const roles = [
       'Manage applications',
       'Premium employer tools'
     ],
-    enabled: false // Set to true when ready to re-enable
+    enabled: true // Re-enabled for employer registration
   },
   {
     id: 'agency',
@@ -52,7 +52,7 @@ const roles = [
       'Access professional network',
       'Agency-specific features'
     ],
-    enabled: false // Set to true when ready to re-enable
+    enabled: true // Re-enabled for agency registration
   }
 ];
 
