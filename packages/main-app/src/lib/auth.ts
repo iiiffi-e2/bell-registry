@@ -235,12 +235,12 @@ export const authOptions: NextAuthOptions = {
               }
             });
 
-            // Initialize trial subscription for new employers
+            // Initialize trial subscription for new employers/agencies
             try {
-              await initializeTrialSubscription(newUser.id);
-              console.log(`Trial subscription initialized for employer ${newUser.id}`);
+              await initializeTrialSubscription(newUser.id, role);
+              console.log(`Trial subscription initialized for ${role} ${newUser.id}`);
             } catch (trialError) {
-              console.error(`Failed to initialize trial subscription for employer ${newUser.id}:`, trialError);
+              console.error(`Failed to initialize trial subscription for ${role} ${newUser.id}:`, trialError);
               // Don't fail the sign-in, just log the error
             }
           }

@@ -76,12 +76,12 @@ export async function POST(req: Request) {
         },
       });
 
-      // Initialize trial subscription for new employers
+      // Initialize trial subscription for new employers/agencies
       try {
-        await initializeTrialSubscription(user.id);
-        console.log(`Trial subscription initialized for employer ${user.id}`);
+        await initializeTrialSubscription(user.id, body.role);
+        console.log(`Trial subscription initialized for ${body.role} ${user.id}`);
       } catch (trialError) {
-        console.error(`Failed to initialize trial subscription for employer ${user.id}:`, trialError);
+        console.error(`Failed to initialize trial subscription for ${body.role} ${user.id}:`, trialError);
         // Don't fail the registration, just log the error
       }
     }

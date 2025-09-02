@@ -21,11 +21,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export const SUBSCRIPTION_PLANS = {
   TRIAL: {
     name: "30-Day Trial",
-    jobLimit: 5,
+    jobLimit: 5, // This is for agencies only. Employers get 0 job credits.
     durationDays: 30,
     price: 0,
     stripeProductId: null,
-    isCredits: false,
+    isCredits: false, // For agencies, this becomes credit-based (5 credits)
   },
   SPOTLIGHT: {
     name: "Spotlight",
@@ -194,23 +194,13 @@ export async function canPostJob(employerId: string): Promise<boolean> {
       return true; // Can post without consuming credits
     }
 
-    // Check if they have credits available
+    // Check if they have credits available (this covers both agency free credits and purchased credits)
     const jobCredits = (employer as any).jobCredits || 0;
     if (jobCredits > 0) {
       return true;
     }
 
-    // Check if they have an active trial subscription with remaining job limit
-    const subscriptionType = (employer as any).subscriptionType || SubscriptionType.TRIAL;
-    if (subscriptionType === SubscriptionType.TRIAL) {
-      const hasActiveTrial = await hasActiveSubscription(employerId);
-      if (hasActiveTrial) {
-        const jobPostLimit = (employer as any).jobPostLimit || 5;
-        const jobsPostedCount = (employer as any).jobsPostedCount || 0;
-        return jobsPostedCount < jobPostLimit;
-      }
-    }
-
+    // No credits and no unlimited posting means they cannot post
     return false;
   } catch (error) {
     console.error("Error checking job posting eligibility:", error);
@@ -314,10 +304,8 @@ export async function handleJobPosting(employerId: string): Promise<void> {
           SET "jobCredits" = "jobCredits" - 1 
           WHERE "userId" = ${employerId} AND "jobCredits" > 0
         `;
-      } else if (subscriptionType === SubscriptionType.TRIAL) {
-        // For trial users, we don't consume credits but we still track the job post count
-        // The trial limit is enforced by the canPostJob function
       } else {
+        // No credits available and no unlimited posting subscription
         throw new Error("No credits available and no unlimited posting subscription");
       }
     }
@@ -614,9 +602,12 @@ export async function handleSuccessfulPayment(sessionId: string): Promise<void> 
 }
 
 /**
- * Initialize trial subscription for new employer
+ * Initialize trial subscription for new employer/agency
+ * Business Rules:
+ * - EMPLOYER: No free trial, no free job posts (starts with 0 job credits)
+ * - AGENCY: Free trial with 5 job credits that can be used anytime
  */
-export async function initializeTrialSubscription(employerId: string): Promise<void> {
+export async function initializeTrialSubscription(employerId: string, userRole?: string): Promise<void> {
   const existingProfile = await prisma.employerProfile.findUnique({
     where: { userId: employerId },
   });
@@ -625,16 +616,53 @@ export async function initializeTrialSubscription(employerId: string): Promise<v
     throw new Error("Employer profile not found");
   }
 
-  // Use raw SQL to initialize trial
-  await prisma.$executeRaw`
-    UPDATE "EmployerProfile" 
-    SET 
-      "subscriptionType" = ${SubscriptionType.TRIAL},
-      "subscriptionStartDate" = ${new Date()},
-      "jobPostLimit" = 5,
-      "jobsPostedCount" = 0
-    WHERE "userId" = ${employerId}
-  `;
+  // Get user role if not provided
+  let role = userRole;
+  if (!role) {
+    const user = await prisma.user.findUnique({
+      where: { id: employerId },
+      select: { role: true }
+    });
+    role = user?.role;
+  }
+
+  // Apply different business rules based on role
+  if (role === 'EMPLOYER') {
+    // Employers get no free trial or free job posts
+    await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET 
+        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionStartDate" = ${new Date()},
+        "jobPostLimit" = 0,
+        "jobsPostedCount" = 0,
+        "jobCredits" = 0
+      WHERE "userId" = ${employerId}
+    `;
+  } else if (role === 'AGENCY') {
+    // Agencies get 5 job credits that stack with purchased bundles
+    await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET 
+        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionStartDate" = ${new Date()},
+        "jobPostLimit" = 5,
+        "jobsPostedCount" = 0,
+        "jobCredits" = 5
+      WHERE "userId" = ${employerId}
+    `;
+  } else {
+    // Fallback to old behavior for backward compatibility
+    await prisma.$executeRaw`
+      UPDATE "EmployerProfile" 
+      SET 
+        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionStartDate" = ${new Date()},
+        "jobPostLimit" = 5,
+        "jobsPostedCount" = 0
+      WHERE "userId" = ${employerId}
+    `;
+  }
 }
 
 /**
