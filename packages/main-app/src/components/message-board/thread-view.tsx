@@ -166,45 +166,51 @@ export function ThreadView({ threadId }: ThreadViewProps) {
 
       {/* Thread Header */}
       <Card>
-        <CardHeader>
-          <div className="flex items-start justify-between">
+        <CardHeader className="pb-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
-                {thread.isPinned && (
-                  <Pin className="h-5 w-5 text-blue-600" />
-                )}
-                {thread.isLocked && (
-                  <Lock className="h-5 w-5 text-gray-500" />
-                )}
-                <h1 className="text-2xl font-bold text-gray-900">
+              {/* Title Section */}
+              <div className="flex items-start gap-3 mb-6">
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {thread.isPinned && (
+                    <Pin className="h-5 w-5 text-blue-600" />
+                  )}
+                  {thread.isLocked && (
+                    <Lock className="h-5 w-5 text-gray-500" />
+                  )}
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words">
                   {thread.title}
                 </h1>
               </div>
               
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-4">
-                <span>Started by {thread.authorInitials}</span>
+              {/* Metadata Section */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6 text-sm text-gray-600 mb-6">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">Started by {thread.authorInitials}</span>
+                </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
+                  <Clock className="h-4 w-4 flex-shrink-0" />
                   <span>
                     {formatDistanceToNow(new Date(thread.createdAt), { addSuffix: true })}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <MessageSquare className="h-3 w-3" />
-                  <span>{thread.replies.length} replies</span>
+                  <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                  <span>{thread.replies.length} {thread.replies.length === 1 ? 'reply' : 'replies'}</span>
                 </div>
               </div>
 
               {/* Thread Content */}
-              <div className="prose prose-sm max-w-none">
-                <p className="text-gray-900 whitespace-pre-wrap">
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-900 whitespace-pre-wrap text-base leading-relaxed">
                   {thread.content}
                 </p>
               </div>
             </div>
             
-            {/* Thread Like Button - Top Right */}
-            <div className="ml-4 flex-shrink-0">
+            {/* Thread Like Button */}
+            <div className="flex justify-start sm:justify-end sm:ml-6 flex-shrink-0">
               <LikeButton
                 itemId={thread.id}
                 itemType="thread"

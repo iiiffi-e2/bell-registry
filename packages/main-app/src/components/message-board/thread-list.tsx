@@ -160,20 +160,20 @@ export function ThreadList() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Message Board</h1>
           <p className="text-gray-600 mt-1">
             Connect and discuss with fellow professionals
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           {/* Sort Dropdown */}
           <div className="relative">
             <select
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value as 'recent' | 'replies' | 'likes')}
-              className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+              className="appearance-none bg-white border border-gray-300 rounded-md px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer min-w-0"
             >
               <option value="recent">Most Recent</option>
               <option value="replies">Most Replies</option>
@@ -183,10 +183,11 @@ export function ThreadList() {
           </div>
           <Button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Thread
+            <span className="hidden sm:inline">New Thread</span>
+            <span className="sm:hidden">New</span>
           </Button>
         </div>
       </div>
@@ -194,12 +195,12 @@ export function ThreadList() {
       {/* Search Bar */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
                 type="text"
-                placeholder="Search threads by title or content... (Press Enter to search)"
+                placeholder="Search threads..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleSearchKeyPress}
@@ -215,26 +216,33 @@ export function ThreadList() {
                 </button>
               )}
             </div>
-            <Button 
-              onClick={handleSearch}
-              disabled={isSearching || !searchQuery.trim()}
-              variant="outline"
-            >
-              {isSearching ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-            {hasSearched && (
+            <div className="flex items-center gap-2">
               <Button 
-                onClick={clearSearch}
+                onClick={handleSearch}
+                disabled={isSearching || !searchQuery.trim()}
                 variant="outline"
-                className="text-gray-600"
+                size="sm"
               >
-                Clear
+                {isSearching ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Search</span>
+                  </>
+                )}
               </Button>
-            )}
+              {hasSearched && (
+                <Button 
+                  onClick={clearSearch}
+                  variant="outline"
+                  size="sm"
+                  className="text-gray-600"
+                >
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
           
           {hasSearched && (
@@ -288,46 +296,46 @@ export function ThreadList() {
         <div className="space-y-4">
           {displayedThreads.map((thread) => (
             <Card key={thread.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       {thread.isPinned && (
-                        <Pin className="h-4 w-4 text-blue-600" />
+                        <Pin className="h-4 w-4 text-blue-600 flex-shrink-0" />
                       )}
                       {thread.isLocked && (
-                        <Lock className="h-4 w-4 text-gray-500" />
+                        <Lock className="h-4 w-4 text-gray-500 flex-shrink-0" />
                       )}
                       <Link
                         href={`/dashboard/message-board/thread/${thread.id}`}
-                        className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors truncate"
+                        className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors break-words"
                       >
                         {thread.title}
                       </Link>
                     </div>
                     
-                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600">
                       <span>Started by {thread.authorInitials}</span>
                       <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        <span>
+                        <Clock className="h-3 w-3 flex-shrink-0" />
+                        <span className="truncate">
                           Last activity {formatDistanceToNow(new Date(thread.lastReplyAt), { addSuffix: true })}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600 ml-4">
+                  <div className="flex items-center gap-4 text-sm text-gray-600 sm:ml-4 self-start">
                     <div className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
+                      <Users className="h-4 w-4 flex-shrink-0" />
                       <span>{thread.participantCount}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <MessageSquare className="h-4 w-4" />
+                      <MessageSquare className="h-4 w-4 flex-shrink-0" />
                       <span>{thread.replyCount}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Heart className={`h-4 w-4 ${thread.likeCount > 0 ? 'text-red-500' : ''}`} />
+                      <Heart className={`h-4 w-4 flex-shrink-0 ${thread.likeCount > 0 ? 'text-red-500' : ''}`} />
                       <span>{thread.likeCount}</span>
                     </div>
                   </div>
