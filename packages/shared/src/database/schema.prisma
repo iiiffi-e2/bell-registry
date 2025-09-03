@@ -93,6 +93,7 @@ model User {
   bannedBy                  String?
   membershipAccess         MembershipAccessType @default(NEW_APPLICANT)
   referralProfessionalName String?
+  messageBoardTermsAgreedAt DateTime?            @db.Timestamptz(6)
   accounts                  Account[]
   adminAuditLogs            AdminAuditLog[]      @relation("AdminAuditLogs")
   approvedProfiles          CandidateProfile[]   @relation("ProfileApprover")

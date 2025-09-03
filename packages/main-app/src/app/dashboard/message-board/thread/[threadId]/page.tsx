@@ -2,8 +2,9 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ThreadView } from "@/components/message-board/thread-view";
+import { MessageBoardTermsAgreement } from "@/components/message-board/MessageBoardTermsAgreement";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -21,6 +22,8 @@ interface ThreadPageProps {
 export default function ThreadPage({ params }: ThreadPageProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState<boolean | null>(null);
+  const [isCheckingTerms, setIsCheckingTerms] = useState(true);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -35,10 +38,54 @@ export default function ThreadPage({ params }: ThreadPageProps) {
       router.push("/dashboard");
       return;
     }
+
+    // Check if user has agreed to terms
+    checkTermsAgreement();
   }, [session, status, router]);
 
-  // Show loading while checking authentication
-  if (status === "loading") {
+  const checkTermsAgreement = async () => {
+    try {
+      setIsCheckingTerms(true);
+      const response = await fetch("/api/message-board/terms");
+      if (response.ok) {
+        const data = await response.json();
+        setHasAgreedToTerms(data.hasAgreedToTerms);
+      } else {
+        console.error("Failed to check terms agreement");
+        setHasAgreedToTerms(false);
+      }
+    } catch (error) {
+      console.error("Error checking terms agreement:", error);
+      setHasAgreedToTerms(false);
+    } finally {
+      setIsCheckingTerms(false);
+    }
+  };
+
+  const handleTermsAgreement = async () => {
+    try {
+      const response = await fetch("/api/message-board/terms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        setHasAgreedToTerms(true);
+      } else {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to accept terms");
+      }
+    } catch (error) {
+      console.error("Error accepting terms:", error);
+      alert("Failed to accept terms. Please try again.");
+      throw error;
+    }
+  };
+
+  // Show loading while checking authentication or terms
+  if (status === "loading" || isCheckingTerms) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -51,9 +98,24 @@ export default function ThreadPage({ params }: ThreadPageProps) {
     return null;
   }
 
+  // Show terms agreement if user hasn't agreed yet
+  if (hasAgreedToTerms === false) {
+    return <MessageBoardTermsAgreement onAgree={handleTermsAgreement} />;
+  }
+
+  // Show thread view if user has agreed to terms
+  if (hasAgreedToTerms === true) {
+    return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <ThreadView threadId={params.threadId} />
+      </div>
+    );
+  }
+
+  // Fallback loading state
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <ThreadView threadId={params.threadId} />
+    <div className="flex items-center justify-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>
   );
 }

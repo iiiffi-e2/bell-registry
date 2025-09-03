@@ -1,0 +1,11 @@
+# Migration: 20250903143720_add_message_board_terms_agreement
+# Description: Add message board terms agreement timestamp to User table
+
+[metadata]
+name = "add_message_board_terms_agreement"
+description = "Add messageBoardTermsAgreedAt field to track when users agreed to message board community guidelines"
+version = "1.0.0"
+created_at = "2025-09-03T14:37:20Z"
+
+[database]
+provider = "postgresql"
