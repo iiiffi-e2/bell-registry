@@ -22,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { CreateThreadModal } from "./create-thread-modal";
+import { CommunityGuidelinesModal } from "./CommunityGuidelinesModal";
 
 interface Thread {
   id: string;
@@ -50,6 +51,7 @@ export function ThreadList() {
   const [searchResults, setSearchResults] = useState<Thread[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortBy, setSortBy] = useState<'recent' | 'replies' | 'likes'>('recent');
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
 
   useEffect(() => {
     fetchThreads();
@@ -336,11 +338,33 @@ export function ThreadList() {
         </div>
       )}
 
+      {/* Community Guidelines Disclaimer */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            By participating in the message board, you agree to follow our{" "}
+            <button
+              onClick={() => setShowGuidelinesModal(true)}
+              className="text-blue-600 hover:text-blue-800 underline font-medium"
+            >
+              Community Guidelines
+            </button>
+            . Help us maintain a respectful and professional space.
+          </p>
+        </div>
+      </div>
+
       {/* Create Thread Modal */}
       <CreateThreadModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onThreadCreated={handleThreadCreated}
+      />
+
+      {/* Community Guidelines Modal */}
+      <CommunityGuidelinesModal
+        isOpen={showGuidelinesModal}
+        onClose={() => setShowGuidelinesModal(false)}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { LikeButton } from "./like-button";
+import { CommunityGuidelinesModal } from "./CommunityGuidelinesModal";
 
 interface Reply {
   id: string;
@@ -56,6 +57,7 @@ export function ThreadView({ threadId }: ThreadViewProps) {
   const [replyContent, setReplyContent] = useState("");
   const [isSubmittingReply, setIsSubmittingReply] = useState(false);
   const [replyError, setReplyError] = useState<string | null>(null);
+  const [showGuidelinesModal, setShowGuidelinesModal] = useState(false);
 
   useEffect(() => {
     fetchThread();
@@ -314,6 +316,28 @@ export function ThreadView({ threadId }: ThreadViewProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Community Guidelines Disclaimer */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            By participating in the message board, you agree to follow our{" "}
+            <button
+              onClick={() => setShowGuidelinesModal(true)}
+              className="text-blue-600 hover:text-blue-800 underline font-medium"
+            >
+              Community Guidelines
+            </button>
+            . Help us maintain a respectful and professional space.
+          </p>
+        </div>
+      </div>
+
+      {/* Community Guidelines Modal */}
+      <CommunityGuidelinesModal
+        isOpen={showGuidelinesModal}
+        onClose={() => setShowGuidelinesModal(false)}
+      />
     </div>
   );
 }
