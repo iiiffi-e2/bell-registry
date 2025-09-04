@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { XMarkIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline';
 import { Button } from "@/components/ui/button";
 
@@ -10,13 +11,32 @@ interface SurveyBannerProps {
 }
 
 export function SurveyBanner({ onDismissPermanently, onDismissTemporarily }: SurveyBannerProps) {
+  const { data: session } = useSession();
   const [isDismissing, setIsDismissing] = useState(false);
+
+  // Determine survey URL based on user role
+  const getSurveyUrl = () => {
+    const userRole = session?.user?.role;
+    
+    // Professionals get the professionals survey
+    if (userRole === 'PROFESSIONAL') {
+      return 'https://docs.google.com/forms/d/e/1FAIpQLSfi8WG5Xne8t-jqSI269rk7onph11UajjD0TUg77diGeCLxiQ/viewform';
+    }
+    
+    // Employers and Agencies get the clients survey
+    if (userRole === 'EMPLOYER' || userRole === 'AGENCY') {
+      return 'https://docs.google.com/forms/d/e/1FAIpQLSdTpyakx65xhn-nk_KR7qv0PuIVDryUgUD-sTQpHgENPUrP5g/viewform';
+    }
+    
+    // Default to professionals survey for any other roles
+    return 'https://docs.google.com/forms/d/e/1FAIpQLSfi8WG5Xne8t-jqSI269rk7onph11UajjD0TUg77diGeCLxiQ/viewform';
+  };
 
   const handleTakeSurvey = async () => {
     setIsDismissing(true);
     try {
-      // Open the survey in a new tab
-      window.open('https://docs.google.com/forms/d/e/1FAIpQLSfi8WG5Xne8t-jqSI269rk7onph11UajjD0TUg77diGeCLxiQ/viewform', '_blank');
+      // Open the appropriate survey in a new tab
+      window.open(getSurveyUrl(), '_blank');
       // Mark as permanently dismissed when they click to take survey
       await onDismissPermanently();
     } catch (error) {
