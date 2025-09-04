@@ -39,11 +39,9 @@ export function useSSE() {
       eventSource.close()
     }
 
-    console.log('Connecting to SSE...')
     eventSource = new EventSource('/api/sse')
 
     eventSource.onopen = () => {
-      console.log('SSE connection opened')
       setIsConnected(true)
       reconnectAttemptsRef.current = 0 // Reset on successful connection
     }
@@ -57,7 +55,6 @@ export function useSSE() {
         }
 
         if (data.type === 'connected') {
-          console.log('SSE connection confirmed')
           return
         }
 
@@ -80,13 +77,11 @@ export function useSSE() {
         const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000) // Max 30 seconds
         reconnectAttemptsRef.current++
         
-        console.log(`SSE reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current})`)
         
         reconnectTimeout = setTimeout(() => {
           connectSSE()
         }, delay)
       } else {
-        console.error('SSE max reconnection attempts reached')
       }
     }
   }, [session])

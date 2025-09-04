@@ -26,7 +26,6 @@ export async function GET(request: NextRequest) {
         try {
           controller.enqueue(`data: ${JSON.stringify({ type: 'heartbeat', timestamp: Date.now() })}\n\n`)
         } catch (error) {
-          console.log('SSE heartbeat failed, cleaning up connection')
           clearInterval(heartbeat)
           cleanup()
         }
@@ -35,12 +34,10 @@ export async function GET(request: NextRequest) {
       const cleanup = () => {
         clearInterval(heartbeat)
         removeSSEConnection(userId, connectionId)
-        console.log(`SSE connection cleaned up for user ${userId}`)
       }
 
       // Handle client disconnect
       request.signal.addEventListener('abort', () => {
-        console.log(`SSE connection aborted for user ${userId}`)
         cleanup()
       })
 
