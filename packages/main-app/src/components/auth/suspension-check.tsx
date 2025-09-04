@@ -1,6 +1,5 @@
 'use client';
 
-console.log('🔥 SuspensionCheck module loaded in MAIN-APP!');
 
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -22,7 +21,6 @@ interface SuspensionData {
 }
 
 export default function SuspensionCheck({ children, mode = 'modal' }: SuspensionCheckProps) {
-  console.log('SuspensionCheck (MAIN-APP): Component mounted with mode:', mode);
   
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -34,48 +32,39 @@ export default function SuspensionCheck({ children, mode = 'modal' }: Suspension
   const [bannerDismissed, setBannerDismissed] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
 
-  console.log('SuspensionCheck (MAIN-APP): session status:', status, 'user:', session?.user?.email);
 
   useEffect(() => {
     const checkSuspensionStatus = async () => {
       if (status === 'loading' || !session?.user?.id) {
-        console.log('SuspensionCheck (MAIN-APP): Skipping check - status:', status, 'user:', session?.user?.id);
         return;
       }
 
-      console.log('SuspensionCheck (MAIN-APP): Starting suspension check for user:', session.user.email);
 
       try {
         // Check user suspension/ban status from the API
         const response = await fetch('/api/auth/suspension-status');
-        console.log('SuspensionCheck (MAIN-APP): API response status:', response.status);
         
         if (response.ok) {
           const data = await response.json();
-          console.log('SuspensionCheck (MAIN-APP): API response data:', data);
           setSuspensionData(data);
           
           // Banned users should have been blocked at login, but double-check
           if (data.isBanned) {
-            console.log('SuspensionCheck (MAIN-APP): User is banned, redirecting to login');
             window.location.href = '/login?error=banned';
             return;
           }
           
           if (data.isSuspended) {
-            console.log('SuspensionCheck (MAIN-APP): User is suspended, showing modal');
           } else {
-            console.log('SuspensionCheck (MAIN-APP): User is not suspended');
           }
         } else {
           const errorText = await response.text();
-          console.error('SuspensionCheck (MAIN-APP): API error:', response.status, errorText);
+          console.error('Error checking suspension status:', response.status, errorText);
         }
       } catch (error) {
         console.error('Error checking suspension status:', error);
       } finally {
         setSuspensionChecked(true);
-        console.log('SuspensionCheck (MAIN-APP): Check completed');
       }
     };
 
@@ -84,7 +73,6 @@ export default function SuspensionCheck({ children, mode = 'modal' }: Suspension
 
   // Show loading while checking suspension status
   if (!suspensionChecked && status !== 'unauthenticated') {
-    console.log('SuspensionCheck (MAIN-APP): Showing loading spinner');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -92,13 +80,10 @@ export default function SuspensionCheck({ children, mode = 'modal' }: Suspension
     );
   }
 
-  console.log('SuspensionCheck (MAIN-APP): Render check - isSuspended:', suspensionData.isSuspended, 'modalDismissed:', modalDismissed, 'mode:', mode);
 
   // If user is suspended, show appropriate UI based on mode
   if (suspensionData.isSuspended && !modalDismissed) {
-    console.log('SuspensionCheck (MAIN-APP): Should show suspension UI');
     if (mode === 'modal') {
-      console.log('SuspensionCheck (MAIN-APP): Rendering suspension modal');
       return (
         <>
           {/* Suspension Modal Overlay */}
@@ -144,7 +129,7 @@ export default function SuspensionCheck({ children, mode = 'modal' }: Suspension
                   Learn More
                 </a>
                 <a
-                  href={`mailto:support@thebellregistry.com?subject=Account Suspension Appeal - ${session?.user?.email}`}
+                  href={`mailto:support@bellregistry.com?subject=Account Suspension Appeal - ${session?.user?.email}`}
                   className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
                   <EnvelopeIcon className="h-4 w-4 mr-2" />

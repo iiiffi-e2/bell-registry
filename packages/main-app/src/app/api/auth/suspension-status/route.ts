@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log('Suspension API (MAIN-APP): Checking suspension for user:', session.user.email);
 
     // Get user suspension/ban status from database
     const user = await prisma.user.findUnique({
@@ -68,7 +67,6 @@ export async function GET(request: NextRequest) {
       } : null
     };
 
-    console.log('Suspension API (MAIN-APP): Response:', response);
 
     return NextResponse.json(response);
 
