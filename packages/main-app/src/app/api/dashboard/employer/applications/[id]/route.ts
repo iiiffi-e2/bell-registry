@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import { isEmployerOrAgencyRole } from '@/lib/roles';
 
 export async function PATCH(
   req: NextRequest,
@@ -14,7 +15,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (session.user.role !== 'EMPLOYER') {
+    if (!isEmployerOrAgencyRole(session.user.role)) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

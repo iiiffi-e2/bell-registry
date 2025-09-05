@@ -15,7 +15,7 @@ export async function GET() {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (session.user.role !== "EMPLOYER") {
+    if (!isEmployerOrAgencyRole(session.user.role)) {
       return new NextResponse("Forbidden", { status: 403 });
     }
 
