@@ -20,9 +20,46 @@ const prisma = new PrismaClient();
 
 async function fixExistingEmployerProfiles() {
   console.log('🔧 Fixing existing employer and agency profiles for new business rules...\n');
+  console.log('⚠️  This script will update existing TRIAL profiles to match new business rules:');
+  console.log('   - EMPLOYER profiles: Set to 0 credits, 0 limit');
+  console.log('   - AGENCY profiles: Set to 5 credits, 5 limit');
+  console.log('   - Only affects profiles that need updating\n');
 
   try {
-    // Fix EMPLOYER profiles
+    // First, show what would be updated (dry run info)
+    const employersToUpdate = await prisma.employerProfile.count({
+      where: {
+        user: { role: 'EMPLOYER' },
+        subscriptionType: 'TRIAL',
+        OR: [
+          { jobCredits: { not: 0 } },
+          { jobPostLimit: { not: 0 } }
+        ]
+      }
+    });
+
+    const agenciesToUpdate = await prisma.employerProfile.count({
+      where: {
+        user: { role: 'AGENCY' },
+        subscriptionType: 'TRIAL',
+        OR: [
+          { jobCredits: { not: 5 } },
+          { jobPostLimit: { not: 5 } }
+        ]
+      }
+    });
+
+    console.log(`📊 Profiles that will be updated:`);
+    console.log(`   - ${employersToUpdate} EMPLOYER profiles`);
+    console.log(`   - ${agenciesToUpdate} AGENCY profiles`);
+    
+    if (employersToUpdate === 0 && agenciesToUpdate === 0) {
+      console.log('✅ No profiles need updating. All profiles already match business rules.');
+      return;
+    }
+
+    console.log('\n🚀 Proceeding with updates...\n');
+    // Fix EMPLOYER profiles - only those with TRIAL subscription
     console.log('📋 Step 1: Updating EMPLOYER profiles...');
     const employerResult = await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
@@ -33,11 +70,12 @@ async function fixExistingEmployerProfiles() {
         SELECT "id" FROM "User" WHERE "role" = 'EMPLOYER'
       )
       AND "subscriptionType" = 'TRIAL'
+      AND ("jobCredits" != 0 OR "jobPostLimit" != 0)
     `;
     
     console.log(`   ✅ Updated ${employerResult} employer profiles`);
 
-    // Fix AGENCY profiles  
+    // Fix AGENCY profiles - only those with TRIAL subscription that don't have 5 credits
     console.log('📋 Step 2: Updating AGENCY profiles...');
     const agencyResult = await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
@@ -48,6 +86,7 @@ async function fixExistingEmployerProfiles() {
         SELECT "id" FROM "User" WHERE "role" = 'AGENCY'  
       )
       AND "subscriptionType" = 'TRIAL'
+      AND ("jobCredits" != 5 OR "jobPostLimit" != 5)
     `;
 
     console.log(`   ✅ Updated ${agencyResult} agency profiles`);

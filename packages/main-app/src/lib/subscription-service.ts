@@ -647,7 +647,7 @@ export async function initializeTrialSubscription(employerId: string, userRole?:
     await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
       SET 
-        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionType" = ${SubscriptionType.TRIAL}::"SubscriptionType",
         "subscriptionStartDate" = ${new Date()},
         "jobPostLimit" = 0,
         "jobsPostedCount" = 0,
@@ -659,7 +659,7 @@ export async function initializeTrialSubscription(employerId: string, userRole?:
     await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
       SET 
-        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionType" = ${SubscriptionType.TRIAL}::"SubscriptionType",
         "subscriptionStartDate" = ${new Date()},
         "jobPostLimit" = 5,
         "jobsPostedCount" = 0,
@@ -671,7 +671,7 @@ export async function initializeTrialSubscription(employerId: string, userRole?:
     await prisma.$executeRaw`
       UPDATE "EmployerProfile" 
       SET 
-        "subscriptionType" = ${SubscriptionType.TRIAL},
+        "subscriptionType" = ${SubscriptionType.TRIAL}::"SubscriptionType",
         "subscriptionStartDate" = ${new Date()},
         "jobPostLimit" = 5,
         "jobsPostedCount" = 0
