@@ -272,8 +272,11 @@ export default function AdminDashboard() {
               >
                 Review Jobs ({stats.pendingJobs})
               </button>
-              <button className='inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'>
-                View Analytics
+              <button 
+                onClick={() => router.push('/billing')}
+                className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
+              >
+                Billing Management
               </button>
             </div>
             {/* Admin Tools - Always Show System Settings */}
