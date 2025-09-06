@@ -15,6 +15,6 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
   return {
     id: `mock-${Date.now()}`,
     to: userData.email,
-    from: 'welcome@thebellregistry.com'
+    from: 'welcome@bellregistry.com'
   };
 } 

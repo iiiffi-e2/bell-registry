@@ -22,7 +22,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Use Resend's development domain in dev mode
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'The Bell Registry <noreply@thebellregistry.com>';
+          : 'The Bell Registry <noreply@bellregistry.com>';
 
 export async function POST(request: Request) {
   try {

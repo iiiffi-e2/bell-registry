@@ -17,7 +17,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <noreply@thebellregistry.com>';
+  : 'The Bell Registry <noreply@bellregistry.com>';
 
 interface JobApplicationEmailData {
   employerEmail: string;
@@ -37,7 +37,7 @@ interface JobApplicationEmailData {
 export async function sendJobApplicationNotificationEmail(data: JobApplicationEmailData) {
   try {
     const resendClient = getResendClient();
-    const appUrl = process.env.NEXTAUTH_URL || 'https://thebellregistry.com';
+    const appUrl = process.env.NEXTAUTH_URL || 'https://bellregistry.com';
     
     // Format the application date
     const formattedDate = data.applicationDate.toLocaleDateString('en-US', {

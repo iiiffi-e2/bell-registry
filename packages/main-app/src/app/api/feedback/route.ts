@@ -20,7 +20,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <feedback@thebellregistry.com>';
+  : 'The Bell Registry <feedback@bellregistry.com>';
 
 const FEEDBACK_TYPE_LABELS: Record<string, string> = {
   'bug_report': 'Bug Report',
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     
     // Always use production URL for images in emails
-    const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
+    const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
     const logoUrl = `${imageBaseUrl}/images/brand/logo-bell-registry-email.png`;
 
     const emailHtml = `

@@ -10,7 +10,7 @@ const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'The Bell Registry <notifications@thebellregistry.com>';
+          : 'The Bell Registry <notifications@bellregistry.com>';
 
 interface UserNeedingReminder {
   id: string;
@@ -95,7 +95,7 @@ export async function sendProfileUpdateReminderEmail(
     : `${appUrl}/dashboard/profile`;
     
   // Always use production URL for images in emails (localhost won't work in emails)
-  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
 
   // Analyze profile completeness
   const getProfileCompleteness = () => {

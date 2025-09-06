@@ -313,10 +313,10 @@ export default function AccountSuspendedPage() {
           <p className="text-sm text-gray-600">
             Need immediate assistance? Contact us at{' '}
             <a 
-              href="mailto:support@thebellregistry.com?subject=Account Suspension - Urgent"
+              href="mailto:support@bellregistry.com?subject=Account Suspension - Urgent"
               className="text-blue-600 hover:text-blue-500 font-medium"
             >
-              support@thebellregistry.com
+              support@bellregistry.com
             </a>
           </p>
         </div>

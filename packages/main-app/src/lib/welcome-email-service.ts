@@ -18,7 +18,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <welcome@thebellregistry.com>';
+  : 'The Bell Registry <welcome@bellregistry.com>';
 
 interface WelcomeEmailData {
   email: string;
@@ -35,7 +35,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
   const signInUrl = `${appUrl}/login`;
   
   // Always use production URL for images in emails (localhost won't work in emails)
-  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
+  const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
   const logoUrl = `${imageBaseUrl}/images/brand/logo-bell-registry-email.png`;
   
   const fullName = `${userData.firstName} ${userData.lastName}`.trim();
@@ -139,7 +139,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
             <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">
               Our support team is here to help you make the most of The Bell Registry.
             </p>
-            <a href="mailto:support@thebellregistry.com" style="color: #121155; font-weight: 600; text-decoration: none;">
+            <a href="mailto:support@bellregistry.com" style="color: #121155; font-weight: 600; text-decoration: none;">
               Contact Support →
             </a>
           </div>

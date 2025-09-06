@@ -20,7 +20,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <appeals@thebellregistry.com>';
+  : 'The Bell Registry <appeals@bellregistry.com>';
 
 const APPEAL_REASON_LABELS: Record<string, string> = {
   'mistake': 'This was a mistake',
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
     
     // Always use production URL for images in emails
-    const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.thebellregistry.com';
+    const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
     const logoUrl = `${imageBaseUrl}/images/brand/logo-bell-registry-email.png`;
 
     const emailHtml = `
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                Thank you for your patience. If you have any urgent questions, please contact us at support@thebellregistry.com
+                Thank you for your patience. If you have any urgent questions, please contact us at support@bellregistry.com
               </p>
             </div>
           </div>
