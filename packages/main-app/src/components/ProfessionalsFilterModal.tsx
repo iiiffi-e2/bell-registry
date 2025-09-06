@@ -218,7 +218,7 @@ export function ProfessionalsFilterModal({
                 ))
               ) : (
                 <div className="text-sm text-gray-500">
-                  No roles found matching "{roleSearch}"
+                  No roles found matching &ldquo;{roleSearch}&rdquo;
                 </div>
               )}
             </div>
