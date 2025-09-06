@@ -51,8 +51,8 @@ export default function SubscriptionSuccessPage() {
     router.push('/dashboard');
   };
 
-  const handleViewSubscription = () => {
-    router.push('/dashboard/subscription');
+  const handleViewProfessionals = () => {
+    router.push('/dashboard/browse-professionals');
   };
 
   if (loading) {
@@ -90,8 +90,8 @@ export default function SubscriptionSuccessPage() {
                 <Button onClick={handleContinue} variant="outline">
                   Continue to Dashboard
                 </Button>
-                <Button onClick={handleViewSubscription}>
-                  Check Subscription Status
+                <Button onClick={handleViewProfessionals}>
+                  View Professional Profiles
                 </Button>
               </div>
             </CardContent>
@@ -113,7 +113,7 @@ export default function SubscriptionSuccessPage() {
               Payment Successful!
             </CardTitle>
             <CardDescription className="text-lg">
-              Your subscription has been activated and you can now start posting jobs.
+            Your subscription&apos;s active. You&apos;re all set to start posting jobs and connecting with candidates directly
             </CardDescription>
           </CardHeader>
           
@@ -132,8 +132,8 @@ export default function SubscriptionSuccessPage() {
               <Button onClick={handleContinue} className="px-8">
                 Start Posting Jobs
               </Button>
-              <Button onClick={handleViewSubscription} variant="outline">
-                View Subscription Details
+              <Button onClick={handleViewProfessionals} variant="outline">
+                View Professional Profiles
               </Button>
             </div>
           </CardContent>

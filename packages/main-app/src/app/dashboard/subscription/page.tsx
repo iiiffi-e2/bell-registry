@@ -165,7 +165,7 @@ export default function SubscriptionPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Subscription Management</h1>
           <p className="text-gray-600 mt-2">
-            Manage your job posting subscription and billing
+          Manage your subscription and billing
           </p>
         </div>
 

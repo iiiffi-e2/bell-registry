@@ -30,14 +30,14 @@ const mainPlans: Plan[] = [
     price: 250,
     jobLimit: null,
     credits: 1,
-    duration: 'One-time',
+    duration: '',
     description: 'Perfect for hiring a single key position',
     icon: <Star className="h-6 w-6" />,
     isCredits: true,
     features: [
       '1 job post',
       '45-day listing duration',
-      'Job posts never expire',
+      'Job post credits never expire',
       'Standard visibility'
     ]
   },
@@ -47,7 +47,7 @@ const mainPlans: Plan[] = [
     price: 750,
     jobLimit: null,
     credits: 4,
-    duration: 'One-time',
+    duration: '',
     description: 'Great for multiple positions or seasonal hiring',
     icon: <Briefcase className="h-6 w-6" />,
     popular: true,
@@ -55,7 +55,7 @@ const mainPlans: Plan[] = [
     features: [
       '4 job posts',
       '45-day listing duration',
-      'Job posts never expire',
+      'Job post credits never expire',
       'Standard visibility',
       'Save $250 vs individual posts'
     ]
@@ -65,15 +65,14 @@ const mainPlans: Plan[] = [
     name: 'Unlimited (Annual)',
     price: 1500,
     jobLimit: null,
-    duration: '1 year',
+    duration: '',
     description: 'Unlimited hiring power for growing teams',
     icon: <CheckCircle className="h-6 w-6" />,
-    renewalType: 'Annual',
+    renewalType: '',
     features: [
       'Unlimited job posting',
       '45-day listing duration',
       'Auto-renews annually',
-      'Cancel anytime',
       'Standard visibility'
     ]
   }
@@ -92,8 +91,7 @@ const networkPlans = {
       '45-day listing duration',
       'Full profile visibility',
       'Direct candidate messaging',
-      'Auto-renews quarterly',
-      'Cancel anytime'
+      'Auto-renews quarterly'
     ]
   },
   annual: {
@@ -108,7 +106,6 @@ const networkPlans = {
       'Full profile visibility',
       'Direct candidate messaging',
       'Auto-renews annually',
-      'Cancel anytime',
       'Save $2,500 vs quarterly'
     ]
   }
@@ -286,7 +283,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
               {selectedNetworkPlan.duration} • {selectedNetworkPlan.renewalType} billing
             </div>
             <CardDescription className="text-base mt-4">
-              Premium access to our exclusive network of vetted professionals
+            Premium access to our exclusive network of pre-screened professionals
             </CardDescription>
           </CardHeader>
 
@@ -307,10 +304,6 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span>Auto-renews {networkPeriod === 'quarterly' ? 'quarterly' : 'annually'}</span>
                   </li>
-                  <li className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Cancel anytime</span>
-                  </li>
                 </ul>
               </div>
               
@@ -324,10 +317,6 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
                   <li className="flex items-start gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
                     <span>Direct candidate messaging</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span>Access to vetted professionals</span>
                   </li>
                   <li className="flex items-start gap-2 text-sm">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
