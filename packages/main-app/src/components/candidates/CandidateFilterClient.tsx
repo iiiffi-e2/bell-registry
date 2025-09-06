@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState, useEffect } from 'react'
 import { type CandidateFilters } from '../../types/candidate'
+import { ProfessionalsFilterModal } from '../ProfessionalsFilterModal'
 
 // Professional roles constant
 const PROFESSIONAL_ROLES = [
@@ -74,14 +75,22 @@ export function CandidateFilterClient({
     searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
   )
   
-  // State for roles dropdown
-  const [isRolesOpen, setIsRolesOpen] = useState(false)
-  const [roleSearch, setRoleSearch] = useState('')
+  // Location and radius state
+  const [location, setLocation] = useState(searchParams.get('location') || '')
+  const [radius, setRadius] = useState(parseInt(searchParams.get('radius') || '50'))
+  
+  // State for filter modal
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
 
-     // Filter roles based on search
-   const filteredRoles = PROFESSIONAL_ROLES.filter(role =>
-     role.toLowerCase().includes(roleSearch.toLowerCase())
-   )
+  // Count active filters for badge
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (selectedRoles.length > 0) count += selectedRoles.length;
+    if (location) count += 1;
+    if (radius !== 50) count += 1;
+    if (searchParams.get('openToWork') === 'true') count += 1;
+    return count;
+  };
 
    // Function to update URL without triggering search
    const updateURL = useCallback(
@@ -102,6 +111,16 @@ export function CandidateFilterClient({
        } else {
          params.delete('openToWork')
        }
+       if (filters.location) {
+         params.set('location', filters.location)
+       } else {
+         params.delete('location')
+       }
+       if (filters.radius && filters.radius !== 50) {
+         params.set('radius', filters.radius.toString())
+       } else {
+         params.delete('radius')
+       }
        
        router.replace(`?${params.toString()}`, { scroll: false })
      },
@@ -117,235 +136,227 @@ export function CandidateFilterClient({
      [onFiltersChange, updateURL]
    )
 
-   // Sync selectedRoles with URL params when they change (only on mount or external URL changes)
+   // Sync state with URL params when they change (only on mount or external URL changes)
    useEffect(() => {
      const urlRoles = searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
+     const urlLocation = searchParams.get('location') || ''
+     const urlRadius = parseInt(searchParams.get('radius') || '50')
+     
      setSelectedRoles(urlRoles)
+     setLocation(urlLocation)
+     setRadius(urlRadius)
    }, [searchParams])
 
-   // Debounced search effect - only for search query changes
+   // Debounced search effect - for search query and location changes
    useEffect(() => {
      const timer = setTimeout(() => {
        triggerSearch({
          searchQuery: searchQuery || undefined,
          openToWork: searchParams.get('openToWork') === 'true' || undefined,
          roles: selectedRoles,
+         location: location || undefined,
+         radius: radius !== 50 ? radius : undefined,
        })
      }, 300) // 300ms delay
 
      return () => clearTimeout(timer)
-   }, [searchQuery, triggerSearch, searchParams, selectedRoles])
+   }, [searchQuery, location, radius, triggerSearch, searchParams, selectedRoles])
   
-  // Close dropdown when clicking outside or pressing Escape
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (isRolesOpen && !(event.target as Element).closest('.roles-dropdown')) {
-        setIsRolesOpen(false)
-        setRoleSearch('')
-      }
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isRolesOpen) {
-        setIsRolesOpen(false)
-        setRoleSearch('')
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    document.addEventListener('keydown', handleKeyDown)
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [isRolesOpen])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value)
   }
 
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setLocation(value)
+  }
+
+  const handleRadiusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value)
+    setRadius(value)
+  }
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4">
-      {/* Search Bar */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search professionals by name, skills, location, or role..."
-          className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
-          value={searchQuery}
-          onChange={handleSearchChange}
-        />
-      </div>
-
-      {/* Filters Row */}
-      <div className="flex flex-wrap items-center gap-3">
-        {/* Professional Roles Filter */}
-        <div className="relative">
-          <div className="relative roles-dropdown">
-            <button
-              type="button"
-              onClick={() => setIsRolesOpen(!isRolesOpen)}
-              className="inline-flex items-center justify-between w-56 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-                             <span className="truncate">
-                 {selectedRoles && selectedRoles.length > 0
-                   ? `${selectedRoles.length} role${selectedRoles.length === 1 ? '' : 's'} selected`
-                   : 'Select professional roles'
-                 }
-               </span>
-              <svg className="ml-2 h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            
-            {/* Dropdown Menu */}
-            {isRolesOpen && (
-              <div className="absolute z-10 w-80 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-auto">
-                                 {/* Search Input with Clear All */}
-                 <div className="p-3 border-b border-gray-200">
-                   <div className="flex items-center gap-2">
-                     <input
-                       type="text"
-                       placeholder="Search roles..."
-                       value={roleSearch}
-                       onChange={(e) => setRoleSearch(e.target.value)}
-                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                     />
-                                           <button
-                        type="button"
-                                               onClick={() => {
-                         // Clear roles locally and update URL
-                         setSelectedRoles([])
-                         updateURL({
-                           searchQuery: searchQuery || undefined,
-                           openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                           roles: undefined
-                         })
-                       }}
-                        className="text-xs text-red-600 hover:text-red-800 font-medium px-3 py-1 hover:bg-red-50 rounded whitespace-nowrap"
-                      >
-                        Clear all
-                      </button>
-                   </div>
-                 </div>
-                
-                {/* Role Options */}
-                <div className="p-1">
-                  {filteredRoles.length > 0 ? (
-                    filteredRoles.map((role) => (
-                      <label
-                        key={role}
-                        className="flex items-center px-3 py-2.5 text-sm hover:bg-gray-100 cursor-pointer rounded-md"
-                      >
-                                                 <input
-                           type="checkbox"
-                           checked={selectedRoles.includes(role)}
-                          onChange={(e) => {
-                            const newRoles = e.target.checked
-                              ? [...selectedRoles, role]
-                              : selectedRoles.filter(r => r !== role)
-                            
-                            // Update local state immediately (no search triggered)
-                            setSelectedRoles(newRoles)
-                            
-                            // Update URL without triggering search
-                            updateURL({
-                              searchQuery: searchQuery || undefined,
-                              openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                              roles: newRoles.length > 0 ? newRoles : undefined,
-                            })
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
-                        />
-                        {role}
-                      </label>
-                    ))
-                  ) : (
-                                         <div className="px-3 py-2 text-sm text-gray-500">
-                       No roles found matching &ldquo;{roleSearch}&rdquo;
-                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Search Bar and Filters Button */}
+      <div className="flex gap-4">
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Try: 'private chef Austin' or 'personal chef in Austin' for smart search..."
+            className="block w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
         </div>
-
-                 {/* Status Filter */}
-         <div className="relative">
-        <select
-           value={searchParams.get('openToWork') === 'true' ? 'true' : ''}
-           onChange={(e) => {
-             const openToWork = e.target.value === 'true' ? true : undefined
-             
-             // Trigger search immediately for status changes
-             triggerSearch({
-               searchQuery: searchQuery || undefined,
-               openToWork: openToWork,
-               roles: selectedRoles,
-             })
-           }}
-             className="appearance-none inline-flex items-center justify-between rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+        
+        <button
+          type="button"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="inline-flex items-center rounded-md bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
         >
-          <option value="">All Professionals</option>
-          <option value="true">Open to Work</option>
-        </select>
-           <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
-             <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-           </svg>
-         </div>
+          <svg 
+            className="h-5 w-5 text-gray-400 mr-2" 
+            fill="none" 
+            viewBox="0 0 24 24" 
+            strokeWidth={1.5} 
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+          </svg>
+          Filters
+          {getActiveFiltersCount() > 0 && (
+            <span className="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+              {getActiveFiltersCount()}
+            </span>
+          )}
+        </button>
       </div>
 
-             {/* Selected Roles Tags */}
-       {selectedRoles && selectedRoles.length > 0 && (
-        <div className="mt-3 pt-3 border-t border-gray-200">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-gray-600">Selected roles:</span>
-                         {selectedRoles.map((role) => (
-              <span
-                key={role}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-800 rounded-full font-medium"
-              >
-                {role}
-                <button
-                  onClick={() => {
-                    const newRoles = selectedRoles.filter(r => r !== role)
-                    
-                    // Update local state immediately (no search triggered)
-                    setSelectedRoles(newRoles)
-                    
-                    // Update URL without triggering search
-                    updateURL({
-                      searchQuery: searchQuery || undefined,
-                      openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                      roles: newRoles.length > 0 ? newRoles : undefined,
-                    })
-                  }}
-                  className="ml-1 text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
-                  title="Remove role"
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-            <button
-              onClick={() => {
-                // Clear roles locally and update URL
-                setSelectedRoles([])
-                updateURL({
-                  searchQuery: searchQuery || undefined,
-                  openToWork: searchParams.get('openToWork') === 'true' || undefined,
-                  roles: undefined
-                })
-              }}
-              className="text-xs text-red-600 hover:text-red-800 font-medium underline"
+      {/* Active Filter Tags */}
+      {getActiveFiltersCount() > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-medium text-gray-600">Active filters:</span>
+          
+          {/* Role Tags */}
+          {selectedRoles.map((role) => (
+            <span
+              key={role}
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-blue-100 text-blue-800 rounded-full font-medium"
             >
-              Clear all
-            </button>
-      </div>
+              {role}
+              <button
+                onClick={() => {
+                  const newRoles = selectedRoles.filter(r => r !== role)
+                  setSelectedRoles(newRoles)
+                  updateURL({
+                    searchQuery: searchQuery || undefined,
+                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    roles: newRoles.length > 0 ? newRoles : undefined,
+                    location: location || undefined,
+                    radius: radius !== 50 ? radius : undefined,
+                  })
+                }}
+                className="ml-1 text-blue-600 hover:text-blue-800 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                title="Remove role"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+          
+          {/* Location Tag */}
+          {location && (
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-green-100 text-green-800 rounded-full font-medium">
+              📍 {location}
+              <button
+                onClick={() => {
+                  setLocation('')
+                  updateURL({
+                    searchQuery: searchQuery || undefined,
+                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    roles: selectedRoles,
+                    location: undefined,
+                    radius: radius !== 50 ? radius : undefined,
+                  })
+                }}
+                className="ml-1 text-green-600 hover:text-green-800 hover:bg-green-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                title="Remove location"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          {/* Radius Tag */}
+          {radius !== 50 && (
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-purple-100 text-purple-800 rounded-full font-medium">
+              📏 {radius} miles
+              <button
+                onClick={() => {
+                  setRadius(50)
+                  updateURL({
+                    searchQuery: searchQuery || undefined,
+                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    roles: selectedRoles,
+                    location: location || undefined,
+                    radius: undefined,
+                  })
+                }}
+                className="ml-1 text-purple-600 hover:text-purple-800 hover:bg-purple-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                title="Reset radius"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          {/* Open to Work Tag */}
+          {searchParams.get('openToWork') === 'true' && (
+            <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-orange-100 text-orange-800 rounded-full font-medium">
+              🟢 Open to Work
+              <button
+                onClick={() => {
+                  triggerSearch({
+                    searchQuery: searchQuery || undefined,
+                    openToWork: undefined,
+                    roles: selectedRoles,
+                    location: location || undefined,
+                    radius: radius !== 50 ? radius : undefined,
+                  })
+                }}
+                className="ml-1 text-orange-600 hover:text-orange-800 hover:bg-orange-200 rounded-full w-4 h-4 flex items-center justify-center transition-colors"
+                title="Remove filter"
+              >
+                ×
+              </button>
+            </span>
+          )}
+          
+          {/* Clear All Button */}
+          <button
+            onClick={() => {
+              setSelectedRoles([])
+              setLocation('')
+              setRadius(50)
+              updateURL({
+                searchQuery: searchQuery || undefined,
+                openToWork: undefined,
+                roles: undefined,
+                location: undefined,
+                radius: undefined,
+              })
+            }}
+            className="text-xs text-red-600 hover:text-red-800 font-medium underline"
+          >
+            Clear all filters
+          </button>
         </div>
       )}
+      
+      {/* Filters Modal */}
+      <ProfessionalsFilterModal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        filters={{
+          searchQuery: searchQuery || undefined,
+          roles: selectedRoles,
+          location: location || undefined,
+          radius: radius,
+          openToWork: searchParams.get('openToWork') === 'true' || undefined,
+        }}
+        onFiltersChange={(newFilters) => {
+          // Update local state
+          setSelectedRoles(newFilters.roles || []);
+          setLocation(newFilters.location || '');
+          setRadius(newFilters.radius || 50);
+          
+          // Trigger search with new filters
+          triggerSearch(newFilters);
+        }}
+      />
     </div>
   )
 } 

@@ -16,6 +16,8 @@ export interface CandidateFilters {
   searchQuery?: string
   openToWork?: boolean
   roles?: string[]
+  location?: string
+  radius?: number // in miles
 }
 
 export interface CandidateSearchParams extends CandidateFilters {
