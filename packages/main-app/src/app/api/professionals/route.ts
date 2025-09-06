@@ -59,6 +59,40 @@ export async function GET(request: Request) {
           roleQuery = role.trim()
           locationQuery = loc.trim()
         }
+
+        // Expand location query to handle state names and abbreviations
+        const expandLocationQuery = (loc: string): string[] => {
+          const stateMap: Record<string, string> = {
+            'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+            'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+            'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+            'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+            'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+            'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+            'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+            'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+            'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+            'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
+          };
+          
+          const reverseStateMap: Record<string, string> = Object.fromEntries(
+            Object.entries(stateMap).map(([name, abbr]) => [abbr.toLowerCase(), name])
+          );
+
+          const variations: string[] = [loc];
+          const lowerLoc = loc.toLowerCase();
+
+          // If it's a state name, add abbreviation
+          if (stateMap[lowerLoc]) {
+            variations.push(stateMap[lowerLoc]);
+          }
+          // If it's a state abbreviation, add full name
+          else if (reverseStateMap[lowerLoc]) {
+            variations.push(reverseStateMap[lowerLoc]);
+          }
+
+          return variations;
+        };
         
         // Build SQL for fuzzy search with similarity threshold
         let paramIndex = 1;
@@ -80,11 +114,15 @@ export async function GET(request: Request) {
         
         // Add location filtering if location is parsed from query
         let locationParamIndex: number | null = null;
+        let locationVariations: string[] = [];
         if (locationQuery) {
-          params.push(`%${locationQuery}%`);
-          locationParamIndex = paramIndex++;
-          // Use ILIKE for location matching for precise results - this is a filter, not part of the OR clause
-          // We'll add this as an AND condition later
+          locationVariations = expandLocationQuery(locationQuery);
+          // Add all location variations as parameters
+          locationVariations.forEach(variation => {
+            params.push(`%${variation}%`);
+          });
+          locationParamIndex = paramIndex;
+          paramIndex += locationVariations.length;
         }
 
         // Add limit and offset parameters
@@ -105,13 +143,47 @@ export async function GET(request: Request) {
         if (openToWork) {
           additionalWhere += ` AND "openToWork" = true`;
         }
+        // Handle separate location and radius filters (not from parsed query)
         if (location && !locationQuery) {
-          params.push(`%${location}%`);
-          additionalWhere += ` AND "location" ILIKE $${paramIndex++}`;
+          const locationVariationsForFilter = expandLocationQuery(location);
+          
+          // If radius is specified and > 50 miles, make location search more flexible
+          if (radius && radius > 50) {
+            // For larger radius, be more flexible with location matching
+            const locationConditions = locationVariationsForFilter.map(() => {
+              params.push(`%${location.split(' ')[0]}%`); // Use first word for broader search
+              return `"location" ILIKE $${paramIndex++}`;
+            });
+            // Also include state-level matches for large radius
+            locationVariationsForFilter.forEach(variation => {
+              params.push(`%${variation}%`);
+              locationConditions.push(`"location" ILIKE $${paramIndex++}`);
+            });
+            additionalWhere += ` AND (${locationConditions.join(' OR ')})`;
+          } else {
+            // Standard location matching for smaller radius or no radius
+            const locationConditions = locationVariationsForFilter.map(variation => {
+              params.push(`%${variation}%`);
+              return `"location" ILIKE $${paramIndex++}`;
+            });
+            additionalWhere += ` AND (${locationConditions.join(' OR ')})`;
+          }
         }
-        // Add location filter from parsed query (strict matching)
-        if (locationQuery && locationParamIndex) {
-          additionalWhere += ` AND "location" ILIKE $${locationParamIndex}`;
+        // Add location filter from parsed query (strict matching with variations)
+        if (locationQuery && locationParamIndex && locationVariations.length > 0) {
+          let locationConditions = locationVariations.map((_, index) => 
+            `"location" ILIKE $${locationParamIndex + index}`
+          );
+          
+          // If radius is specified and > 50 miles, add broader location matching
+          if (radius && radius > 50) {
+            // Add broader search for larger radius
+            const firstWord = locationQuery.split(' ')[0];
+            params.push(`%${firstWord}%`);
+            locationConditions.push(`"location" ILIKE $${paramIndex++}`);
+          }
+          
+          additionalWhere += ` AND (${locationConditions.join(' OR ')})`;
         }
 
         const query = `
@@ -224,6 +296,66 @@ export async function GET(request: Request) {
       }
     }
 
+    // Helper function for state expansion (reused for fallback)
+    const expandLocationQueryFallback = (loc: string): string[] => {
+      const stateMap: Record<string, string> = {
+        'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR', 'california': 'CA',
+        'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE', 'florida': 'FL', 'georgia': 'GA',
+        'hawaii': 'HI', 'idaho': 'ID', 'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA',
+        'kansas': 'KS', 'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
+        'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS', 'missouri': 'MO',
+        'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV', 'new hampshire': 'NH', 'new jersey': 'NJ',
+        'new mexico': 'NM', 'new york': 'NY', 'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH',
+        'oklahoma': 'OK', 'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
+        'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT', 'vermont': 'VT',
+        'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV', 'wisconsin': 'WI', 'wyoming': 'WY'
+      };
+      
+      const reverseStateMap: Record<string, string> = Object.fromEntries(
+        Object.entries(stateMap).map(([name, abbr]) => [abbr.toLowerCase(), name])
+      );
+
+      const variations: string[] = [loc];
+      const lowerLoc = loc.toLowerCase();
+
+      // If it's a state name, add abbreviation
+      if (stateMap[lowerLoc]) {
+        variations.push(stateMap[lowerLoc]);
+      }
+      // If it's a state abbreviation, add full name
+      else if (reverseStateMap[lowerLoc]) {
+        variations.push(reverseStateMap[lowerLoc]);
+      }
+
+      return variations;
+    };
+
+    // Build location filter with state variations for fallback search
+    const buildLocationFilter = () => {
+      if (!location) return {};
+      
+      const locationVariations = expandLocationQueryFallback(location);
+      
+      // If radius is large, make search more flexible
+      if (radius && radius > 50) {
+        return {
+          OR: [
+            ...locationVariations.map(variation => ({
+              location: { contains: variation, mode: 'insensitive' as Prisma.QueryMode }
+            })),
+            // Add broader search for large radius
+            { location: { contains: location.split(' ')[0], mode: 'insensitive' as Prisma.QueryMode } }
+          ]
+        };
+      } else {
+        return {
+          OR: locationVariations.map(variation => ({
+            location: { contains: variation, mode: 'insensitive' as Prisma.QueryMode }
+          }))
+        };
+      }
+    };
+
     // Standard search (fallback)
     const where = {
       // Show both approved and pending profiles for now (pending profiles need approval)
@@ -238,7 +370,7 @@ export async function GET(request: Request) {
         ]
       },
       // Filter conditions
-      ...(location ? { location: { contains: location, mode: 'insensitive' as Prisma.QueryMode } } : {}),
+      ...(location ? buildLocationFilter() : {}),
       ...(roleType ? { user: { role: roleType } } : {}),
       ...(roles.length > 0 ? { preferredRole: { in: roles } } : {}),
       ...(openToWork ? { openToWork: true } : {}),
