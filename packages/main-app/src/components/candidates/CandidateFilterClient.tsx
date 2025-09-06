@@ -78,6 +78,7 @@ export function CandidateFilterClient({
   // Location and radius state
   const [location, setLocation] = useState(searchParams.get('location') || '')
   const [radius, setRadius] = useState(parseInt(searchParams.get('radius') || '50'))
+  const [openToWork, setOpenToWork] = useState(searchParams.get('openToWork') === 'true')
   
   // State for filter modal
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
@@ -88,7 +89,7 @@ export function CandidateFilterClient({
     if (selectedRoles.length > 0) count += selectedRoles.length;
     if (location) count += 1;
     if (radius !== 50) count += 1;
-    if (searchParams.get('openToWork') === 'true') count += 1;
+    if (openToWork) count += 1;
     return count;
   };
 
@@ -141,10 +142,12 @@ export function CandidateFilterClient({
      const urlRoles = searchParams.get('roles') ? searchParams.get('roles')!.split(',') : []
      const urlLocation = searchParams.get('location') || ''
      const urlRadius = parseInt(searchParams.get('radius') || '50')
+     const urlOpenToWork = searchParams.get('openToWork') === 'true'
      
      setSelectedRoles(urlRoles)
      setLocation(urlLocation)
      setRadius(urlRadius)
+     setOpenToWork(urlOpenToWork)
    }, [searchParams])
 
    // Debounced search effect - for search query and location changes
@@ -152,7 +155,7 @@ export function CandidateFilterClient({
      const timer = setTimeout(() => {
        triggerSearch({
          searchQuery: searchQuery || undefined,
-         openToWork: searchParams.get('openToWork') === 'true' || undefined,
+         openToWork: openToWork || undefined,
          roles: selectedRoles,
          location: location || undefined,
          radius: radius !== 50 ? radius : undefined,
@@ -160,7 +163,7 @@ export function CandidateFilterClient({
      }, 300) // 300ms delay
 
      return () => clearTimeout(timer)
-   }, [searchQuery, location, radius, triggerSearch, searchParams, selectedRoles])
+   }, [searchQuery, location, radius, selectedRoles, openToWork]) // Removed triggerSearch and searchParams to prevent infinite loop
   
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -233,7 +236,7 @@ export function CandidateFilterClient({
                   setSelectedRoles(newRoles)
                   updateURL({
                     searchQuery: searchQuery || undefined,
-                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    openToWork: openToWork || undefined,
                     roles: newRoles.length > 0 ? newRoles : undefined,
                     location: location || undefined,
                     radius: radius !== 50 ? radius : undefined,
@@ -256,7 +259,7 @@ export function CandidateFilterClient({
                   setLocation('')
                   updateURL({
                     searchQuery: searchQuery || undefined,
-                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    openToWork: openToWork || undefined,
                     roles: selectedRoles,
                     location: undefined,
                     radius: radius !== 50 ? radius : undefined,
@@ -279,7 +282,7 @@ export function CandidateFilterClient({
                   setRadius(50)
                   updateURL({
                     searchQuery: searchQuery || undefined,
-                    openToWork: searchParams.get('openToWork') === 'true' || undefined,
+                    openToWork: openToWork || undefined,
                     roles: selectedRoles,
                     location: location || undefined,
                     radius: undefined,
@@ -294,7 +297,7 @@ export function CandidateFilterClient({
           )}
           
           {/* Open to Work Tag */}
-          {searchParams.get('openToWork') === 'true' && (
+          {openToWork && (
             <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-orange-100 text-orange-800 rounded-full font-medium">
               🟢 Open to Work
               <button
@@ -345,13 +348,14 @@ export function CandidateFilterClient({
           roles: selectedRoles,
           location: location || undefined,
           radius: radius,
-          openToWork: searchParams.get('openToWork') === 'true' || undefined,
+          openToWork: openToWork || undefined,
         }}
         onFiltersChange={(newFilters) => {
           // Update local state
           setSelectedRoles(newFilters.roles || []);
           setLocation(newFilters.location || '');
           setRadius(newFilters.radius || 50);
+          setOpenToWork(newFilters.openToWork || false);
           
           // Trigger search with new filters
           triggerSearch(newFilters);
