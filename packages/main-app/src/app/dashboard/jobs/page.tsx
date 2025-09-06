@@ -7,7 +7,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon,
   MapPinIcon,
-  CurrencyDollarIcon,
+  // CurrencyDollarIcon, // Removed since we no longer display salary
   BuildingOfficeIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -255,14 +255,7 @@ function JobSearchPageContent() {
     }
   };
 
-  const formatSalary = (salary: Job["salary"]) => {
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: salary.currency || "USD",
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(salary.min)} - ${formatter.format(salary.max)}`;
-  };
+  // formatSalary function removed - salary no longer displayed
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -305,10 +298,7 @@ function JobSearchPageContent() {
             <MapPinIcon className="h-4 w-4 text-gray-400" />
             <span className="ml-1">{job.location}</span>
           </div>
-          <div className="mt-1 flex items-center text-sm text-gray-500">
-            <CurrencyDollarIcon className="h-4 w-4 text-gray-400" />
-            <span className="ml-1">{formatSalary(job.salary)}</span>
-          </div>
+          {/* Salary display removed */}
         </div>
         <button
           type="button"
@@ -376,10 +366,7 @@ function JobSearchPageContent() {
                 <p className="ml-1 text-sm text-gray-500">
                   {job.location}
                 </p>
-                <CurrencyDollarIcon className="ml-4 h-4 w-4 text-gray-400" />
-                <p className="ml-1 text-sm text-gray-500">
-                  {formatSalary(job.salary)}
-                </p>
+                {/* Salary display removed */}
               </div>
             </div>
             <button

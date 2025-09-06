@@ -61,22 +61,7 @@ interface PaginationData {
   limit: number;
 }
 
-function formatSalary(salary: any) {
-  if (!salary) return "Salary not specified";
-  
-  const { min, max, currency } = salary;
-  const currencySymbol = currency === "USD" ? "$" : currency;
-  
-  if (min && max) {
-    return `${currencySymbol}${min.toLocaleString()} - ${currencySymbol}${max.toLocaleString()}`;
-  } else if (min) {
-    return `${currencySymbol}${min.toLocaleString()}+`;
-  } else if (max) {
-    return `Up to ${currencySymbol}${max.toLocaleString()}`;
-  }
-  
-  return "Salary not specified";
-}
+// formatSalary function removed - salary no longer displayed
 
 function getTimeAgo(dateString: string) {
   const date = new Date(dateString);
@@ -288,9 +273,7 @@ export default function EmployerJobsPage() {
                             </div>
                           </div>
 
-                          <div className="text-lg font-semibold text-gray-900 mb-3">
-                            {formatSalary(job.salary)}
-                          </div>
+                          {/* Salary display removed */}
 
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {stripHtmlAndTruncate(job.description, 30)}

@@ -52,7 +52,7 @@ export async function PUT(
       exceptionalOpportunity: data.exceptionalOpportunity,
       location: data.location,
       requirements: data.requirements,
-      salary: data.salary,
+      compensation: data.compensation,
       jobType: data.jobType,
       employmentType: data.employmentType,
       status: data.status as JobStatus,

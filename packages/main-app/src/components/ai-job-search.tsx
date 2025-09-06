@@ -705,12 +705,7 @@ export default function AIJobSearch() {
                             <MapPinIcon className="h-4 w-4" />
                             {match.job.location}
                           </div>
-                          {match.job.salary && (
-                            <div className="flex items-center gap-1">
-                              <BanknotesIcon className="h-4 w-4" />
-                              ${match.job.salary.min?.toLocaleString()} - ${match.job.salary.max?.toLocaleString()}
-                            </div>
-                          )}
+                          {/* Salary display removed - now using compensation field */}
                           <div className="flex items-center gap-1">
                             <ClockIcon className="h-4 w-4" />
                             {match.job.employmentType || 'Full-time'}

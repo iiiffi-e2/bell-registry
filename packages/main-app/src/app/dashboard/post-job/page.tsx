@@ -11,8 +11,7 @@ const jobSchema = z.object({
   description: z.string().min(50, "Description must be at least 50 characters"),
   location: z.string().min(1, "Location is required"),
   type: z.enum(["Full-time", "Part-time", "Contract", "Temporary"]),
-  salaryMin: z.string().min(1, "Minimum salary is required"),
-  salaryMax: z.string().min(1, "Maximum salary is required"),
+  // Salary fields removed - now using compensation repeater
   requirements: z.string().min(1, "Requirements are required"),
   benefits: z.string().optional(),
   applicationDeadline: z.string().optional(),
@@ -148,47 +147,7 @@ export default function PostJobPage() {
               )}
             </div>
 
-            {/* Salary Range */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="salaryMin"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Minimum Salary
-                </label>
-                <input
-                  type="text"
-                  {...register("salaryMin")}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="e.g., 50000"
-                />
-                {errors.salaryMin && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.salaryMin.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label
-                  htmlFor="salaryMax"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Maximum Salary
-                </label>
-                <input
-                  type="text"
-                  {...register("salaryMax")}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  placeholder="e.g., 80000"
-                />
-                {errors.salaryMax && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.salaryMax.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            {/* Salary fields removed - now using compensation repeater in main post job page */}
 
             {/* Requirements */}
             <div>

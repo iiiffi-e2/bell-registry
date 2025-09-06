@@ -18,8 +18,7 @@ export async function GET(request: Request) {
     const searchQuery = searchParams.get('search')
     const jobType = searchParams.get('jobType')
     const professionalRole = searchParams.get('professionalRole')
-    const salaryMin = searchParams.get('salaryMin')
-    const salaryMax = searchParams.get('salaryMax')
+    // Salary filtering removed - now using compensation field
     const status = searchParams.get('status')
     const employmentType = searchParams.get('employmentType')
     const sortBy = searchParams.get('sortBy') || 'recent'
@@ -232,15 +231,7 @@ export async function GET(request: Request) {
           (fallbackWhere.AND as Prisma.JobWhereInput[]).push({ OR: locations });
         }
       }
-      if (salaryMin || salaryMax) {
-        (fallbackWhere.AND as Prisma.JobWhereInput[]).push({
-          salary: {
-            path: ['min'],
-            gte: salaryMin ? parseInt(salaryMin) : undefined,
-            lte: salaryMax ? parseInt(salaryMax) : undefined,
-          }
-        });
-      }
+      // Salary filtering removed - compensation is now a string array
       
       const jobs = await prisma.job.findMany({
         where: fallbackWhere,
@@ -318,30 +309,15 @@ export async function GET(request: Request) {
           in: professionalRole.split(',')
         }
       } : {}),
-      ...(salaryMin || salaryMax ? {
-        salary: {
-          path: ['min'],
-          gte: salaryMin ? parseInt(salaryMin) : undefined,
-          lte: salaryMax ? parseInt(salaryMax) : undefined,
-        }
-      } : {}),
+      // Salary filtering removed - compensation is now a string array
     }
 
     let orderBy: Prisma.JobOrderByWithRelationInput = { createdAt: 'desc' }
     switch (sortBy) {
-      case 'salary-high':
-        orderBy = { 
-          salary: 'desc'
-        }
-        break
-      case 'salary-low':
-        orderBy = { 
-          salary: 'asc'
-        }
-        break
       case 'oldest':
         orderBy = { createdAt: 'asc' }
         break
+      // Salary sorting removed - compensation is now a string array
     }
 
     const featuredJobs = await prisma.job.findMany({
@@ -479,7 +455,7 @@ export async function POST(request: Request) {
         exceptionalOpportunity: data.exceptionalOpportunity,
         location: data.location,
         requirements: data.requirements,
-        salary: data.salary,
+        compensation: data.compensation,
         jobType: data.jobType,
         employmentType: data.employmentType,
         featured: data.featured,

@@ -314,14 +314,7 @@ export default function AIJobMatches() {
                         <MapPin className="h-4 w-4" />
                         {match.job.location}
                       </div>
-                      {match.job.salary && (
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          {typeof match.job.salary === 'object' && match.job.salary.min 
-                            ? `$${match.job.salary.min.toLocaleString()} - $${match.job.salary.max.toLocaleString()}`
-                            : 'Salary negotiable'}
-                        </div>
-                      )}
+                      {/* Salary display removed - now using compensation field */}
                     </div>
                     
                     <p className="text-gray-700 mb-4">{match.reasoning}</p>

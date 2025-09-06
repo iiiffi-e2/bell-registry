@@ -20,11 +20,7 @@ interface JobDetails {
   exceptionalOpportunity?: string;
   location: string;
   requirements: string[];
-  salary: {
-    min: number;
-    max: number;
-    currency: string;
-  };
+  compensation: string[];
   jobType: string;
   employmentType: string;
   featured: boolean;
@@ -136,14 +132,9 @@ export default function DashboardJobDetailsPage() {
     }
   };
 
-  const formatSalary = (salary: JobDetails["salary"]) => {
-    if (!salary || !salary.min || !salary.max) return 'Salary not specified';
-    const formatter = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: salary.currency || "USD",
-      maximumFractionDigits: 0,
-    });
-    return `${formatter.format(salary.min)} - ${formatter.format(salary.max)}`;
+  const formatCompensation = (compensation: string[]) => {
+    if (!compensation || compensation.length === 0) return null;
+    return compensation;
   };
 
   const formatDate = (dateString: string) => {
@@ -256,11 +247,6 @@ export default function DashboardJobDetailsPage() {
               </div>
             </div>
 
-            {/* Salary */}
-            <div className="flex items-center text-xl font-semibold text-green-600 mb-6">
-              <span>{formatSalary(job.salary)}</span>
-              <span className="text-sm text-gray-500 ml-2">per year</span>
-            </div>
           </div>
 
           {/* Action Buttons */}
@@ -411,6 +397,21 @@ export default function DashboardJobDetailsPage() {
               )}
             </div>
           </div>
+
+          {/* Compensation */}
+          {formatCompensation(job.compensation) && formatCompensation(job.compensation)!.length > 0 && (
+            <div className="bg-white rounded-lg shadow p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Compensation</h3>
+              <ul className="space-y-2">
+                {formatCompensation(job.compensation)!.map((comp, index) => (
+                  <li key={index} className="flex items-start">
+                    <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2 mr-3"></div>
+                    <span className="text-gray-700">{comp}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 

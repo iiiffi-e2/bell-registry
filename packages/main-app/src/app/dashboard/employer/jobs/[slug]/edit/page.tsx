@@ -121,8 +121,9 @@ const jobFormSchema = z.object({
   requirements: z.array(z.object({
     value: z.string()
   })).optional().default([]),
-  salaryMin: z.string().optional().default(""),
-  salaryMax: z.string().optional().default(""),
+  compensation: z.array(z.object({
+    value: z.string()
+  })).optional().default([]),
   jobType: z.enum(JOB_TYPES, {
     required_error: "Job type is required",
   }).optional().default("Permanent" as JobType),
@@ -156,8 +157,7 @@ export default function EditJobPage() {
       exceptionalOpportunity: "",
       location: "",
       requirements: [{ value: "" }],
-      salaryMin: "",
-      salaryMax: "",
+      compensation: [{ value: "" }],
       jobType: "Permanent",
       employmentType: "Full-time",
       status: "ACTIVE",
@@ -168,6 +168,11 @@ export default function EditJobPage() {
 
   const { fields: requirementFields, append: appendRequirement, remove: removeRequirement } = useFieldArray({
     name: "requirements",
+    control: form.control,
+  });
+
+  const { fields: compensationFields, append: appendCompensation, remove: removeCompensation } = useFieldArray({
+    name: "compensation",
     control: form.control,
   });
 
@@ -206,8 +211,9 @@ export default function EditJobPage() {
           requirements: (job.requirements || []).length > 0 
             ? (job.requirements || []).map((req: string) => ({ value: req }))
             : [{ value: "" }],
-          salaryMin: job.salary?.min?.toString() || "",
-          salaryMax: job.salary?.max?.toString() || "",
+          compensation: (job.compensation || []).length > 0 
+            ? (job.compensation || []).map((comp: string) => ({ value: comp }))
+            : [{ value: "" }],
           jobType: job.jobType as JobType,
           employmentType: job.employmentType as EmploymentType,
           status: job.status as JobStatus,
@@ -236,19 +242,19 @@ export default function EditJobPage() {
     try {
       setIsSubmitting(true);
       
-      // Filter out empty requirements
+      // Filter out empty requirements and compensation
       const requirements = (data.requirements || [])
         .filter(req => req.value.trim() !== "")
         .map(req => req.value);
+        
+      const compensation = (data.compensation || [])
+        .filter(comp => comp.value.trim() !== "")
+        .map(comp => comp.value);
 
       const jobData = {
         ...data,
         requirements,
-        salary: {
-          min: parseInt(data.salaryMin),
-          max: parseInt(data.salaryMax),
-          currency: "USD"
-        },
+        compensation,
       };
 
       const response = await fetch(`/api/jobs/${params.slug}`, {
@@ -565,34 +571,56 @@ export default function EditJobPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="salaryMin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Minimum Salary (USD) (Optional)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g. 50000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="salaryMax"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Maximum Salary (USD) (Optional)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g. 100000" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <FormLabel>Compensation (Optional)</FormLabel>
+                  <FormDescription className="text-sm text-gray-500">
+                    Add compensation details such as salary range, benefits, etc.
+                  </FormDescription>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendCompensation({ value: "" })}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Compensation
+                </Button>
+              </div>
+              
+              <div className="space-y-3">
+                {compensationFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`compensation.${index}.value`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              placeholder="e.g. $50,000 - $70,000 per year, Health insurance, 401k matching"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {index > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={() => removeCompensation(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <FormField
