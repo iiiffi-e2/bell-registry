@@ -59,9 +59,10 @@ export async function GET(request: NextRequest) {
         }
       }),
       
-      // Pending jobs (we'll count all jobs for now and refine later) 
+      // Pending jobs (jobs awaiting admin approval)
       prisma.job.count({
         where: { 
+          adminStatus: 'PENDING',
           employer: { isDeleted: false }
         }
       }),

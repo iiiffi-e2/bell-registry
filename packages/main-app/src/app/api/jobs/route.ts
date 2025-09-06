@@ -488,6 +488,8 @@ export async function POST(request: Request) {
         urlSlug,
         employerId: session.user.id,
         status: JobStatus.ACTIVE,
+        adminStatus: 'APPROVED', // Auto-approve all jobs
+        approvedAt: new Date(),
       },
     });
 
