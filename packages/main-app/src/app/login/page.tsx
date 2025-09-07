@@ -37,7 +37,7 @@ export default function LoginPage() {
                     Welcome back
                   </h1>
                   <p className="mt-4 text-base text-gray-600">
-                    Sign in to continue your journey in luxury private service.
+                    Please sign in to continue.
                   </p>
                 </div>
                 <LoginFormWith2FA />
