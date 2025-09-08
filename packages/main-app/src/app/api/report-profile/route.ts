@@ -21,7 +21,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'The Bell Registry <noreply@bellregistry.com>';
+          : 'Bell Registry <noreply@bellregistry.com>';
 
 export async function POST(request: NextRequest) {
   try {
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
               Review Profile
             </a>
             <p style="color: #9ca3af; font-size: 12px; margin: 16px 0 0 0;">
-              This is an automated notification from The Bell Registry's reporting system.
+              This is an automated notification from Bell Registry's reporting system.
             </p>
           </div>
         </div>

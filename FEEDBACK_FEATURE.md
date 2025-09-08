@@ -47,7 +47,7 @@ A comprehensive feedback system has been implemented to allow users to submit fe
 ### Email Configuration
 - **Development**: Emails sent to `delivered@resend.dev` 
 - **Production**: Emails sent to actual admin email address
-- **From Address**: `The Bell Registry <feedback@bellregistry.com>`
+- **From Address**: `Bell Registry <feedback@bellregistry.com>`
 
 ## Email Template
 

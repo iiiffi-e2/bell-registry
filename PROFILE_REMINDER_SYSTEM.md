@@ -79,7 +79,7 @@ Uses optimized Prisma queries to:
 ### Email Settings
 - Development: Sends to `delivered@resend.dev`
 - Production: Sends to actual user email addresses
-- From address: `The Bell Registry <notifications@bellregistry.com>`
+- From address: `Bell Registry <notifications@bellregistry.com>`
 
 ## Usage
 

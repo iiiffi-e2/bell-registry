@@ -165,6 +165,78 @@ function IndividualSuspensionModal({
   );
 }
 
+// Bulk Delete Modal Component
+function BulkDeleteModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  selectedCount, 
+  isLoading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: () => void; 
+  selectedCount: number; 
+  isLoading: boolean; 
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              Delete Multiple Profiles
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+          
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                You are about to permanently delete <strong>{selectedCount} profile{selectedCount > 1 ? 's' : ''}</strong>.
+              </p>
+              <p className="text-sm text-red-600 font-medium">
+                This action cannot be undone. All selected user accounts and their associated data will be marked as deleted.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Deleting...' : `Delete ${selectedCount} Profile${selectedCount > 1 ? 's' : ''}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Bulk Suspension Modal Component
 function BulkSuspensionModal({ 
   isOpen, 
@@ -292,6 +364,7 @@ export default function ProfileManagementPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showBulkSuspensionModal, setShowBulkSuspensionModal] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [showIndividualSuspensionModal, setShowIndividualSuspensionModal] = useState(false);
   const [selectedProfileForSuspension, setSelectedProfileForSuspension] = useState<Profile | null>(null);
   
@@ -346,7 +419,7 @@ export default function ProfileManagementPage() {
     }
   };
 
-  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
+  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'delete', reason?: string, note?: string) => {
     if (selectedProfiles.length === 0) return;
     
     setBulkActionLoading(true);
@@ -384,6 +457,15 @@ export default function ProfileManagementPage() {
   const handleBulkSuspendConfirm = (reason: string, note: string) => {
     handleBulkAction('suspend', reason, note);
     setShowBulkSuspensionModal(false);
+  };
+
+  const handleBulkDeleteClick = () => {
+    setShowBulkDeleteModal(true);
+  };
+
+  const handleBulkDeleteConfirm = () => {
+    handleBulkAction('delete');
+    setShowBulkDeleteModal(false);
   };
 
   const handleIndividualSuspendClick = (profile: Profile) => {
@@ -649,6 +731,14 @@ export default function ProfileManagementPage() {
                   Flag
                 </button>
                 <button
+                  onClick={handleBulkDeleteClick}
+                  disabled={bulkActionLoading}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-700 hover:bg-red-800 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Delete
+                </button>
+                <button
                   onClick={() => setSelectedProfiles([])}
                   className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                 >
@@ -820,6 +910,14 @@ export default function ProfileManagementPage() {
         isOpen={showBulkSuspensionModal}
         onClose={() => setShowBulkSuspensionModal(false)}
         onConfirm={handleBulkSuspendConfirm}
+        selectedCount={selectedProfiles.length}
+        isLoading={bulkActionLoading}
+      />
+
+      <BulkDeleteModal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+        onConfirm={handleBulkDeleteConfirm}
         selectedCount={selectedProfiles.length}
         isLoading={bulkActionLoading}
       />

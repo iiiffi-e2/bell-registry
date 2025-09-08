@@ -204,6 +204,19 @@ export async function POST(
         message = "Profile flagged for review";
         break;
 
+      case 'delete':
+        // Soft delete the user account
+        updatedUser = await (prisma as any).user.update({
+          where: { id: userId },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date()
+          }
+        });
+        actionType = "DELETE_PROFILE";
+        message = "Profile deleted successfully";
+        break;
+
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }

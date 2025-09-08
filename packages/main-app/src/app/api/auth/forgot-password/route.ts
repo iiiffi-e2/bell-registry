@@ -22,7 +22,7 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 // Use Resend's development domain in dev mode
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'The Bell Registry <noreply@bellregistry.com>';
+          : 'Bell Registry <noreply@bellregistry.com>';
 
 export async function POST(request: Request) {
   try {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
-      subject: 'Reset Your Password - The Bell Registry',
+      subject: 'Reset Your Password - Bell Registry',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333;">Password Reset Request</h1>

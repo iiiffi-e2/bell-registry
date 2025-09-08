@@ -17,7 +17,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <noreply@bellregistry.com>';
+  : 'Bell Registry <noreply@bellregistry.com>';
 
 interface JobApplicationEmailData {
   employerEmail: string;
@@ -55,7 +55,7 @@ export async function sendJobApplicationNotificationEmail(data: JobApplicationEm
           
           <!-- Header with Logo -->
           <div style="background-color: #121155; padding: 32px; text-align: center;">
-            <img src="${appUrl}/images/brand/bell-registry-b-white-on-blue.png" alt="The Bell Registry" style="height: 40px; margin-bottom: 16px;">
+            <img src="${appUrl}/images/brand/bell-registry-b-white-on-blue.png" alt="Bell Registry" style="height: 40px; margin-bottom: 16px;">
             <h1 style="color: white; font-size: 24px; font-weight: 700; margin: 0;">
               New Job Application Received
             </h1>
@@ -136,7 +136,7 @@ export async function sendJobApplicationNotificationEmail(data: JobApplicationEm
             <!-- Footer -->
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                This is an automated notification from The Bell Registry. 
+                This is an automated notification from Bell Registry. 
                 You can manage your job applications and settings from your employer dashboard.
               </p>
             </div>

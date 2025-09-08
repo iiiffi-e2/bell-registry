@@ -22,18 +22,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Action is required" }, { status: 400 });
     }
 
-    // Get users for these profiles
-    const profiles = await prisma.candidateProfile.findMany({
+    // Get users for these user IDs (profileIds actually contains user IDs)
+    const users = await prisma.user.findMany({
       where: {
-        id: { in: profileIds }
+        id: { in: profileIds },
+        isDeleted: false
       },
       include: {
-        user: true
+        candidateProfile: true
       }
     });
 
-    if (profiles.length === 0) {
-      return NextResponse.json({ error: "No valid profiles found" }, { status: 404 });
+    if (users.length === 0) {
+      return NextResponse.json({ error: "No valid users found" }, { status: 404 });
     }
 
     let actionType = "";
@@ -42,26 +43,29 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'approve':
-        // Update profile status to approved
-        await prisma.candidateProfile.updateMany({
-          where: {
-            id: { in: profileIds }
-          },
-          data: {
-            status: 'APPROVED',
-            approvedAt: new Date(),
-            approvedBy: session.user.id
-          }
-        });
+        // Update profile status to approved for users that have candidate profiles
+        const userIdsWithProfiles = users.filter(u => u.candidateProfile).map(u => u.id);
+        if (userIdsWithProfiles.length > 0) {
+          await prisma.candidateProfile.updateMany({
+            where: {
+              userId: { in: userIdsWithProfiles }
+            },
+            data: {
+              status: 'APPROVED',
+              approvedAt: new Date(),
+              approvedBy: session.user.id
+            }
+          });
+        }
         actionType = "BULK_APPROVE_PROFILES";
-        message = `${profiles.length} profile${profiles.length > 1 ? 's' : ''} approved successfully`;
+        message = `${users.length} profile${users.length > 1 ? 's' : ''} approved successfully`;
         break;
 
       case 'suspend':
         // Update user suspension status
-        const suspendPromises = profiles.map(async (profile) => {
+        const suspendPromises = users.map(async (user) => {
           const updatedUser = await prisma.user.update({
-            where: { id: profile.user.id },
+            where: { id: user.id },
             data: {
               isSuspended: true,
               suspensionReason: reason,
@@ -73,11 +77,11 @@ export async function POST(request: NextRequest) {
 
           // Send suspension notification email
           try {
-            const userAny = profile.user as any;
+            const userAny = user as any;
             await sendSuspensionNotification({
-              userEmail: profile.user.email,
+              userEmail: user.email,
               userName: `${userAny.firstName || ''} ${userAny.lastName || ''}`.trim() || 'User',
-              userRole: profile.user.role || 'UNKNOWN',
+              userRole: user.role || 'UNKNOWN',
               suspensionReason: reason,
               suspensionNote: note,
               suspendedByAdmin: {
@@ -86,7 +90,7 @@ export async function POST(request: NextRequest) {
               },
               suspendedAt: new Date()
             });
-            console.log('[BULK_ADMIN_ACTION] Suspension notification sent to:', profile.user.email);
+            console.log('[BULK_ADMIN_ACTION] Suspension notification sent to:', user.email);
           } catch (emailError) {
             console.error('[BULK_ADMIN_ACTION] Failed to send suspension notification:', emailError);
             // Don't fail the whole action if email fails
@@ -97,14 +101,14 @@ export async function POST(request: NextRequest) {
 
         updatedUsers = await Promise.all(suspendPromises);
         actionType = "BULK_SUSPEND_USERS";
-        message = `${profiles.length} user${profiles.length > 1 ? 's' : ''} suspended successfully`;
+        message = `${users.length} user${users.length > 1 ? 's' : ''} suspended successfully`;
         break;
 
       case 'ban':
         // Update user ban status
-        const banPromises = profiles.map(async (profile) => {
+        const banPromises = users.map(async (user) => {
           const updatedUser = await prisma.user.update({
-            where: { id: profile.user.id },
+            where: { id: user.id },
             data: {
               isBanned: true,
               bannedAt: new Date(),
@@ -114,18 +118,18 @@ export async function POST(request: NextRequest) {
 
           // Send ban notification email
           try {
-            const userAny = profile.user as any;
+            const userAny = user as any;
             await sendBanNotification({
-              userEmail: profile.user.email,
+              userEmail: user.email,
               userName: `${userAny.firstName || ''} ${userAny.lastName || ''}`.trim() || 'User',
-              userRole: profile.user.role || 'UNKNOWN',
+              userRole: user.role || 'UNKNOWN',
               bannedByAdmin: {
                 name: `${(session.user as any).firstName || ''} ${(session.user as any).lastName || ''}`.trim() || 'Admin',
                 email: session.user.email || ''
               },
               bannedAt: new Date()
             });
-            console.log('[BULK_ADMIN_ACTION] Ban notification sent to:', profile.user.email);
+            console.log('[BULK_ADMIN_ACTION] Ban notification sent to:', user.email);
           } catch (emailError) {
             console.error('[BULK_ADMIN_ACTION] Failed to send ban notification:', emailError);
             // Don't fail the whole action if email fails
@@ -136,7 +140,25 @@ export async function POST(request: NextRequest) {
 
         updatedUsers = await Promise.all(banPromises);
         actionType = "BULK_BAN_USERS";
-        message = `${profiles.length} user${profiles.length > 1 ? 's' : ''} banned successfully`;
+        message = `${users.length} user${users.length > 1 ? 's' : ''} banned successfully`;
+        break;
+
+      case 'delete':
+        // Soft delete users
+        const deletePromises = users.map(async (user) => {
+          const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              isDeleted: true,
+              deletedAt: new Date()
+            }
+          });
+          return updatedUser;
+        });
+
+        updatedUsers = await Promise.all(deletePromises);
+        actionType = "BULK_DELETE_PROFILES";
+        message = `${users.length} profile${users.length > 1 ? 's' : ''} deleted successfully`;
         break;
 
       default:
@@ -152,8 +174,8 @@ export async function POST(request: NextRequest) {
         action,
         reason,
         note,
-        affectedCount: profiles.length,
-        userEmails: profiles.map(p => p.user.email)
+        affectedCount: users.length,
+        userEmails: users.map(u => u.email)
       },
       request.ip,
       request.headers.get("user-agent") || undefined
@@ -162,7 +184,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       message,
-      affectedCount: profiles.length,
+      affectedCount: users.length,
       users: updatedUsers
     });
 

@@ -63,6 +63,78 @@ interface ProfileDetail {
   whyIEnjoyThisWork?: string | null;
 }
 
+// Delete Confirmation Modal Component
+function DeleteConfirmationModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  userName, 
+  isLoading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: () => void; 
+  userName: string; 
+  isLoading: boolean; 
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              Delete User Profile
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+          
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                You are about to permanently delete the profile for <strong>{userName}</strong>.
+              </p>
+              <p className="text-sm text-red-600 font-medium">
+                This action cannot be undone. The user's account and all associated data will be marked as deleted.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Deleting...' : 'Delete Profile'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Suspension Modal Component
 function SuspensionModal({ 
   isOpen, 
@@ -192,6 +264,7 @@ export default function ProfileDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [showSuspensionModal, setShowSuspensionModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -232,7 +305,7 @@ export default function ProfileDetailPage({
     }
   };
 
-  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'unsuspend' | 'flag' | 'ban' | 'unban', reason?: string, note?: string) => {
+  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'unsuspend' | 'flag' | 'ban' | 'unban' | 'delete', reason?: string, note?: string) => {
     if (!profile) return;
     
     setActionLoading(true);
@@ -256,6 +329,12 @@ export default function ProfileDetailPage({
       // Show success message
       alert(result.message || `Profile ${action} successful`);
       
+      // If profile was deleted, redirect back to profiles list
+      if (action === 'delete') {
+        router.push('/profiles');
+        return;
+      }
+      
       // Refresh profile data
       await fetchProfile();
     } catch (error) {
@@ -273,6 +352,15 @@ export default function ProfileDetailPage({
   const handleSuspendConfirm = (reason: string, note: string) => {
     handleAction('suspend', reason, note);
     setShowSuspensionModal(false);
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    handleAction('delete');
+    setShowDeleteModal(false);
   };
 
   const getStatusBadge = (status?: string, reportCount?: number) => {
@@ -365,6 +453,15 @@ export default function ProfileDetailPage({
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteConfirm}
+        userName={`${profile?.user.firstName} ${profile?.user.lastName}`}
+        isLoading={actionLoading}
+      />
+
       {/* Suspension Modal */}
       <SuspensionModal
         isOpen={showSuspensionModal}
@@ -489,6 +586,16 @@ export default function ProfileDetailPage({
               >
                 <FlagIcon className="h-4 w-4 mr-2" />
                 Flag
+              </button>
+
+              {/* Delete button (always available) */}
+              <button
+                onClick={handleDeleteClick}
+                disabled={actionLoading}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-700 hover:bg-red-800 disabled:opacity-50"
+              >
+                <XMarkIcon className="h-4 w-4 mr-2" />
+                Delete
               </button>
             </div>
           </div>

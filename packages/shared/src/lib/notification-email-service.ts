@@ -55,7 +55,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'The Bell Registry <notifications@bellregistry.com>';
+      : 'Bell Registry <notifications@bellregistry.com>';
 
     // Generate suspension email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -68,7 +68,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
           
           <!-- Header with Logo -->
           <div style="background-color: #121155; padding: 32px; text-align: center;">
-            <img src="${logoUrl}" alt="The Bell Registry" style="max-width: 200px; height: auto;" />
+            <img src="${logoUrl}" alt="Bell Registry" style="max-width: 200px; height: auto;" />
           </div>
 
           <!-- Main Content -->
@@ -87,7 +87,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
                 Dear ${data.userName},
               </p>
               <p style="color: #374151; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
-                We are writing to inform you that your account on The Bell Registry has been temporarily suspended.
+                We are writing to inform you that your account on Bell Registry has been temporarily suspended.
               </p>
             </div>
 
@@ -141,7 +141,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                This is an automated notification from The Bell Registry. If you believe this is an error, please contact us immediately.
+                This is an automated notification from Bell Registry. If you believe this is an error, please contact us immediately.
               </p>
             </div>
           </div>
@@ -156,7 +156,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
     const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
-      subject: 'Your account has been suspended - The Bell Registry',
+      subject: 'Your account has been suspended - Bell Registry',
       html: emailHtml,
     });
 
@@ -185,7 +185,7 @@ export async function sendBanNotification(data: BanNotificationData) {
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'The Bell Registry <notifications@bellregistry.com>';
+      : 'Bell Registry <notifications@bellregistry.com>';
 
     // Generate ban email
     const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
@@ -197,7 +197,7 @@ export async function sendBanNotification(data: BanNotificationData) {
           
           <!-- Header with Logo -->
           <div style="background-color: #121155; padding: 32px; text-align: center;">
-            <img src="${logoUrl}" alt="The Bell Registry" style="max-width: 200px; height: auto;" />
+            <img src="${logoUrl}" alt="Bell Registry" style="max-width: 200px; height: auto;" />
           </div>
 
           <!-- Main Content -->
@@ -216,7 +216,7 @@ export async function sendBanNotification(data: BanNotificationData) {
                 Dear ${data.userName},
               </p>
               <p style="color: #374151; font-size: 14px; line-height: 1.6; margin: 0 0 16px 0;">
-                We are writing to inform you that your account on The Bell Registry has been permanently banned due to violations of our terms of service.
+                We are writing to inform you that your account on Bell Registry has been permanently banned due to violations of our terms of service.
               </p>
             </div>
 
@@ -239,7 +239,7 @@ export async function sendBanNotification(data: BanNotificationData) {
             <div style="background-color: #f8fafc; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
               <h4 style="margin: 0 0 12px 0; color: #374151; font-size: 16px; font-weight: 600;">What This Means:</h4>
               <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
-                <p style="margin: 0 0 8px 0;">• Your account has been permanently banned from The Bell Registry</p>
+                <p style="margin: 0 0 8px 0;">• Your account has been permanently banned from Bell Registry</p>
                 <p style="margin: 0 0 8px 0;">• You can no longer access your account or profile</p>
                 <p style="margin: 0 0 8px 0;">• All your data will be retained according to our privacy policy</p>
                 <p style="margin: 0;">• This decision is final and cannot be appealed</p>
@@ -255,7 +255,7 @@ export async function sendBanNotification(data: BanNotificationData) {
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                This is an automated notification from The Bell Registry. If you have questions about this ban, please contact our support team.
+                This is an automated notification from Bell Registry. If you have questions about this ban, please contact our support team.
               </p>
             </div>
           </div>
@@ -270,7 +270,7 @@ export async function sendBanNotification(data: BanNotificationData) {
     const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
-      subject: 'Your account has been banned - The Bell Registry',
+      subject: 'Your account has been banned - Bell Registry',
       html: emailHtml,
     });
 
@@ -299,7 +299,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'The Bell Registry <notifications@bellregistry.com>';
+      : 'Bell Registry <notifications@bellregistry.com>';
 
     // Generate unsuspension email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -312,7 +312,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
           
           <!-- Header with Logo -->
           <div style="background-color: #121155; padding: 32px; text-align: center;">
-            <img src="${logoUrl}" alt="The Bell Registry" style="max-width: 200px; height: auto;" />
+            <img src="${logoUrl}" alt="Bell Registry" style="max-width: 200px; height: auto;" />
           </div>
 
           <!-- Main Content -->
@@ -373,7 +373,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                Welcome back to The Bell Registry! Thank you for your patience during the review process.
+                Welcome back to Bell Registry! Thank you for your patience during the review process.
               </p>
             </div>
           </div>
@@ -388,7 +388,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
     const emailResponse = await getResendClient().emails.send({
       from: FROM_EMAIL,
       to: toEmail,
-      subject: 'Your account has been restored - The Bell Registry',
+      subject: 'Your account has been restored - Bell Registry',
       html: emailHtml,
     });
 

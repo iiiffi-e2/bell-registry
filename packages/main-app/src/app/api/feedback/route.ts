@@ -20,7 +20,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'The Bell Registry <feedback@bellregistry.com>';
+  : 'Bell Registry <feedback@bellregistry.com>';
 
 const FEEDBACK_TYPE_LABELS: Record<string, string> = {
   'bug_report': 'Bug Report',
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
           
           <!-- Header with Logo -->
           <div style="background-color: #121155; padding: 32px; text-align: center;">
-            <img src="${logoUrl}" alt="The Bell Registry" style="max-width: 200px; height: auto;" />
+            <img src="${logoUrl}" alt="Bell Registry" style="max-width: 200px; height: auto;" />
           </div>
 
           <!-- Main Content -->
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                This is an automated notification from The Bell Registry's feedback system.
+                This is an automated notification from Bell Registry's feedback system.
               </p>
             </div>
           </div>
