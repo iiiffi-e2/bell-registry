@@ -67,7 +67,15 @@ const professionalNavigation: NavigationItem[] = [
 
 const employerNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
-  { name: "Job Listings", href: "/dashboard/jobs", icon: BriefcaseIcon },
+  { 
+    name: "Job Listings", 
+    href: "#", 
+    icon: BriefcaseIcon,
+    submenu: [
+      { name: "Browse All", href: "/dashboard/jobs" },
+      { name: "View My Jobs", href: "/dashboard/employer/jobs" }
+    ]
+  },
   { 
     name: "Professionals", 
     href: "#", 
@@ -87,7 +95,15 @@ const employerNavigation: NavigationItem[] = [
 
 const agencyNavigation: NavigationItem[] = [
   { name: "Dashboard", href: "/dashboard/employer", icon: HomeIcon },
-  { name: "Job Listings", href: "/dashboard/employer/jobs", icon: BriefcaseIcon },
+  { 
+    name: "Job Listings", 
+    href: "#", 
+    icon: BriefcaseIcon,
+    submenu: [
+      { name: "Browse All", href: "/dashboard/jobs" },
+      { name: "View My Jobs", href: "/dashboard/employer/jobs" }
+    ]
+  },
   { 
     name: "Professionals", 
     href: "#", 

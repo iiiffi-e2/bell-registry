@@ -82,8 +82,18 @@ const employerRoutes = [
   {
     label: "Job Listings",
     icon: Briefcase,
-    href: "/dashboard/jobs",
+    href: "#",
     color: "text-violet-500",
+    submenu: [
+      {
+        label: "Browse All",
+        href: "/dashboard/jobs",
+      },
+      {
+        label: "View My Jobs",
+        href: "/dashboard/employer/jobs",
+      },
+    ],
   },
   {
     label: "Professionals",
@@ -143,8 +153,18 @@ const agencyRoutes = [
   {
     label: "Job Listings",
     icon: Briefcase,
-    href: "/dashboard/jobs",
+    href: "#",
     color: "text-violet-500",
+    submenu: [
+      {
+        label: "Browse All",
+        href: "/dashboard/jobs",
+      },
+      {
+        label: "View My Jobs",
+        href: "/dashboard/employer/jobs",
+      },
+    ],
   },
   {
     label: "Professionals",
