@@ -124,7 +124,7 @@ export function HomePageClient() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href="/register?role=candidate"
+                  href="/register?role=professional"
                   className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 >
                   Join as a Professional

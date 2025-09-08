@@ -4,13 +4,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
+import { RoleSelection } from "@/components/auth/role-selection";
 
 export default function RegisterPage() {
   const searchParams = useSearchParams();
   const userRole = searchParams?.get("role")?.toUpperCase();
   const isEmployerRoute = userRole === "EMPLOYER";
   const isAgencyRoute = userRole === "AGENCY";
+  const isProfessionalRoute = userRole === "PROFESSIONAL";
   const isEmployerOrAgency = isEmployerRoute || isAgencyRoute;
+  
+  // If no role parameter is provided, show role selection
+  const hasRoleParam = userRole && (isEmployerRoute || isAgencyRoute || isProfessionalRoute);
   
   // Determine which hero image to use
   const heroImage = isEmployerOrAgency ? "/images/register-hero-employer.png" : "/images/register-hero.png";
@@ -62,7 +67,7 @@ export default function RegisterPage() {
                     }
                   </p>
                 </div>
-                <RegisterForm />
+                {hasRoleParam ? <RegisterForm /> : <RoleSelection />}
               </div>
             </div>
 

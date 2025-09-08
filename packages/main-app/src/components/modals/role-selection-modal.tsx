@@ -17,7 +17,7 @@ const roles = [
     title: 'Professional',
     description: 'I am looking for employment opportunities in luxury private service',
     icon: UserIcon,
-    href: '/register?role=candidate',
+    href: '/register?role=professional',
     benefits: [
       'Browse exclusive job opportunities',
       'Create a professional profile',

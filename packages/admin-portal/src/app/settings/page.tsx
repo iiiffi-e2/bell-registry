@@ -34,6 +34,13 @@ export default function SettingsPage() {
   const [success, setSuccess] = useState<string | null>(null);
 
   const [defaultProfileStatus, setDefaultProfileStatus] = useState<'APPROVED' | 'PENDING'>('APPROVED');
+  
+  // Demo data management states
+  const [demoJobsCount, setDemoJobsCount] = useState<number>(0);
+  const [demoUsersCount, setDemoUsersCount] = useState<number>(0);
+  const [loadingDemoInfo, setLoadingDemoInfo] = useState(false);
+  const [removingDemoJobs, setRemovingDemoJobs] = useState(false);
+  const [removingDemoUsers, setRemovingDemoUsers] = useState(false);
 
   // Redirect if not admin
   useEffect(() => {
@@ -45,6 +52,7 @@ export default function SettingsPage() {
     }
     
     fetchSettings();
+    fetchDemoInfo();
   }, [session, status, router]);
 
   const fetchSettings = async () => {
@@ -67,6 +75,29 @@ export default function SettingsPage() {
       setError('Failed to load settings');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDemoInfo = async () => {
+    setLoadingDemoInfo(true);
+    try {
+      // Fetch demo jobs count
+      const jobsResponse = await fetch('/api/demo/jobs');
+      if (jobsResponse.ok) {
+        const jobsData = await jobsResponse.json();
+        setDemoJobsCount(jobsData.demoJobCount || 0);
+      }
+
+      // Fetch demo users count
+      const usersResponse = await fetch('/api/demo/users');
+      if (usersResponse.ok) {
+        const usersData = await usersResponse.json();
+        setDemoUsersCount(usersData.demoUserCount || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching demo info:', error);
+    } finally {
+      setLoadingDemoInfo(false);
     }
   };
 
@@ -97,6 +128,64 @@ export default function SettingsPage() {
       setError('Failed to save setting');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const removeDemoJobs = async () => {
+    if (!confirm(`Are you sure you want to remove all ${demoJobsCount} demo jobs? This action cannot be undone.`)) {
+      return;
+    }
+
+    setRemovingDemoJobs(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/demo/jobs', {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove demo jobs');
+      }
+
+      const result = await response.json();
+      setSuccess(result.message);
+      await fetchDemoInfo(); // Refresh the counts
+    } catch (error) {
+      console.error('Error removing demo jobs:', error);
+      setError('Failed to remove demo jobs');
+    } finally {
+      setRemovingDemoJobs(false);
+    }
+  };
+
+  const removeDemoUsers = async () => {
+    if (!confirm(`Are you sure you want to remove all ${demoUsersCount} demo users? This will also remove their associated jobs, profiles, and other data. This action cannot be undone.`)) {
+      return;
+    }
+
+    setRemovingDemoUsers(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch('/api/demo/users', {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to remove demo users');
+      }
+
+      const result = await response.json();
+      setSuccess(result.message);
+      await fetchDemoInfo(); // Refresh the counts
+    } catch (error) {
+      console.error('Error removing demo users:', error);
+      setError('Failed to remove demo users');
+    } finally {
+      setRemovingDemoUsers(false);
     }
   };
 
@@ -219,6 +308,108 @@ export default function SettingsPage() {
                   'Save Setting'
                 )}
               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Demo Data Management */}
+      <div className="bg-white shadow rounded-lg mb-6">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-medium text-gray-900">Demo Data Management</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Remove test/demo data from the production database
+          </p>
+        </div>
+        
+        <div className="px-6 py-4">
+          <div className="space-y-6">
+            {/* Demo Jobs Section */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-gray-900">Demo Jobs</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                  {loadingDemoInfo ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    `${demoJobsCount} demo jobs found in database`
+                  )}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Jobs marked with isDemo = true will be permanently removed
+                </p>
+              </div>
+              <button
+                onClick={removeDemoJobs}
+                disabled={removingDemoJobs || demoJobsCount === 0 || loadingDemoInfo}
+                className={`ml-4 inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  demoJobsCount > 0 && !loadingDemoInfo
+                    ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500'
+                    : 'border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed'
+                }`}
+              >
+                {removingDemoJobs ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                    Removing...
+                  </>
+                ) : (
+                  `Remove ${demoJobsCount} Demo Jobs`
+                )}
+              </button>
+            </div>
+
+            {/* Demo Users Section */}
+            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div className="flex-1">
+                <h4 className="text-sm font-medium text-gray-900">Demo Users</h4>
+                <p className="text-sm text-gray-500 mt-1">
+                  {loadingDemoInfo ? (
+                    <span className="animate-pulse">Loading...</span>
+                  ) : (
+                    `${demoUsersCount} demo users found in database`
+                  )}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Users marked with isDemo = true and all their associated data will be permanently removed
+                </p>
+              </div>
+              <button
+                onClick={removeDemoUsers}
+                disabled={removingDemoUsers || demoUsersCount === 0 || loadingDemoInfo}
+                className={`ml-4 inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                  demoUsersCount > 0 && !loadingDemoInfo
+                    ? 'border-red-300 text-red-700 bg-red-50 hover:bg-red-100 focus:ring-red-500'
+                    : 'border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed'
+                }`}
+              >
+                {removingDemoUsers ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600 mr-2"></div>
+                    Removing...
+                  </>
+                ) : (
+                  `Remove ${demoUsersCount} Demo Users`
+                )}
+              </button>
+            </div>
+
+            {/* Warning Notice */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <div className="flex">
+                <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" />
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-yellow-800">
+                    Warning: Irreversible Action
+                  </h3>
+                  <div className="mt-2 text-sm text-yellow-700">
+                    <p>
+                      Removing demo data is permanent and cannot be undone. Make sure you want to delete this data before proceeding.
+                      Demo users removal will also cascade delete all associated jobs, profiles, applications, and other related data.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -67,6 +67,7 @@ export function RegisterForm() {
   const roleParam = searchParams.get("role")?.toUpperCase();
   const isEmployerRoute = roleParam === "EMPLOYER";
   const isAgencyRoute = roleParam === "AGENCY";
+  const isProfessionalRoute = roleParam === "PROFESSIONAL";
 
   const stepOneForm = useForm<StepOneData>({
     resolver: zodResolver(stepOneSchema),
@@ -91,7 +92,7 @@ export function RegisterForm() {
 
 
       // Validate membership access fields for professionals only
-      if (!isEmployerRoute && !isAgencyRoute) {
+      if (isProfessionalRoute || (!isEmployerRoute && !isAgencyRoute)) {
         if (!data.membershipAccess || data.membershipAccess === "") {
           setError("Please select your membership access type");
           return;
@@ -207,7 +208,7 @@ export function RegisterForm() {
     if (!terms) return true;
 
     // For professionals only, membership access is required
-    if (!isEmployerRoute && !isAgencyRoute) {
+    if (isProfessionalRoute || (!isEmployerRoute && !isAgencyRoute)) {
       if (!membershipAccess || membershipAccess === "") return true;
       
       // If referred by professional, referral name is required
@@ -239,7 +240,7 @@ export function RegisterForm() {
         </div>
 
         {/* Membership Access - Only show for professionals */}
-        {(!isEmployerRoute && !isAgencyRoute) && (
+        {(isProfessionalRoute || (!isEmployerRoute && !isAgencyRoute)) && (
           <>
             <div>
               <label htmlFor="membershipAccess" className="block text-sm font-medium text-gray-700">
@@ -382,8 +383,8 @@ export function RegisterForm() {
             <p className="mt-2 text-xs text-gray-500 text-center">
               {!stepOneForm.watch("email") && "Please enter your email address"}
               {stepOneForm.watch("email") && !stepOneForm.watch("terms") && "Please accept the terms and conditions"}
-              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && (!stepOneForm.watch("membershipAccess") || stepOneForm.watch("membershipAccess") === "") && "Please select your membership access type"}
-              {stepOneForm.watch("email") && stepOneForm.watch("terms") && !isEmployerRoute && !isAgencyRoute && stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (!stepOneForm.watch("referralProfessionalName") || stepOneForm.watch("referralProfessionalName")?.trim().length === 0) && "Please provide the professional referral name"}
+              {stepOneForm.watch("email") && stepOneForm.watch("terms") && (isProfessionalRoute || (!isEmployerRoute && !isAgencyRoute)) && (!stepOneForm.watch("membershipAccess") || stepOneForm.watch("membershipAccess") === "") && "Please select your membership access type"}
+              {stepOneForm.watch("email") && stepOneForm.watch("terms") && (isProfessionalRoute || (!isEmployerRoute && !isAgencyRoute)) && stepOneForm.watch("membershipAccess") === "PROFESSIONAL_REFERRAL" && (!stepOneForm.watch("referralProfessionalName") || stepOneForm.watch("referralProfessionalName")?.trim().length === 0) && "Please provide the professional referral name"}
             </p>
           )}
         </div>

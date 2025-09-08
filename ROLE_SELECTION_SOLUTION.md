@@ -35,7 +35,7 @@ I implemented a **Role Selection Modal** approach that provides a clean, user-fr
 2. Role selection modal appears with three clear options
 3. User selects their role (Professional, Employer, or Agency)
 4. Modal closes and routes user to appropriate registration form:
-   - Professional → `/register?role=candidate`
+   - Professional → `/register?role=professional`
    - Employer → `/register?role=employer`
    - Agency → `/register?role=agency`
 5. Registration form adapts based on the role parameter
