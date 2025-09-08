@@ -13,7 +13,8 @@ import {
   MagnifyingGlassIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  EyeIcon
+  EyeIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 
 interface JobData {
@@ -88,6 +89,8 @@ export default function AdminJobsPage() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -157,6 +160,40 @@ export default function AdminJobsPage() {
 
   const handlePageChange = (page: number) => {
     fetchJobs(page, statusFilter, searchTerm);
+  };
+
+  const handleDeleteJob = async (jobId: string, jobTitle: string) => {
+    if (!confirm(`Are you sure you want to delete the job "${jobTitle}"? This action cannot be undone and will also delete all associated applications.`)) {
+      return;
+    }
+
+    setDeletingJobId(jobId);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await fetch(`/api/jobs/${jobId}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete job');
+      }
+
+      const result = await response.json();
+      setSuccess(`Successfully deleted job: ${jobTitle}`);
+      
+      // Refresh the jobs list
+      await fetchJobs(currentPage, statusFilter, searchTerm);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccess(null), 5000);
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      setError('Failed to delete job');
+    } finally {
+      setDeletingJobId(null);
+    }
   };
 
   const getStatusBadge = (adminStatus: string) => {
@@ -266,6 +303,17 @@ export default function AdminJobsPage() {
         {error && (
           <div className="mb-6 rounded-md bg-red-50 p-4">
             <div className="text-sm text-red-700">{error}</div>
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-6 rounded-md bg-green-50 p-4">
+            <div className="flex">
+              <CheckCircleIcon className="h-5 w-5 text-green-400" />
+              <div className="ml-3">
+                <p className="text-sm text-green-700">{success}</p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -414,6 +462,19 @@ export default function AdminJobsPage() {
                       >
                         <EyeIcon className="h-4 w-4" />
                       </a>
+                      
+                      <button
+                        onClick={() => handleDeleteJob(job.id, job.title)}
+                        disabled={deletingJobId === job.id}
+                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete job"
+                      >
+                        {deletingJobId === job.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                        ) : (
+                          <TrashIcon className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
