@@ -47,6 +47,7 @@ interface JobDetails {
   employer: {
     firstName: string;
     lastName: string;
+    role: string;
     employerProfile: {
       companyName: string;
       description?: string;
@@ -281,7 +282,9 @@ export default function JobDetailsPage() {
           {/* Employer Info */}
           {(job.employer.employerProfile.description || job.employer.employerProfile.website || job.employer.employerProfile.publicSlug) && (
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">About the Employer</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {job.employer.role === 'AGENCY' ? 'About the Company' : 'About the Employer'}
+              </h3>
               <div className="space-y-3">
                 <div>
                   <p className="font-medium text-gray-900">
