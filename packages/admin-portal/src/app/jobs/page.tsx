@@ -22,7 +22,6 @@ interface JobData {
   title: string;
   description: string;
   location: string;
-  salary: any;
   requirements: string[];
   status: string;
   adminStatus: string;
@@ -236,20 +235,6 @@ export default function AdminJobsPage() {
     });
   };
 
-  const formatSalary = (salary: any) => {
-    if (!salary) return 'Not specified';
-    
-    if (typeof salary === 'object') {
-      const { min, max, currency = 'USD', period = 'year' } = salary;
-      if (min && max) {
-        return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()} per ${period}`;
-      } else if (min) {
-        return `${currency} ${min.toLocaleString()}+ per ${period}`;
-      }
-    }
-    
-    return salary.toString();
-  };
 
   // Show loading state while checking authentication
   if (status === 'loading') {
@@ -420,15 +405,12 @@ export default function AdminJobsPage() {
                         <span>Posted {formatDate(job.createdAt)}</span>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-600">
                         <div>
                           <span className="font-medium">Location:</span> {job.location}
                         </div>
                         <div>
                           <span className="font-medium">Role:</span> {job.professionalRole}
-                        </div>
-                        <div>
-                          <span className="font-medium">Salary:</span> {formatSalary(job.salary)}
                         </div>
                         <div>
                           <span className="font-medium">Applications:</span> {job._count.applications}
