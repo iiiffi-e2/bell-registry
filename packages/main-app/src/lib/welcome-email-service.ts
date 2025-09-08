@@ -57,7 +57,6 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
           <li><strong>Post your first job</strong> - Create detailed job listings to attract qualified professionals</li>
           <li><strong>Browse candidate profiles</strong> - Discover talented professionals who match your needs</li>
           <li><strong>Use our messaging system</strong> - Connect directly with candidates you're interested in</li>
-          <li><strong>Access premium features</strong> - Upgrade for enhanced visibility and advanced search tools</li>
         </ul>
       </div>
     `
@@ -79,10 +78,10 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
       <div style="background-color: #fffbeb; border-radius: 8px; padding: 20px; margin: 24px 0;">
         <h3 style="margin: 0 0 12px 0; color: #92400e; font-size: 16px; font-weight: 600;">Why Bell Registry?</h3>
         <ul style="margin: 0; padding-left: 16px; color: #374151; font-size: 14px; line-height: 1.6;">
-          <li><strong>Vetted professionals</strong> - All candidates undergo thorough screening and background checks</li>
-          <li><strong>Luxury market expertise</strong> - Specialized in high-net-worth household staffing</li>
+          <li><strong>Trusted Network</strong> - Only qualified professionals are invited to join the platform</li>
+          <li><strong>Luxury market expertise</strong> - Focused on private household services</li>
           <li><strong>Confidential process</strong> - Discreet hiring with privacy protection</li>
-          <li><strong>Expert support</strong> - Dedicated team to help you find the perfect match</li>
+          <li><strong>Expert support</strong> - Guidance available to help you connect with the right professionals</li>
         </ul>
       </div>
     `
