@@ -115,7 +115,7 @@ export default function BrowseProfessionalsPage() {
                       </div>
                       <div className="ml-3">
                         <p className="text-sm text-blue-800">
-                          <span className="font-medium">Note:</span> Some professionals have chosen to keep their profiles anonymous. While you have network access, anonymous profiles will show limited information for privacy reasons.
+                          <span className="font-medium">Note:</span> Some professionals have chosen to keep their profiles anonymous. While you have full network access, anonymous profiles show limited information for privacy reasons.
                         </p>
                       </div>
                     </div>
