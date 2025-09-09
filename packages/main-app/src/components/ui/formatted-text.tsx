@@ -6,10 +6,23 @@ interface FormattedTextProps {
 export function FormattedText({ text, className = "text-gray-700" }: FormattedTextProps) {
   if (!text) return null;
   
-  // Split text by single line breaks (paragraph breaks)
-  const paragraphs = text
-    .split(/\n/) // Split on single line breaks
-    .map(paragraph => paragraph.trim())
+  // Normalize the text by handling different types of line breaks
+  const normalizedText = text
+    .replace(/\r\n/g, '\n') // Convert Windows line endings to Unix
+    .replace(/\r/g, '\n');  // Convert Mac line endings to Unix
+  
+  // Split by double line breaks (actual paragraph breaks) first
+  const paragraphs = normalizedText
+    .split(/\n\s*\n/) // Split on double line breaks (with optional whitespace between)
+    .map(paragraph => {
+      // For each paragraph, join single line breaks with spaces
+      // This handles copy-pasted text where each line has a line break but should be one paragraph
+      return paragraph
+        .split(/\n/)
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join(' ');
+    })
     .filter(paragraph => paragraph.length > 0);
   
   if (paragraphs.length === 0) return null;
