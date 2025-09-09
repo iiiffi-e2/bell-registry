@@ -18,7 +18,7 @@ export default function RegisterPage() {
   const hasRoleParam = userRole && (isEmployerRoute || isAgencyRoute || isProfessionalRoute);
   
   // Determine which hero image to use
-  const heroImage = isEmployerOrAgency ? "/images/register-hero-employer.png" : "/images/register-hero.png";
+  const heroImage = isEmployerOrAgency ? "/images/register-hero-employer.jpg" : "/images/register-hero.png";
   const heroAlt = isEmployerOrAgency ? "Luxury estate employer" : "Luxury estate professional";
 
   return (
