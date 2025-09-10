@@ -348,7 +348,7 @@ export default function DashboardLayout({
             <div className="flex items-center space-x-4">
               <button
                 type="button"
-                className="rounded-full bg-white p-1 text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm"
+                className="rounded-full bg-white p-1 text-slate-500 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-sm hidden"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" aria-hidden="true" />
