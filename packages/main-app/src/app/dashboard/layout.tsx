@@ -316,7 +316,7 @@ export default function DashboardLayout({
         )}
         {/* Hamburger button */}
         <button
-          className="fixed top-4 left-4 z-50 p-2 rounded-md text-slate-600 bg-white shadow-lg lg:hidden"
+          className="fixed top-4 left-4 z-50 p-2 rounded-md text-white bg-[#1e293b] shadow-lg lg:hidden"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           aria-label="Open sidebar"
         >
@@ -325,9 +325,9 @@ export default function DashboardLayout({
         {/* Main content */}
         <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
           {/* Top bar */}
-          <div className="flex items-center justify-between h-16 px-6 bg-white border-b border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between h-16 px-6 bg-[#1e293b] border-b border-slate-200 shadow-sm">
             <div className="flex items-center">
-              <h1 className="hidden md:block text-2xl font-bold text-slate-900">Dashboard</h1>
+              <h1 className="hidden md:block text-2xl font-bold text-white">Dashboard</h1>
               <Link href="/dashboard" className="block lg:hidden max-w-[140px] ml-8">
                 <Image
                   src="/images/brand/logo-full.png"

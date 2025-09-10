@@ -10,7 +10,7 @@ export function PublicNavigation() {
   const router = useRouter();
 
   return (
-    <nav className="bg-white shadow-sm border-b">
+    <nav className="bg-[#1e293b] shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
@@ -28,13 +28,13 @@ export function PublicNavigation() {
               <div className="flex items-baseline space-x-4">
                 <Link
                   href="/jobs"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Browse Jobs
                 </Link>
                 <Link
                   href="/dashboard/browse-professionals"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Find Professionals
                 </Link>
@@ -47,13 +47,13 @@ export function PublicNavigation() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/dashboard"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Dashboard
                 </Link>
                 <button
                   onClick={() => router.push('/api/auth/signout')}
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign Out
                 </button>
@@ -62,7 +62,7 @@ export function PublicNavigation() {
               <div className="flex items-center space-x-4">
                 <Link
                   href="/login"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                  className="text-white hover:text-gray-200 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Sign In
                 </Link>
