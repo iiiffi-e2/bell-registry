@@ -4,58 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useState, useEffect } from 'react'
 import { type CandidateFilters } from '../../types/candidate'
 import { ProfessionalsFilterModal } from '../ProfessionalsFilterModal'
-
-// Professional roles constant
-const PROFESSIONAL_ROLES = [
-  "Head Gardener",
-  "Executive Housekeeper",
-  "Driver",
-  "Executive Protection",
-  "Butler",
-  "Governess",
-  "Private Teacher",
-  "Nanny | Educator",
-  "Nanny",
-  "Family Assistant",
-  "Personal Assistant",
-  "Laundress",
-  "Housekeeper",
-  "Houseman",
-  "Estate Couple",
-  "Property Caretaker",
-  "House Manager",
-  "Estate Manager",
-  "Personal Chef",
-  "Private Chef",
-  "Event Chef",
-  "Drop-Off Chef",
-  "Seasonal Chef",
-  "Office Chef",
-  "Yacht Chef",
-  "Jet Chef",
-  "Family Office CEO",
-  "Family Office COO",
-  "Executive Assistant",
-  "Administrative Assistant",
-  "Office Manager",
-  "Human Resources Director",
-  "Director of Residences",
-  "Chief of Staff",
-  "Estate Hospitality Manager",
-  "Estate IT Director",
-  "Estate Security Director",
-  "Director of Operations",
-  "Director of Real Estate and Construction",
-  "Construction Manager",
-  "Facilities Manager",
-  "Property Manager",
-  "Landscape Director",
-  "Yacht Captain",
-  "Yacht Steward | Stewardess",
-  "Yacht Engineer",
-  "Flight Attendant",
-  "Other"
-];
+import { PROFESSIONAL_ROLES } from '@/lib/constants'
 
 interface CandidateFilterClientProps {
   onFiltersChange: (filters: CandidateFilters) => void
