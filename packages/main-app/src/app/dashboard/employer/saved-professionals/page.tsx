@@ -197,33 +197,32 @@ export default function SavedProfessionalsPage() {
                 className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow duration-200"
               >
                 <div className="p-6">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-4">
                     <Link
                       href={`/dashboard/view-profile/${professional.user.id}`}
-                      className="flex-1"
+                      className="flex-1 min-w-0"
                     >
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-start space-x-4">
                         <ProfilePictureWithBadge
                           profile={professional}
                           size="md"
-                          className="h-12 w-12"
                           hideBadge={true}
                         />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-600 transition-colors">
                               {getDisplayName(professional)}
                             </h3>
                             {professional.openToWork && (
                               <OpenToWorkBadge variant="inline" size="sm" />
                             )}
                           </div>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-600 mb-2">
                             {professional.title || professional.preferredRole || 'Professional'}
                           </p>
                           {professional.location && (
-                            <div className="flex items-center text-sm text-gray-400 mt-1">
-                              <MapPinIcon className="h-4 w-4 mr-1" />
+                            <div className="flex items-center text-sm text-gray-500">
+                              <MapPinIcon className="h-4 w-4 mr-1.5 text-gray-400" />
                               {professional.location}
                             </div>
                           )}
@@ -235,12 +234,12 @@ export default function SavedProfessionalsPage() {
                       candidateId={professional.user.id}
                       candidateName={getDisplayName(professional)}
                       onSaveStatusChange={(saved) => handleSaveStatusChange(professional.user.id, saved)}
-                      className="ml-4"
+                      className="flex-shrink-0"
                     />
                   </div>
 
                   {professional.skills && professional.skills.length > 0 && (
-                    <div className="mt-4">
+                    <div className="mt-5">
                       <div className="flex flex-wrap gap-2">
                         {professional.skills.slice(0, 5).map((skill, index) => (
                           <span
@@ -259,9 +258,9 @@ export default function SavedProfessionalsPage() {
                     </div>
                   )}
 
-                  <div className="mt-4 flex items-center justify-between text-sm">
+                  <div className="mt-5 flex items-center justify-between text-sm">
                     <div className="flex items-center text-gray-500">
-                      <CurrencyDollarIcon className="h-4 w-4 mr-1" />
+                      <CurrencyDollarIcon className="h-4 w-4 mr-1.5 text-gray-400" />
                       {formatSalaryRange(professional)}
                     </div>
                     <div className="text-xs text-gray-500">
@@ -270,7 +269,7 @@ export default function SavedProfessionalsPage() {
                   </div>
 
                   {professional.note && (
-                    <div className="mt-4 p-3 bg-yellow-50 rounded-md border-l-4 border-yellow-200">
+                    <div className="mt-5 p-3 bg-yellow-50 rounded-md border-l-4 border-yellow-200">
                       <div className="flex">
                         <div className="ml-1">
                           <p className="text-sm text-yellow-800">
@@ -282,7 +281,7 @@ export default function SavedProfessionalsPage() {
                   )}
 
                   {professional.job && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-md border-l-4 border-blue-200">
+                    <div className="mt-5 p-3 bg-blue-50 rounded-md border-l-4 border-blue-200">
                       <div className="flex">
                         <div className="ml-1">
                           <p className="text-xs text-blue-600 font-medium">Saved for job:</p>
