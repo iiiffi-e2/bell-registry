@@ -1,17 +1,11 @@
 "use client";
 
-import { Metadata } from "next";
 import Link from "next/link";
 import { LoginFormWith2FA } from "@/components/auth/login-form-with-2fa";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-export const metadata: Metadata = {
-  title: "Login - Bell Registry",
-  description: "Login to your Bell Registry account",
-};
 
 export default function LoginPage() {
   const { data: session, status } = useSession();
