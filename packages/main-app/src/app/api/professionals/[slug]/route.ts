@@ -123,6 +123,7 @@ export async function GET(
         'Cache-Control': 'private, max-age=30, must-revalidate',
         'Surrogate-Control': 'no-store',
         'Pragma': 'no-cache',
+        'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet, noimageindex',
       }
     });
   } catch (error) {

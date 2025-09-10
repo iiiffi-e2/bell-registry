@@ -107,7 +107,11 @@ export async function GET(
       }
     };
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(responseData, {
+      headers: {
+        'X-Robots-Tag': 'noindex, nofollow, noarchive, nosnippet, noimageindex',
+      }
+    });
 
   } catch (error) {
     console.error('Error fetching professional profile:', error);

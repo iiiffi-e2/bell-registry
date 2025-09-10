@@ -6,7 +6,7 @@ async function resetAdminPassword() {
   console.log('================================');
 
   const adminEmail = 'admin@bellregistry.com';
-  const newPassword = 'AdminPassword123!';
+  const newPassword = 'Es!w*&I4BrZ58084';
 
   try {
     // Find the admin user
@@ -35,17 +35,17 @@ async function resetAdminPassword() {
       }
     });
 
-    console.log('✅ Successfully reset admin password!');
-    console.log('📧 Email:', updatedUser.email);
-    console.log('🔑 New Password:', newPassword);
-    console.log('👤 Role:', updatedUser.role);
-    console.log('🆔 User ID:', updatedUser.id);
-    console.log('✅ Email Verified:', updatedUser.emailVerified ? 'Yes' : 'No');
+    // console.log('✅ Successfully reset admin password!');
+    // console.log('📧 Email:', updatedUser.email);
+    // console.log('🔑 New Password:', newPassword);
+    // console.log('👤 Role:', updatedUser.role);
+    // console.log('🆔 User ID:', updatedUser.id);
+    // console.log('✅ Email Verified:', updatedUser.emailVerified ? 'Yes' : 'No');
     
-    console.log('\n🎯 Ready to login:');
-    console.log('1. Go to: http://localhost:3001');
-    console.log('2. Email: admin@bellregistry.com');
-    console.log('3. Password: AdminPassword123!');
+    // console.log('\n🎯 Ready to login:');
+    // console.log('1. Go to: http://localhost:3001');
+    // console.log('2. Email: admin@bellregistry.com');
+    // console.log('3. Password: AdminPassword123!');
 
   } catch (error) {
     console.error('❌ Error resetting admin password:', error);

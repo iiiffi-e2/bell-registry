@@ -1,0 +1,21 @@
+User-agent: *
+Disallow: /professionals/
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+Disallow: /billing/
+Disallow: /settings/
+Disallow: /messages/
+Disallow: /uploads/
+
+# Allow main pages
+Allow: /
+Allow: /about
+Allow: /contact
+Allow: /jobs/
+Allow: /employers/
+
+# Sitemap location (if you have one)
+# Sitemap: https://yourdomain.com/sitemap.xml
