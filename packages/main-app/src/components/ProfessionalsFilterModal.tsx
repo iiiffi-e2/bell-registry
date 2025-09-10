@@ -227,7 +227,7 @@ export function ProfessionalsFilterModal({
                   : "bg-gray-100 text-gray-800 hover:bg-gray-200"
               }`}
             >
-              Open to Work Only
+              Open to Opportunities Only
             </button>
           </div>
         </div>

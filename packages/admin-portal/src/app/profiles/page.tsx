@@ -658,7 +658,7 @@ export default function ProfileManagementPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Open to Work</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Open to Opportunities</label>
                 <select
                   value={filters.openToWork === null ? 'all' : filters.openToWork.toString()}
                   onChange={(e) => setFilters({ 
@@ -668,7 +668,7 @@ export default function ProfileManagementPage() {
                   className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="all">All</option>
-                  <option value="true">Open to Work</option>
+                  <option value="true">Open to Opportunities</option>
                   <option value="false">Not Open</option>
                 </select>
               </div>
@@ -804,7 +804,7 @@ export default function ProfileManagementPage() {
                             {getStatusBadge(profile.status, profile.reportCount)}
                             {profile.openToWork && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Open to Work
+                                Open to Opportunities
                               </span>
                             )}
                             {/* Membership Access */}

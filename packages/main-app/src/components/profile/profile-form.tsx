@@ -858,9 +858,9 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel className="text-green-800 font-semibold">Open to Work</FormLabel>
+                      <FormLabel className="text-green-800 font-semibold">Open to Opportunities</FormLabel>
                       <FormDescription className="text-green-700">
-                        Let employers know you&apos;re actively seeking new opportunities. This will display a prominent &quot;Open to Work&quot; badge on your profile.
+                        Let employers know you&apos;re actively seeking new opportunities. This will display a prominent &quot;Open to Opportunities&quot; badge on your profile.
                       </FormDescription>
                     </div>
                   </FormItem>

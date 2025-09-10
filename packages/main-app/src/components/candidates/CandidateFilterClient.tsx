@@ -248,7 +248,7 @@ export function CandidateFilterClient({
           {/* Open to Work Tag */}
           {openToWork && (
             <span className="inline-flex items-center gap-1 px-3 py-1.5 text-xs bg-orange-100 text-orange-800 rounded-full font-medium">
-              🟢 Open to Work
+              🟢 Open to Opportunities
               <button
                 onClick={() => {
                   triggerSearch({

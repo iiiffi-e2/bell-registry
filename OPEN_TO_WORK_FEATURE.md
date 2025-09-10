@@ -1,8 +1,8 @@
-# Open to Work Feature Implementation
+# Open to Opportunities Feature Implementation
 
 ## Overview
 
-The "Open to Work" feature allows professionals to signal their availability for new job opportunities. This provides clear visibility to employers about which candidates are actively seeking employment.
+The "Open to Opportunities" feature allows professionals to signal their availability for new job opportunities. This provides clear visibility to employers about which candidates are actively seeking employment.
 
 ## Features Implemented
 
@@ -12,12 +12,12 @@ The "Open to Work" feature allows professionals to signal their availability for
 
 ### 2. **Visual Indicators**
 - **Profile Picture Badge**: Green circular badge overlay on profile pictures
-- **Inline Badge**: "Open to Work" badge next to professional names
-- **Banner Badge**: Prominent banner at the top of profiles when open to work
+- **Inline Badge**: "Open to Opportunities" badge next to professional names
+- **Banner Badge**: Prominent banner at the top of profiles when open to opportunities
 
 ### 3. **User Interface Components**
 
-#### **OpenToWorkBadge Component**
+#### **OpenToOpportunitiesBadge Component**
 - Three variants: `overlay`, `inline`, `banner`
 - Multiple sizes: `sm`, `md`, `lg`
 - Consistent green color scheme
@@ -26,7 +26,7 @@ The "Open to Work" feature allows professionals to signal their availability for
 - Wraps profile pictures with optional open to work badge
 - Handles anonymous profiles appropriately
 
-#### **OpenToWorkToggle Component**
+#### **OpenToOpportunitiesToggle Component**
 - Quick toggle switch for professionals
 - Real-time status updates
 - Visual feedback during updates

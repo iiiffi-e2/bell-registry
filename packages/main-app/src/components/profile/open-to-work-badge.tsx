@@ -40,7 +40,7 @@ export function OpenToWorkBadge({
       <div className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}>
         <div className="flex items-center">
           <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
-          <span className="font-semibold">Open to Work</span>
+          <span className="font-semibold">Open to Opportunities</span>
         </div>
       </div>
     );
@@ -49,7 +49,7 @@ export function OpenToWorkBadge({
   return (
     <div className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}>
       <CheckCircleIcon className="h-4 w-4 mr-1.5 text-green-600" />
-      <span>Open to Work</span>
+      <span>Open to Opportunities</span>
     </div>
   );
 }

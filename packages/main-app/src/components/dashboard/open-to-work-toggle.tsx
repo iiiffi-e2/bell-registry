@@ -40,7 +40,7 @@ export function OpenToWorkToggle({ isOpenToWork, onToggle, isLoading }: OpenToWo
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
       <div className="flex items-center justify-between">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Open to Work Status</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Open to Opportunities Status</h3>
           <p className="text-sm text-gray-600 mb-4">
             Let employers know you&apos;re actively seeking new opportunities
           </p>
@@ -70,7 +70,7 @@ export function OpenToWorkToggle({ isOpenToWork, onToggle, isLoading }: OpenToWo
       
       <div className="mt-4 text-sm text-gray-500">
         Status: <span className={`font-medium ${isOpenToWork ? 'text-green-600' : 'text-gray-600'}`}>
-          {isOpenToWork ? 'Open to Work' : 'Not actively seeking'}
+          {isOpenToWork ? 'Open to Opportunities' : 'Not actively seeking'}
         </span>
       </div>
       

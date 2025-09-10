@@ -503,7 +503,7 @@ export function ProfessionalDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-green-800">Open to Work</h4>
+                      <h4 className="font-medium text-green-800">Open to Opportunities</h4>
                       {openToWork && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
                           Active
