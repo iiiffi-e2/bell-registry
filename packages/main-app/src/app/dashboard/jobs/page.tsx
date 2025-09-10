@@ -42,6 +42,14 @@ import { FilterModal } from "@/components/FilterModal";
 import { stripHtmlAndTruncate } from "@/lib/utils";
 import AIJobSearch from "@/components/ai-job-search";
 
+// Helper function to get employer display name
+const getEmployerDisplayName = (employer: Job['employer']): string => {
+  if (employer.role === 'EMPLOYER') {
+    return 'Individual Employer';
+  }
+  return employer.employerProfile.companyName;
+};
+
 interface Job {
   id: string;
   title: string;
@@ -57,6 +65,7 @@ interface Job {
   employer: {
     firstName: string;
     lastName: string;
+    role: string;
     employerProfile: {
       companyName: string;
     };
@@ -289,7 +298,7 @@ function JobSearchPageContent() {
           <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">{job.title}</h3>
           <div className="mt-1 flex items-center text-sm text-gray-500">
             <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
-            <span className="ml-1">{job.employer.employerProfile.companyName}</span>
+            <span className="ml-1">{getEmployerDisplayName(job.employer)}</span>
           </div>
           <div className="mt-1 flex items-center text-sm text-gray-500">
             <MapPinIcon className="h-4 w-4 text-gray-400" />
@@ -357,7 +366,7 @@ function JobSearchPageContent() {
               <div className="mt-1 flex items-center">
                 <BuildingOfficeIcon className="h-4 w-4 text-gray-400" />
                 <p className="ml-1 text-sm text-gray-500">
-                  {job.employer.employerProfile.companyName}
+                  {getEmployerDisplayName(job.employer)}
                 </p>
                 <MapPinIcon className="ml-4 h-4 w-4 text-gray-400" />
                 <p className="ml-1 text-sm text-gray-500">

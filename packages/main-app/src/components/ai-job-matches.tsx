@@ -34,6 +34,7 @@ interface JobMatch {
     employer: {
       firstName?: string;
       lastName?: string;
+      role?: string;
       employerProfile?: {
         companyName: string;
       };
@@ -307,7 +308,8 @@ export default function AIJobMatches() {
                     <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
                       <div className="flex items-center gap-1">
                         <Building className="h-4 w-4" />
-                        {match.job.employer.employerProfile?.companyName || 
+                        {match.job.employer.role === 'EMPLOYER' ? 'Individual Employer' :
+                         match.job.employer.employerProfile?.companyName || 
                          `${match.job.employer.firstName} ${match.job.employer.lastName}`}
                       </div>
                       <div className="flex items-center gap-1">

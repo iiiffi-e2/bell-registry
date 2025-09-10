@@ -26,6 +26,7 @@ export async function GET(request: Request) {
               select: {
                 firstName: true,
                 lastName: true,
+                role: true,
                 employerProfile: {
                   select: {
                     companyName: true,

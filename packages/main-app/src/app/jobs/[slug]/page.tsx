@@ -325,7 +325,7 @@ export default function PublicJobDetailsPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="font-medium text-gray-900">
-                      {job.employer.employerProfile.companyName}
+                      {job.employer.role === 'EMPLOYER' ? 'Individual Employer' : job.employer.employerProfile.companyName}
                     </p>
                     {job.employer.employerProfile.location && (
                       <p className="text-sm text-gray-600">

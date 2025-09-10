@@ -12,6 +12,14 @@ import { ApplyJobModal } from "@/components/modals/apply-job-modal";
 import { Button } from "@/components/ui/button";
 import { FormattedJobDescription } from "@/components/ui/rich-text-editor";
 
+// Helper function to get employer display name
+const getEmployerDisplayName = (employer: JobDetails['employer']): string => {
+  if (employer.role === 'EMPLOYER') {
+    return 'Individual Employer';
+  }
+  return employer.employerProfile.companyName;
+};
+
 interface JobDetails {
   id: string;
   title: string;
@@ -229,7 +237,7 @@ export default function DashboardJobDetailsPage() {
             <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
               <div className="flex items-center">
                 <BuildingOfficeIcon className="h-4 w-4 text-gray-400 mr-1" />
-                {job.employer.employerProfile.companyName}
+                {getEmployerDisplayName(job.employer)}
               </div>
               <div className="flex items-center">
                 <MapPinIcon className="h-4 w-4 text-gray-400 mr-1" />
@@ -331,7 +339,7 @@ export default function DashboardJobDetailsPage() {
               <div className="space-y-3">
                 <div>
                   <div className="text-sm font-medium text-gray-500">Company</div>
-                  <div className="text-gray-900">{job.employer.employerProfile.companyName}</div>
+                  <div className="text-gray-900">{getEmployerDisplayName(job.employer)}</div>
                 </div>
                 
                 {job.employer.employerProfile.location && (

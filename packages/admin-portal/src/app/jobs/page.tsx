@@ -397,7 +397,8 @@ export default function AdminJobsPage() {
                       <div className="flex items-center text-sm text-gray-500 mb-2">
                         <BuildingOfficeIcon className="w-4 h-4 mr-1" />
                         <span className="mr-4">
-                          {job.employer.employerProfile?.companyName || 
+                          {job.employer.role === 'EMPLOYER' ? 'Individual Employer' : 
+                           job.employer.employerProfile?.companyName || 
                            `${job.employer.firstName || ''} ${job.employer.lastName || ''}`.trim() ||
                            job.employer.email}
                         </span>
