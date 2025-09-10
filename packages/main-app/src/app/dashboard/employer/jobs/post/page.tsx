@@ -46,16 +46,7 @@ const EMPLOYMENT_TYPES = [
   "Live-out"
 ] as const;
 
-const JOB_TYPES = [
-  "Permanent",
-  "Fixed-term",
-  "Temporary",
-  "Freelance",
-  "Per Diem"
-] as const;
-
 type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
-type JobType = (typeof JOB_TYPES)[number];
 
 const jobFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -69,9 +60,7 @@ const jobFormSchema = z.object({
   compensation: z.array(z.object({
     value: z.string()
   })).optional().default([]),
-  jobType: z.enum(JOB_TYPES, {
-    required_error: "Job type is required",
-  }).optional().default("Permanent" as JobType),
+  salary: z.string().min(1, "Salary is required"),
   employmentType: z.enum(EMPLOYMENT_TYPES, {
     required_error: "Employment type is required",
   }).optional().default("Full-time" as EmploymentType),
@@ -140,7 +129,7 @@ const defaultValues: Partial<JobFormValues> = {
   location: "",
   requirements: [{ value: "" }],
   compensation: [{ value: "" }],
-  jobType: "Permanent" as JobType,
+  salary: "",
   employmentType: "Full-time" as EmploymentType,
   featured: false,
   expiresAt: "",
@@ -194,7 +183,7 @@ export default function PostJobPage() {
   }, []);
 
   const form = useForm<JobFormValues>({
-    // resolver: zodResolver(jobFormSchema), // Temporarily disabled due to TypeScript strict mode conflicts
+    resolver: zodResolver(jobFormSchema),
     defaultValues,
   });
 
@@ -490,11 +479,11 @@ export default function PostJobPage() {
               name="professionalRole"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Professional Role</FormLabel>
+                  <FormLabel>Job Category</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a professional role" />
+                        <SelectValue placeholder="Select a job category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -506,7 +495,7 @@ export default function PostJobPage() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Choose the primary role category for this position
+                    Choose the primary category for this position
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -588,24 +577,19 @@ export default function PostJobPage() {
 
               <FormField
                 control={form.control}
-                name="jobType"
+                name="salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Type (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select job type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {JOB_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Salary</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g. $50,000 - $70,000 per year, $25/hour, Competitive salary" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the salary range or compensation details
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -708,9 +692,9 @@ export default function PostJobPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <FormLabel>Compensation (Optional)</FormLabel>
+                  <FormLabel>Additional Benefits (Optional)</FormLabel>
                   <FormDescription className="text-sm text-gray-500">
-                    Add compensation details such as salary range, benefits, etc.
+                    Add additional benefits, perks, and compensation details
                   </FormDescription>
                 </div>
                 <Button
@@ -720,7 +704,7 @@ export default function PostJobPage() {
                   onClick={() => appendCompensation({ value: "" })}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Compensation
+                  Add Benefit
                 </Button>
               </div>
               
@@ -734,7 +718,7 @@ export default function PostJobPage() {
                         <FormItem className="flex-1">
                           <FormControl>
                             <Input
-                              placeholder="e.g. $50,000 - $70,000 per year, Health insurance, 401k matching"
+                              placeholder="e.g. Health insurance, 401k matching, Paid time off, Professional development"
                               {...field}
                             />
                           </FormControl>

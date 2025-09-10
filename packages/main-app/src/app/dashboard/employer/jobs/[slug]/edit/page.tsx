@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
@@ -40,14 +41,6 @@ const EMPLOYMENT_TYPES = [
   "Seasonal",
   "Live-in",
   "Live-out"
-] as const;
-
-const JOB_TYPES = [
-  "Permanent",
-  "Fixed-term",
-  "Temporary",
-  "Freelance",
-  "Per Diem"
 ] as const;
 
 const JOB_STATUSES = [
@@ -109,7 +102,6 @@ const PROFESSIONAL_ROLES = [
 ];
 
 type EmploymentType = (typeof EMPLOYMENT_TYPES)[number];
-type JobType = (typeof JOB_TYPES)[number];
 type JobStatus = (typeof JOB_STATUSES)[number];
 
 const jobFormSchema = z.object({
@@ -124,9 +116,7 @@ const jobFormSchema = z.object({
   compensation: z.array(z.object({
     value: z.string()
   })).optional().default([]),
-  jobType: z.enum(JOB_TYPES, {
-    required_error: "Job type is required",
-  }).optional().default("Permanent" as JobType),
+  salary: z.string().min(1, "Salary is required"),
   employmentType: z.enum(EMPLOYMENT_TYPES, {
     required_error: "Employment type is required",
   }).optional().default("Full-time" as EmploymentType),
@@ -149,7 +139,7 @@ export default function EditJobPage() {
   const [isImprovingDescription, setIsImprovingDescription] = useState(false);
 
   const form = useForm<JobFormValues>({
-    // resolver: zodResolver(jobFormSchema),
+    // resolver: zodResolver(jobFormSchema), // Temporarily disabled due to TypeScript strict mode conflicts
     defaultValues: {
       title: "",
       professionalRole: "",
@@ -158,7 +148,7 @@ export default function EditJobPage() {
       location: "",
       requirements: [{ value: "" }],
       compensation: [{ value: "" }],
-      jobType: "Permanent",
+      salary: "",
       employmentType: "Full-time",
       status: "ACTIVE",
       featured: false,
@@ -214,7 +204,7 @@ export default function EditJobPage() {
           compensation: (job.compensation || []).length > 0 
             ? (job.compensation || []).map((comp: string) => ({ value: comp }))
             : [{ value: "" }],
-          jobType: job.jobType as JobType,
+          salary: job.salary || "",
           employmentType: job.employmentType as EmploymentType,
           status: job.status as JobStatus,
           featured: job.featured,
@@ -236,6 +226,12 @@ export default function EditJobPage() {
   async function onSubmit(data: JobFormValues) {
     if (!params?.slug) {
       toast.error("Missing job identifier");
+      return;
+    }
+
+    // Manual validation for required fields
+    if (!data.salary || data.salary.trim() === "") {
+      toast.error("Salary is required");
       return;
     }
 
@@ -364,11 +360,11 @@ export default function EditJobPage() {
                 name="professionalRole"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Professional Role</FormLabel>
+                    <FormLabel>Job Category</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a professional role" />
+                          <SelectValue placeholder="Select a job category" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -380,7 +376,7 @@ export default function EditJobPage() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      Choose the primary role category for this position
+                      Choose the primary category for this position
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -495,24 +491,19 @@ export default function EditJobPage() {
 
               <FormField
                 control={form.control}
-                name="jobType"
+                name="salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Job Type (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select job type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {JOB_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Salary</FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g. $50,000 - $70,000 per year, $25/hour, Competitive salary" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the salary range or compensation details
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -574,9 +565,9 @@ export default function EditJobPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <FormLabel>Compensation (Optional)</FormLabel>
+                  <FormLabel>Additional Benefits (Optional)</FormLabel>
                   <FormDescription className="text-sm text-gray-500">
-                    Add compensation details such as salary range, benefits, etc.
+                    Add additional benefits, perks, and compensation details
                   </FormDescription>
                 </div>
                 <Button
@@ -586,7 +577,7 @@ export default function EditJobPage() {
                   onClick={() => appendCompensation({ value: "" })}
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Compensation
+                  Add Benefit
                 </Button>
               </div>
               
@@ -600,7 +591,7 @@ export default function EditJobPage() {
                         <FormItem className="flex-1">
                           <FormControl>
                             <Input
-                              placeholder="e.g. $50,000 - $70,000 per year, Health insurance, 401k matching"
+                              placeholder="e.g. Health insurance, 401k matching, Paid time off, Professional development"
                               {...field}
                             />
                           </FormControl>

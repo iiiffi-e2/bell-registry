@@ -244,7 +244,7 @@ model Job {
   title                  String
   description            String
   location               String
-  salary                 Json?
+  salary                 String?
   compensation           String[]
   requirements           String[]
   status                 JobStatus        @default(ACTIVE)

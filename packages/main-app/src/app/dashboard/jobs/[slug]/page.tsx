@@ -21,6 +21,7 @@ interface JobDetails {
   location: string;
   requirements: string[];
   compensation: string[];
+  salary?: string;
   jobType: string;
   employmentType: string;
   featured: boolean;
@@ -401,12 +402,18 @@ export default function DashboardJobDetailsPage() {
             </div>
           </div>
 
-          {/* Compensation */}
-          {formatCompensation(job.compensation) && formatCompensation(job.compensation)!.length > 0 && (
+          {/* Compensation & Benefits */}
+          {(job.salary || (formatCompensation(job.compensation) && formatCompensation(job.compensation)!.length > 0)) && (
             <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Compensation</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Compensation & Benefits</h3>
               <ul className="space-y-2">
-                {formatCompensation(job.compensation)!.map((comp, index) => (
+                {job.salary && (
+                  <li className="flex items-start">
+                    <div className="flex-shrink-0 w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3"></div>
+                    <span className="text-gray-700 font-medium">{job.salary}</span>
+                  </li>
+                )}
+                {formatCompensation(job.compensation) && formatCompensation(job.compensation)!.map((comp, index) => (
                   <li key={index} className="flex items-start">
                     <div className="flex-shrink-0 w-2 h-2 bg-green-600 rounded-full mt-2 mr-3"></div>
                     <span className="text-gray-700">{comp}</span>

@@ -22,11 +22,8 @@ interface Job {
   description: string;
   location: string;
   requirements: string[];
-  salary: {
-    min: number;
-    max: number;
-    currency: string;
-  };
+  salary?: string;
+  compensation: string[];
   status: string;
   featured: boolean;
   createdAt: string;

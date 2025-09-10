@@ -456,7 +456,7 @@ export async function POST(request: Request) {
         location: data.location,
         requirements: data.requirements,
         compensation: data.compensation,
-        jobType: data.jobType,
+        salary: data.salary,
         employmentType: data.employmentType,
         featured: data.featured,
         expiresAt: data.expiresAt ? new Date(data.expiresAt) : null,
