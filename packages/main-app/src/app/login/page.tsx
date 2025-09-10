@@ -1,7 +1,12 @@
+"use client";
+
 import { Metadata } from "next";
 import Link from "next/link";
 import { LoginFormWith2FA } from "@/components/auth/login-form-with-2fa";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export const metadata: Metadata = {
   title: "Login - Bell Registry",
@@ -9,6 +14,37 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Wait for session to fully load before making any redirect decisions
+    if (status === "loading") return;
+    
+    // If user is already authenticated, redirect to dashboard
+    if (status === "authenticated" && session?.user?.role) {
+      router.push("/dashboard");
+    }
+  }, [session, status, router]);
+
+  // Show loading state while checking session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show loading while redirecting
+  if (status === "authenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FFFFF0] p-4 md:p-8">
       {/* Logo above container */}

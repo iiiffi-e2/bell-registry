@@ -5,8 +5,13 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
 import { RoleSelection } from "@/components/auth/role-selection";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function RegisterPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const userRole = searchParams?.get("role")?.toUpperCase();
   const isEmployerRoute = userRole === "EMPLOYER";
@@ -20,6 +25,34 @@ export default function RegisterPage() {
   // Determine which hero image to use
   const heroImage = isEmployerOrAgency ? "/images/register-hero-employer.jpg" : "/images/register-hero.png";
   const heroAlt = isEmployerOrAgency ? "Luxury estate employer" : "Luxury estate professional";
+
+  useEffect(() => {
+    // Wait for session to fully load before making any redirect decisions
+    if (status === "loading") return;
+    
+    // If user is already authenticated, redirect to dashboard
+    if (status === "authenticated" && session?.user?.role) {
+      router.push("/dashboard");
+    }
+  }, [session, status, router]);
+
+  // Show loading state while checking session
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  // If user is authenticated, show loading while redirecting
+  if (status === "authenticated") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FFFFF0] p-4 md:p-8">
