@@ -20,7 +20,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'Bell Registry <feedback@bellregistry.com>';
+  : `Bell Registry <${process.env.FEEDBACK_EMAIL || 'feedback@bellregistry.com'}>`;
 
 const FEEDBACK_TYPE_LABELS: Record<string, string> = {
   'bug_report': 'Bug Report',

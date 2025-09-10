@@ -18,7 +18,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'Bell Registry <welcome@bellregistry.com>';
+  : `Bell Registry <${process.env.WELCOME_EMAIL || 'welcome@bellregistry.com'}>`;
 
 interface WelcomeEmailData {
   email: string;
@@ -138,7 +138,7 @@ export async function sendWelcomeEmail(userData: WelcomeEmailData) {
             <p style="margin: 0 0 16px 0; color: #6b7280; font-size: 14px;">
               Our support team is here to help you make the most of Bell Registry.
             </p>
-            <a href="mailto:support@bellregistry.com" style="color: #121155; font-weight: 600; text-decoration: none;">
+            <a href="mailto:${process.env.SUPPORT_EMAIL || 'support@bellregistry.com'}" style="color: #121155; font-weight: 600; text-decoration: none;">
               Contact Support →
             </a>
           </div>

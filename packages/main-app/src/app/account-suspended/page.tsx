@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EMAIL_ADDRESSES } from '@/lib/constants';
 
 interface SuspensionData {
   isSuspended: boolean;
@@ -313,10 +314,10 @@ export default function AccountSuspendedPage() {
           <p className="text-sm text-gray-600">
             Need immediate assistance? Contact us at{' '}
             <a 
-              href="mailto:support@bellregistry.com?subject=Account Suspension - Urgent"
+              href={`mailto:${EMAIL_ADDRESSES.SUPPORT}?subject=Account Suspension - Urgent`}
               className="text-blue-600 hover:text-blue-500 font-medium"
             >
-              support@bellregistry.com
+              {EMAIL_ADDRESSES.SUPPORT}
             </a>
           </p>
         </div>

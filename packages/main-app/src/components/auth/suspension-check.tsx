@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { ExclamationTriangleIcon, XMarkIcon, EnvelopeIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { EMAIL_ADDRESSES } from '@/lib/constants';
 
 interface SuspensionCheckProps {
   children: React.ReactNode;
@@ -129,7 +130,7 @@ export default function SuspensionCheck({ children, mode = 'modal' }: Suspension
                   Learn More
                 </a>
                 <a
-                  href={`mailto:support@bellregistry.com?subject=Account Suspension Appeal - ${session?.user?.email}`}
+                  href={`mailto:${EMAIL_ADDRESSES.SUPPORT}?subject=Account Suspension Appeal - ${session?.user?.email}`}
                   className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
                   <EnvelopeIcon className="h-4 w-4 mr-2" />

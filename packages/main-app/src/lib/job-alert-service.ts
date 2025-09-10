@@ -9,7 +9,7 @@ const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'Bell Registry <alerts@bellregistry.com>';
+  : `Bell Registry <${process.env.ALERTS_EMAIL || 'alerts@bellregistry.com'}>`;
 
 interface JobWithEmployer {
   id: string;

@@ -21,7 +21,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-          : 'Bell Registry <noreply@bellregistry.com>';
+  : `Bell Registry <${process.env.FROM_EMAIL || 'noreply@bellregistry.com'}>`;
 
 export async function POST(request: NextRequest) {
   try {

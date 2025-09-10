@@ -69,12 +69,6 @@ export default function ResetPasswordPage({
               </div>
             </div>
 
-            <div className="mt-8 text-center text-sm text-gray-500">
-              <div className="flex items-center justify-center space-x-1">
-                <span>★★★★★</span>
-                <span>4.7/5 based on 2,000+ reviews</span>
-              </div>
-            </div>
           </div>
 
           {/* Right side - Image */}

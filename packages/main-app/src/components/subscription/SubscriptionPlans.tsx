@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Star, Users, Briefcase } from "lucide-react";
 import { PurchasePlanButton } from "./PurchasePlanButton";
+import { EMAIL_ADDRESSES } from "@/lib/constants";
 
 interface Plan {
   id: 'SPOTLIGHT' | 'BUNDLE' | 'UNLIMITED' | 'NETWORK' | 'NETWORK_QUARTERLY';
@@ -367,7 +368,7 @@ export function SubscriptionPlans({ currentPlan, showTrialInfo = true }: Subscri
           Your payment information is never stored on our servers.
         </p>
         <p>
-          <strong>Support:</strong> Need help choosing the right plan? Contact our team at support@bellregistry.com
+          <strong>Support:</strong> Need help choosing the right plan? Contact our team at {EMAIL_ADDRESSES.SUPPORT}
         </p>
       </div>
     </div>

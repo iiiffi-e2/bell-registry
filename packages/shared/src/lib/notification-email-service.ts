@@ -55,7 +55,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'Bell Registry <notifications@bellregistry.com>';
+      : `Bell Registry <${process.env.NOTIFICATIONS_EMAIL || 'notifications@bellregistry.com'}>`;
 
     // Generate suspension email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';
@@ -134,7 +134,7 @@ export async function sendSuspensionNotification(data: SuspensionNotificationDat
               <a href="${appUrl}/account-suspended" style="background-color: #121155; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block; margin-right: 12px; margin-bottom: 8px;">
                 View Details & Submit Appeal
               </a>
-              <a href="mailto:support@bellregistry.com?subject=Account Suspension - ${data.userEmail}" style="background-color: #059669; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
+              <a href="mailto:${process.env.SUPPORT_EMAIL || 'support@bellregistry.com'}?subject=Account Suspension - ${data.userEmail}" style="background-color: #059669; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
                 Contact Support
               </a>
             </div>
@@ -185,7 +185,7 @@ export async function sendBanNotification(data: BanNotificationData) {
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'Bell Registry <notifications@bellregistry.com>';
+      : `Bell Registry <${process.env.NOTIFICATIONS_EMAIL || 'notifications@bellregistry.com'}>`;
 
     // Generate ban email
     const imageBaseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://app.bellregistry.com';
@@ -248,7 +248,7 @@ export async function sendBanNotification(data: BanNotificationData) {
 
             <!-- Contact Information -->
             <div style="text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-              <a href="mailto:support@bellregistry.com?subject=Account Ban - ${data.userEmail}" style="background-color: #121155; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
+              <a href="mailto:${process.env.SUPPORT_EMAIL || 'support@bellregistry.com'}?subject=Account Ban - ${data.userEmail}" style="background-color: #121155; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 500; display: inline-block;">
                 Contact Support
               </a>
             </div>
@@ -299,7 +299,7 @@ export async function sendUnsuspensionNotification(data: UnsuspensionNotificatio
   try {
     const FROM_EMAIL = isDevelopment 
       ? 'onboarding@resend.dev'
-      : 'Bell Registry <notifications@bellregistry.com>';
+      : `Bell Registry <${process.env.NOTIFICATIONS_EMAIL || 'notifications@bellregistry.com'}>`;
 
     // Generate unsuspension email
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000';

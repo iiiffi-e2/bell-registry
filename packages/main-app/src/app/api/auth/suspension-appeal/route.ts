@@ -20,7 +20,7 @@ function getResendClient(): Resend {
 const isDevelopment = process.env.NODE_ENV === 'development';
 const FROM_EMAIL = isDevelopment 
   ? 'onboarding@resend.dev'
-  : 'Bell Registry <appeals@bellregistry.com>';
+  : `Bell Registry <${process.env.APPEALS_EMAIL || 'appeals@bellregistry.com'}>`;
 
 const APPEAL_REASON_LABELS: Record<string, string> = {
   'mistake': 'This was a mistake',
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 
             <div style="text-align: center; margin-top: 16px;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                Thank you for your patience. If you have any urgent questions, please contact us at support@bellregistry.com
+                Thank you for your patience. If you have any urgent questions, please contact us at ${process.env.SUPPORT_EMAIL || 'support@bellregistry.com'}
               </p>
             </div>
           </div>
