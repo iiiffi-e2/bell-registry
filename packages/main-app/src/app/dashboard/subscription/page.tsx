@@ -16,6 +16,7 @@ import {
 import { SubscriptionPlans } from "@/components/subscription/SubscriptionPlans";
 import { CheckCircle, Clock, AlertTriangle, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
+import { formatSubscriptionType } from "@/lib/subscription-utils";
 
 interface SubscriptionData {
   subscriptionType: string;
@@ -183,7 +184,7 @@ export default function SubscriptionPage() {
                       <Badge variant="secondary">Trial</Badge>
                     )
                   ) : (
-                    <Badge variant="default">{subscription.subscriptionType}</Badge>
+                    <Badge variant="default">{formatSubscriptionType(subscription.subscriptionType)}</Badge>
                   )}
                 </CardTitle>
                 <CardDescription>

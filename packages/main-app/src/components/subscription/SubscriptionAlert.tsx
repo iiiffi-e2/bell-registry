@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Clock, CreditCard, CheckCircle, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { formatSubscriptionType } from "@/lib/subscription-utils";
 
 interface SubscriptionData {
   subscriptionType: string;
@@ -201,7 +202,7 @@ export function SubscriptionAlert({ compact = false, hideWhenHealthy = false }: 
       message = `You have ${jobCredits} job credit${jobCredits !== 1 ? 's' : ''} remaining from your welcome package.`;
     } else {
       // For healthy subscriptions, show clean format
-      title = `Subscription Active - ${subscription.subscriptionType}`;
+      title = `Subscription Active - ${formatSubscriptionType(subscription.subscriptionType)}`;
       message = ''; // Remove usage from message since it's shown in progress bar
     }
   }

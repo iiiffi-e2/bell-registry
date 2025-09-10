@@ -35,6 +35,7 @@ import ImprovedJobDescriptionModal from "@/components/ui/improved-job-descriptio
 import { useSession } from "next-auth/react";
 import { AlertTriangle, CreditCard, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { formatSubscriptionType } from "@/lib/subscription-utils";
 
 const EMPLOYMENT_TYPES = [
   "Full-time",
@@ -443,7 +444,7 @@ export default function PostJobPage() {
             <CreditCard className="h-5 w-5 text-blue-600 mr-3" />
             <div>
               <p className="text-sm text-blue-800">
-                <span className="font-medium">Subscription:</span> {subscriptionStatus.subscription.subscriptionType} | 
+                <span className="font-medium">Subscription:</span> {formatSubscriptionType(subscriptionStatus.subscription.subscriptionType)} | 
                 <span className="font-medium"> Jobs Used:</span> {subscriptionStatus.subscription.jobsPostedCount} / {subscriptionStatus.subscription.jobPostLimit || '∞'}
               </p>
             </div>
