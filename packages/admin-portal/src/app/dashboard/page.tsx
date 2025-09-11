@@ -259,12 +259,18 @@ export default function AdminDashboard() {
             Quick Actions
           </h2>
           <div className='bg-white shadow rounded-lg p-6'>
-            <div className='grid grid-cols-1 gap-4 sm:grid-cols-3'>
+            <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <button 
                 onClick={() => router.push('/profiles')}
                 className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
               >
                 Review Profiles ({stats.pendingProfiles})
+              </button>
+              <button 
+                onClick={() => router.push('/employers')}
+                className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              >
+                Manage Employers ({stats.totalEmployers})
               </button>
               <button 
                 onClick={() => router.push('/jobs')}
