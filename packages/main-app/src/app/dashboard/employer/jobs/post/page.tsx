@@ -410,7 +410,7 @@ export default function PostJobPage() {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job Title</FormLabel>
+                  <FormLabel>Job Title <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="e.g. Experienced Estate Manager for Luxury Manhattan Property" 
@@ -430,7 +430,7 @@ export default function PostJobPage() {
               name="professionalRole"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Job Category</FormLabel>
+                  <FormLabel>Job Category <span className="text-red-500">*</span></FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -459,7 +459,7 @@ export default function PostJobPage() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex justify-between items-center mb-1">
-                    <FormLabel>Job Description</FormLabel>
+                    <FormLabel>Job Description <span className="text-red-500">*</span></FormLabel>
                     <button
                       type="button"
                       onClick={handleImproveWithAI}
@@ -510,7 +510,7 @@ export default function PostJobPage() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Location <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <GoogleMapsLoader>
                         <LocationAutocomplete
@@ -531,7 +531,7 @@ export default function PostJobPage() {
                 name="salary"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Salary</FormLabel>
+                    <FormLabel>Salary <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input 
                         placeholder="e.g. $50,000 - $70,000 per year, $25/hour, Competitive salary" 
@@ -553,7 +553,7 @@ export default function PostJobPage() {
                 name="employmentType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Employment Type (Optional)</FormLabel>
+                    <FormLabel>Employment Type <span className="text-red-500">*</span></FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
