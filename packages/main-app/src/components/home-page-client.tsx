@@ -170,7 +170,7 @@ export function HomePageClient() {
                 Ready to Connect with Exceptional Talent?
               </h2>
               <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                Whether you're a professional seeking your next opportunity or an employer looking for top talent, 
+                Whether you&apos;re a professional seeking your next opportunity or an employer looking for top talent, 
                 join the premier platform for estate service excellence.
               </p>
               <button
