@@ -11,10 +11,10 @@ export function PublicNavigation() {
 
   return (
     <nav className="bg-[#1e293b] shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex justify-between items-center h-20">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex-shrink-0 py-[5px]">
               <Image
                 src="/images/brand/logo-full.png"
                 alt="The Bell Registry"

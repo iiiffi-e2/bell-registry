@@ -50,6 +50,7 @@ export default function PublicJobDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const viewTrackedRef = useRef(false); // Track if we've already recorded a view for this page load
 
   useEffect(() => {
@@ -123,6 +124,11 @@ export default function PublicJobDetailsPage() {
     });
   };
 
+  const truncateDescription = (description: string, maxLength: number = 200) => {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + "...";
+  };
+
   const handleApplicationSuccess = () => {
     // Update the job state to reflect that user has applied
     if (job) {
@@ -190,7 +196,7 @@ export default function PublicJobDetailsPage() {
   return (
     <>
       <PublicNavigation />
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white rounded-lg shadow p-6">
@@ -334,28 +340,43 @@ export default function PublicJobDetailsPage() {
                     )}
                   </div>
                   {job.employer.employerProfile.description && (
-                    <p className="text-sm text-gray-700">
-                      {job.employer.employerProfile.description}
-                    </p>
+                    <div>
+                      <p className="text-sm text-gray-700">
+                        {isDescriptionExpanded 
+                          ? job.employer.employerProfile.description
+                          : truncateDescription(job.employer.employerProfile.description)
+                        }
+                      </p>
+                      {job.employer.employerProfile.description.length > 200 && (
+                        <button
+                          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                          className="text-sm text-blue-600 hover:text-blue-500 mt-2 font-medium"
+                        >
+                          {isDescriptionExpanded ? "Read less" : "Read more"}
+                        </button>
+                      )}
+                    </div>
                   )}
-                  {job.employer.employerProfile.website && (
-                    <a
-                      href={job.employer.employerProfile.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:text-blue-500"
-                    >
-                      Visit Company Website
-                    </a>
-                  )}
-                  {job.employer.employerProfile.publicSlug && (
-                    <Link
-                      href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
-                      className="text-sm text-blue-600 hover:text-blue-500"
-                    >
-                      View All Jobs
-                    </Link>
-                  )}
+                  <div className="space-y-2 mt-4">
+                    {job.employer.employerProfile.website && (
+                      <a
+                        href={job.employer.employerProfile.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full px-4 py-2 text-sm font-medium text-center text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                      >
+                        Visit Company Website
+                      </a>
+                    )}
+                    {job.employer.employerProfile.publicSlug && (
+                      <Link
+                        href={`/employers/${job.employer.employerProfile.publicSlug}/jobs`}
+                        className="block w-full px-4 py-2 text-sm font-medium text-center text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 transition-colors"
+                      >
+                        View All Jobs
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
