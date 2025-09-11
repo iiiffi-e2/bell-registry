@@ -66,6 +66,7 @@ export default function RegisterPage() {
             height={47}
             priority
             className="h-auto w-full"
+            style={{ maxWidth: '190px' }}
           />
         </Link>
       </div>
