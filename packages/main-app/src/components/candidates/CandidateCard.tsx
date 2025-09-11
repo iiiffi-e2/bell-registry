@@ -183,17 +183,17 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
-                      {displayName}
-                    </h3>
-                    {candidate.openToWork && (
-                      <OpenToWorkBadge variant="inline" size="sm" />
-                    )}
-                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                    {displayName}
+                  </h3>
                   <p className="text-sm text-gray-500 mt-1">
                     {candidate.title || candidate.preferredRole || 'Professional'}
                   </p>
+                  {candidate.openToWork && (
+                    <div className="mt-2">
+                      <OpenToWorkBadge variant="inline" size="sm" />
+                    </div>
+                  )}
                 </div>
               </div>
 
