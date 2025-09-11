@@ -84,7 +84,7 @@ export function HomePageClient() {
           <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="text-2xl font-bold text-gray-900">
               <Image
-                src="/images/brand/logo-full.png"
+                src="/images/brand/logo-full-dark.png"
                 alt="The Bell Registry"
                 width={175}
                 height={47}

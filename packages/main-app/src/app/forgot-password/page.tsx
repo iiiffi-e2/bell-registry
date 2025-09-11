@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
       <div className="max-w-7xl mx-auto mb-8">
         <Link href="/" className="block max-w-[175px]">
           <Image
-            src="/images/brand/logo-full.png"
+            src="/images/brand/logo-full-dark.png"
             alt="The Bell Registry"
             width={175}
             height={47}
