@@ -104,6 +104,12 @@ export function stripHtml(html: string): string {
     .replace(/<br\s*\/?>/gi, ' ') // Replace <br> tags with spaces
     .replace(/<\/p>/gi, ' ') // Replace </p> tags with spaces
     .replace(/<[^>]*>/g, '') // Remove all other HTML tags
+    .replace(/&nbsp;/g, ' ') // Replace &nbsp; with regular spaces
+    .replace(/&amp;/g, '&') // Replace &amp; with &
+    .replace(/&lt;/g, '<') // Replace &lt; with <
+    .replace(/&gt;/g, '>') // Replace &gt; with >
+    .replace(/&quot;/g, '"') // Replace &quot; with "
+    .replace(/&#39;/g, "'") // Replace &#39; with '
     .replace(/\s+/g, ' ') // Normalize multiple spaces to single spaces
     .trim();
 }
