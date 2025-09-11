@@ -196,6 +196,7 @@ export async function GET(request: Request) {
           AND cp."status" IN ('APPROVED', 'PENDING')
           AND cp."bio" IS NOT NULL AND cp."bio" != ''
           AND cp."location" IS NOT NULL AND cp."location" != ''
+          AND u."isDeleted" = false
           ${additionalWhere}
           ORDER BY rank DESC
           LIMIT $${limitParamIndex} OFFSET $${offsetParamIndex}
@@ -232,10 +233,12 @@ export async function GET(request: Request) {
         const countQuery = `
           SELECT COUNT(*) as total
           FROM "CandidateProfile" cp
+          JOIN "User" u ON cp."userId" = u."id"
           WHERE (${whereClauses.join(' OR ')})
           AND cp."status" IN ('APPROVED', 'PENDING')
           AND cp."bio" IS NOT NULL AND cp."bio" != ''
           AND cp."location" IS NOT NULL AND cp."location" != ''
+          AND u."isDeleted" = false
           ${additionalWhere}
         `;
         
@@ -371,7 +374,11 @@ export async function GET(request: Request) {
       },
       // Filter conditions
       ...(location ? buildLocationFilter() : {}),
-      ...(roleType ? { user: { role: roleType } } : {}),
+      // Combine user filters
+      user: {
+        isDeleted: false,
+        ...(roleType ? { role: roleType } : {}),
+      },
       ...(roles.length > 0 ? { preferredRole: { in: roles } } : {}),
       ...(openToWork ? { openToWork: true } : {}),
       ...(searchQuery
