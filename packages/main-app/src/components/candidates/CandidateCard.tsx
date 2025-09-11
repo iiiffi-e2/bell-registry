@@ -189,11 +189,6 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
                   <p className="text-sm text-gray-500 mt-1">
                     {candidate.title || candidate.preferredRole || 'Professional'}
                   </p>
-                  {candidate.openToWork && (
-                    <div className="mt-2">
-                      <OpenToWorkBadge variant="inline" size="sm" />
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -209,6 +204,13 @@ export function CandidateCard({ candidate, useDashboardRoutes = false }: Candida
                   <span>{candidate.yearsOfExperience} years experience</span>
                 )}
               </div>
+
+              {/* Open to Opportunities Badge */}
+              {candidate.openToWork && (
+                <div className="mt-2 flex">
+                  <OpenToWorkBadge variant="inline" size="sm" />
+                </div>
+              )}
 
               {/* Salary Range */}
               {formatSalaryRange() && (
