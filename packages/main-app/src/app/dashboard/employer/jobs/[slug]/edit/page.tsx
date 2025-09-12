@@ -75,6 +75,7 @@ const jobFormSchema = z.object({
   }).optional().default("ACTIVE" as JobStatus),
   featured: z.boolean().optional().default(false),
   expiresAt: z.string().optional().default(""),
+  customApplicationUrl: z.string().optional().default(""),
 });
 
 type JobFormValues = z.infer<typeof jobFormSchema>;
@@ -103,6 +104,7 @@ export default function EditJobPage() {
       status: "ACTIVE",
       featured: false,
       expiresAt: "",
+      customApplicationUrl: "",
     }
   });
 
@@ -621,6 +623,26 @@ export default function EditJobPage() {
               )}
             />
             */}
+
+            <FormField
+              control={form.control}
+              name="customApplicationUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Custom Application URL (Optional)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      placeholder="https://example.com/apply" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    If provided, the apply button will redirect to this URL instead of using the Bell Registry application system
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end space-x-4">
               <Button

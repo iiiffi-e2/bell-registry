@@ -26,6 +26,7 @@ interface JobDetails {
   createdAt: string;
   expiresAt: string;
   urlSlug: string;
+  customApplicationUrl?: string;
   employer: {
     firstName?: string;
     lastName?: string;
@@ -249,6 +250,15 @@ export default function PublicJobDetailsPage() {
                       >
                         Already Applied
                       </button>
+                    ) : job.customApplicationUrl ? (
+                      <a
+                        href={job.customApplicationUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors inline-block"
+                      >
+                        Apply for this Job
+                      </a>
                     ) : (
                       <button
                         onClick={() => setIsApplyModalOpen(true)}
@@ -261,12 +271,23 @@ export default function PublicJobDetailsPage() {
                 )}
                 
                 {!session && (
-                  <button
-                    onClick={() => router.push('/login?callbackUrl=' + encodeURIComponent(window.location.pathname))}
-                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
-                  >
-                    Sign in to Apply
-                  </button>
+                  job.customApplicationUrl ? (
+                    <a
+                      href={job.customApplicationUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors inline-block"
+                    >
+                      Apply for this Job
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => router.push('/login?callbackUrl=' + encodeURIComponent(window.location.pathname))}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium transition-colors"
+                    >
+                      Sign in to Apply
+                    </button>
+                  )
                 )}
 
                 {/* Save Button */}

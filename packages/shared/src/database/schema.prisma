@@ -265,6 +265,7 @@ model Job {
   rejectionReason        String?
   exceptionalOpportunity String?
   listingCloseDate       DateTime?
+  customApplicationUrl   String?
   approver               User?            @relation("JobApprover", fields: [approvedBy], references: [id])
   employer               User             @relation(fields: [employerId], references: [id])
   rejecter               User?            @relation("JobRejecter", fields: [rejectedBy], references: [id])

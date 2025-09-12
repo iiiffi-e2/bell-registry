@@ -469,6 +469,7 @@ export async function POST(request: Request) {
         status: JobStatus.ACTIVE,
         adminStatus: 'APPROVED', // Auto-approve all jobs
         approvedAt: new Date(),
+        customApplicationUrl: data.customApplicationUrl || null,
       },
     });
 
