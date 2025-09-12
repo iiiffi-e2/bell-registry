@@ -161,6 +161,7 @@ export default function EditJobPage() {
           status: job.status as JobStatus,
           featured: job.featured,
           expiresAt: expiryDate,
+          customApplicationUrl: job.customApplicationUrl || "",
         };
 
         form.reset(formData);
