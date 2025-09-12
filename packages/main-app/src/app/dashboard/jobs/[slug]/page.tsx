@@ -293,7 +293,7 @@ export default function DashboardJobDetailsPage() {
                   className="inline-block"
                 >
                   <Button className="bg-blue-600 hover:bg-blue-700">
-                    Apply Now (External)
+                    Apply Now
                   </Button>
                 </a>
               ) : (
