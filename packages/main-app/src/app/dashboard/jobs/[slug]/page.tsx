@@ -35,6 +35,7 @@ interface JobDetails {
   featured: boolean;
   createdAt: string;
   expiresAt: string;
+  customApplicationUrl?: string;
   employer: {
     firstName?: string;
     lastName?: string;
@@ -277,13 +278,32 @@ export default function DashboardJobDetailsPage() {
             </Button>
 
             {session?.user?.role === 'PROFESSIONAL' && (
-              <Button
-                onClick={() => setIsApplyModalOpen(true)}
-                disabled={job.hasApplied}
-                className={job.hasApplied ? 'bg-green-600 hover:bg-green-700' : ''}
-              >
-                {job.hasApplied ? 'Applied' : 'Apply Now'}
-              </Button>
+              job.hasApplied ? (
+                <Button
+                  disabled
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Applied
+                </Button>
+              ) : job.customApplicationUrl ? (
+                <a
+                  href={job.customApplicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block"
+                >
+                  <Button className="bg-blue-600 hover:bg-blue-700">
+                    Apply Now (External)
+                  </Button>
+                </a>
+              ) : (
+                <Button
+                  onClick={() => setIsApplyModalOpen(true)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Apply Now
+                </Button>
+              )
             )}
           </div>
         </div>
