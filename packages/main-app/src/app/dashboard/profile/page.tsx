@@ -7,8 +7,7 @@ import {
   UserCircleIcon,
   PencilSquareIcon,
   MapPinIcon,
-
-
+  ClockIcon,
   BriefcaseIcon,
   AcademicCapIcon,
   CheckCircleIcon,
@@ -50,6 +49,7 @@ interface CandidateProfile {
   mediaUrls: string[];
   openToWork: boolean;
   employmentType: string | null;
+  status: string;
   user: {
     firstName: string | null;
     lastName: string | null;
@@ -146,15 +146,24 @@ export default function ProfilePage() {
               My Profile
             </h2>
             {profile?.user.profileSlug && (
-              <Link
-                href={generateProfileUrl(profile.user.profileSlug)}
-                className="mt-2 inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
-              >
-                View public profile
-                <svg className="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clipRule="evenodd" />
-                </svg>
-              </Link>
+              <div className="mt-2">
+                {profile.status === 'PENDING' ? (
+                  <span className="inline-flex items-center text-sm text-gray-500">
+                    <ClockIcon className="h-4 w-4 mr-1" />
+                    Public profile will be available after approval
+                  </span>
+                ) : (
+                  <Link
+                    href={generateProfileUrl(profile.user.profileSlug)}
+                    className="inline-flex items-center text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    View public profile
+                    <svg className="ml-1 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5.22 14.78a.75.75 0 001.06 0l7.22-7.22v5.69a.75.75 0 001.5 0v-7.5a.75.75 0 00-.75-.75h-7.5a.75.75 0 000 1.5h5.69l-7.22 7.22a.75.75 0 000 1.06z" clipRule="evenodd" />
+                    </svg>
+                  </Link>
+                )}
+              </div>
             )}
           </div>
           <div className="mt-4 flex md:mt-0 md:ml-4">
@@ -181,6 +190,28 @@ export default function ProfilePage() {
                 <p className="text-sm text-yellow-700">
                   This profile is currently in anonymous mode. Your public profile will display only your initials and hide your headshot and email address.
                 </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Pending Status Banner */}
+        {profile.status === 'PENDING' && (
+          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-8">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <ClockIcon className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Profile Under Review
+                </h3>
+                <div className="mt-2 text-sm text-blue-700">
+                  <p>
+                    Your profile is currently pending approval and is not visible to employers or in search results. 
+                    Our team will review your profile as soon as possible. You can still edit your profile while waiting for approval.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
