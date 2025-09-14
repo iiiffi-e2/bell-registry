@@ -80,25 +80,34 @@ export default function RegisterPage() {
               <div className="space-y-6">
                 <div>
                   <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-                    {isEmployerOrAgency ? (
-                      <>
-                        Bell Registry —
-                        <br />
-                        <span className="text-gray-500">free to get started</span>
-                      </>
+                    {hasRoleParam ? (
+                      isEmployerOrAgency ? (
+                        <>
+                          Bell Registry —
+                          <br />
+                          <span className="text-gray-500">free to get started</span>
+                        </>
+                      ) : (
+                        <>
+                          Sign up for Bell Registry —
+                          <br />
+                          <span className="text-gray-500">free forever</span>
+                        </>
+                      )
                     ) : (
                       <>
-                        Sign up for Bell Registry —
-                        <br />
-                        <span className="text-gray-500">free forever</span>
+                        Sign up for Bell Registry
                       </>
                     )}
                   </h1>
                   <p className="mt-4 text-base text-gray-600">
-                    {isEmployerOrAgency 
-                      ? "Find, connect with, and hire top-tier estate professionals. Join the premier platform trusted by discerning employers in luxury private service."
-                      : "Find, connect, and secure your ideal position in luxury private service. Join the premier platform for estate professionals."
-                    }
+                    {hasRoleParam ? (
+                      isEmployerOrAgency 
+                        ? "Find, connect with, and hire top-tier estate professionals. Join the premier platform trusted by discerning employers in luxury private service."
+                        : "Find, connect, and secure your ideal position in luxury private service. Join the premier platform for estate professionals."
+                    ) : (
+                      "Join the premier platform connecting estate professionals with luxury private service opportunities. Whether you're seeking employment or looking to hire, Bell Registry provides the tools and network you need to succeed."
+                    )}
                   </p>
                 </div>
                 {hasRoleParam ? <RegisterForm /> : <RoleSelection />}
