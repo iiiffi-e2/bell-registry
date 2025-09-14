@@ -85,12 +85,15 @@ model User {
   twoFactorSecret           String?
   isSuspended               Boolean              @default(false)
   isBanned                  Boolean              @default(false)
+  isRemoved                 Boolean              @default(false)
   suspensionReason          String?
   suspensionNote            String?
   suspendedAt               DateTime?            @db.Timestamptz(6)
   suspendedBy               String?
   bannedAt                  DateTime?            @db.Timestamptz(6)
   bannedBy                  String?
+  removedAt                 DateTime?            @db.Timestamptz(6)
+  removedBy                 String?
   membershipAccess         MembershipAccessType @default(NEW_APPLICANT)
   referralProfessionalName String?
   messageBoardTermsAgreedAt DateTime?            @db.Timestamptz(6)
@@ -125,6 +128,8 @@ model User {
   bannedUsers               User[]               @relation("BannedByAdmin")
   suspendedByAdmin          User?                @relation("SuspendedByAdmin", fields: [suspendedBy], references: [id])
   suspendedUsers            User[]                     @relation("SuspendedByAdmin")
+  removedByAdmin            User?                @relation("RemovedByAdmin", fields: [removedBy], references: [id])
+  removedUsers              User[]                     @relation("RemovedByAdmin")
   messageBoardThreads       MessageBoardThread[]       @relation("ThreadAuthor")
   messageBoardReplies       MessageBoardReply[]        @relation("ReplyAuthor")
   messageBoardThreadLikes   MessageBoardThreadLike[]   @relation("ThreadLikes")
@@ -136,8 +141,10 @@ model User {
   @@index([lastProfileReminderSentAt])
   @@index([isSuspended])
   @@index([isBanned])
+  @@index([isRemoved])
   @@index([suspendedAt])
   @@index([bannedAt])
+  @@index([removedAt])
 }
 
 model CandidateProfile {
@@ -551,6 +558,7 @@ enum ProfileStatus {
   REJECTED
   SUSPENDED
   BANNED
+  REMOVED
 }
 
 enum JobAdminStatus {

@@ -92,9 +92,18 @@ export const authOptions: NextAuthOptions = {
             throw new Error("No account found with this email address");
           }
 
-          // Check if account is deleted
+          // Check if account is deleted, suspended, banned, or removed
           if (user.isDeleted) {
             throw new Error("This account has been deleted");
+          }
+          if (user.isSuspended) {
+            throw new Error("This account has been suspended");
+          }
+          if (user.isBanned) {
+            throw new Error("This account has been banned");
+          }
+          if (user.isRemoved) {
+            throw new Error("This account has been removed");
           }
 
           return {
@@ -117,9 +126,18 @@ export const authOptions: NextAuthOptions = {
           throw new Error("No account found with this email address");
         }
 
-        // Check if account is deleted
+        // Check if account is deleted, suspended, banned, or removed
         if (user.isDeleted) {
           throw new Error("This account has been deleted");
+        }
+        if (user.isSuspended) {
+          throw new Error("This account has been suspended");
+        }
+        if (user.isBanned) {
+          throw new Error("This account has been banned");
+        }
+        if (user.isRemoved) {
+          throw new Error("This account has been removed");
         }
 
         const isCorrectPassword = await bcrypt.compare(
@@ -156,9 +174,18 @@ export const authOptions: NextAuthOptions = {
           }
         });
 
-        // Check if existing user account is deleted
+        // Check if existing user account is deleted, suspended, banned, or removed
         if (existingUser?.isDeleted) {
           throw new Error("This account has been deleted");
+        }
+        if (existingUser?.isSuspended) {
+          throw new Error("This account has been suspended");
+        }
+        if (existingUser?.isBanned) {
+          throw new Error("This account has been banned");
+        }
+        if (existingUser?.isRemoved) {
+          throw new Error("This account has been removed");
         }
 
         if (existingUser && existingUser.accounts.length === 0) {

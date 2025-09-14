@@ -35,7 +35,7 @@ interface Profile {
   profileViews: number;
   openToWork: boolean;
   createdAt: string;
-  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED' | 'BANNED';
+  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED' | 'BANNED' | 'REMOVED';
   reportCount?: number;
   lastReportDate?: string;
 }
@@ -419,7 +419,7 @@ export default function ProfileManagementPage() {
     }
   };
 
-  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'delete', reason?: string, note?: string) => {
+  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove' | 'delete', reason?: string, note?: string) => {
     if (selectedProfiles.length === 0) return;
     
     setBulkActionLoading(true);
@@ -481,7 +481,7 @@ export default function ProfileManagementPage() {
     }
   };
 
-  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
+  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
     try {
       const response = await fetch(`/api/profiles/${profileId}/action`, {
         method: 'POST',
@@ -549,6 +549,13 @@ export default function ProfileManagementPage() {
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <XCircleIcon className="h-3 w-3 mr-1" />
             Banned
+          </span>
+        );
+      case 'REMOVED':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <XCircleIcon className="h-3 w-3 mr-1" />
+            Removed
           </span>
         );
       default:
@@ -627,6 +634,7 @@ export default function ProfileManagementPage() {
                   <option value="REJECTED">Rejected</option>
                   <option value="SUSPENDED">Suspended</option>
                   <option value="BANNED">Banned</option>
+                  <option value="REMOVED">Removed</option>
                 </select>
               </div>
               
@@ -721,6 +729,14 @@ export default function ProfileManagementPage() {
                 >
                   <XMarkIcon className="h-4 w-4 mr-1" />
                   Ban
+                </button>
+                <button
+                  onClick={() => handleBulkAction('remove')}
+                  disabled={bulkActionLoading}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Remove
                 </button>
                 <button
                   onClick={() => handleBulkAction('flag')}
@@ -878,6 +894,13 @@ export default function ProfileManagementPage() {
                             onClick={() => handleProfileAction(profile.user.id, 'ban')}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                             title="Ban"
+                          >
+                            <XMarkIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleProfileAction(profile.user.id, 'remove')}
+                            className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
+                            title="Remove"
                           >
                             <XMarkIcon className="h-5 w-5" />
                           </button>

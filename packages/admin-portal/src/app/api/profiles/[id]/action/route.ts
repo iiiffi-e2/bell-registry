@@ -204,6 +204,31 @@ export async function POST(
         message = "Profile flagged for review";
         break;
 
+      case 'remove':
+        // Mark user as removed (similar to soft delete but different status)
+        updatedUser = await (prisma as any).user.update({
+          where: { id: userId },
+          data: {
+            isRemoved: true,
+            removedAt: new Date(),
+            removedBy: session.user.id
+          }
+        });
+        
+        // Update profile status to REMOVED if it exists
+        if (user.candidateProfile) {
+          updatedProfile = await (prisma as any).candidateProfile.update({
+            where: { userId: userId },
+            data: {
+              status: 'REMOVED'
+            }
+          });
+        }
+        
+        actionType = "REMOVE_USER";
+        message = "User removed successfully";
+        break;
+
       case 'delete':
         // Soft delete the user account
         updatedUser = await (prisma as any).user.update({

@@ -143,6 +143,36 @@ export async function POST(request: NextRequest) {
         message = `${users.length} user${users.length > 1 ? 's' : ''} banned successfully`;
         break;
 
+      case 'remove':
+        // Mark users as removed (no email notifications)
+        const removePromises = users.map(async (user) => {
+          const updatedUser = await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              isRemoved: true,
+              removedAt: new Date(),
+              removedBy: session.user.id
+            }
+          });
+
+          // Update profile status to REMOVED if it exists
+          if (user.candidateProfile) {
+            await prisma.candidateProfile.update({
+              where: { userId: user.id },
+              data: {
+                status: 'REMOVED'
+              }
+            });
+          }
+
+          return updatedUser;
+        });
+
+        updatedUsers = await Promise.all(removePromises);
+        actionType = "BULK_REMOVE_USERS";
+        message = `${users.length} user${users.length > 1 ? 's' : ''} removed successfully`;
+        break;
+
       case 'delete':
         // Soft delete users
         const deletePromises = users.map(async (user) => {

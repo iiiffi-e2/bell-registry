@@ -149,6 +149,8 @@ export async function GET(request: NextRequest) {
         displayStatus = 'BANNED';
       } else if (profile.user.isSuspended) {
         displayStatus = 'SUSPENDED';
+      } else if (profile.user.isRemoved) {
+        displayStatus = 'REMOVED';
       }
 
       return {

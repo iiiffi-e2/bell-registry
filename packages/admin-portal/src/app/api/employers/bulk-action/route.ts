@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid employer IDs" }, { status: 400 });
     }
 
-    if (!action || !['approve', 'suspend', 'flag', 'ban'].includes(action)) {
+    if (!action || !['approve', 'suspend', 'flag', 'ban', 'remove'].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -102,6 +102,18 @@ export async function POST(request: NextRequest) {
               console.warn('Could not create report entry:', reportError);
             }
             message = 'Employers flagged for review';
+            break;
+
+          case 'remove':
+            await prisma.user.update({
+              where: { id: employerId },
+              data: {
+                isRemoved: true,
+                removedAt: new Date(),
+                removedBy: session.user.id
+              }
+            });
+            message = 'Employers removed successfully';
             break;
         }
 

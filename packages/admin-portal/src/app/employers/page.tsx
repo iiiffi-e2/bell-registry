@@ -38,7 +38,7 @@ interface EmployerProfile {
   jobsPostedCount: number;
   hasNetworkAccess: boolean;
   createdAt: string;
-  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED' | 'BANNED';
+  status?: 'APPROVED' | 'PENDING' | 'REJECTED' | 'SUSPENDED' | 'BANNED' | 'REMOVED';
   reportCount?: number;
   lastReportDate?: string;
 }
@@ -354,7 +354,7 @@ export default function EmployerManagementPage() {
     }
   };
 
-  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
+  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
     if (selectedEmployers.length === 0) return;
     
     setBulkActionLoading(true);
@@ -407,7 +407,7 @@ export default function EmployerManagementPage() {
     }
   };
 
-  const handleEmployerAction = async (employerId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
+  const handleEmployerAction = async (employerId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
     try {
       const response = await fetch(`/api/employers/${employerId}/action`, {
         method: 'POST',
@@ -475,6 +475,13 @@ export default function EmployerManagementPage() {
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
             <XCircleIcon className="h-3 w-3 mr-1" />
             Banned
+          </span>
+        );
+      case 'REMOVED':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            <XCircleIcon className="h-3 w-3 mr-1" />
+            Removed
           </span>
         );
       default:
@@ -575,6 +582,7 @@ export default function EmployerManagementPage() {
                   <option value="REJECTED">Rejected</option>
                   <option value="SUSPENDED">Suspended</option>
                   <option value="BANNED">Banned</option>
+                  <option value="REMOVED">Removed</option>
                 </select>
               </div>
               
@@ -684,6 +692,14 @@ export default function EmployerManagementPage() {
                 >
                   <XMarkIcon className="h-4 w-4 mr-1" />
                   Ban
+                </button>
+                <button
+                  onClick={() => handleBulkAction('remove')}
+                  disabled={bulkActionLoading}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-gray-600 hover:bg-gray-700 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Remove
                 </button>
                 <button
                   onClick={() => handleBulkAction('flag')}
@@ -812,6 +828,13 @@ export default function EmployerManagementPage() {
                             onClick={() => handleEmployerAction(employer.user.id, 'ban')}
                             className="p-1.5 text-red-600 hover:bg-red-50 rounded"
                             title="Ban"
+                          >
+                            <XMarkIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleEmployerAction(employer.user.id, 'remove')}
+                            className="p-1.5 text-gray-600 hover:bg-gray-50 rounded"
+                            title="Remove"
                           >
                             <XMarkIcon className="h-5 w-5" />
                           </button>

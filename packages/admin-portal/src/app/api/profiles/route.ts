@@ -46,7 +46,12 @@ export async function GET(request: NextRequest) {
 
     // Status filter
     if (status && status !== 'all') {
-      whereClause.status = status;
+      if (status === 'REMOVED') {
+        // For removed status, check user's isRemoved field instead of profile status
+        whereClause.user.isRemoved = true;
+      } else {
+        whereClause.status = status;
+      }
     }
 
     // Search filter

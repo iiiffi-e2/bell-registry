@@ -17,7 +17,7 @@ export async function POST(
     const { id: employerId } = params;
     const { action, reason, note } = await request.json();
 
-    if (!action || !['approve', 'reject', 'suspend', 'flag', 'ban'].includes(action)) {
+    if (!action || !['approve', 'reject', 'suspend', 'flag', 'ban', 'remove'].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -110,6 +110,18 @@ export async function POST(
           console.warn('Could not create report entry:', reportError);
         }
         message = "Employer flagged for review";
+        break;
+
+      case 'remove':
+        await prisma.user.update({
+          where: { id: employerId },
+          data: {
+            isRemoved: true,
+            removedAt: new Date(),
+            removedBy: session.user.id
+          }
+        });
+        message = 'Employer removed successfully';
         break;
 
       default:
