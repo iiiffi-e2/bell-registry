@@ -175,11 +175,11 @@ export async function POST(request: NextRequest) {
 
       case 'pending':
         // Set profile status back to PENDING for re-review
-        const userIdsWithProfiles = users.filter(u => u.candidateProfile).map(u => u.id);
-        if (userIdsWithProfiles.length > 0) {
+        const userIdsWithProfilesForPending = users.filter(u => u.candidateProfile).map(u => u.id);
+        if (userIdsWithProfilesForPending.length > 0) {
           await prisma.candidateProfile.updateMany({
             where: {
-              userId: { in: userIdsWithProfiles }
+              userId: { in: userIdsWithProfilesForPending }
             },
             data: {
               status: 'PENDING',
