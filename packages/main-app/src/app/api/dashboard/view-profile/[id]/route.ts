@@ -61,6 +61,7 @@ export async function GET(
     const isViewingOwnProfile = session?.user?.id === professional.id;
     const shouldAnonymize = (session?.user?.role === "PROFESSIONAL" && !isViewingOwnProfile) || 
                            (isEmployerOrAgency && !hasNetworkAccess);
+    const userWantsAnonymous = professional.isAnonymous || false;
 
     // Format the response data
     const responseData = {
@@ -93,14 +94,14 @@ export async function GET(
       user: {
         id: professional.id,
         // Anonymize personal information based on access level
-        firstName: shouldAnonymize ? (professional.firstName?.[0] || '') : professional.firstName,
-        lastName: shouldAnonymize ? (professional.lastName?.[0] || '') : professional.lastName,
+        firstName: (shouldAnonymize || userWantsAnonymous) ? (professional.firstName?.[0] || '') : professional.firstName,
+        lastName: (shouldAnonymize || userWantsAnonymous) ? (professional.lastName?.[0] || '') : professional.lastName,
         image: shouldAnonymize ? null : professional.image, // Hide profile image if anonymized
         role: professional.role,
         createdAt: professional.createdAt.toISOString(),
         email: shouldAnonymize ? '' : professional.email, // Hide email if anonymized
         phoneNumber: shouldAnonymize ? null : professional.phoneNumber, // Hide phone number if anonymized
-        isAnonymous: shouldAnonymize ? true : false, // Mark as anonymous if anonymized
+        isAnonymous: (shouldAnonymize || userWantsAnonymous) ? true : false, // Mark as anonymous if anonymized
         preferredAnonymity: professional.isAnonymous || false, // Original anonymity preference
         customInitials: (professional as any).customInitials || null,
         dontContactMe: (professional as any).dontContactMe || false,

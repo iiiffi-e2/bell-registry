@@ -79,15 +79,15 @@ export async function GET() {
       job: saved.job,
       user: {
         id: saved.candidate.id,
-        // Apply anonymization based on network access
-        firstName: (isEmployerOrAgency && !hasNetworkAccess) ? (saved.candidate.firstName?.[0] || '') : saved.candidate.firstName,
-        lastName: (isEmployerOrAgency && !hasNetworkAccess) ? (saved.candidate.lastName?.[0] || '') : saved.candidate.lastName,
+        // Apply anonymization based on network access and user preference
+        firstName: ((isEmployerOrAgency && !hasNetworkAccess) || saved.candidate.isAnonymous) ? (saved.candidate.firstName?.[0] || '') : saved.candidate.firstName,
+        lastName: ((isEmployerOrAgency && !hasNetworkAccess) || saved.candidate.isAnonymous) ? (saved.candidate.lastName?.[0] || '') : saved.candidate.lastName,
         image: (isEmployerOrAgency && !hasNetworkAccess) ? null : saved.candidate.image,
         role: saved.candidate.role,
         profileSlug: saved.candidate.profileSlug,
         email: (isEmployerOrAgency && !hasNetworkAccess) ? '' : saved.candidate.email,
         phoneNumber: (isEmployerOrAgency && !hasNetworkAccess) ? null : saved.candidate.phoneNumber,
-        isAnonymous: (isEmployerOrAgency && !hasNetworkAccess) ? true : false,
+        isAnonymous: ((isEmployerOrAgency && !hasNetworkAccess) || saved.candidate.isAnonymous) ? true : false,
       },
     }));
 

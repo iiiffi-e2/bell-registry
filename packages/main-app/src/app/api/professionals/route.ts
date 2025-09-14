@@ -505,15 +505,17 @@ export async function GET(request: Request) {
     
     
     const anonymizedProfessionals = professionals.map(professional => {
-      if (shouldAnonymize) {
+      const userWantsAnonymous = professional.user.isAnonymous || false;
+      
+      if (shouldAnonymize || userWantsAnonymous) {
         return {
           ...professional,
           user: {
             ...professional.user,
             firstName: professional.user.firstName?.[0] || '',
             lastName: professional.user.lastName?.[0] || '',
-            image: null, // Hide profile image
-            email: '', // Hide email
+            image: shouldAnonymize ? null : professional.user.image, // Hide profile image only if forced anonymization
+            email: shouldAnonymize ? '' : professional.user.email, // Hide email only if forced anonymization
             isAnonymous: true, // Mark as anonymous when anonymized
             preferredAnonymity: professional.user.isAnonymous || false, // Original anonymity preference
             customInitials: (professional.user as any).customInitials || null,
@@ -524,7 +526,7 @@ export async function GET(request: Request) {
         ...professional,
         user: {
           ...professional.user,
-          isAnonymous: false, // Not anonymized for employers with network access
+          isAnonymous: false, // Not anonymous when user doesn't want it and employer has access
           preferredAnonymity: professional.user.isAnonymous || false, // Original anonymity preference
         }
       };

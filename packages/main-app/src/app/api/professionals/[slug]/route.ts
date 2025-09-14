@@ -67,10 +67,12 @@ export async function GET(
     // Determine if we should anonymize the profile
     // Anonymize if:
     // 1. Viewer is a professional viewing someone else's profile (not their own), OR
-    // 2. Viewer is an employer/agency without network access
+    // 2. Viewer is an employer/agency without network access, OR
+    // 3. User has chosen to be anonymous
     const isViewingOwnProfile = session?.user?.id === profile.id;
     const shouldAnonymize = (session?.user?.role === "PROFESSIONAL" && !isViewingOwnProfile) || 
                            (isEmployerOrAgency && !hasNetworkAccess);
+    const userWantsAnonymous = profile.isAnonymous || false;
 
     // Format the response data
     const responseData = {
@@ -102,14 +104,14 @@ export async function GET(
       employmentType: (profile.candidateProfile as any).employmentType || null,
       user: {
         id: profile.id,
-        firstName: shouldAnonymize ? (profile.firstName?.[0] || '') : profile.firstName,
-        lastName: shouldAnonymize ? (profile.lastName?.[0] || '') : profile.lastName,
+        firstName: (shouldAnonymize || userWantsAnonymous) ? (profile.firstName?.[0] || '') : profile.firstName,
+        lastName: (shouldAnonymize || userWantsAnonymous) ? (profile.lastName?.[0] || '') : profile.lastName,
         image: shouldAnonymize ? null : profile.image,
         role: profile.role,
         createdAt: profile.createdAt.toISOString(),
         email: shouldAnonymize ? '' : profile.email,
         phoneNumber: shouldAnonymize ? null : profile.phoneNumber,
-        isAnonymous: shouldAnonymize ? true : false,
+        isAnonymous: (shouldAnonymize || userWantsAnonymous) ? true : false,
         preferredAnonymity: profile.isAnonymous || false, // Original anonymity preference
         customInitials: shouldAnonymize ? ((profile as any).customInitials || null) : ((profile as any).customInitials || null),
         dontContactMe: (profile as any).dontContactMe || false,
