@@ -87,7 +87,7 @@ export async function GET() {
         profileSlug: saved.candidate.profileSlug,
         email: (isEmployerOrAgency && !hasNetworkAccess) ? '' : saved.candidate.email,
         phoneNumber: (isEmployerOrAgency && !hasNetworkAccess) ? null : saved.candidate.phoneNumber,
-        isAnonymous: (isEmployerOrAgency && !hasNetworkAccess) ? true : (saved.candidate.isAnonymous || false),
+        isAnonymous: (isEmployerOrAgency && !hasNetworkAccess) ? true : false,
       },
     }));
 

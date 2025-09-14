@@ -524,6 +524,7 @@ export async function GET(request: Request) {
         ...professional,
         user: {
           ...professional.user,
+          isAnonymous: false, // Not anonymized for employers with network access
           preferredAnonymity: professional.user.isAnonymous || false, // Original anonymity preference
         }
       };
