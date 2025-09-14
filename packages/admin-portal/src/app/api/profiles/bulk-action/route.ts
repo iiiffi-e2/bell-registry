@@ -173,6 +173,28 @@ export async function POST(request: NextRequest) {
         message = `${users.length} user${users.length > 1 ? 's' : ''} removed successfully`;
         break;
 
+      case 'pending':
+        // Set profile status back to PENDING for re-review
+        const userIdsWithProfiles = users.filter(u => u.candidateProfile).map(u => u.id);
+        if (userIdsWithProfiles.length > 0) {
+          await prisma.candidateProfile.updateMany({
+            where: {
+              userId: { in: userIdsWithProfiles }
+            },
+            data: {
+              status: 'PENDING',
+              approvedAt: null,
+              approvedBy: null,
+              rejectedAt: null,
+              rejectedBy: null,
+              rejectionReason: null
+            }
+          });
+        }
+        actionType = "BULK_SET_PROFILES_PENDING";
+        message = `${users.length} profile${users.length > 1 ? 's' : ''} set to pending for re-review`;
+        break;
+
       case 'delete':
         // Soft delete users
         const deletePromises = users.map(async (user) => {

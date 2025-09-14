@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
     // Create the appropriate profile based on user role
     if (body.role === "PROFESSIONAL") {
-      const approvalFields = getProfileApprovalFields();
+      const approvalFields = await getProfileApprovalFields();
       await prisma.candidateProfile.create({
         data: {
           userId: user.id,

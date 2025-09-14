@@ -229,6 +229,25 @@ export async function POST(
         message = "User removed successfully";
         break;
 
+      case 'pending':
+        // Set profile status back to PENDING for re-review
+        if (user.candidateProfile) {
+          updatedProfile = await (prisma as any).candidateProfile.update({
+            where: { userId: userId },
+            data: {
+              status: 'PENDING',
+              approvedAt: null,
+              approvedBy: null,
+              rejectedAt: null,
+              rejectedBy: null,
+              rejectionReason: null
+            }
+          });
+        }
+        actionType = "SET_PROFILE_PENDING";
+        message = "Profile set to pending for re-review";
+        break;
+
       case 'delete':
         // Soft delete the user account
         updatedUser = await (prisma as any).user.update({

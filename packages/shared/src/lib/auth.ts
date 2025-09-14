@@ -239,7 +239,7 @@ export const authOptions: NextAuthOptions = {
           });
 
           if (role === UserRole.PROFESSIONAL) {
-            const approvalFields = getProfileApprovalFields();
+            const approvalFields = await getProfileApprovalFields();
             await prisma.candidateProfile.create({
               data: {
                 userId: newUser.id,

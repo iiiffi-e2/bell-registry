@@ -419,7 +419,7 @@ export default function ProfileManagementPage() {
     }
   };
 
-  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove' | 'delete', reason?: string, note?: string) => {
+  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove' | 'delete' | 'pending', reason?: string, note?: string) => {
     if (selectedProfiles.length === 0) return;
     
     setBulkActionLoading(true);
@@ -481,7 +481,7 @@ export default function ProfileManagementPage() {
     }
   };
 
-  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
+  const handleProfileAction = async (profileId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove' | 'pending', reason?: string, note?: string) => {
     try {
       const response = await fetch(`/api/profiles/${profileId}/action`, {
         method: 'POST',
@@ -715,6 +715,14 @@ export default function ProfileManagementPage() {
                   Approve
                 </button>
                 <button
+                  onClick={() => handleBulkAction('pending')}
+                  disabled={bulkActionLoading}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
+                >
+                  <ClockIcon className="h-4 w-4 mr-1" />
+                  Set to Pending
+                </button>
+                <button
                   onClick={handleBulkSuspendClick}
                   disabled={bulkActionLoading}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50"
@@ -882,6 +890,13 @@ export default function ProfileManagementPage() {
                             title="Approve"
                           >
                             <CheckCircleIcon className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleProfileAction(profile.user.id, 'pending')}
+                            className="p-1.5 text-yellow-600 hover:bg-yellow-50 rounded"
+                            title="Set to Pending"
+                          >
+                            <ClockIcon className="h-5 w-5" />
                           </button>
                           <button
                             onClick={() => handleIndividualSuspendClick(profile)}

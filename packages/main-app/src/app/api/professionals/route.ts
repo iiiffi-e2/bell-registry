@@ -193,7 +193,7 @@ export async function GET(request: Request) {
           FROM "CandidateProfile" cp
           JOIN "User" u ON cp."userId" = u."id"
           WHERE (${whereClauses.join(' OR ')})
-          AND cp."status" IN ('APPROVED', 'PENDING')
+          AND cp."status" = 'APPROVED'
           AND cp."bio" IS NOT NULL AND cp."bio" != ''
           AND cp."location" IS NOT NULL AND cp."location" != ''
           AND u."isDeleted" = false
@@ -235,7 +235,7 @@ export async function GET(request: Request) {
           FROM "CandidateProfile" cp
           JOIN "User" u ON cp."userId" = u."id"
           WHERE (${whereClauses.join(' OR ')})
-          AND cp."status" IN ('APPROVED', 'PENDING')
+          AND cp."status" = 'APPROVED'
           AND cp."bio" IS NOT NULL AND cp."bio" != ''
           AND cp."location" IS NOT NULL AND cp."location" != ''
           AND u."isDeleted" = false
@@ -361,8 +361,8 @@ export async function GET(request: Request) {
 
     // Standard search (fallback)
     const where = {
-      // Show both approved and pending profiles for now (pending profiles need approval)
-      status: { in: ['APPROVED', 'PENDING'] as any },
+      // Only show approved profiles (pending profiles need admin approval)
+      status: 'APPROVED',
       // Basic profile completion requirements
       NOT: {
         OR: [
