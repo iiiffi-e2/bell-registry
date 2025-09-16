@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { sendSlackTestNotification, sendUserRegistrationSlackNotification } from "@/lib/slack-notification-service";
 
-// Hardcoded webhook URL for testing - remove this in production!
-const TEST_WEBHOOK_URL = "https://hooks.slack.com/services/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";
-
 async function sendTestSlackMessage(message: any) {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  
+  if (!webhookUrl) {
+    throw new Error('SLACK_WEBHOOK_URL environment variable is not set');
+  }
+
   try {
-    const response = await fetch(TEST_WEBHOOK_URL, {
+    const response = await fetch(webhookUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

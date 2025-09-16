@@ -25,7 +25,7 @@ The Bell Registry application now sends Slack notifications whenever a new profe
 3. Click **Add to Slack**
 4. Choose the channel where you want to receive notifications (e.g., `#registrations`, `#team-updates`)
 5. Click **Add Incoming WebHooks Integration**
-6. Copy the **Webhook URL** (it will look like: `https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX`)
+6. Copy the **Webhook URL** (it will look like: `https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX`)
 
 ### 2. Configure Environment Variable
 
@@ -33,13 +33,24 @@ Add the Slack webhook URL to your environment variables:
 
 #### For Development (.env.local)
 ```bash
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
 ```
 
 #### For Production (Vercel/your hosting platform)
 Set the environment variable `SLACK_WEBHOOK_URL` with your webhook URL.
 
-### 3. Test the Integration
+### 3. Set Up Local Environment
+
+Create a `.env.local` file in your `packages/main-app` directory:
+
+```bash
+# packages/main-app/.env.local
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX
+```
+
+Replace `TXXXXXXXX/BXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX` with your actual webhook URL from step 1.
+
+### 4. Test the Integration
 
 You can test the Slack integration using the test endpoint:
 
