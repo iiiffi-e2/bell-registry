@@ -10,6 +10,7 @@ import { sendWelcomeEmail } from "./welcome-email-service";
 import { verifyTwoFactorSession } from "@/lib/2fa-session";
 import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
 import { initializeTrialSubscription } from "./subscription-service";
+import { sendUserRegistrationSlackNotification } from "./slack-notification-service";
 
 const ROLES = {
   PROFESSIONAL: UserRole.PROFESSIONAL,
@@ -257,6 +258,22 @@ export const authOptions: NextAuthOptions = {
           } catch (emailError) {
             // Log email error but don't fail the authentication
             console.error(`Failed to send welcome email to Google OAuth user ${newUser.email}:`, emailError);
+          }
+
+          // Send Slack notification for new OAuth registration
+          try {
+            await sendUserRegistrationSlackNotification({
+              firstName: newUser.firstName || user.name?.split(" ")[0] || "",
+              lastName: newUser.lastName || user.name?.split(" ").slice(1).join(" ") || "",
+              email: newUser.email,
+              role: role,
+              membershipAccess: newUser.membershipAccess || undefined,
+              registrationMethod: 'oauth',
+              provider: account.provider,
+            });
+          } catch (slackError) {
+            // Log Slack error but don't fail the authentication
+            console.error(`Failed to send Slack notification for OAuth registration ${newUser.email}:`, slackError);
           }
 
           user.id = newUser.id;

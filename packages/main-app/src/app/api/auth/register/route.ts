@@ -7,6 +7,7 @@ import { generateProfileSlug } from "@/lib/utils";
 import { sendWelcomeEmail } from "@/lib/welcome-email-service";
 import { getProfileApprovalFields } from "@bell-registry/shared/lib/profile-config";
 import { initializeTrialSubscription } from "@/lib/subscription-service";
+import { sendUserRegistrationSlackNotification } from "@/lib/slack-notification-service";
 
 const registerSchema = z.object({
   firstName: z.string().min(2),
@@ -98,6 +99,23 @@ export async function POST(req: Request) {
     } catch (emailError) {
       // Log email error but don't fail the registration
       console.error(`Failed to send welcome email to ${body.email}:`, emailError);
+    }
+
+    // Send Slack notification for new registration
+    try {
+      await sendUserRegistrationSlackNotification({
+        firstName: body.firstName,
+        lastName: body.lastName,
+        email: body.email,
+        role: body.role,
+        membershipAccess: body.membershipAccess,
+        companyName: body.companyName,
+        referralProfessionalName: body.referralProfessionalName,
+        registrationMethod: 'manual',
+      });
+    } catch (slackError) {
+      // Log Slack error but don't fail the registration
+      console.error(`Failed to send Slack notification for registration ${body.email}:`, slackError);
     }
 
     return NextResponse.json(
