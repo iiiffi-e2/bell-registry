@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { sendSlackTestNotification, sendUserRegistrationSlackNotification } from "@/lib/slack-notification-service";
 
 // Hardcoded webhook URL for testing - remove this in production!
-const TEST_WEBHOOK_URL = "https://hooks.slack.com/services/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";
+const TEST_WEBHOOK_URL = "https://hooks.slack.com/services/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";
 
 async function sendTestSlackMessage(message: any) {
   try {
