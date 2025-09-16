@@ -61,9 +61,9 @@ const profileSchema = z.object({
   payRangeMax: z.string().optional(),
   payType: z.string().default("Salary"),
   
-  // Media
-  additionalPhotos: z.array(z.string()).optional(),
-  mediaUrls: z.array(z.string()).optional(),
+  // Media - managed separately via state
+  // additionalPhotos: z.array(z.string()).optional(),
+  // mediaUrls: z.array(z.string()).optional(),
   
   // Existing fields
   certifications: z.string().optional(),
@@ -208,8 +208,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
       payRangeMin: "",
       payRangeMax: "",
       payType: "Salary",
-      additionalPhotos: [],
-      mediaUrls: [],
+      // additionalPhotos: [],
+      // mediaUrls: [],
       certifications: "",
       experience: [],
       phoneNumber: "",
@@ -308,6 +308,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         const response = await fetch("/api/profile");
         const data = await response.json();
         
+        
         if (data) {
           // Set the form values
           const formValues = {
@@ -334,8 +335,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             payRangeMin: data.payRangeMin?.toString() || "",
             payRangeMax: data.payRangeMax?.toString() || "",
             payType: data.payType || "Salary",
-            additionalPhotos: data.additionalPhotos || [],
-            mediaUrls: data.mediaUrls || [],
+            // additionalPhotos: data.additionalPhotos || [],
+            // mediaUrls: data.mediaUrls || [],
             certifications: Array.isArray(data.certifications) ? data.certifications.join(", ") : data.certifications || "",
             experience: data.experience || [],
             phoneNumber: data.phoneNumber || "",
@@ -355,7 +356,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     if (session?.user && !profileLoaded) {
       loadProfile();
     }
-  }, [session?.user?.id, profileLoaded, form]);
+  }, [session?.user?.id, profileLoaded]);
 
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
@@ -371,6 +372,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         setIsLoading(false);
         return;
       }
+
 
       await onSubmit({
         ...data,
