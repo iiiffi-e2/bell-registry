@@ -180,6 +180,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [improvedBio, setImprovedBio] = useState("");
   const [isImprovingBio, setIsImprovingBio] = useState(false);
 
+
   const form = useForm<ProfileFormData>({
     // @ts-ignore - Complex Zod schema type inference issue
     resolver: zodResolver(profileSchema),

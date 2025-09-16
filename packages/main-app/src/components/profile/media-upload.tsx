@@ -12,6 +12,7 @@ interface MediaUploadProps {
 
 export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFiles = 5 }: MediaUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -89,7 +90,7 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
           {/* Existing Files */}
           {currentFiles.map((url) => (
             <div key={url} className="relative group">
-              <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden rounded-lg bg-gray-100">
+              <div className="aspect-square w-full overflow-hidden rounded-lg bg-gray-100">
                 {type === "photo" ? (
                   <Image
                     src={url}
@@ -118,7 +119,7 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
 
           {/* Upload Button */}
           {currentFiles.length < maxFiles && (
-            <div className="aspect-w-1 aspect-h-1 w-full">
+            <div className="aspect-square w-full">
               <label
                 htmlFor={`${type}-upload`}
                 className="flex h-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400"
