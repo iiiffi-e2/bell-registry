@@ -134,6 +134,8 @@ model User {
   messageBoardReplies       MessageBoardReply[]        @relation("ReplyAuthor")
   messageBoardThreadLikes   MessageBoardThreadLike[]   @relation("ThreadLikes")
   messageBoardReplyLikes    MessageBoardReplyLike[]    @relation("ReplyLikes")
+  adminNotesForUser         AdminNote[]                @relation("AdminNotesForUser")
+  adminNotesCreated         AdminNote[]                @relation("AdminNotesCreated")
 
   @@index([isDeleted])
   @@index([deletedAt])
@@ -625,4 +627,19 @@ model MessageBoardReplyLike {
   @@unique([replyId, userId])
   @@index([replyId])
   @@index([userId])
+}
+
+model AdminNote {
+  id        String   @id @default(cuid())
+  userId    String
+  adminId   String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation("AdminNotesForUser", fields: [userId], references: [id], onDelete: Cascade)
+  admin     User     @relation("AdminNotesCreated", fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
 }

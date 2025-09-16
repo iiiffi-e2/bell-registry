@@ -120,6 +120,32 @@ export async function GET(
       reports = [];
     }
 
+    // Get admin notes for this user
+    let adminNotes = [];
+    try {
+      adminNotes = await (prisma as any).adminNote.findMany({
+        where: {
+          userId: userId
+        },
+        include: {
+          admin: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    } catch (error) {
+      // If adminNote table doesn't exist yet, use empty array
+      adminNotes = [];
+    }
+
     // Transform the data to match frontend expectations
     const profileData = {
       id: user.candidateProfile?.id || user.id,
@@ -171,6 +197,7 @@ export async function GET(
       })(),
       reportCount: reports.length,
       reports: reports,
+      adminNotes: adminNotes,
       
       // Additional admin data
       adminData: {

@@ -21,6 +21,7 @@ import {
   PhoneIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import AdminNotes from '../../../components/AdminNotes';
 
 interface ProfileDetail {
   id: string;
@@ -56,6 +57,7 @@ interface ProfileDetail {
   status?: string;
   reportCount?: number;
   reports?: any[];
+  adminNotes?: any[];
   // Additional "about me" fields
   idealEnvironment?: string | null;
   whatImSeeking?: string | null;
@@ -835,6 +837,16 @@ export default function ProfileDetailPage({
                 </div>
               </div>
             </div>
+
+            {/* Admin Notes */}
+            {session?.user && (
+              <AdminNotes
+                userId={profile.user.id}
+                notes={profile.adminNotes || []}
+                currentAdminId={session.user.id}
+                onNotesUpdate={fetchProfile}
+              />
+            )}
           </div>
         </div>
       </div>

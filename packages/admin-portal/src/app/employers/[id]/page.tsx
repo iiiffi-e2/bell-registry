@@ -19,6 +19,7 @@ import {
   CalendarIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
+import AdminNotes from '../../../components/AdminNotes';
 
 interface EmployerDetail {
   id: string;
@@ -69,6 +70,7 @@ interface EmployerDetail {
       email: string;
     };
   }>;
+  adminNotes?: any[];
 }
 
 interface EmployerDetailPageProps {
@@ -627,6 +629,16 @@ export default function EmployerDetailPage({ params }: EmployerDetailPageProps) 
                 </button>
               </div>
             </div>
+
+            {/* Admin Notes */}
+            {session?.user && (
+              <AdminNotes
+                userId={employer.user.id}
+                notes={employer.adminNotes || []}
+                currentAdminId={session.user.id}
+                onNotesUpdate={fetchEmployerDetails}
+              />
+            )}
           </div>
         </div>
       </div>

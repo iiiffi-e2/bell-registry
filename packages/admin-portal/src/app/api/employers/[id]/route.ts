@@ -96,6 +96,32 @@ export async function GET(
       reportCount = 0;
     }
 
+    // Get admin notes for this employer
+    let adminNotes = [];
+    try {
+      adminNotes = await (prisma as any).adminNote.findMany({
+        where: {
+          userId: employerId
+        },
+        include: {
+          admin: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+    } catch (error) {
+      // If adminNote table doesn't exist yet, use empty array
+      adminNotes = [];
+    }
+
     // Transform the data
     const employerDetail = {
       id: user.employerProfile.id,
@@ -129,7 +155,8 @@ export async function GET(
       createdAt: user.employerProfile.createdAt,
       postedJobs: user.postedJobs,
       reportCount,
-      reports
+      reports,
+      adminNotes
     };
 
     return NextResponse.json({
