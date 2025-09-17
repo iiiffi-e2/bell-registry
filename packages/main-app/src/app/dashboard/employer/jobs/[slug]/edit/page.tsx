@@ -75,7 +75,18 @@ const jobFormSchema = z.object({
   }).optional().default("ACTIVE" as JobStatus),
   featured: z.boolean().optional().default(false),
   expiresAt: z.string().optional().default(""),
-  customApplicationUrl: z.string().optional().default(""),
+  customApplicationUrl: z.string().optional().default("").refine((val) => {
+    if (!val || val.trim() === "") return true;
+    // If it starts with http:// or https://, it's valid
+    if (val.startsWith("http://") || val.startsWith("https://")) return true;
+    // If it starts with www., add https://
+    if (val.startsWith("www.")) return true;
+    // If it doesn't start with http but looks like a domain, add https://
+    if (val.includes(".") && !val.includes(" ")) return true;
+    return false;
+  }, {
+    message: "Please enter a valid URL (e.g., https://example.com or www.example.com)"
+  }),
 });
 
 type JobFormValues = z.infer<typeof jobFormSchema>;
@@ -200,10 +211,20 @@ export default function EditJobPage() {
         .filter(comp => comp.value.trim() !== "")
         .map(comp => comp.value);
 
+      // Normalize the custom application URL
+      let normalizedCustomUrl = data.customApplicationUrl;
+      if (normalizedCustomUrl && normalizedCustomUrl.trim() !== "") {
+        normalizedCustomUrl = normalizedCustomUrl.trim();
+        if (!normalizedCustomUrl.startsWith("http://") && !normalizedCustomUrl.startsWith("https://")) {
+          normalizedCustomUrl = "https://" + normalizedCustomUrl;
+        }
+      }
+
       const jobData = {
         ...data,
         requirements,
         compensation,
+        customApplicationUrl: normalizedCustomUrl,
       };
 
       const response = await fetch(`/api/jobs/${params.slug}`, {
