@@ -1,9 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '../packages/shared/src/lib/prisma';
 
 async function checkLegacyProfiles() {
-  console.log('🔍 Checking for profiles with potential location issues...\n');
+  console.log('🔍 Legacy Profile Location Analysis');
+  console.log('==================================');
+  console.log('Checking for profiles with potential location issues...\n');
 
   // Find approved profiles that might be getting filtered out
   const allApprovedProfiles = await prisma.candidateProfile.findMany({
@@ -89,7 +89,10 @@ async function checkLegacyProfiles() {
   console.log(`- Profiles with comma in location: ${locationAnalysis.filter(p => p.hasComma).length} (${((locationAnalysis.filter(p => p.hasComma).length / allApprovedProfiles.length) * 100).toFixed(1)}%)`);
 
   console.log('\n✅ Quick fix has been applied - these profiles should now be visible in search results!');
-
+  console.log('\n🔧 Next steps:');
+  console.log('- Test the professional search to verify legacy profiles are now visible');
+  console.log('- Consider running the migration script to standardize location formats');
+  
   await prisma.$disconnect();
 }
 
