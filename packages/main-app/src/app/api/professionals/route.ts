@@ -367,10 +367,13 @@ export async function GET(request: Request) {
       NOT: {
         OR: [
           { bio: null },
-          { bio: '' },
-          { location: null },
-          { location: '' }
+          { bio: '' }
         ]
+      },
+      // More lenient location filter - allow any non-empty location (including legacy formats like "NY")
+      location: {
+        not: null,
+        not: ''
       },
       // Filter conditions
       ...(location ? buildLocationFilter() : {}),
