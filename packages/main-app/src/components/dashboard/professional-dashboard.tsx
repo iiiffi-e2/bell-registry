@@ -251,7 +251,7 @@ export function ProfessionalDashboard() {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {stats.map((item) => (
               <div
                 key={item.name}
@@ -327,7 +327,7 @@ export function ProfessionalDashboard() {
                             percentChange > 0 ? "text-green-600" : "text-red-600"
                           }`}
                         >
-                          {percentChange > 0 ? "+" : ""}{percentChange}%
+                          {percentChange > 0 ? "+" : ""}{Math.round(percentChange)}%
                         </p>
                       )}
                     </div>
