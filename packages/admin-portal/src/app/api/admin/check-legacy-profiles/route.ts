@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { adminAuthOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { UserRole } from '@prisma/client';
+import { prisma, adminAuthOptions, logAdminAction } from "@bell-registry/shared";
+import { UserRole } from "@bell-registry/shared";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,6 +11,15 @@ export async function GET(request: NextRequest) {
     if (!session?.user || session.user.role !== UserRole.ADMIN) {
       return NextResponse.json({ error: "Unauthorized - Admin access required" }, { status: 401 });
     }
+
+    // Log this admin action
+    await logAdminAction(
+      session.user.id,
+      "CHECK_LEGACY_PROFILES",
+      { endpoint: "/api/admin/check-legacy-profiles" },
+      request.ip,
+      request.headers.get("user-agent") || undefined
+    );
 
     console.log('🔍 Legacy Profile Location Analysis - Admin Portal');
     console.log('Running diagnostic script via API...');
