@@ -52,9 +52,10 @@ export async function GET(request: NextRequest) {
         }
       }),
       
-      // Pending profiles (we'll count all profiles for now and refine later)
+      // Pending profiles (profiles awaiting approval)
       prisma.candidateProfile.count({
         where: { 
+          status: 'PENDING',
           user: { isDeleted: false }
         }
       }),
