@@ -753,19 +753,17 @@ export default function ProfileDetailPage({
                     <span className="text-sm text-gray-900">{profile.location}</span>
                   </div>
                 )}
-                {profile.user.profileSlug && (
-                  <div className="flex items-center">
-                    <GlobeAltIcon className="h-5 w-5 text-gray-400 mr-3" />
-                    <a
-                      href={`${window.location.origin}/professionals/${profile.user.profileSlug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:text-blue-500"
-                    >
-                      View Public Profile
-                    </a>
-                  </div>
-                )}
+                <div className="flex items-center">
+                  <GlobeAltIcon className="h-5 w-5 text-gray-400 mr-3" />
+                  <a
+                    href={`${window.location.origin.replace(':3001', ':3000')}/dashboard/view-profile/${profile.user.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    View Profile
+                  </a>
+                </div>
 
               </div>
             </div>
