@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { storageProvider } from "@/lib/storage";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   try {

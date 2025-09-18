@@ -70,6 +70,12 @@ const nextConfig = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
+  // Increase body size limit for file uploads
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
 }
 
 module.exports = nextConfig 

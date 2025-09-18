@@ -1,5 +1,10 @@
 {
   "name": "bell-registry-main",
+  "functions": {
+    "src/app/api/upload/route.ts": {
+      "maxDuration": 30
+    }
+  },
   "git": {
     "deploymentEnabled": {
       "main": true

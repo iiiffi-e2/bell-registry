@@ -184,6 +184,9 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
           />
         </label>
       </div>
+      <p className="mt-1 text-sm text-gray-500">
+        Upload a profile picture (JPG, PNG, GIF, WebP). Maximum 10MB.
+      </p>
 
       {/* Crop Modal */}
       {showCropModal && (
