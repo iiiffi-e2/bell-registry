@@ -8,6 +8,8 @@ import { MediaUpload } from "./media-upload";
 import { useSession } from "next-auth/react";
 import ImprovedBioModal from "@/components/ui/improved-bio-modal";
 import { Combobox } from "@headlessui/react";
+import { toast } from "sonner";
+import { signIn } from "next-auth/react";
 import { LocationAutocomplete } from "@/components/ui/location-autocomplete";
 import { GoogleMapsLoader } from "@/components/ui/google-maps-loader";
 import { MultiLocationAutocomplete } from '../ui/multi-location-autocomplete';
@@ -179,6 +181,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [showImprovedBioModal, setShowImprovedBioModal] = useState(false);
   const [improvedBio, setImprovedBio] = useState("");
   const [isImprovingBio, setIsImprovingBio] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [lastSavedData, setLastSavedData] = useState<string | null>(null);
 
 
   const form = useForm<ProfileFormData>({
@@ -302,6 +306,68 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
   // Track if profile has been loaded to prevent re-loading when user has made changes
   const [profileLoaded, setProfileLoaded] = useState(false);
+  
+  // Auto-save draft functionality
+  useEffect(() => {
+    const watchedValues = form.watch();
+    const currentData = JSON.stringify({
+      ...watchedValues,
+      additionalPhotos: uploadedPhotos,
+      mediaUrls: uploadedMedia,
+    });
+    
+    if (lastSavedData && currentData !== lastSavedData && profileLoaded) {
+      setHasUnsavedChanges(true);
+      
+      // Auto-save draft to localStorage every 30 seconds if there are changes
+      const timeoutId = setTimeout(() => {
+        try {
+          localStorage.setItem('profile-draft', currentData);
+          toast.success("Draft saved locally", { duration: 2000 });
+        } catch (error) {
+          console.warn("Failed to save draft:", error);
+        }
+      }, 30000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [form.watch(), uploadedPhotos, uploadedMedia, lastSavedData, profileLoaded]);
+  
+  // Load draft on component mount
+  useEffect(() => {
+    const savedDraft = localStorage.getItem('profile-draft');
+    if (savedDraft && !profileLoaded) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        const shouldLoadDraft = window.confirm(
+          "We found a saved draft of your profile. Would you like to restore it?"
+        );
+        if (shouldLoadDraft) {
+          form.reset(draftData);
+          setUploadedPhotos(draftData.additionalPhotos || []);
+          setUploadedMedia(draftData.mediaUrls || []);
+          setHasUnsavedChanges(true);
+          toast.info("Draft restored successfully");
+        }
+      } catch (error) {
+        console.warn("Failed to load draft:", error);
+        localStorage.removeItem('profile-draft');
+      }
+    }
+  }, [form, profileLoaded]);
+  
+  // Warn user about unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -346,7 +412,15 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
           form.reset(formValues);
           setUploadedPhotos(data.additionalPhotos || []);
           setUploadedMedia(data.mediaUrls || []);
+          setLastSavedData(JSON.stringify({
+            ...formValues,
+            additionalPhotos: data.additionalPhotos || [],
+            mediaUrls: data.mediaUrls || [],
+          }));
           setProfileLoaded(true);
+          
+          // Clear any existing draft since we loaded fresh data
+          localStorage.removeItem('profile-draft');
         }
       } catch (error) {
         console.error("Error loading profile:", error);
@@ -370,16 +444,25 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         Object.entries(nameErrors).forEach(([field, error]) => {
           form.setError(field as keyof ProfileFormData, error);
         });
+        toast.error("Please fix the validation errors before saving.");
         setIsLoading(false);
         return;
       }
 
-
-      await onSubmit({
+      const submitData = {
         ...data,
         additionalPhotos: uploadedPhotos,
         mediaUrls: uploadedMedia,
-      });
+      };
+
+      // Save current data for comparison
+      setLastSavedData(JSON.stringify(submitData));
+      setHasUnsavedChanges(false);
+
+      await onSubmit(submitData);
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast.error("Failed to submit form. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -917,14 +1000,41 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
           </div>
         </div>
 
+        {/* Unsaved Changes Indicator */}
+        {hasUnsavedChanges && (
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  You have unsaved changes. Don&apos;t forget to save your profile!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Submit Button */}
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center space-x-3">
+          {hasUnsavedChanges && (
+            <span className="text-sm text-yellow-600 font-medium">
+              • Unsaved changes
+            </span>
+          )}
           <button
             type="submit"
             disabled={isLoading}
-            className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
+            className={`inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+              hasUnsavedChanges 
+                ? 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500' 
+                : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+            }`}
           >
-            {isLoading ? "Saving..." : "Save Changes"}
+            {isLoading ? "Saving..." : hasUnsavedChanges ? "Save Changes" : "Save Profile"}
           </button>
         </div>
 

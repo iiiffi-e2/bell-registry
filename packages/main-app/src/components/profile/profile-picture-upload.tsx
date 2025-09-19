@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { toast } from "sonner";
 import ReactCrop, { 
   centerCrop, 
   makeAspectCrop, 
@@ -127,7 +128,21 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
       });
 
       if (!response.ok) {
-        throw new Error("Failed to upload image");
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        
+        if (response.status === 401) {
+          throw new Error("Your session has expired. Please refresh the page and try again.");
+        }
+        
+        if (response.status === 413) {
+          throw new Error("Image is too large. Please choose a smaller image (max 10MB).");
+        }
+        
+        if (response.status === 400) {
+          throw new Error(errorData.error || "Invalid image file. Please choose a JPEG, PNG, or WebP image.");
+        }
+        
+        throw new Error(errorData.error || "Failed to upload image. Please try again.");
       }
 
       const data = await response.json();
@@ -140,7 +155,8 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
       setCompletedCrop(undefined);
     } catch (error) {
       console.error("Error uploading cropped image:", error);
-      alert("Failed to upload image. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload image. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }

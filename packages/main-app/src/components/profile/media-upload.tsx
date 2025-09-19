@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { PhotoIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
+import { toast } from "sonner";
 
 interface MediaUploadProps {
   currentFiles?: string[];
@@ -20,7 +21,7 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
 
     // Check if adding new files would exceed the limit
     if (currentFiles.length + files.length > maxFiles) {
-      alert(`You can only upload up to ${maxFiles} files`);
+      toast.error(`You can only upload up to ${maxFiles} files`);
       return;
     }
 
@@ -48,7 +49,7 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
           ];
           
           if (!allowedMediaTypes.includes(file.type)) {
-            alert(`File type ${file.type} is not supported. Please upload videos (MP4, MOV, WebM, AVI), PDFs, or Word documents only.`);
+            toast.error(`File type ${file.type} is not supported. Please upload videos (MP4, MOV, WebM, AVI), PDFs, or Word documents only.`);
             continue;
           }
         }
@@ -65,16 +66,35 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
         });
 
         if (!response.ok) {
-          throw new Error("Failed to upload file");
+          const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+          
+          if (response.status === 401) {
+            throw new Error("Your session has expired. Please refresh the page and try again.");
+          }
+          
+          if (response.status === 413) {
+            throw new Error(`File "${file.name}" is too large. Maximum size is ${type === 'photo' ? '10MB' : '50MB'}.`);
+          }
+          
+          if (response.status === 400) {
+            throw new Error(errorData.error || `Invalid file: ${file.name}`);
+          }
+          
+          throw new Error(errorData.error || `Failed to upload ${file.name}`);
         }
 
         const data = await response.json();
         uploadedUrls.push(data.url);
       }
 
-      onUpload(uploadedUrls);
+      if (uploadedUrls.length > 0) {
+        onUpload(uploadedUrls);
+        toast.success(`Successfully uploaded ${uploadedUrls.length} file${uploadedUrls.length > 1 ? 's' : ''}`);
+      }
     } catch (error) {
       console.error("Error uploading files:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to upload files. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }

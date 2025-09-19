@@ -41,7 +41,10 @@ export async function PUT(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse(JSON.stringify({ error: "Your session has expired. Please log in again." }), { 
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
     const body = await req.json();
@@ -60,7 +63,10 @@ export async function PUT(req: Request) {
       if (session.user.role === "AGENCY") {
         // For agencies, companyName is required
         if (!body.companyName || body.companyName.trim() === "") {
-          return new NextResponse("Company name is required for agencies", { status: 400 });
+          return new NextResponse(JSON.stringify({ error: "Company name is required for agencies" }), { 
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          });
         }
         profileData.companyName = body.companyName.trim();
       } else {
@@ -86,6 +92,23 @@ export async function PUT(req: Request) {
         console.error("[PROFILE_PUT] Database error:", error);
         console.error("[PROFILE_PUT] Profile data:", profileData);
         console.error("[PROFILE_PUT] User role:", session.user.role);
+        
+        // Handle specific database errors
+        if (error instanceof Error) {
+          if (error.message.includes('unique constraint')) {
+            return new NextResponse(JSON.stringify({ error: "A profile with this information already exists." }), { 
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+          if (error.message.includes('Data too long')) {
+            return new NextResponse(JSON.stringify({ error: "Some of your profile data is too long. Please shorten your text fields." }), { 
+              status: 413,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        }
+        
         throw error;
       }
     } else {
@@ -165,6 +188,26 @@ export async function PUT(req: Request) {
     }
   } catch (error) {
     console.error("[PROFILE_PUT]", error);
-    return new NextResponse("Internal Error", { status: 500 });
+    
+    // Handle JSON parsing errors
+    if (error instanceof SyntaxError) {
+      return new NextResponse(JSON.stringify({ error: "Invalid data format. Please try again." }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Handle request size errors
+    if (error instanceof Error && error.message.includes('PayloadTooLargeError')) {
+      return new NextResponse(JSON.stringify({ error: "Your profile data is too large. Please reduce image sizes or remove some media files." }), { 
+        status: 413,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    return new NextResponse(JSON.stringify({ error: "An unexpected error occurred. Please try again later." }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 } 
