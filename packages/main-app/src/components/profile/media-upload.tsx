@@ -171,7 +171,7 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
         <p className="mt-2 text-sm text-gray-500">
           {type === "photo"
             ? `Upload up to ${maxFiles} photos of your work or portfolio (JPG, PNG, GIF, WebP). Maximum 10MB per file.`
-            : `Upload up to ${maxFiles} media files (Videos, PDFs, Word docs).. Maximum 50MB per file. No resumes please.`}
+            : `Upload up to ${maxFiles} media files (Videos, PDFs, Word docs). Maximum 50MB per file. No resumes please.`}
         </p>
       </div>
     </div>
