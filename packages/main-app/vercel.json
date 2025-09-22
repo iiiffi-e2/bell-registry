@@ -10,12 +10,6 @@
       "main": true
     }
   },
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
   "installCommand": "cd ../.. && npm install",
   "buildCommand": "cd ../.. && npm run build:shared && npm run db:generate && npm run build:main",
   "outputDirectory": ".next",
