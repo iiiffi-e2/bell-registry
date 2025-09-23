@@ -117,36 +117,49 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
       const blob = await canvasToBlob(canvas);
       if (!blob) throw new Error('Failed to create image blob');
 
-      // Create FormData and upload
-      const formData = new FormData();
-      formData.append("file", blob, "cropped-profile.jpg");
-      formData.append("uploadType", "image");
-
-      const response = await fetch("/api/upload", {
+      // Get pre-signed URL for direct S3 upload
+      const presignedResponse = await fetch("/api/upload/presigned-url", {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          fileName: "cropped-profile.jpg",
+          fileType: "image/jpeg",
+          uploadType: "image",
+        }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+      if (!presignedResponse.ok) {
+        const errorData = await presignedResponse.json().catch(() => ({ error: "Unknown error" }));
         
-        if (response.status === 401) {
+        if (presignedResponse.status === 401) {
           throw new Error("Your session has expired. Please refresh the page and try again.");
         }
         
-        if (response.status === 413) {
-          throw new Error("Image is too large. Please choose a smaller image (max 10MB).");
-        }
-        
-        if (response.status === 400) {
+        if (presignedResponse.status === 400) {
           throw new Error(errorData.error || "Invalid image file. Please choose a JPEG, PNG, or WebP image.");
         }
         
-        throw new Error(errorData.error || "Failed to upload image. Please try again.");
+        throw new Error(errorData.error || "Failed to prepare upload. Please try again.");
       }
 
-      const data = await response.json();
-      onUpload(data.url);
+      const { presignedUrl, fileUrl } = await presignedResponse.json();
+
+      // Upload directly to S3 using pre-signed URL
+      const uploadResponse = await fetch(presignedUrl, {
+        method: "PUT",
+        body: blob,
+        headers: {
+          "Content-Type": "image/jpeg",
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image to storage");
+      }
+
+      onUpload(fileUrl);
       
       // Close modal and reset
       setShowCropModal(false);
