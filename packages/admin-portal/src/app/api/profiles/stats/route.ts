@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         }
       }),
       
-      // Total professionals with completed profiles (APPROVED status)
+      // Total professionals with completed profiles (all required fields filled)
       prisma.user.count({
         where: { 
           isDeleted: false,
@@ -61,7 +61,23 @@ export async function GET(request: NextRequest) {
           },
           role: UserRole.PROFESSIONAL,
           candidateProfile: {
-            status: 'APPROVED'
+            bio: {
+              not: null
+            },
+            title: {
+              not: null
+            },
+            location: {
+              not: null
+            },
+            user: {
+              firstName: {
+                not: null
+              },
+              lastName: {
+                not: null
+              }
+            }
           }
         }
       }),
