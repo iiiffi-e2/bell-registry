@@ -184,7 +184,6 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedData, setLastSavedData] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isSubmittingRef = useRef(false);
 
 
   const form = useForm<ProfileFormData>({
@@ -358,18 +357,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     }
   }, [form, profileLoaded]);
   
-  // Warn user about unsaved changes (but not during form submission)
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges && !isSubmittingRef.current) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  // Note: Removed beforeunload warning as it was interfering with form submission
+  // The visual indicator below provides sufficient warning about unsaved changes
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -438,7 +427,6 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     setIsSubmitting(true);
-    isSubmittingRef.current = true;
     try {
       // Run custom validation
       const nameErrors = validateNameFields(data);
@@ -451,7 +439,6 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         toast.error("Please fix the validation errors before saving.");
         setIsLoading(false);
         setIsSubmitting(false);
-        isSubmittingRef.current = false;
         return;
       }
 
@@ -461,6 +448,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         mediaUrls: uploadedMedia,
       };
 
+      // Clear unsaved changes before submission
+      setHasUnsavedChanges(false);
       // Save current data for comparison
       setLastSavedData(JSON.stringify(submitData));
 
@@ -473,18 +462,12 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     } finally {
       setIsLoading(false);
       setIsSubmitting(false);
-      isSubmittingRef.current = false;
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={(e) => {
-        // Immediately disable beforeunload warning when form is submitted
-        isSubmittingRef.current = true;
-        setHasUnsavedChanges(false);
-        return form.handleSubmit(handleSubmit)(e);
-      }} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Left Column */}
           <div className="space-y-8">
