@@ -31,24 +31,59 @@ export async function GET(request: NextRequest) {
       totalApplications,
       activeConversations,
     ] = await Promise.all([
-      // Total users (excluding deleted)
-      prisma.user.count({
-        where: { isDeleted: false }
-      }),
-      
-      // Total professionals
+      // Total users (excluding deleted, demo users, and test users)
       prisma.user.count({
         where: { 
-          role: UserRole.PROFESSIONAL,
-          isDeleted: false 
+          isDeleted: false,
+          isDemo: false,
+          email: {
+            not: {
+              contains: 'test.com'
+            }
+          },
+          NOT: {
+            email: {
+              contains: 'example.com'
+            }
+          }
         }
       }),
       
-      // Total employers
+      // Total professionals (excluding deleted, demo users, and test users)
+      prisma.user.count({
+        where: { 
+          role: UserRole.PROFESSIONAL,
+          isDeleted: false,
+          isDemo: false,
+          email: {
+            not: {
+              contains: 'test.com'
+            }
+          },
+          NOT: {
+            email: {
+              contains: 'example.com'
+            }
+          }
+        }
+      }),
+      
+      // Total employers (excluding deleted, demo users, and test users)
       prisma.user.count({
         where: { 
           role: UserRole.EMPLOYER,
-          isDeleted: false 
+          isDeleted: false,
+          isDemo: false,
+          email: {
+            not: {
+              contains: 'test.com'
+            }
+          },
+          NOT: {
+            email: {
+              contains: 'example.com'
+            }
+          }
         }
       }),
       
@@ -56,7 +91,20 @@ export async function GET(request: NextRequest) {
       prisma.candidateProfile.count({
         where: { 
           status: 'PENDING',
-          user: { isDeleted: false }
+          user: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          }
         }
       }),
       
@@ -64,7 +112,20 @@ export async function GET(request: NextRequest) {
       prisma.job.count({
         where: { 
           adminStatus: 'PENDING',
-          employer: { isDeleted: false }
+          employer: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          }
         }
       }),
       
@@ -72,15 +133,56 @@ export async function GET(request: NextRequest) {
       prisma.job.count({
         where: { 
           status: "ACTIVE",
-          employer: { isDeleted: false }
+          employer: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          }
         }
       }),
       
       // Total job applications
       prisma.jobApplication.count({
         where: {
-          candidate: { isDeleted: false },
-          job: { employer: { isDeleted: false } }
+          candidate: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          },
+          job: { 
+            employer: { 
+              isDeleted: false,
+              isDemo: false,
+              email: {
+                not: {
+                  contains: 'test.com'
+                }
+              },
+              NOT: {
+                email: {
+                  contains: 'example.com'
+                }
+              }
+            } 
+          }
         }
       }),
       
@@ -88,8 +190,34 @@ export async function GET(request: NextRequest) {
       prisma.conversation.count({
         where: { 
           status: "ACTIVE",
-          client: { isDeleted: false },
-          professional: { isDeleted: false }
+          client: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          },
+          professional: { 
+            isDeleted: false,
+            isDemo: false,
+            email: {
+              not: {
+                contains: 'test.com'
+              }
+            },
+            NOT: {
+              email: {
+                contains: 'example.com'
+              }
+            }
+          }
         }
       }),
     ]);
