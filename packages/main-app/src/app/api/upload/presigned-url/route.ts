@@ -70,15 +70,23 @@ export async function POST(request: NextRequest) {
     const uniqueId = uuidv4().split('-')[0]; // Use first part of UUID for shorter ID
     const finalFileName = `${uniqueId}_${cleanName}.${ext}`;
 
-    // Generate pre-signed URL for direct upload with CORS headers
-    const presignedUrl = s3.getSignedUrl('putObject', {
+    // Generate pre-signed URL for direct upload
+    const s3Params = {
       Bucket: process.env.AWS_BUCKET_NAME!,
       Key: `uploads/${finalFileName}`,
       ContentType: fileType,
       Expires: 300, // 5 minutes
-      // Add CORS headers to the pre-signed URL
-      ACL: 'public-read', // Make the uploaded file publicly readable
+      // Remove ACL to avoid permission issues - bucket should be configured for public access
+    };
+
+    console.log('Generating pre-signed URL with params:', {
+      Bucket: s3Params.Bucket,
+      Key: s3Params.Key,
+      ContentType: s3Params.ContentType,
+      Expires: s3Params.Expires
     });
+
+    const presignedUrl = s3.getSignedUrl('putObject', s3Params);
 
     // Return the pre-signed URL and the final file name
     return NextResponse.json({

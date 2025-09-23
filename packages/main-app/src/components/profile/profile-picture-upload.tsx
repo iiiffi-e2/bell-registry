@@ -148,16 +148,23 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
           const { presignedUrl, fileUrl } = await presignedResponse.json();
 
           // Upload directly to S3 using pre-signed URL
+          // Note: Don't set Content-Type header as it's already included in the pre-signed URL
           const uploadResponse = await fetch(presignedUrl, {
             method: "PUT",
             body: blob,
-            headers: {
-              "Content-Type": "image/jpeg",
-            },
+            // Remove Content-Type header to avoid conflicts with pre-signed URL
           });
 
           if (!uploadResponse.ok) {
-            throw new Error("Failed to upload image to storage");
+            const errorText = await uploadResponse.text().catch(() => "Unknown error");
+            console.error(`S3 upload failed for profile picture:`, {
+              status: uploadResponse.status,
+              statusText: uploadResponse.statusText,
+              error: errorText,
+              blobSize: blob.size,
+              contentType: "image/jpeg"
+            });
+            throw new Error(`S3 upload failed: ${uploadResponse.status} ${uploadResponse.statusText}`);
           }
 
           onUpload(fileUrl);
