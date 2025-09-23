@@ -120,8 +120,14 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
       // Check blob size to determine upload method
       const isLargeFile = blob.size > 4 * 1024 * 1024; // 4MB threshold
       
-      if (isLargeFile) {
-        // For large files, use direct S3 upload
+      // CORS is now configured and working - enable direct S3 uploads
+      const enableDirectUpload = true;
+      
+      // Try direct S3 upload first for large files, fallback to regular upload
+      let uploadSuccess = false;
+      
+      if (isLargeFile && enableDirectUpload) {
+        // For large files, try direct S3 upload first
         try {
           const presignedResponse = await fetch("/api/upload/presigned-url", {
             method: "POST",
@@ -136,17 +142,7 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
           });
 
           if (!presignedResponse.ok) {
-            const errorData = await presignedResponse.json().catch(() => ({ error: "Unknown error" }));
-            
-            if (presignedResponse.status === 401) {
-              throw new Error("Your session has expired. Please refresh the page and try again.");
-            }
-            
-            if (presignedResponse.status === 400) {
-              throw new Error(errorData.error || "Invalid image file. Please choose a JPEG, PNG, or WebP image.");
-            }
-            
-            throw new Error(errorData.error || "Failed to prepare upload. Please try again.");
+            throw new Error("Failed to get pre-signed URL");
           }
 
           const { presignedUrl, fileUrl } = await presignedResponse.json();
@@ -165,13 +161,16 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
           }
 
           onUpload(fileUrl);
+          uploadSuccess = true;
+          console.log("Direct S3 upload successful for profile picture");
         } catch (directUploadError) {
           // If direct upload fails, fall back to regular upload
           console.warn("Direct upload failed, falling back to regular upload:", directUploadError);
-          throw directUploadError; // Re-throw to trigger fallback
         }
-      } else {
-        // For smaller files, use regular upload method
+      }
+      
+      // If direct upload failed or file is small, use regular upload method
+      if (!uploadSuccess) {
         const formData = new FormData();
         formData.append("file", blob, "cropped-profile.jpg");
         formData.append("uploadType", "image");
@@ -201,6 +200,7 @@ export function ProfilePictureUpload({ currentImage, onUpload }: ProfilePictureU
 
         const data = await response.json();
         onUpload(data.url);
+        console.log("Regular upload successful for profile picture");
       }
       
       // Close modal and reset
