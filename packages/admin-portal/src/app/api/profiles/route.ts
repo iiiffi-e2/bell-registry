@@ -49,6 +49,21 @@ export async function GET(request: NextRequest) {
       if (status === 'REMOVED') {
         // For removed status, check user's isRemoved field instead of profile status
         whereClause.user.isRemoved = true;
+      } else if (status === 'INCOMPLETE') {
+        // Incomplete profiles: missing any required field
+        // We'll filter further after fetch for cases like bio length < 50
+        whereClause.OR = [
+          { bio: null },
+          { bio: '' },
+          { title: null },
+          { title: '' },
+          { location: null },
+          { location: '' },
+          { user: { firstName: null } },
+          { user: { firstName: '' } },
+          { user: { lastName: null } },
+          { user: { lastName: '' } },
+        ];
       } else {
         whereClause.status = status;
       }
@@ -158,6 +173,7 @@ export async function GET(request: NextRequest) {
         },
         preferredRole: profile.preferredRole,
         location: profile.location,
+        bio: profile.bio,
         profileViews: profile.profileViews,
         openToWork: profile.openToWork,
         createdAt: profile.createdAt,
@@ -166,10 +182,23 @@ export async function GET(request: NextRequest) {
       };
     }));
 
+    // Additional filter for incomplete status (ensure bio meets length requirement)
+    let filteredByStatus = transformedProfiles;
+    if (status === 'INCOMPLETE') {
+      filteredByStatus = transformedProfiles.filter(p => {
+        const bioLen = (p.bio || '').trim().length;
+        return (
+          !p.user.firstName || !p.user.lastName ||
+          !p.preferredRole || !p.location ||
+          bioLen < 50
+        );
+      });
+    }
+
     // Filter by reports if requested
     const filteredProfiles = hasReports 
-      ? transformedProfiles.filter(p => p.reportCount > 0)
-      : transformedProfiles;
+      ? filteredByStatus.filter(p => p.reportCount > 0)
+      : filteredByStatus;
 
     // Sort by most reported if requested
     const finalProfiles = sortBy === 'mostReported' 

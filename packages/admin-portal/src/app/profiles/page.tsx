@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   UserGroupIcon, 
   MagnifyingGlassIcon,
@@ -364,6 +364,7 @@ function BulkSuspensionModal({
 export default function ProfileManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -382,12 +383,13 @@ export default function ProfileManagementPage() {
   });
   const [statsLoading, setStatsLoading] = useState(true);
   
+  // Initialize filters from URL params
   const [filters, setFilters] = useState<ProfileFilters>({
-    status: 'all',
-    search: '',
-    hasReports: false,
-    openToWork: null,
-    sortBy: 'newest'
+    status: searchParams.get('status') || 'all',
+    search: searchParams.get('search') || '',
+    hasReports: searchParams.get('hasReports') === 'true',
+    openToWork: searchParams.get('openToWork') === 'true' ? true : searchParams.get('openToWork') === 'false' ? false : null,
+    sortBy: (searchParams.get('sortBy') as 'newest' | 'oldest' | 'mostViewed' | 'mostReported') || 'newest'
   });
 
   // Redirect if not authenticated
@@ -410,6 +412,35 @@ export default function ProfileManagementPage() {
     if (status !== 'authenticated') return;
     fetchProfileStats();
   }, [status]);
+
+  // Update URL when filters change
+  const updateFilters = (newFilters: ProfileFilters) => {
+    setFilters(newFilters);
+    
+    // Update URL with new filters
+    const params = new URLSearchParams();
+    if (newFilters.status !== 'all') params.set('status', newFilters.status);
+    if (newFilters.search) params.set('search', newFilters.search);
+    if (newFilters.hasReports) params.set('hasReports', 'true');
+    if (newFilters.openToWork !== null) params.set('openToWork', newFilters.openToWork.toString());
+    if (newFilters.sortBy !== 'newest') params.set('sortBy', newFilters.sortBy);
+    
+    const newUrl = params.toString() ? `/profiles?${params.toString()}` : '/profiles';
+    router.replace(newUrl, { scroll: false });
+  };
+
+  // Navigate to profile with current filters preserved
+  const navigateToProfile = (profileId: string) => {
+    const params = new URLSearchParams();
+    if (filters.status !== 'all') params.set('status', filters.status);
+    if (filters.search) params.set('search', filters.search);
+    if (filters.hasReports) params.set('hasReports', 'true');
+    if (filters.openToWork !== null) params.set('openToWork', filters.openToWork.toString());
+    if (filters.sortBy !== 'newest') params.set('sortBy', filters.sortBy);
+    
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    router.push(`/profiles/${profileId}${queryString}`);
+  };
 
   const fetchProfiles = async () => {
     try {
@@ -769,7 +800,7 @@ export default function ProfileManagementPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                 <select
                   value={filters.status}
-                  onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                  onChange={(e) => updateFilters({ ...filters, status: e.target.value })}
                   className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="all">All Statuses</option>
@@ -778,6 +809,7 @@ export default function ProfileManagementPage() {
                   <option value="REJECTED">Rejected</option>
                   <option value="SUSPENDED">Suspended</option>
                   <option value="BANNED">Banned</option>
+                  <option value="INCOMPLETE">Incomplete</option>
                   <option value="REMOVED">Removed</option>
                 </select>
               </div>
@@ -789,7 +821,7 @@ export default function ProfileManagementPage() {
                   <input
                     type="text"
                     value={filters.search}
-                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                    onChange={(e) => updateFilters({ ...filters, search: e.target.value })}
                     placeholder="Name or email..."
                     className="block w-full pl-10 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   />
@@ -802,7 +834,7 @@ export default function ProfileManagementPage() {
                   <input
                     type="checkbox"
                     checked={filters.hasReports}
-                    onChange={(e) => setFilters({ ...filters, hasReports: e.target.checked })}
+                    onChange={(e) => updateFilters({ ...filters, hasReports: e.target.checked })}
                     className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                   />
                   <span className="ml-2 text-sm text-gray-600">Has reports</span>
@@ -813,10 +845,10 @@ export default function ProfileManagementPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Open to Opportunities</label>
                 <select
                   value={filters.openToWork === null ? 'all' : filters.openToWork.toString()}
-                  onChange={(e) => setFilters({ 
-                    ...filters, 
-                    openToWork: e.target.value === 'all' ? null : e.target.value === 'true'
-                  })}
+                  onChange={(e) => {
+                    const value = e.target.value === 'all' ? null : e.target.value === 'true';
+                    updateFilters({ ...filters, openToWork: value });
+                  }}
                   className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="all">All</option>
@@ -829,7 +861,7 @@ export default function ProfileManagementPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
                 <select
                   value={filters.sortBy}
-                  onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as any })}
+                  onChange={(e) => updateFilters({ ...filters, sortBy: e.target.value as any })}
                   className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="newest">Newest First</option>
@@ -1020,7 +1052,16 @@ export default function ProfileManagementPage() {
                       <div className="flex items-center space-x-2">
                         {profile.reportCount && profile.reportCount > 0 && (
                           <button
-                            onClick={() => router.push(`/profiles/${profile.user.id}/reports`)}
+                            onClick={() => {
+                              const params = new URLSearchParams();
+                              if (filters.status !== 'all') params.set('status', filters.status);
+                              if (filters.search) params.set('search', filters.search);
+                              if (filters.hasReports) params.set('hasReports', 'true');
+                              if (filters.openToWork !== null) params.set('openToWork', filters.openToWork.toString());
+                              if (filters.sortBy !== 'newest') params.set('sortBy', filters.sortBy);
+                              const queryString = params.toString() ? `?${params.toString()}` : '';
+                              router.push(`/profiles/${profile.user.id}/reports${queryString}`);
+                            }}
                             className="inline-flex items-center px-3 py-1.5 border border-red-300 text-xs font-medium rounded text-red-700 bg-red-50 hover:bg-red-100"
                           >
                             View Reports
@@ -1073,7 +1114,7 @@ export default function ProfileManagementPage() {
                         </div>
                         
                         <button
-                          onClick={() => router.push(`/profiles/${profile.user.id}`)}
+                          onClick={() => navigateToProfile(profile.user.id)}
                           className="p-1.5 text-gray-400 hover:bg-gray-50 rounded"
                         >
                           <ChevronRightIcon className="h-5 w-5" />
