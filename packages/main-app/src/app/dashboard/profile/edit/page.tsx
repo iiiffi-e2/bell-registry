@@ -72,7 +72,8 @@ export default function EditProfilePage() {
         return;
       }
       
-      // Success!
+      // Success! Clear any saved draft
+      localStorage.removeItem('profile-draft');
       toast.success("Profile saved successfully!");
       router.push("/dashboard/profile");
       

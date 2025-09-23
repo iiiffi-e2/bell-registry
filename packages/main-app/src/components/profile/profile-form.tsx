@@ -183,6 +183,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [isImprovingBio, setIsImprovingBio] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedData, setLastSavedData] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const form = useForm<ProfileFormData>({
@@ -356,10 +357,10 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     }
   }, [form, profileLoaded]);
   
-  // Warn user about unsaved changes
+  // Warn user about unsaved changes (but not during form submission)
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
+      if (hasUnsavedChanges && !isSubmitting) {
         e.preventDefault();
         e.returnValue = '';
       }
@@ -367,7 +368,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [hasUnsavedChanges]);
+  }, [hasUnsavedChanges, isSubmitting]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -435,6 +436,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
+    setIsSubmitting(true);
     try {
       // Run custom validation
       const nameErrors = validateNameFields(data);
@@ -446,6 +448,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         });
         toast.error("Please fix the validation errors before saving.");
         setIsLoading(false);
+        setIsSubmitting(false);
         return;
       }
 
@@ -455,16 +458,20 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         mediaUrls: uploadedMedia,
       };
 
+      // Clear unsaved changes immediately when starting submission
+      setHasUnsavedChanges(false);
       // Save current data for comparison
       setLastSavedData(JSON.stringify(submitData));
-      setHasUnsavedChanges(false);
 
       await onSubmit(submitData);
     } catch (error) {
       console.error("Error in form submission:", error);
       toast.error("Failed to submit form. Please try again.");
+      // Restore unsaved changes flag on error
+      setHasUnsavedChanges(true);
     } finally {
       setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
