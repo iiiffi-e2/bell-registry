@@ -54,49 +54,91 @@ export function MediaUpload({ currentFiles = [], onUpload, onRemove, type, maxFi
           }
         }
 
-        // Get pre-signed URL for direct S3 upload
-        const presignedResponse = await fetch("/api/upload/presigned-url", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            fileName: file.name,
-            fileType: file.type,
-            uploadType: type === "photo" ? "image" : "media",
-          }),
-        });
+        // Check file size to determine upload method
+        const isLargeFile = file.size > 4 * 1024 * 1024; // 4MB threshold
+        
+        if (isLargeFile) {
+          // For large files, use direct S3 upload
+          try {
+            const presignedResponse = await fetch("/api/upload/presigned-url", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                fileType: file.type,
+                uploadType: type === "photo" ? "image" : "media",
+              }),
+            });
 
-        if (!presignedResponse.ok) {
-          const errorData = await presignedResponse.json().catch(() => ({ error: "Unknown error" }));
-          
-          if (presignedResponse.status === 401) {
-            throw new Error("Your session has expired. Please refresh the page and try again.");
+            if (!presignedResponse.ok) {
+              const errorData = await presignedResponse.json().catch(() => ({ error: "Unknown error" }));
+              
+              if (presignedResponse.status === 401) {
+                throw new Error("Your session has expired. Please refresh the page and try again.");
+              }
+              
+              if (presignedResponse.status === 400) {
+                throw new Error(errorData.error || `Invalid file: ${file.name}`);
+              }
+              
+              throw new Error(errorData.error || `Failed to prepare upload for ${file.name}`);
+            }
+
+            const { presignedUrl, fileUrl } = await presignedResponse.json();
+
+            // Upload directly to S3 using pre-signed URL
+            const uploadResponse = await fetch(presignedUrl, {
+              method: "PUT",
+              body: file,
+              headers: {
+                "Content-Type": file.type,
+              },
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error(`Failed to upload ${file.name} to storage`);
+            }
+
+            uploadedUrls.push(fileUrl);
+          } catch (directUploadError) {
+            // If direct upload fails, fall back to regular upload
+            console.warn("Direct upload failed, falling back to regular upload:", directUploadError);
+            throw directUploadError; // Re-throw to trigger fallback
           }
-          
-          if (presignedResponse.status === 400) {
-            throw new Error(errorData.error || `Invalid file: ${file.name}`);
+        } else {
+          // For smaller files, use regular upload method
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("uploadType", type === "photo" ? "image" : "media");
+
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+            
+            if (response.status === 401) {
+              throw new Error("Your session has expired. Please refresh the page and try again.");
+            }
+            
+            if (response.status === 413) {
+              throw new Error(`File "${file.name}" is too large. Maximum size is ${type === 'photo' ? '10MB' : '50MB'}.`);
+            }
+            
+            if (response.status === 400) {
+              throw new Error(errorData.error || `Invalid file: ${file.name}`);
+            }
+            
+            throw new Error(errorData.error || `Failed to upload ${file.name}`);
           }
-          
-          throw new Error(errorData.error || `Failed to prepare upload for ${file.name}`);
+
+          const data = await response.json();
+          uploadedUrls.push(data.url);
         }
-
-        const { presignedUrl, fileUrl } = await presignedResponse.json();
-
-        // Upload directly to S3 using pre-signed URL
-        const uploadResponse = await fetch(presignedUrl, {
-          method: "PUT",
-          body: file,
-          headers: {
-            "Content-Type": file.type,
-          },
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error(`Failed to upload ${file.name} to storage`);
-        }
-
-        uploadedUrls.push(fileUrl);
       }
 
       if (uploadedUrls.length > 0) {
