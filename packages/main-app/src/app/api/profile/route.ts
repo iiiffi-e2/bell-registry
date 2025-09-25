@@ -3,10 +3,65 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { prisma } from "@/lib/prisma";
 import { generateProfileSlug } from "@/lib/utils";
+import { logValidationErrors } from "@/lib/validation-logger";
+import { z } from "zod";
 
 // Use static rendering by default, only opt into dynamic when needed
 export const dynamic = 'force-dynamic';
 export const revalidate = 30; // Revalidate every 30 seconds
+
+// Validation schemas for server-side validation
+const candidateProfileSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  preferredRole: z.string().min(2, "Professional title is required"),
+  location: z.string().min(2, "Current location is required"),
+  bio: z.string().min(50, "Bio must be at least 50 characters"),
+  phoneNumber: z.string().optional(),
+  photoUrl: z.string().optional(),
+  customInitials: z.string().regex(/^[A-Za-z]{2,3}$/, "Must be 2-3 letters only").optional().or(z.literal("")),
+  yearsOfExperience: z.string().optional(),
+  availability: z.string().optional(),
+  employmentType: z.string().optional(),
+  openToRelocation: z.boolean().default(false),
+  openToWork: z.boolean().default(false),
+  isAnonymous: z.boolean().default(false),
+  dontContactMe: z.boolean().default(false),
+  seekingOpportunities: z.array(z.string()).default([]),
+  skills: z.array(z.string()).default([]).refine((skills) => skills.length <= 10, {
+    message: "You can select a maximum of 10 skills"
+  }),
+  payRangeMin: z.string().optional(),
+  payRangeMax: z.string().optional(),
+  payType: z.string().default("Salary"),
+  whatImSeeking: z.string().optional(),
+  whyIEnjoyThisWork: z.string().optional(),
+  whatSetsApartMe: z.string().optional(),
+  idealEnvironment: z.string().optional(),
+  workLocations: z.array(z.string()).optional().default([]),
+  additionalPhotos: z.array(z.string()).optional(),
+  mediaUrls: z.array(z.string()).optional(),
+  certifications: z.string().optional(),
+  experience: z.array(z.any()).optional(),
+});
+
+const employerProfileSchema = z.object({
+  companyName: z.string().optional(),
+  description: z.string().min(10, "Description must be at least 10 characters").optional(),
+  website: z.string().url("Please enter a valid website URL").optional().or(z.literal("")),
+  logoUrl: z.string().optional(),
+  location: z.string().min(2, "Location is required").optional(),
+  publicSlug: z.string().optional(),
+});
+
+const agencyProfileSchema = z.object({
+  companyName: z.string().min(1, "Company name is required for agencies"),
+  description: z.string().min(10, "Description must be at least 10 characters").optional(),
+  website: z.string().url("Please enter a valid website URL").optional().or(z.literal("")),
+  logoUrl: z.string().optional(),
+  location: z.string().min(2, "Location is required").optional(),
+  publicSlug: z.string().optional(),
+});
 
 export async function GET() {
   try {
@@ -48,6 +103,43 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
+    
+    // Server-side validation with logging
+    let validationResult;
+    let profileType: 'candidate' | 'employer' | 'agency' = 'candidate';
+    
+    if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
+      profileType = session.user.role === "AGENCY" ? 'agency' : 'employer';
+      const schema = session.user.role === "AGENCY" ? agencyProfileSchema : employerProfileSchema;
+      validationResult = schema.safeParse(body);
+    } else {
+      profileType = 'candidate';
+      validationResult = candidateProfileSchema.safeParse(body);
+    }
+    
+    // Log validation errors if they occur
+    if (!validationResult.success) {
+      logValidationErrors(
+        session,
+        validationResult.error.flatten().fieldErrors,
+        body,
+        req as NextRequest,
+        {
+          profileType,
+          attemptNumber: 1, // Could be enhanced to track retry attempts
+          timeOnPage: undefined, // Could be passed from frontend
+          referrer: req.headers.get('referer') || undefined,
+        }
+      );
+      
+      return new NextResponse(JSON.stringify({ 
+        error: "Validation failed",
+        details: validationResult.error.flatten().fieldErrors 
+      }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
 
     if (session.user.role === "EMPLOYER" || session.user.role === "AGENCY") {
       // Prepare data based on user role

@@ -512,6 +512,29 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
         Object.entries(nameErrors).forEach(([field, error]) => {
           form.setError(field as keyof ProfileFormData, error);
         });
+        
+        // Log client-side validation errors for analysis
+        const clientValidationErrors = {
+          ...form.formState.errors,
+          ...nameErrors
+        };
+        
+        console.log('[CLIENT_VALIDATION_ERROR]', {
+          timestamp: new Date().toISOString(),
+          userId: session?.user?.id,
+          userEmail: session?.user?.email,
+          userRole: session?.user?.role,
+          validationErrors: Object.entries(clientValidationErrors).map(([field, error]) => ({
+            field,
+            message: error?.message || 'Unknown error',
+            value: data[field as keyof ProfileFormData] || null,
+          })),
+          formCompletion: getFormCompletion(),
+          attemptNumber: 1, // Could be enhanced to track retry attempts
+          userAgent: navigator.userAgent,
+          referrer: document.referrer,
+        });
+        
         toast.error("Please fix the validation errors before saving.");
         setIsLoading(false);
         setIsSubmitting(false);
