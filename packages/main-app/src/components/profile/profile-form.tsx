@@ -174,6 +174,7 @@ function MultiSelect({ options, value, onChange, placeholder }: {
 }
 
 export function ProfileForm({ onSubmit }: ProfileFormProps) {
+  
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
   const [uploadedMedia, setUploadedMedia] = useState<string[]>([]);
@@ -221,6 +222,40 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
       phoneNumber: "",
     },
   });
+
+  // Log form validation errors whenever they change
+  useEffect(() => {
+    const errors = form.formState.errors;
+    if (Object.keys(errors).length > 0) {
+      console.log('[FORM_VALIDATION_ERRORS] React Hook Form detected errors:', errors);
+      
+      // Log to server for Vercel logging
+      const clientErrorData = {
+        timestamp: new Date().toISOString(),
+        userId: session?.user?.id,
+        userEmail: session?.user?.email,
+        userRole: session?.user?.role,
+        validationErrors: Object.entries(errors).map(([field, error]) => ({
+          field,
+          message: error?.message || 'Unknown error',
+          value: form.getValues(field as keyof ProfileFormData) || null,
+        })),
+        formCompletion: getFormCompletion(),
+        source: 'REACT_HOOK_FORM_VALIDATION',
+        userAgent: navigator.userAgent,
+        referrer: document.referrer,
+      };
+      
+      // Send to server for Vercel logging
+      fetch('/api/log-validation-error', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(clientErrorData)
+      }).catch(error => {
+        console.warn('Failed to log form validation error to server:', error);
+      });
+    }
+  }, [form.formState.errors, session?.user?.id, session?.user?.email, session?.user?.role]);
 
   const currentBio = form.watch("bio");
 
@@ -1196,6 +1231,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             Complete all required fields to save your profile
           </p>
         </div>
+
 
         {/* Submit Button */}
         <div className="flex justify-between items-center">
