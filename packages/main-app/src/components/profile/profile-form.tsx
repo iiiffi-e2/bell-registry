@@ -519,7 +519,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
           ...nameErrors
         };
         
-        console.log('[CLIENT_VALIDATION_ERROR]', {
+        const clientErrorData = {
           timestamp: new Date().toISOString(),
           userId: session?.user?.id,
           userEmail: session?.user?.email,
@@ -530,10 +530,24 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
             value: data[field as keyof ProfileFormData] || null,
           })),
           formCompletion: getFormCompletion(),
-          attemptNumber: 1, // Could be enhanced to track retry attempts
+          attemptNumber: 1,
           userAgent: navigator.userAgent,
           referrer: document.referrer,
-        });
+        };
+        
+        console.log('[CLIENT_VALIDATION_ERROR]', clientErrorData);
+        
+        // Also send to server for Vercel logging
+        try {
+          await fetch('/api/log-validation-error', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(clientErrorData)
+          });
+        } catch (error) {
+          // Fail silently - don't break the form
+          console.warn('Failed to log validation error to server:', error);
+        }
         
         toast.error("Please fix the validation errors before saving.");
         setIsLoading(false);
