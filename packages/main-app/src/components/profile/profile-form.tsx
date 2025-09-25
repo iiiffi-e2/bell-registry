@@ -184,7 +184,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [lastSavedData, setLastSavedData] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const [showValidationSummary, setShowValidationSummary] = useState(false);
 
   const form = useForm<ProfileFormData>({
     // @ts-ignore - Complex Zod schema type inference issue
@@ -269,6 +269,73 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
     }
 
     return errors;
+  };
+
+  // Get all validation errors for summary
+  const getValidationErrors = () => {
+    const errors = form.formState.errors;
+    const errorList: Array<{ field: string; message: string; label: string }> = [];
+
+    const fieldLabels: Record<string, string> = {
+      firstName: "First Name",
+      lastName: "Last Name",
+      preferredRole: "Professional Title",
+      location: "Current Location",
+      bio: "Professional Bio",
+      yearsOfExperience: "Years of Experience",
+      availability: "Availability",
+      employmentType: "Employment Type",
+      seekingOpportunities: "Seeking Opportunities",
+      skills: "Skills",
+      payRangeMin: "Minimum Pay",
+      payRangeMax: "Maximum Pay",
+      whatImSeeking: "What You're Seeking",
+      whyIEnjoyThisWork: "Why You Enjoy This Work",
+      whatSetsApartMe: "What Sets You Apart",
+      idealEnvironment: "Ideal Work Environment",
+      customInitials: "Custom Initials",
+      workLocations: "Work Locations"
+    };
+
+    Object.entries(errors).forEach(([field, error]) => {
+      if (error?.message) {
+        errorList.push({
+          field,
+          message: error.message,
+          label: fieldLabels[field] || field
+        });
+      }
+    });
+
+    return errorList;
+  };
+
+  // Scroll to first error field
+  const scrollToFirstError = () => {
+    const firstError = Object.keys(form.formState.errors)[0];
+    if (firstError) {
+      const element = document.querySelector(`[name="${firstError}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Focus the element after scrolling
+        setTimeout(() => {
+          if (element instanceof HTMLElement) {
+            element.focus();
+          }
+        }, 500);
+      }
+    }
+  };
+
+  // Get form completion percentage
+  const getFormCompletion = () => {
+    const requiredFields = ['firstName', 'lastName', 'preferredRole', 'location', 'bio'];
+    const values = form.getValues();
+    const completedFields = requiredFields.filter(field => {
+      const value = values[field as keyof ProfileFormData];
+      return value && value.toString().trim().length > 0;
+    });
+    return Math.round((completedFields.length / requiredFields.length) * 100);
   };
 
   const handleImproveWithAI = async () => {
@@ -360,6 +427,13 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   // Note: Removed beforeunload warning as it was interfering with form submission
   // The visual indicator below provides sufficient warning about unsaved changes
 
+  // Hide validation summary when all errors are fixed
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length === 0) {
+      setShowValidationSummary(false);
+    }
+  }, [form.formState.errors]);
+
   useEffect(() => {
     const loadProfile = async () => {
       try {
@@ -427,6 +501,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
   const handleSubmit = async (data: ProfileFormData) => {
     setIsLoading(true);
     setIsSubmitting(true);
+    setShowValidationSummary(true);
+    
     try {
       // Run custom validation
       const nameErrors = validateNameFields(data);
@@ -494,7 +570,11 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         <input
                           type="text"
                           {...form.register("firstName")}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          className={`block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm ${
+                            form.formState.errors.firstName 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-gray-300 focus:border-blue-500'
+                          }`}
                           placeholder="Enter your first name"
                         />
                       </div>
@@ -510,7 +590,11 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                         <input
                           type="text"
                           {...form.register("lastName")}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          className={`block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm ${
+                            form.formState.errors.lastName 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-gray-300 focus:border-blue-500'
+                          }`}
                           placeholder="Enter your last name"
                         />
                       </div>
@@ -568,7 +652,11 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                       <textarea
                         {...form.register("bio")}
                         rows={4}
-                        className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        className={`shadow-sm focus:ring-blue-500 block w-full sm:text-sm rounded-md ${
+                          form.formState.errors.bio 
+                            ? 'border-red-300 focus:border-red-500' 
+                            : 'border-gray-300 focus:border-blue-500'
+                        }`}
                         placeholder="Tell us about your professional background and expertise... (Required, minimum 50 characters)"
                       />
                     </div>
@@ -585,7 +673,11 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     <div className="mt-1">
                       <select
                         {...form.register("preferredRole")}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className={`block w-full rounded-md shadow-sm focus:ring-blue-500 sm:text-sm ${
+                          form.formState.errors.preferredRole 
+                            ? 'border-red-300 focus:border-red-500' 
+                            : 'border-gray-300 focus:border-blue-500'
+                        }`}
                       >
                         <option value="">Select a Professional Title</option>
                         {PROFESSIONAL_ROLES.map((role) => (
@@ -1015,24 +1107,107 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
           </div>
         )}
 
+        {/* Validation Error Summary */}
+        {showValidationSummary && Object.keys(form.formState.errors).length > 0 && (
+          <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-6">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3 flex-1">
+                <h3 className="text-sm font-medium text-red-800">
+                  Please fix {Object.keys(form.formState.errors).length} error{Object.keys(form.formState.errors).length > 1 ? 's' : ''} before saving:
+                </h3>
+                <div className="mt-2">
+                  <ul className="list-disc pl-5 space-y-1">
+                    {getValidationErrors().map((error, index) => (
+                      <li key={index} className="text-sm text-red-700">
+                        <span className="font-medium">{error.label}:</span> {error.message}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={scrollToFirstError}
+                    className="text-sm font-medium text-red-800 hover:text-red-600 underline"
+                  >
+                    Jump to first error →
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Form Completion Progress */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Profile Completion</span>
+            <span className="text-sm text-gray-500">{getFormCompletion()}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div 
+              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${getFormCompletion()}%` }}
+            ></div>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            Complete all required fields to save your profile
+          </p>
+        </div>
+
         {/* Submit Button */}
-        <div className="flex justify-end items-center space-x-3">
-          {hasUnsavedChanges && (
-            <span className="text-sm text-yellow-600 font-medium">
-              • Unsaved changes
-            </span>
-          )}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className={`inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
-              hasUnsavedChanges 
-                ? 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500' 
-                : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
-            }`}
-          >
-            {isLoading ? "Saving..." : hasUnsavedChanges ? "Save Changes" : "Save Profile"}
-          </button>
+        <div className="flex justify-between items-center">
+          {/* Validation Status */}
+          <div className="flex items-center space-x-4">
+            {hasUnsavedChanges && (
+              <span className="text-sm text-yellow-600 font-medium">
+                • Unsaved changes
+              </span>
+            )}
+            {Object.keys(form.formState.errors).length > 0 && (
+              <span className="text-sm text-red-600 font-medium">
+                • {Object.keys(form.formState.errors).length} validation error{Object.keys(form.formState.errors).length > 1 ? 's' : ''}
+              </span>
+            )}
+            {Object.keys(form.formState.errors).length === 0 && !hasUnsavedChanges && (
+              <span className="text-sm text-green-600 font-medium">
+                ✓ All fields valid
+              </span>
+            )}
+          </div>
+
+          {/* Save Button */}
+          <div className="flex items-center space-x-3">
+            {Object.keys(form.formState.errors).length > 0 && (
+              <button
+                type="button"
+                onClick={scrollToFirstError}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Fix Errors
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
+                Object.keys(form.formState.errors).length > 0
+                  ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+                  : hasUnsavedChanges 
+                    ? 'bg-orange-600 hover:bg-orange-700 focus:ring-orange-500' 
+                    : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+              }`}
+            >
+              {isLoading ? "Saving..." : 
+               Object.keys(form.formState.errors).length > 0 ? `Save Profile (${Object.keys(form.formState.errors).length} errors)` :
+               hasUnsavedChanges ? "Save Changes" : "Save Profile"}
+            </button>
+          </div>
         </div>
 
         {/* Improved Bio Modal */}
