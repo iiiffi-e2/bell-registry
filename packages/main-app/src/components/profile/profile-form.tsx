@@ -35,7 +35,9 @@ const profileSchema = z.object({
   photoUrl: z.string().optional(),
   preferredRole: z.string().min(2, "Professional title is required"),
   location: z.string().min(2, "Current location is required"),
-  workLocations: z.array(z.string()).optional().default([]),
+  workLocations: z.array(z.string()).optional().default([]).transform((arr) => 
+    arr.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+  ),
   openToRelocation: z.boolean().default(false),
   openToWork: z.boolean().default(false),
   isAnonymous: z.boolean().default(false),
@@ -58,7 +60,9 @@ const profileSchema = z.object({
   seekingOpportunities: z.array(z.string()).default([]).transform((arr) => 
     arr.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
   ),
-  skills: z.array(z.string()).default([]).refine((skills) => skills.length <= 10, {
+  skills: z.array(z.string()).default([]).transform((arr) => 
+    arr.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+  ).refine((skills) => skills.length <= 10, {
     message: "You can select a maximum of 10 skills"
   }),
   payRangeMin: z.string().optional(),
@@ -594,8 +598,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
 
       const submitData = {
         ...data,
-        additionalPhotos: uploadedPhotos,
-        mediaUrls: uploadedMedia,
+        additionalPhotos: uploadedPhotos.filter(item => item !== null && item !== undefined),
+        mediaUrls: uploadedMedia.filter(item => item !== null && item !== undefined),
       };
 
       // Clear unsaved changes before submission
@@ -842,8 +846,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     <div className="mt-1">
                       <GoogleMapsLoader>
                         <MultiLocationAutocomplete
-                          value={form.watch("workLocations") || []}
-                          onChange={(value) => form.setValue("workLocations", value)}
+                          value={(form.watch("workLocations") || []).filter(item => item !== null && item !== undefined)}
+                          onChange={(value) => form.setValue("workLocations", value.filter(item => item !== null && item !== undefined))}
                           error={form.formState.errors.workLocations?.message}
                           placeholder="Enter city and state..."
                         />
@@ -889,8 +893,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     </label>
                     <div className="mt-1">
                       <SkillsCombobox
-                        value={form.watch("skills") || []}
-                        onChange={(newValue) => form.setValue("skills", newValue)}
+                        value={(form.watch("skills") || []).filter(item => item !== null && item !== undefined)}
+                        onChange={(newValue) => form.setValue("skills", newValue.filter(item => item !== null && item !== undefined))}
                         placeholder="Search and select up to 10 skills..."
                         maxSelections={10}
                       />
