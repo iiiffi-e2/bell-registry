@@ -55,7 +55,9 @@ const profileSchema = z.object({
   idealEnvironment: z.string().optional(),
   
   // Professional Details
-  seekingOpportunities: z.array(z.string()).default([]),
+  seekingOpportunities: z.array(z.string()).default([]).transform((arr) => 
+    arr.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+  ),
   skills: z.array(z.string()).default([]).refine((skills) => skills.length <= 10, {
     message: "You can select a maximum of 10 skills"
   }),
@@ -95,14 +97,14 @@ function MultiSelect({ options, value, onChange, placeholder }: {
       );
 
   const handleSelect = (selectedOption: string) => {
-    if (!value.includes(selectedOption)) {
+    if (selectedOption && !value.includes(selectedOption)) {
       onChange([...value, selectedOption]);
     }
     setQuery("");
   };
 
   const handleRemove = (optionToRemove: string) => {
-    onChange(value.filter(v => v !== optionToRemove));
+    onChange(value.filter(v => v !== optionToRemove && v !== null && v !== undefined));
   };
 
   return (
@@ -115,7 +117,7 @@ function MultiSelect({ options, value, onChange, placeholder }: {
               inputRef.current?.focus();
             }}
           >
-            {value.map((item) => (
+            {value.filter(item => item !== null && item !== undefined).map((item) => (
               <span
                 key={item}
                 className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-blue-100 text-blue-800"
@@ -870,8 +872,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                     <div className="mt-1">
                       <MultiSelect
                         options={PROFESSIONAL_ROLES}
-                        value={form.watch("seekingOpportunities") || []}
-                        onChange={(newValue) => form.setValue("seekingOpportunities", newValue)}
+                        value={(form.watch("seekingOpportunities") || []).filter(item => item !== null && item !== undefined)}
+                        onChange={(newValue) => form.setValue("seekingOpportunities", newValue.filter(item => item !== null && item !== undefined))}
                         placeholder="Select roles you&apos;re interested in..."
                       />
                     </div>
