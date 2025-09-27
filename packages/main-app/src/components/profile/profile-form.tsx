@@ -820,7 +820,8 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                             value={form.watch("location")}
                             onChange={(value) => form.setValue("location", value)}
                             error={form.formState.errors.location?.message}
-                            placeholder="Enter city and state..."
+                            placeholder="Type to search and select your location..."
+                            allowCustomInput={false}
                           />
                         </GoogleMapsLoader>
                       </div>
@@ -849,7 +850,7 @@ export function ProfileForm({ onSubmit }: ProfileFormProps) {
                           value={(form.watch("workLocations") || []).filter(item => item !== null && item !== undefined)}
                           onChange={(value) => form.setValue("workLocations", value.filter(item => item !== null && item !== undefined))}
                           error={form.formState.errors.workLocations?.message}
-                          placeholder="Enter city and state..."
+                          placeholder="Type to search and select locations..."
                         />
                       </GoogleMapsLoader>
                     </div>
