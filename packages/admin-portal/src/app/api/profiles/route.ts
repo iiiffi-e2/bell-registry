@@ -35,6 +35,10 @@ export async function GET(request: NextRequest) {
     const hasReports = searchParams.get('hasReports') === 'true';
     const openToWork = searchParams.get('openToWork');
     const sortBy = searchParams.get('sortBy') || 'newest';
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
+    const pageSizeParam = parseInt(searchParams.get('pageSize') || '50', 10);
+    const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+    const pageSize = Number.isNaN(pageSizeParam) || pageSizeParam < 1 ? 50 : Math.min(pageSizeParam, 100);
 
     // Build where clause
     const whereClause: any = {
@@ -111,6 +115,11 @@ export async function GET(request: NextRequest) {
         break;
     }
 
+    // Count total for pagination (before reports/incomplete post-filters)
+    const totalCount = await (prisma as any).candidateProfile.count({
+      where: whereClause
+    });
+
     // Get profiles with user data
     const profiles = await (prisma as any).candidateProfile.findMany({
       where: whereClause,
@@ -132,7 +141,8 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy,
-      take: 100 // Limit results for performance
+      skip: (page - 1) * pageSize,
+      take: pageSize
     });
 
     // Transform data with actual status and report count
@@ -211,7 +221,7 @@ export async function GET(request: NextRequest) {
       "VIEW_PROFILES",
       { 
         endpoint: "/api/profiles",
-        filters: { status, search, hasReports, openToWork, sortBy },
+        filters: { status, search, hasReports, openToWork, sortBy, page, pageSize },
         resultCount: finalProfiles.length
       },
       request.ip,
@@ -220,7 +230,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       profiles: finalProfiles,
-      total: finalProfiles.length
+      total: totalCount,
+      page,
+      pageSize,
+      hasMore: page * pageSize < totalCount
     });
 
   } catch (error) {

@@ -294,6 +294,10 @@ export default function EmployerManagementPage() {
   const [employers, setEmployers] = useState<EmployerProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(50);
+  const [total, setTotal] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [selectedEmployers, setSelectedEmployers] = useState<string[]>([]);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -323,7 +327,7 @@ export default function EmployerManagementPage() {
   useEffect(() => {
     if (status !== 'authenticated') return;
     fetchEmployers();
-  }, [status, filters]);
+  }, [status, filters, page, pageSize]);
 
   const fetchEmployers = async () => {
     try {
@@ -337,6 +341,8 @@ export default function EmployerManagementPage() {
       if (filters.subscriptionType !== 'all') queryParams.set('subscriptionType', filters.subscriptionType);
       if (filters.hasNetworkAccess !== null) queryParams.set('hasNetworkAccess', filters.hasNetworkAccess.toString());
       queryParams.set('sortBy', filters.sortBy);
+      queryParams.set('page', page.toString());
+      queryParams.set('pageSize', pageSize.toString());
       
       const response = await fetch(`/api/employers?${queryParams.toString()}`);
       
@@ -346,6 +352,8 @@ export default function EmployerManagementPage() {
       
       const data = await response.json();
       setEmployers(data.employers || []);
+      setTotal(typeof data.total === 'number' ? data.total : 0);
+      setHasMore(!!data.hasMore);
     } catch (error) {
       console.error('Error fetching employers:', error);
       setError('Failed to load employers');
@@ -860,6 +868,33 @@ export default function EmployerManagementPage() {
               ))}
             </ul>
           )}
+        </div>
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          {total > 0 && (
+            <span>
+              Showing {Math.min((page - 1) * pageSize + 1, total)}–{Math.min(page * pageSize, total)} of {total}
+            </span>
+          )}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1 || loading}
+            className="px-3 py-1.5 border border-gray-300 text-sm rounded-md bg-white text-gray-700 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore || loading}
+            className="px-3 py-1.5 border border-gray-300 text-sm rounded-md bg-white text-gray-700 disabled:opacity-50"
+          >
+            Next
+          </button>
         </div>
       </div>
 

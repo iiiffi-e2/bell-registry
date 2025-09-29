@@ -36,6 +36,10 @@ export async function GET(request: NextRequest) {
     const subscriptionType = searchParams.get('subscriptionType');
     const hasNetworkAccess = searchParams.get('hasNetworkAccess');
     const sortBy = searchParams.get('sortBy') || 'newest';
+    const pageParam = parseInt(searchParams.get('page') || '1', 10);
+    const pageSizeParam = parseInt(searchParams.get('pageSize') || '50', 10);
+    const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
+    const pageSize = Number.isNaN(pageSizeParam) || pageSizeParam < 1 ? 50 : Math.min(pageSizeParam, 100);
 
     // Build where clause for employer profiles
     const whereClause: any = {
@@ -105,6 +109,11 @@ export async function GET(request: NextRequest) {
         break;
     }
 
+    // Count total for pagination (before status/report derived filters)
+    const totalCount = await (prisma as any).employerProfile.count({
+      where: whereClause
+    });
+
     // Get employer profiles with user data
     const employerProfiles = await (prisma as any).employerProfile.findMany({
       where: whereClause,
@@ -125,7 +134,8 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy,
-      take: 100 // Limit results for performance
+      skip: (page - 1) * pageSize,
+      take: pageSize
     });
 
     // Transform data with actual status and report count
@@ -200,7 +210,7 @@ export async function GET(request: NextRequest) {
       "VIEW_EMPLOYERS",
       { 
         endpoint: "/api/employers",
-        filters: { status, search, hasReports, subscriptionType, hasNetworkAccess, sortBy },
+        filters: { status, search, hasReports, subscriptionType, hasNetworkAccess, sortBy, page, pageSize },
         resultCount: finalEmployers.length
       },
       request.ip,
@@ -209,7 +219,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       employers: finalEmployers,
-      total: finalEmployers.length
+      total: totalCount,
+      page,
+      pageSize,
+      hasMore: page * pageSize < totalCount
     });
 
   } catch (error) {

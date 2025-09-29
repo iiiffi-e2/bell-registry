@@ -368,6 +368,16 @@ export default function ProfileManagementPage() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(() => {
+    const p = parseInt(searchParams.get('page') || '1', 10);
+    return Number.isNaN(p) || p < 1 ? 1 : p;
+  });
+  const [pageSize, setPageSize] = useState<number>(() => {
+    const s = parseInt(searchParams.get('pageSize') || '50', 10);
+    return Number.isNaN(s) || s < 1 ? 50 : s;
+  });
+  const [total, setTotal] = useState<number>(0);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -405,7 +415,7 @@ export default function ProfileManagementPage() {
   useEffect(() => {
     if (status !== 'authenticated') return;
     fetchProfiles();
-  }, [status, filters]);
+  }, [status, filters, page, pageSize]);
 
   // Fetch profile stats
   useEffect(() => {
@@ -416,6 +426,8 @@ export default function ProfileManagementPage() {
   // Update URL when filters change
   const updateFilters = (newFilters: ProfileFilters) => {
     setFilters(newFilters);
+    const nextPage = 1;
+    setPage(nextPage);
     
     // Update URL with new filters
     const params = new URLSearchParams();
@@ -424,6 +436,8 @@ export default function ProfileManagementPage() {
     if (newFilters.hasReports) params.set('hasReports', 'true');
     if (newFilters.openToWork !== null) params.set('openToWork', newFilters.openToWork.toString());
     if (newFilters.sortBy !== 'newest') params.set('sortBy', newFilters.sortBy);
+    if (pageSize !== 50) params.set('pageSize', pageSize.toString());
+    if (nextPage !== 1) params.set('page', nextPage.toString());
     
     const newUrl = params.toString() ? `/profiles?${params.toString()}` : '/profiles';
     router.replace(newUrl, { scroll: false });
@@ -453,6 +467,8 @@ export default function ProfileManagementPage() {
       if (filters.hasReports) queryParams.set('hasReports', 'true');
       if (filters.openToWork !== null) queryParams.set('openToWork', filters.openToWork.toString());
       queryParams.set('sortBy', filters.sortBy);
+      queryParams.set('page', page.toString());
+      queryParams.set('pageSize', pageSize.toString());
       
       const response = await fetch(`/api/profiles?${queryParams.toString()}`);
       
@@ -462,6 +478,19 @@ export default function ProfileManagementPage() {
       
       const data = await response.json();
       setProfiles(data.profiles || []);
+      setTotal(typeof data.total === 'number' ? data.total : 0);
+      setHasMore(!!data.hasMore);
+      // Sync URL with current page
+      const params = new URLSearchParams();
+      if (filters.status !== 'all') params.set('status', filters.status);
+      if (filters.search) params.set('search', filters.search);
+      if (filters.hasReports) params.set('hasReports', 'true');
+      if (filters.openToWork !== null) params.set('openToWork', filters.openToWork.toString());
+      if (filters.sortBy !== 'newest') params.set('sortBy', filters.sortBy);
+      if (pageSize !== 50) params.set('pageSize', pageSize.toString());
+      if (page !== 1) params.set('page', page.toString());
+      const newUrl = params.toString() ? `/profiles?${params.toString()}` : '/profiles';
+      router.replace(newUrl, { scroll: false });
     } catch (error) {
       console.error('Error fetching profiles:', error);
       setError('Failed to load profiles');
@@ -1127,6 +1156,32 @@ export default function ProfileManagementPage() {
             </ul>
           )}
         </div>
+      {/* Pagination Controls */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          {total > 0 && (
+            <span>
+              Showing {Math.min((page - 1) * pageSize + 1, total)}–{Math.min(page * pageSize, total)} of {total}
+            </span>
+          )}
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1 || loading}
+            className="px-3 py-1.5 border border-gray-300 text-sm rounded-md bg-white text-gray-700 disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            disabled={!hasMore || loading}
+            className="px-3 py-1.5 border border-gray-300 text-sm rounded-md bg-white text-gray-700 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
       </div>
 
       <BulkSuspensionModal
