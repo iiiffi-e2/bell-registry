@@ -121,7 +121,7 @@ export default function EmployerDetailPage({ params }: EmployerDetailPageProps) 
     }
   };
 
-  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban', reason?: string, note?: string) => {
+  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'delete', reason?: string, note?: string) => {
     if (!employer) return;
     
     setActionLoading(true);
@@ -138,6 +138,12 @@ export default function EmployerDetailPage({ params }: EmployerDetailPageProps) 
       
       if (!response.ok) {
         throw new Error('Action failed');
+      }
+      
+      // If employer was deleted, redirect back to employers list
+      if (action === 'delete') {
+        router.push('/employers');
+        return;
       }
       
       // Refresh employer details
@@ -343,6 +349,14 @@ export default function EmployerDetailPage({ params }: EmployerDetailPageProps) 
                 >
                   <FlagIcon className="h-4 w-4 mr-2" />
                   Flag
+                </button>
+                <button
+                  onClick={() => handleAction('delete')}
+                  disabled={actionLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-2" />
+                  Delete
                 </button>
               </div>
             </div>

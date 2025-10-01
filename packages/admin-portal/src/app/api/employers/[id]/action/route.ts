@@ -17,7 +17,7 @@ export async function POST(
     const { id: employerId } = params;
     const { action, reason, note } = await request.json();
 
-    if (!action || !['approve', 'reject', 'suspend', 'flag', 'ban', 'remove'].includes(action)) {
+    if (!action || !['approve', 'reject', 'suspend', 'flag', 'ban', 'remove', 'delete'].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -122,6 +122,17 @@ export async function POST(
           }
         });
         message = 'Employer removed successfully';
+        break;
+
+      case 'delete':
+        await prisma.user.update({
+          where: { id: employerId },
+          data: {
+            isDeleted: true,
+            deletedAt: new Date()
+          }
+        });
+        message = 'Employer deleted successfully';
         break;
 
       default:

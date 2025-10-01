@@ -288,6 +288,78 @@ function BulkSuspensionModal({
   );
 }
 
+// Bulk Delete Modal Component
+function BulkDeleteModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  selectedCount, 
+  isLoading 
+}: { 
+  isOpen: boolean; 
+  onClose: () => void; 
+  onConfirm: () => void; 
+  selectedCount: number; 
+  isLoading: boolean; 
+}) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+      <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              Delete Multiple Employers
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+          </div>
+          
+          <div className="mb-6">
+            <div className="flex items-center mb-4">
+              <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-600" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                You are about to permanently delete <strong>{selectedCount} employer{selectedCount > 1 ? 's' : ''}</strong>.
+              </p>
+              <p className="text-sm text-red-600 font-medium">
+                This action cannot be undone. All selected employer accounts and their associated data will be marked as deleted.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              disabled={isLoading}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-700 hover:bg-red-800 disabled:opacity-50"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Deleting...' : `Delete ${selectedCount} Employer${selectedCount > 1 ? 's' : ''}`}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EmployerManagementPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -302,6 +374,7 @@ export default function EmployerManagementPage() {
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showBulkSuspensionModal, setShowBulkSuspensionModal] = useState(false);
+  const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
   const [showIndividualSuspensionModal, setShowIndividualSuspensionModal] = useState(false);
   const [selectedEmployerForSuspension, setSelectedEmployerForSuspension] = useState<EmployerProfile | null>(null);
   
@@ -362,7 +435,7 @@ export default function EmployerManagementPage() {
     }
   };
 
-  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
+  const handleBulkAction = async (action: 'approve' | 'suspend' | 'flag' | 'ban' | 'remove' | 'delete', reason?: string, note?: string) => {
     if (selectedEmployers.length === 0) return;
     
     setBulkActionLoading(true);
@@ -402,6 +475,15 @@ export default function EmployerManagementPage() {
     setShowBulkSuspensionModal(false);
   };
 
+  const handleBulkDeleteClick = () => {
+    setShowBulkDeleteModal(true);
+  };
+
+  const handleBulkDeleteConfirm = () => {
+    handleBulkAction('delete');
+    setShowBulkDeleteModal(false);
+  };
+
   const handleIndividualSuspendClick = (employer: EmployerProfile) => {
     setSelectedEmployerForSuspension(employer);
     setShowIndividualSuspensionModal(true);
@@ -415,7 +497,7 @@ export default function EmployerManagementPage() {
     }
   };
 
-  const handleEmployerAction = async (employerId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove', reason?: string, note?: string) => {
+  const handleEmployerAction = async (employerId: string, action: 'approve' | 'reject' | 'suspend' | 'flag' | 'ban' | 'remove' | 'delete', reason?: string, note?: string) => {
     try {
       const response = await fetch(`/api/employers/${employerId}/action`, {
         method: 'POST',
@@ -718,6 +800,14 @@ export default function EmployerManagementPage() {
                   Flag
                 </button>
                 <button
+                  onClick={handleBulkDeleteClick}
+                  disabled={bulkActionLoading}
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-red-700 hover:bg-red-800 disabled:opacity-50"
+                >
+                  <XMarkIcon className="h-4 w-4 mr-1" />
+                  Delete
+                </button>
+                <button
                   onClick={() => setSelectedEmployers([])}
                   className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                 >
@@ -853,6 +943,13 @@ export default function EmployerManagementPage() {
                           >
                             <FlagIcon className="h-5 w-5" />
                           </button>
+                          <button
+                            onClick={() => handleEmployerAction(employer.user.id, 'delete')}
+                            className="p-1.5 text-red-700 hover:bg-red-50 rounded"
+                            title="Delete"
+                          >
+                            <XMarkIcon className="h-5 w-5" />
+                          </button>
                         </div>
                         
                         <button
@@ -902,6 +999,14 @@ export default function EmployerManagementPage() {
         isOpen={showBulkSuspensionModal}
         onClose={() => setShowBulkSuspensionModal(false)}
         onConfirm={handleBulkSuspendConfirm}
+        selectedCount={selectedEmployers.length}
+        isLoading={bulkActionLoading}
+      />
+
+      <BulkDeleteModal
+        isOpen={showBulkDeleteModal}
+        onClose={() => setShowBulkDeleteModal(false)}
+        onConfirm={handleBulkDeleteConfirm}
         selectedCount={selectedEmployers.length}
         isLoading={bulkActionLoading}
       />

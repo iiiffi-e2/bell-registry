@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid employer IDs" }, { status: 400 });
     }
 
-    if (!action || !['approve', 'suspend', 'flag', 'ban', 'remove'].includes(action)) {
+    if (!action || !['approve', 'suspend', 'flag', 'ban', 'remove', 'delete'].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -114,6 +114,17 @@ export async function POST(request: NextRequest) {
               }
             });
             message = 'Employers removed successfully';
+            break;
+
+          case 'delete':
+            await prisma.user.update({
+              where: { id: employerId },
+              data: {
+                isDeleted: true,
+                deletedAt: new Date()
+              }
+            });
+            message = 'Employers deleted successfully';
             break;
         }
 
