@@ -753,6 +753,16 @@ export default function ProfileDetailPage({
                 </div>
               )}
             </div>
+
+            {/* Admin Notes - Full Width */}
+            {session?.user && (
+              <AdminNotes
+                userId={profile.user.id}
+                notes={profile.adminNotes || []}
+                currentAdminId={session.user.id}
+                onNotesUpdate={fetchProfile}
+              />
+            )}
           </div>
 
           {/* Sidebar */}
@@ -860,15 +870,6 @@ export default function ProfileDetailPage({
               </div>
             </div>
 
-            {/* Admin Notes */}
-            {session?.user && (
-              <AdminNotes
-                userId={profile.user.id}
-                notes={profile.adminNotes || []}
-                currentAdminId={session.user.id}
-                onNotesUpdate={fetchProfile}
-              />
-            )}
           </div>
         </div>
       </div>
