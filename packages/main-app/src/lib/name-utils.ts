@@ -1,4 +1,10 @@
 /**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
+/**
  * Get display name for a user, handling anonymization for professionals
  * @param user User object with firstName, lastName, and optional isAnonymous flag
  * @param role User role to determine if anonymization should apply

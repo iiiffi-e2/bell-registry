@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Slack Integration Setup for Bell Registry
 
 This document outlines how to set up Slack notifications for new user registrations in Bell Registry.

@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"

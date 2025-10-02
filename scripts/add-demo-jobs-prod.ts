@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { PrismaClient, UserRole, JobStatus } from '@prisma/client'
 import { generateJobUrlSlug } from '../src/lib/job-utils'
 import { PROFESSIONAL_ROLES } from '../src/lib/constants'

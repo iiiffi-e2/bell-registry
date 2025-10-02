@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Open to Opportunities Feature Implementation
 
 ## Overview

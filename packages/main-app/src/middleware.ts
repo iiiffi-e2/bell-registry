@@ -1,8 +1,18 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { NextResponse } from "next/server";
 import type { NextRequest } from 'next/server';
 import { getToken } from "next-auth/jwt";
+import { logStartupBanner } from "./lib/startup-banner";
 
 export async function middleware(request: NextRequest) {
+  // Log startup banner once
+  logStartupBanner();
+  
   const { pathname } = request.nextUrl;
 
   // Public routes that don't require authentication

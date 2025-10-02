@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Stripe Integration Guide - Updated Pricing Structure
 
 This guide covers the complete Stripe Checkout integration for the updated subscription plans with new pricing and features.

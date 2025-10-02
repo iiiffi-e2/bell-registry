@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 // Application constants
 export const EMAIL_ADDRESSES = {
   SUPPORT: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@bellregistry.com',

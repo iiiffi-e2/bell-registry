@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { prisma } from '../src/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { UserRole } from '../packages/shared/src/types';

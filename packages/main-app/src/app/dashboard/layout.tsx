@@ -35,6 +35,7 @@ import { SurveyBanner } from "@/components/survey/survey-banner";
 import { useSurvey } from "@/hooks/use-survey";
 import SuspensionCheck from "@/components/auth/suspension-check";
 import OAuthCompletion from "@/components/auth/oauth-completion";
+import { FooterCopyright } from "@/components/ui/footer-copyright";
 
 const ROLES = {
   PROFESSIONAL: "PROFESSIONAL",
@@ -434,6 +435,9 @@ export default function DashboardLayout({
             )}
             {children}
           </main>
+          
+          {/* Footer */}
+          <FooterCopyright />
         </div>
 
         {/* Feedback Modal */}

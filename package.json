@@ -21,7 +21,9 @@
     "db:migrate": "npm run db:migrate --workspace=packages/shared",
     "db:studio": "npm run db:studio --workspace=packages/shared",
     "db:seed": "npm run db:seed --workspace=packages/shared",
-    "postinstall": "npm run db:generate --workspace=packages/shared"
+    "postinstall": "npm run db:generate --workspace=packages/shared",
+    "copyright:check": "node scripts/apply-copyright-headers.js --dry-run",
+    "copyright:apply": "node scripts/apply-copyright-headers.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",

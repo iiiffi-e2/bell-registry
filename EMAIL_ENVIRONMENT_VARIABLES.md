@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Email Environment Variables Configuration
 
 This document outlines the environment variables that need to be configured to replace hardcoded email addresses in the Bell Registry application.

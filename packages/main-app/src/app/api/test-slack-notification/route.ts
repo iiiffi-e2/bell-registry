@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { NextResponse } from "next/server";
 import { sendSlackTestNotification, sendUserRegistrationSlackNotification } from "@/lib/slack-notification-service";
 

@@ -1,4 +1,10 @@
 /**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
+/**
  * Slack notification service for the shared package
  * Simplified version for OAuth registrations
  */

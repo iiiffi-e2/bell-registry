@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Testing Account Deletion Implementation
 
 This guide walks you through testing the complete account deletion feature in development.

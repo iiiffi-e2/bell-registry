@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # New Subscription System Implementation
 
 This document outlines the implementation of the new purchase options, enforcement logic, and renewal behavior as specified in the requirements.

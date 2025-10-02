@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Profile Status Configuration System
 
 This document explains how to configure the default status for new candidate profiles in the Bell Registry application.

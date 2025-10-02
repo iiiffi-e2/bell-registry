@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { authOptions } from "@/lib/auth";
 import { UserRole } from "@/types";

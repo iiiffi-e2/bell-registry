@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 // Store active SSE connections
 const connections = new Map<string, ReadableStreamDefaultController>()
 const userConnections = new Map<string, Set<string>>()

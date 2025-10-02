@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Twilio SMS Two-Factor Authentication Setup Guide
 
 This guide walks you through setting up SMS-based two-factor authentication using Twilio for your Bell Registry application.

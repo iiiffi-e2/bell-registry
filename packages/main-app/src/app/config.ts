@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 // This configuration ensures proper handling of dynamic and static routes
 export const dynamic = 'force-dynamic';
 export const dynamicParams = true;

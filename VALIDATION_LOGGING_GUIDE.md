@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Validation Error Logging Guide
 
 This guide explains how to set up and analyze validation error logging for the profile form to identify where users are getting stuck.

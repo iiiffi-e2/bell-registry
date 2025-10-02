@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Subscription and Job-Posting Access System
 
 This document describes the implementation of a subscription-based access control system for employers and agencies using Stripe for payment processing.

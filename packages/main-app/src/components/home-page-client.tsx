@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 "use client";
 
 import { useState } from "react";
@@ -252,7 +258,7 @@ export function HomePageClient() {
               </div>
             </div>
             <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-              <p>&copy; {new Date().getFullYear()} The Bell Registry. All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} Bell Registry. All rights reserved.</p>
             </div>
           </div>
         </footer>

@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/welcome-email-service";
 import { UserRole } from '@bell-registry/shared';

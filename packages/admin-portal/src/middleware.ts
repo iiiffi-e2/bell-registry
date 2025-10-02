@@ -1,8 +1,18 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { UserRole } from "@bell-registry/shared";
+import { logStartupBanner } from './lib/startup-banner';
 
 export async function middleware(req: NextRequest) {
+  // Log startup banner once
+  logStartupBanner();
+  
   // Allow access to login page and API auth routes
   if (req.nextUrl.pathname.startsWith('/login') || 
       req.nextUrl.pathname.startsWith('/api/auth')) {

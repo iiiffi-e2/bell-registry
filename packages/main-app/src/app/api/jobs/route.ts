@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 // To use fuzzy search, ensure the pg_trgm extension is enabled in your PostgreSQL database:
 // CREATE EXTENSION IF NOT EXISTS pg_trgm;
 import { NextResponse, NextRequest } from 'next/server'

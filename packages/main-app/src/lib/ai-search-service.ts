@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import OpenAI from 'openai';
 import { prisma } from '@/lib/prisma';
 import { JobStatus, Prisma } from '@bell-registry/shared';

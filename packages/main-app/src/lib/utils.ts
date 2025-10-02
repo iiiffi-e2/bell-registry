@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { prisma } from "@/lib/prisma";
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"

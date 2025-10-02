@@ -1,4 +1,10 @@
 /**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
+/**
  * Generates a random alphanumeric string of specified length
  */
 function generateRandomCode(length: number): string {

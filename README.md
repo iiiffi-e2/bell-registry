@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # The Bell Registry
 
 The Bell Registry is a high-end, full-stack web application for the luxury private service industry, connecting elite service professionals with prestigious employers.
@@ -96,6 +101,28 @@ src/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## License
+## Copyright & Licensing
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This software is proprietary and confidential to Bell Registry. All source code files contain copyright headers, and the application displays copyright notices in the user interface.
+
+### Copyright Management
+
+The repository includes automated tools for managing copyright headers:
+
+```bash
+# Check what files would be updated (dry run)
+npm run copyright:check
+
+# Apply copyright headers to all source files
+npm run copyright:apply
+```
+
+These scripts will:
+- Add copyright headers to all applicable source files (JS, TS, TSX, CSS, MD, etc.)
+- Skip binary files, dependencies, and generated files
+- Update copyright years in existing headers
+- Preserve shebangs and existing formatting
+
+### License
+
+This project is proprietary software - see the [LICENSE](LICENSE) file for details.

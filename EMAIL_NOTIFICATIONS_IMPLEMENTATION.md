@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # Email Notifications for Account Suspensions and Bans
 
 This document outlines the implementation of automated email notifications that are sent to users when their account is suspended, unsuspended, or banned.

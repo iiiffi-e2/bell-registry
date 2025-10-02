@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { getWelcomeMessage } from "@/lib/welcome-message-utils";

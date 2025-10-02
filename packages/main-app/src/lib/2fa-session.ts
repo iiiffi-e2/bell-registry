@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { randomBytes } from 'crypto';
 
 // Store temporary 2FA session tokens (in production, use Redis or database)

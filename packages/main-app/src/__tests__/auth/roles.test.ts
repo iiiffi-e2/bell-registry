@@ -1,3 +1,9 @@
+/**
+ * Copyright © 2025 Bell Registry. All rights reserved.
+ * Unauthorized copying, distribution, modification, or use is prohibited.
+ * Proprietary and confidential.
+ */
+
 import { UserRole } from "@/types";
 import { toPrismaUserRole, fromPrismaUserRole } from "@/lib/prisma-types";
 import { describe, it, expect } from "vitest";

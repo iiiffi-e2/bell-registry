@@ -1,3 +1,8 @@
+> Copyright © 2025 Bell Registry. All rights reserved.
+> Unauthorized copying, distribution, modification, or use is prohibited.
+> Proprietary and confidential.
+>
+
 # S3 Upload Debug Guide
 
 ## Current Issue: 400 Error on S3 Direct Upload
